@@ -61,6 +61,7 @@
         <module>api</module>
         <module>implementation</module>
         <module>testsuite</module>
+        <module>service-discovery</module>
     </modules>
 
     <dependencyManagement>
