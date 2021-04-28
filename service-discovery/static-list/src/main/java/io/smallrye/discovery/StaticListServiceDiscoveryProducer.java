@@ -2,12 +2,9 @@ package io.smallrye.discovery;
 
 import java.util.Collections;
 
-import javax.enterprise.inject.Produces;
+public class StaticListServiceDiscoveryProducer implements ServiceDiscoveryProducer {
 
-public class StaticListServiceDiscoveryProducer {
-
-    @Produces
-    public StaticListServiceDiscovery staticListServiceDiscovery() {
+    public StaticListServiceDiscovery getServiceDiscovery(String serviceName) {
         // TODO load the addresses from the configuration
         return new StaticListServiceDiscovery(Collections.emptyList());
     }

@@ -23,11 +23,11 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-service-discovery</artifactId>
+    <artifactId>smallrye-client-side-load-balancer</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>SmallRye Service Discovery</name>
+    <name>SmallRye Client-Side Load-Balancer</name>
     <url>http://smallrye.io</url>
 
     <issueManagement>
@@ -44,6 +44,6 @@
 
     <modules>
         <module>api</module>
-        <module>static-list</module>
+        <module>round-robin</module>
     </modules>
 </project>
