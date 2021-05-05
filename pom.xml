@@ -62,6 +62,7 @@
         <module>implementation</module>
         <module>testsuite</module>
         <module>service-discovery</module>
+        <module>client-side-load-balancer</module>
     </modules>
 
     <dependencyManagement>

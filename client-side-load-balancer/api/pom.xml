@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- ~  Copyright 2021 Red Hat, Inc.
+ ~  Copyright 2020 Red Hat, Inc.
  ~
  ~  Licensed under the Apache License, Version 2.0 (the "License");
  ~  you may not use this file except in compliance with the License.
@@ -19,31 +19,19 @@
 
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-load-balancer-parent</artifactId>
+        <artifactId>smallrye-client-side-load-balancer</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-service-discovery</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <artifactId>smallrye-client-side-load-balancer-api</artifactId>
 
-    <name>SmallRye Service Discovery</name>
-    <url>http://smallrye.io</url>
+    <name>SmallRye Client-Side Load-Balancer: API</name>
 
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/smallrye/smallrye-load-balancer/issues</url>
-    </issueManagement>
-
-    <scm>
-        <connection>scm:git:git@github.com:smallrye/smallrye-load-balancer.git</connection>
-        <developerConnection>scm:git:git@github.com:smallrye/smallrye-load-balancer.git</developerConnection>
-        <url>https://github.com/smallrye/smallrye-load-balancer/</url>
-        <tag>HEAD</tag>
-    </scm>
-
-    <modules>
-        <module>api</module>
-        <module>static-list</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>io.smallrye</groupId>
+            <artifactId>smallrye-service-discovery-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

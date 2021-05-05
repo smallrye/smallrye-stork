@@ -1,10 +1,9 @@
 package io.smallrye.discovery;
 
 public class ServiceInstance {
-    // TODO we probably need a service name too
-    final long id;
+    private final long id;
 
-    final String value;
+    private final String value;
 
     public ServiceInstance(long id, String value) {
         this.id = id;
