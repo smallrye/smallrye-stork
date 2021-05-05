@@ -1,16 +1,16 @@
 package io.smallrye.discovery;
 
 public class ServiceInstance {
-    private final long id;
+    private final String id;
 
     private final String value;
 
-    public ServiceInstance(long id, String value) {
+    public ServiceInstance(String id, String value) {
         this.id = id;
         this.value = value;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
