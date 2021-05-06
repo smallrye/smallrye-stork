@@ -1,22 +1,23 @@
 package io.smallrye.loadbalancer.roundrobin;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+import org.junit.jupiter.api.Test;
+
 import io.smallrye.discovery.ServiceDiscovery;
 import io.smallrye.discovery.ServiceInstance;
 import io.smallrye.loadbalancer.LoadBalancer;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class RoundRobinLoadBalancerTest {
 
     private final ServiceDiscovery serviceDiscovery = new TestServiceDiscovery(
-            Arrays.asList(new ServiceInstance(1, "service-1-url"),
-                    new ServiceInstance(2, "service-2-url")));
+            Arrays.asList(new ServiceInstance("1", "service-1-url"),
+                    new ServiceInstance("2", "service-2-url")));
 
     @Test
     public void shouldGetServiceInstance() {
@@ -24,8 +25,8 @@ public class RoundRobinLoadBalancerTest {
         ServiceInstance oneInstance = loadBalancer.getServiceInstance().toCompletableFuture().join();
         ServiceInstance anotherInstance = loadBalancer.getServiceInstance().toCompletableFuture().join();
 
-        assertThat(oneInstance.getId()).isEqualTo(1);
-        assertThat(anotherInstance.getId()).isEqualTo(2);
+        assertThat(oneInstance.getId()).isEqualTo("1");
+        assertThat(anotherInstance.getId()).isEqualTo("2");
     }
 
     @Test
@@ -34,8 +35,8 @@ public class RoundRobinLoadBalancerTest {
         ServiceInstance oneInstance = loadBalancer.getServiceInstanceBlocking().get();
         ServiceInstance anotherInstance = loadBalancer.getServiceInstanceBlocking().get();
 
-        assertThat(oneInstance.getId()).isEqualTo(1);
-        assertThat(anotherInstance.getId()).isEqualTo(2);
+        assertThat(oneInstance.getId()).isEqualTo("1");
+        assertThat(anotherInstance.getId()).isEqualTo("2");
     }
 
     private static class TestServiceDiscovery implements ServiceDiscovery {

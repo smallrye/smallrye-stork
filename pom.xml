@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- ~  Copyright 2017 Red Hat, Inc.
+ ~  Copyright 2021 Red Hat, Inc.
  ~
  ~  Licensed under the Apache License, Version 2.0 (the "License");
  ~  you may not use this file except in compliance with the License.
@@ -35,14 +35,9 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
+        <version.assertj>3.19.0</version.assertj>
         <version.microprofile-config-api>2.0</version.microprofile-config-api>
-        <version.slf4j-simple>1.7.30</version.slf4j-simple>
-        <!-- smallrye-config is purely used for testing -->
         <version.smallrye-config>2.2.0</version.smallrye-config>
-        <!-- smallrye-metrics is purely used for testing -->
-        <version.smallrye-metrics>3.0.3</version.smallrye-metrics>
-
-        <version.org.assertj.assertj-core>3.19.0</version.org.assertj.assertj-core>
     </properties>
 
     <issueManagement>
@@ -57,14 +52,6 @@
         <tag>HEAD</tag>
     </scm>
 
-    <modules>
-        <module>api</module>
-        <module>implementation</module>
-        <module>testsuite</module>
-        <module>service-discovery</module>
-        <module>client-side-load-balancer</module>
-    </modules>
-
     <dependencyManagement>
         <!--mstodo clean up-->
         <dependencies>
@@ -78,53 +65,67 @@
                 <artifactId>microprofile-config-api</artifactId>
                 <version>${version.microprofile-config-api}</version>
             </dependency>
-
-            <dependency>
-                <groupId>io.opentracing</groupId>
-                <artifactId>opentracing-mock</artifactId>
-                <version>${version.opentracing}</version>
-                <scope>test</scope>
-            </dependency>
-
             <dependency>
                 <groupId>io.smallrye.config</groupId>
                 <artifactId>smallrye-config</artifactId>
                 <version>${version.smallrye-config}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${version.slf4j-simple}</version>
-                <scope>test</scope>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${version.assertj}</version>
             </dependency>
 
             <!-- Dependencies provided by the project -->
             <dependency>
                 <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-load-balancer-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-service-discovery-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-service-discovery-static-list</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-client-side-load-balancer-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-client-side-load-balancer-round-robin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye</groupId>
                 <artifactId>smallrye-load-balancer-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>io.smallrye</groupId>
                 <artifactId>smallrye-load-balancer-implementation</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
-
             <dependency>
                 <groupId>io.smallrye</groupId>
                 <artifactId>smallrye-load-balancer-testsuite</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
-
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${version.org.assertj.assertj-core}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <modules>
+        <module>api</module>
+        <module>implementation</module>
+        <module>testsuite</module>
+        <module>service-discovery</module>
+        <module>client-side-load-balancer</module>
+        <module>config</module>
+    </modules>
 </project>
