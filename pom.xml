@@ -53,13 +53,7 @@
     </scm>
 
     <dependencyManagement>
-        <!--mstodo clean up-->
         <dependencies>
-            <dependency>
-                <groupId>jakarta.enterprise.concurrent</groupId>
-                <artifactId>jakarta.enterprise.concurrent-api</artifactId>
-                <version>${version.jakarta.enterprise.concurrent-api}</version>
-            </dependency>
             <dependency>
                 <groupId>org.eclipse.microprofile.config</groupId>
                 <artifactId>microprofile-config-api</artifactId>
@@ -94,35 +88,20 @@
             </dependency>
             <dependency>
                 <groupId>io.smallrye</groupId>
-                <artifactId>smallrye-client-side-load-balancer-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.smallrye</groupId>
-                <artifactId>smallrye-client-side-load-balancer-round-robin</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.smallrye</groupId>
                 <artifactId>smallrye-load-balancer-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.smallrye</groupId>
-                <artifactId>smallrye-load-balancer-implementation</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.smallrye</groupId>
-                <artifactId>smallrye-load-balancer-testsuite</artifactId>
+                <artifactId>smallrye-load-balancer-round-robin</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <modules>
-        <module>service-discovery</module>
-        <module>client-side-load-balancer</module>
         <module>config</module>
+        <module>service-discovery</module>
+        <module>load-balancer</module>
     </modules>
 </project>
