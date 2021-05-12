@@ -121,9 +121,6 @@
     </dependencyManagement>
 
     <modules>
-        <module>api</module>
-        <module>implementation</module>
-        <module>testsuite</module>
         <module>service-discovery</module>
         <module>client-side-load-balancer</module>
         <module>config</module>
