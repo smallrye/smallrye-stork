@@ -23,11 +23,11 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-client-side-load-balancer</artifactId>
+    <artifactId>smallrye-load-balancer</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>SmallRye Client-Side Load-Balancer</name>
+    <name>SmallRye Load Balancer</name>
     <url>http://smallrye.io</url>
 
     <issueManagement>
