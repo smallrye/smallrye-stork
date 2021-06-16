@@ -2,8 +2,8 @@ package io.smallrye.discovery.roundrobin;
 
 import static io.smallrye.discovery.config.ConfigUtils.keySegment;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.microprofile.config.Config;
 
@@ -36,8 +36,8 @@ public class RoundRobinLoadBalancerInitializer {
         }
     }
 
-    private List<String> getServiceNames() {
-        List<String> serviceNames = new LinkedList<>();
+    private Set<String> getServiceNames() {
+        Set<String> serviceNames = new HashSet<>();
 
         for (String key : configAccessor.getKeys(CONFIG_PREFIX)) {
             String serviceName = keySegment(key, SERVICE_NAME_SEGMENT_POSITION);

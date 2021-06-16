@@ -2,8 +2,10 @@ package io.smallrye.discovery.staticlist;
 
 import static io.smallrye.discovery.config.ConfigUtils.keySegment;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.microprofile.config.Config;
 
@@ -50,8 +52,8 @@ public class StaticListServiceDiscoveryInitializer {
         return new StaticListServiceDiscoveryHandler(serviceName, serviceInstances);
     }
 
-    private List<String> getServiceNames() {
-        List<String> serviceNames = new LinkedList<>();
+    private Set<String> getServiceNames() {
+        Set<String> serviceNames = new HashSet<>();
 
         for (String key : configAccessor.getKeys(CONFIG_PREFIX)) {
             String serviceName = keySegment(key, SERVICE_NAME_SEGMENT_POSITION);
@@ -63,9 +65,9 @@ public class StaticListServiceDiscoveryInitializer {
         return serviceNames;
     }
 
-    private List<String> getServiceIds(String serviceName) {
+    private Set<String> getServiceIds(String serviceName) {
         String servicePrefix = String.format("%s.%s", CONFIG_PREFIX, serviceName);
-        List<String> serviceIds = new LinkedList<>();
+        Set<String> serviceIds = new HashSet<>();
 
         for (String key : configAccessor.getKeys(servicePrefix)) {
             String serviceId = keySegment(key, SERVICE_ID_SEGMENT_POSITION);
