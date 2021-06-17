@@ -21,10 +21,11 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>26</version>
+        <version>28</version>
     </parent>
 
-    <artifactId>smallrye-service-discovery-parent</artifactId>
+    <groupId>io.smallrye.dux</groupId>
+    <artifactId>smallrye-dux-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
@@ -78,18 +79,18 @@
 
             <!-- Dependencies provided by the project -->
             <dependency>
-                <groupId>io.smallrye</groupId>
-                <artifactId>smallrye-service-discovery-core</artifactId>
+                <groupId>io.smallrye.dux</groupId>
+                <artifactId>smallrye-dux-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.smallrye</groupId>
-                <artifactId>smallrye-service-discovery-static-list</artifactId>
+                <groupId>io.smallrye.dux</groupId>
+                <artifactId>smallrye-dux-static-list</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.smallrye</groupId>
-                <artifactId>smallrye-service-discovery-round-robin</artifactId>
+                <groupId>io.smallrye.dux</groupId>
+                <artifactId>smallrye-dux-round-robin</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
@@ -97,7 +98,7 @@
 
     <modules>
         <module>core</module>
-        <module>static-list</module>
-        <module>round-robin</module>
+        <module>service-discovery/static-list</module>
+        <module>load-balancer/round-robin</module>
     </modules>
 </project>
