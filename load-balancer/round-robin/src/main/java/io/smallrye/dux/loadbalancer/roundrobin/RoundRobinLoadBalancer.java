@@ -4,28 +4,23 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.smallrye.dux.LoadBalancer;
+import io.smallrye.dux.ServiceDiscovery;
 import io.smallrye.dux.ServiceInstance;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 public class RoundRobinLoadBalancer implements LoadBalancer {
 
     private final AtomicInteger index = new AtomicInteger();
 
-    private final String serviceName;
+    private final ServiceDiscovery serviceDiscovery;
 
-    public RoundRobinLoadBalancer(String serviceName) {
-        this.serviceName = serviceName;
+    public RoundRobinLoadBalancer(ServiceDiscovery serviceDiscovery) {
+        this.serviceDiscovery = serviceDiscovery;
     }
 
     @Override
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    @Override
-    public Uni<ServiceInstance> selectServiceInstance(Multi<ServiceInstance> serviceInstances) {
-        return serviceInstances.collect()
+    public Uni<ServiceInstance> selectServiceInstance() {
+        return serviceDiscovery.getServiceInstances().collect()
                 .asList()
                 .map(this::select);
     }

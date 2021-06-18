@@ -32,7 +32,12 @@
     <dependencies>
         <dependency>
             <groupId>io.smallrye.dux</groupId>
-            <artifactId>smallrye-dux-core</artifactId>
+            <artifactId>smallrye-dux-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.dux</groupId>
+            <artifactId>smallrye-dux-test-utils</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

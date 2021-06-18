@@ -2,60 +2,46 @@ package io.smallrye.dux.loadbalancer.roundrobin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.time.Duration;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.config.ConfigValuePropertiesConfigSource;
-import io.smallrye.config.SmallRyeConfig;
-import io.smallrye.config.SmallRyeConfigBuilder;
-import io.smallrye.dux.ServiceDiscovery;
-import io.smallrye.dux.ServiceDiscoveryHandler;
-import io.smallrye.dux.ServiceInstance;
-import io.smallrye.mutiny.Multi;
+import io.smallrye.dux.Dux;
+import io.smallrye.dux.LoadBalancer;
+import io.smallrye.dux.test.TestConfigProvider;
 
 public class RoundRobinLoadBalancerTest {
 
-    private final List<ServiceInstance> serviceInstances = Arrays.asList(
-            new ServiceInstance("1", "first"),
-            new ServiceInstance("2", "second"));
-
-    private ServiceDiscovery serviceDiscovery;
+    public static final String FST_SRVC_1 = "http://localhost:8080";
+    public static final String FST_SRVC_2 = "http://localhost:8081";
+    private Dux dux;
 
     @BeforeEach
     void setUp() {
-        serviceDiscovery = new ServiceDiscovery();
+        TestConfigProvider.clear();
+        TestConfigProvider.addServiceConfig("first-service", "round-robin", "static",
+                null,
+                Map.of("1", FST_SRVC_1, "2", FST_SRVC_2));
 
-        Map<String, String> properties = new HashMap<>();
-        properties.put("load-balancer.first-service.type", "round-robin");
-        properties.put("load-balancer.second-service.type", "round-robin");
-        properties.put("load-balancer.third-service.type", "something-else");
-        SmallRyeConfig config = new SmallRyeConfigBuilder()
-                .withSources(new ConfigValuePropertiesConfigSource(properties, "test-config-source", 0))
-                .build();
-        new RoundRobinLoadBalancerInitializer(config).init(serviceDiscovery);
+        TestConfigProvider.addServiceConfig("second-service", "round-robin", "static",
+                null,
+                Map.of("3", "http://localhost:8082"));
 
-        serviceDiscovery.registerServiceDiscoveryHandler(new ServiceDiscoveryHandler() {
-            @Override
-            public String getServiceName() {
-                return "first-service";
-            }
+        TestConfigProvider.addServiceConfig("third-service", null, "static",
+                null,
+                Map.of("4", "http://localhost:8083"));
 
-            @Override
-            public Multi<ServiceInstance> getServiceInstances() {
-                return Multi.createFrom().iterable(serviceInstances);
-            }
-        });
+        dux = new Dux();
     }
 
     @Test
     public void shouldGetServiceInstance() {
-        assertThat(serviceDiscovery.get("first-service").await().indefinitely()).isEqualTo(serviceInstances.get(0));
-        assertThat(serviceDiscovery.get("first-service").await().indefinitely()).isEqualTo(serviceInstances.get(1));
-        assertThat(serviceDiscovery.get("first-service").await().indefinitely()).isEqualTo(serviceInstances.get(0));
+        LoadBalancer loadBalancer = dux.getLoadBalancer("first-service");
+
+        assertThat(loadBalancer.selectServiceInstance().await().atMost(Duration.ofSeconds(5)).getValue()).isEqualTo(FST_SRVC_1);
+        assertThat(loadBalancer.selectServiceInstance().await().atMost(Duration.ofSeconds(5)).getValue()).isEqualTo(FST_SRVC_2);
+        assertThat(loadBalancer.selectServiceInstance().await().atMost(Duration.ofSeconds(5)).getValue()).isEqualTo(FST_SRVC_1);
     }
 }

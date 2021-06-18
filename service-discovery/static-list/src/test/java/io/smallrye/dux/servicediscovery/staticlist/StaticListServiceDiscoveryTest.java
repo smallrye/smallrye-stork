@@ -2,60 +2,45 @@ package io.smallrye.dux.servicediscovery.staticlist;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.HashMap;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.config.ConfigValuePropertiesConfigSource;
-import io.smallrye.config.SmallRyeConfig;
-import io.smallrye.config.SmallRyeConfigBuilder;
-import io.smallrye.dux.ServiceDiscovery;
+import io.smallrye.dux.Dux;
 import io.smallrye.dux.ServiceInstance;
+import io.smallrye.dux.test.TestConfigProvider;
 
 public class StaticListServiceDiscoveryTest {
 
-    private ServiceDiscovery serviceDiscovery;
+    Dux dux;
 
     @BeforeEach
     void setUp() {
-        serviceDiscovery = new ServiceDiscovery();
+        TestConfigProvider.clear();
+        TestConfigProvider.addServiceConfig("first-service", null, "static",
+                null, Map.of("1", "http://localhost:8080", "2", "http://localhost:8081"));
 
-        Map<String, String> properties = new HashMap<>();
-        properties.put("service-discovery.first-service.type", "static");
-        properties.put("service-discovery.first-service.1", "http://localhost:8080");
-        properties.put("service-discovery.first-service.2", "http://localhost:8081");
-        properties.put("service-discovery.second-service.type", "static");
-        properties.put("service-discovery.second-service.3", "http://localhost:8082");
-        properties.put("service-discovery.third-service.load-balancer", "round-robin");
-        properties.put("service-discovery.third-service.type", "kubernetes");
-        properties.put("service-discovery.third-service.4", "http://localhost:8083");
-        SmallRyeConfig config = new SmallRyeConfigBuilder()
-                .withSources(new ConfigValuePropertiesConfigSource(properties, "test-config-source", 0))
-                .build();
-        new StaticListServiceDiscoveryInitializer(config).init(serviceDiscovery);
+        TestConfigProvider.addServiceConfig("second-service", null, "static",
+                null, Map.of("3", "http://localhost:8082"));
+
+        TestConfigProvider.addServiceConfig("third-service", null, "static",
+                null, Map.of("4", "http://localhost:8083"));
+
+        dux = new Dux();
     }
 
     @Test
     void shouldGetAllServiceInstances() {
-        List<ServiceInstance> serviceInstances = serviceDiscovery.getAll("first-service")
-                .collect()
-                .asList()
-                .await()
-                .indefinitely();
+        List<ServiceInstance> serviceInstances = Dux.getInstance().getServiceDiscovery("first-service")
+                .getServiceInstances()
+                .collect().asList().await().atMost(Duration.ofSeconds(5));
 
         assertThat(serviceInstances).hasSize(2);
+        assertThat(serviceInstances.stream().map(ServiceInstance::getValue)).containsExactlyInAnyOrder("http://localhost:8080",
+                "http://localhost:8081");
     }
 
-    @Test
-    void shouldGetOneServiceInstance() {
-        ServiceInstance serviceInstance = serviceDiscovery.get("first-service")
-                .await()
-                .indefinitely();
-
-        assertThat(serviceInstance.getId()).isEqualTo("1");
-        assertThat(serviceInstance.getValue()).isEqualTo("http://localhost:8080");
-    }
 }

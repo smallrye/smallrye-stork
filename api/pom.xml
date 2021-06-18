@@ -10,9 +10,9 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-dux-core</artifactId>
+    <artifactId>smallrye-dux-api</artifactId>
 
-    <name>SmallRye Dux : Core</name>
+    <name>SmallRye Dux : interface for library integration</name>
 
     <dependencies>
         <dependency>
