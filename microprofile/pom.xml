@@ -10,14 +10,32 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-dux-api</artifactId>
+    <artifactId>smallrye-dux-microprofile</artifactId>
 
     <name>SmallRye Dux : interface for library integration</name>
 
     <dependencies>
         <dependency>
-            <groupId>io.smallrye.reactive</groupId>
-            <artifactId>mutiny</artifactId>
+            <groupId>io.smallrye.dux</groupId>
+            <artifactId>smallrye-dux-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.config</groupId>
+            <artifactId>microprofile-config-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.config</groupId>
+            <artifactId>smallrye-config</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.dux</groupId>
+            <artifactId>smallrye-dux-test-utils</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
