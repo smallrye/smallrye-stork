@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.dux.Dux;
+import io.smallrye.dux.DuxTestUtils;
 import io.smallrye.dux.ServiceInstance;
 import io.smallrye.dux.test.TestConfigProvider;
 
@@ -29,7 +30,7 @@ public class StaticListServiceDiscoveryTest {
         TestConfigProvider.addServiceConfig("third-service", null, "static",
                 null, Map.of("4", "http://localhost:8083"));
 
-        dux = new Dux();
+        dux = DuxTestUtils.getNewDuxInstance();
     }
 
     @Test

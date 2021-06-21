@@ -9,9 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.smallrye.dux.config.DuxConfigProvider;
-import io.smallrye.dux.config.LoadBalancerConfig;
 import io.smallrye.dux.config.ServiceConfig;
-import io.smallrye.dux.config.ServiceDiscoveryConfig;
 import io.smallrye.dux.spi.ElementWithType;
 import io.smallrye.dux.spi.LoadBalancerProvider;
 import io.smallrye.dux.spi.ServiceDiscoveryProvider;
@@ -41,7 +39,8 @@ public final class Dux {
         return loadBalancer;
     }
 
-    public Dux() {
+    @Deprecated // for tests only
+    Dux() {
         Map<String, LoadBalancerProvider> loadBalancerProviders = getAll(LoadBalancerProvider.class);
         Map<String, ServiceDiscoveryProvider> serviceDiscoveryProviders = getAll(ServiceDiscoveryProvider.class);
 
@@ -55,7 +54,7 @@ public final class Dux {
                 () -> new IllegalStateException("No DuxConfigProvider found"));
 
         for (ServiceConfig serviceConfig : configProvider.getDuxConfigs()) {
-            ServiceDiscoveryConfig serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
+            final var serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
             if (serviceDiscoveryConfig == null) {
                 throw new IllegalArgumentException(
                         "No service discovery not defined for service " + serviceConfig.serviceName());
@@ -65,26 +64,27 @@ public final class Dux {
                 throw new IllegalArgumentException(
                         "Service discovery type not defined for service " + serviceConfig.serviceName());
             }
-            ServiceDiscoveryProvider serviceDiscoveryProvider = serviceDiscoveryProviders.get(serviceDiscoveryType);
+
+            final var serviceDiscoveryProvider = serviceDiscoveryProviders.get(serviceDiscoveryType);
             if (serviceDiscoveryProvider == null) {
                 throw new IllegalArgumentException("ServiceDiscoveryProvider not found for type " + serviceDiscoveryType);
             }
 
-            ServiceDiscovery serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig);
+            final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig);
             serviceDiscoveries.put(serviceConfig.serviceName(), serviceDiscovery);
 
-            LoadBalancerConfig loadBalancerConfig = serviceConfig.loadBalancer();
+            final var loadBalancerConfig = serviceConfig.loadBalancer();
             if (loadBalancerConfig == null) {
                 // no load balancer, maybe someone intends to use service discovery only, ignoring
                 // TODO: log debug sth
             } else {
                 String loadBalancerType = loadBalancerConfig.type();
-                LoadBalancerProvider loadBalancerProvider = loadBalancerProviders.get(loadBalancerType);
+                final var loadBalancerProvider = loadBalancerProviders.get(loadBalancerType);
                 if (loadBalancerProvider == null) {
                     throw new IllegalArgumentException("No LoadBalancerProvider for type " + loadBalancerType);
                 }
 
-                LoadBalancer loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
+                final var loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
                 loadBalancers.put(serviceConfig.serviceName(), loadBalancer);
             }
         }

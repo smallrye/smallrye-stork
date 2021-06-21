@@ -15,6 +15,16 @@ import io.smallrye.dux.config.ServiceDiscoveryConfig;
 public class TestConfigProvider implements DuxConfigProvider {
     private static final List<ServiceConfig> configs = new ArrayList<>();
 
+    private static int priority = Integer.MAX_VALUE;
+
+    public static void setPriority(int priority) {
+        TestConfigProvider.priority = priority;
+    }
+
+    public static int getPriority() {
+        return priority;
+    }
+
     public static void addServiceConfig(String name, String loadBalancer, String serviceDiscovery,
             Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams) {
         configs.add(new ServiceConfig() {
@@ -66,6 +76,6 @@ public class TestConfigProvider implements DuxConfigProvider {
 
     @Override
     public int priority() {
-        return Integer.MAX_VALUE; // make sure this one is selected
+        return priority;
     }
 }

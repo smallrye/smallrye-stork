@@ -1,6 +1,7 @@
 package io.smallrye.dux.servicediscovery.staticlist;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -27,7 +28,7 @@ public class StaticListServiceDiscoveryProvider implements ServiceDiscoveryProvi
 
         parameters.keySet().stream()
                 .filter(k -> number.matcher(k).matches())
-                .sorted()
+                .sorted(Comparator.comparing(Integer::valueOf))
                 .forEach(k -> addressList.add(new ServiceInstance(ServiceInstanceIds.next(), parameters.get(k))));
 
         return new StaticListServiceDiscovery(addressList);

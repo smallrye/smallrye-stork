@@ -109,6 +109,7 @@
 
     <modules>
         <module>api</module>
+        <module>microprofile</module>
         <module>service-discovery/static-list</module>
         <module>load-balancer/round-robin</module>
         <module>test-utils</module>
