@@ -80,7 +80,12 @@
             <!-- Dependencies provided by the project -->
             <dependency>
                 <groupId>io.smallrye.dux</groupId>
-                <artifactId>smallrye-dux-core</artifactId>
+                <artifactId>smallrye-dux-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.dux</groupId>
+                <artifactId>smallrye-dux-test-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -90,15 +95,22 @@
             </dependency>
             <dependency>
                 <groupId>io.smallrye.dux</groupId>
-                <artifactId>smallrye-dux-round-robin</artifactId>
+                <!--todo: name is lengthy, shorten it?-->
+                <artifactId>smallrye-dux-load-balancer-round-robin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.dux</groupId>
+                <artifactId>smallrye-dux-service-discovery-static-list</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <modules>
-        <module>core</module>
+        <module>api</module>
         <module>service-discovery/static-list</module>
         <module>load-balancer/round-robin</module>
+        <module>test-utils</module>
     </modules>
 </project>

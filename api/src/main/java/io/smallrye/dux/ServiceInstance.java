@@ -2,16 +2,16 @@ package io.smallrye.dux;
 
 public final class ServiceInstance {
 
-    private final String id;
+    private final Long id;
 
     private final String value;
 
-    public ServiceInstance(String id, String value) {
+    public ServiceInstance(Long id, String value) {
         this.id = id;
         this.value = value;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
