@@ -41,7 +41,7 @@ public final class Dux {
         return loadBalancer;
     }
 
-    public Dux() {
+    private Dux() {
         Map<String, LoadBalancerProvider> loadBalancerProviders = getAll(LoadBalancerProvider.class);
         Map<String, ServiceDiscoveryProvider> serviceDiscoveryProviders = getAll(ServiceDiscoveryProvider.class);
 

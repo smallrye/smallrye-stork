@@ -29,12 +29,12 @@ public class StaticListServiceDiscoveryTest {
         TestConfigProvider.addServiceConfig("third-service", null, "static",
                 null, Map.of("4", "http://localhost:8083"));
 
-        dux = new Dux();
+        dux = Dux.getInstance();
     }
 
     @Test
     void shouldGetAllServiceInstances() {
-        List<ServiceInstance> serviceInstances = Dux.getInstance().getServiceDiscovery("first-service")
+        List<ServiceInstance> serviceInstances = dux.getServiceDiscovery("first-service")
                 .getServiceInstances()
                 .collect().asList().await().atMost(Duration.ofSeconds(5));
 

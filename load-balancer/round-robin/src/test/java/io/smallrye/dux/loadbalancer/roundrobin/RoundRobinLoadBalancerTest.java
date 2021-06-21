@@ -33,7 +33,7 @@ public class RoundRobinLoadBalancerTest {
                 null,
                 Map.of("4", "http://localhost:8083"));
 
-        dux = new Dux();
+        dux = Dux.getInstance();
     }
 
     @Test
