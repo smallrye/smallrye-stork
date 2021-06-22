@@ -11,7 +11,7 @@ Dux APIs use https://smallrye.io/smallrye-mutiny/[SmallRye Mutiny].
 
 Dux maps service names to addresses. 
 
-Required `ServiceDiscovery` provides a list of addresses (`ServiceInstance`'s)
+Required `ServiceDiscovery` provides a list of addresses (as `ServiceInstance`)
 for a given service name.
 Optional `LoadBalancer` selects a single `ServiceInstance` for a call.  
 
