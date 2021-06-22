@@ -16,7 +16,7 @@ public interface LoadBalancerConfig {
     String type();
 
     /**
-     * Load Balancer parameters. May or may not contain a `type` element specifying the type of the load balancer
+     * Load Balancer parameters.
      * 
      * @return map of parameters of the load balancer
      */
