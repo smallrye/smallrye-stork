@@ -21,7 +21,7 @@ import io.smallrye.dux.spi.ServiceDiscoveryProvider;
  * from it.
  */
 public final class Dux {
-// TODO replace all the exceptions here with dedicated ones?
+    // TODO replace all the exceptions here with dedicated ones?
 
     private final Map<String, ServiceDiscovery> serviceDiscoveries = new ConcurrentHashMap<>();
 
