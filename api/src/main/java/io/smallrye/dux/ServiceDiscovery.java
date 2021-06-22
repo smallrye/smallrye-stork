@@ -5,7 +5,8 @@ import io.smallrye.mutiny.Multi;
 /**
  * Works with a single service. Provides a stream of all available service instances for a given service.
  *
- * <br/>
+ * <br>
+ * </br>
  * <b>Must be non-blocking</b>
  */
 public interface ServiceDiscovery {
