@@ -20,6 +20,7 @@ public interface ServiceConfig {
 
     /**
      * ServiceDiscovery configuration for the service
+     * 
      * @return (required) service discovery configuration
      */
     ServiceDiscoveryConfig serviceDiscovery();

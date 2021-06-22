@@ -12,6 +12,7 @@ public interface LoadBalancer {
 
     /**
      * Provide a single {@link ServiceInstance}
+     * 
      * @return a Uni with a ServiceInstance
      */
     Uni<ServiceInstance> selectServiceInstance();

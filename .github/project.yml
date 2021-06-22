@@ -1,0 +1,4 @@
+name: SmallRye Dux
+release:
+  current-version: 1.0.0
+  next-version: 1.0.0-SNAPSHOT
