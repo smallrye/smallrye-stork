@@ -11,12 +11,12 @@ public interface ServiceDiscoveryConfig {
      * Service discovery type, e.g. "consul".
      * ServiceDiscoveryProvider for the type has to be available
      *
-     * @return service discovery rype
+     * @return service discovery type
      */
     String type();
 
     /**
-     * Service Discovery parameters. May or may not contain a `type` element specifying the type of the service discovery
+     * ServiceDiscovery parameters.
      * 
      * @return map of parameters of the service discovery
      */

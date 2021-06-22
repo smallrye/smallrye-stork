@@ -14,8 +14,14 @@ import io.smallrye.dux.spi.ElementWithType;
 import io.smallrye.dux.spi.LoadBalancerProvider;
 import io.smallrye.dux.spi.ServiceDiscoveryProvider;
 
-// TODO replace all the exceptions here with dedicated ones?
+/**
+ * The entrypoint for SmallRye Dux
+ *
+ * Use `Dux.getInstance()` to get a hold of a configured instance, and retrieve `ServiceDiscovery` and/or `LoadBalancer`
+ * from it.
+ */
 public final class Dux {
+// TODO replace all the exceptions here with dedicated ones?
 
     private final Map<String, ServiceDiscovery> serviceDiscoveries = new ConcurrentHashMap<>();
 
