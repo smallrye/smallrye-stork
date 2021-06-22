@@ -6,7 +6,6 @@ import io.smallrye.mutiny.Uni;
  * Works with a single service name.
  * Provides a single service instance.
  * <br>
- * </br>
  * <b>Must be non-blocking</b>
  */
 public interface LoadBalancer {
