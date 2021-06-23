@@ -40,8 +40,11 @@
         <version.microprofile-config-api>2.0</version.microprofile-config-api>
         <version.mutiny>0.17.0</version.mutiny>
         <version.smallrye-config>2.3.0</version.smallrye-config>
-    </properties>
 
+        <sonar.projectName>SmallRye Dux</sonar.projectName>
+        <sonar.projectKey>smallrye_smallrye-dux</sonar.projectKey>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+    </properties>
 
     <licenses>
         <license>
@@ -122,4 +125,28 @@
         <module>load-balancer/round-robin</module>
         <module>test-utils</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <argLine>@{jacocoArgLine}</argLine>
+                <!--suppress UnresolvedMavenProperty -->
+                <sonar.coverage.jacoco.xmlReportPaths>
+                    ${maven.multiModuleProjectDirectory}/coverage/target/site/jacoco-aggregate/jacoco.xml
+                </sonar.coverage.jacoco.xmlReportPaths>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+            <modules>
+                <module>coverage</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>
