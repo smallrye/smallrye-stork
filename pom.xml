@@ -38,7 +38,7 @@
 
         <version.assertj>3.20.2</version.assertj>
         <version.microprofile-config-api>2.0</version.microprofile-config-api>
-        <version.mutiny>0.17.0</version.mutiny>
+        <version.mutiny>0.18.0</version.mutiny>
         <version.smallrye-config>2.3.0</version.smallrye-config>
 
         <sonar.projectName>SmallRye Dux</sonar.projectName>
