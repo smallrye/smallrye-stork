@@ -2,7 +2,6 @@ package io.smallrye.stork.test;
 
 import java.util.List;
 
-import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.LoadBalancer;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.ServiceInstance;
@@ -18,11 +17,6 @@ public class TestLoadBalancer implements LoadBalancer {
         this.config = config;
         this.serviceDiscovery = serviceDiscovery;
         this.type = type;
-    }
-
-    @Override
-    public Uni<ServiceInstance> selectServiceInstance() {
-        return null;
     }
 
     @Override

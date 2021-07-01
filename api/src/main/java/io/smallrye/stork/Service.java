@@ -7,10 +7,12 @@ public class Service {
 
     private final LoadBalancer loadBalancer;
     private final ServiceDiscovery serviceDiscovery;
+    private final String serviceName;
 
-    public Service(LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery) {
+    public Service(String serviceName, LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery) {
         this.loadBalancer = loadBalancer;
         this.serviceDiscovery = serviceDiscovery;
+        this.serviceName = serviceName;
     }
 
     /**
@@ -24,14 +26,32 @@ public class Service {
                 .map(loadBalancer::selectServiceInstance);
     }
 
+    /**
+     * Provide a collection of {@link ServiceInstance}s
+     *
+     * @return a Multi - stream of ServiceInstances
+     */
     public Multi<ServiceInstance> getServiceInstances() {
         return serviceDiscovery.getServiceInstances();
     }
 
+    /**
+     * Get the underlying load balancer
+     *
+     * @return load balancer
+     */
     public LoadBalancer getLoadBalancer() {
+        if (loadBalancer == null) {
+            throw new IllegalArgumentException("No load balancer for service '" + serviceName + "' defined");
+        }
         return loadBalancer;
     }
 
+    /**
+     * Get the underlying service discovery
+     *
+     * @return service discovery
+     */
     public ServiceDiscovery getServiceDiscovery() {
         return serviceDiscovery;
     }

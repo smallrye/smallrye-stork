@@ -35,7 +35,7 @@ public class StaticListServiceDiscoveryTest {
 
     @Test
     void shouldGetAllServiceInstances() {
-        List<ServiceInstance> serviceInstances = Stork.getInstance().getServiceDiscovery("first-service")
+        List<ServiceInstance> serviceInstances = Stork.getInstance().getService("first-service")
                 .getServiceInstances()
                 .collect().asList().await().atMost(Duration.ofSeconds(5));
 
