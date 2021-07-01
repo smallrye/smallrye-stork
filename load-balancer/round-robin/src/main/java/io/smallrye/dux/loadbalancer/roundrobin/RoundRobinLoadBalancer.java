@@ -1,5 +1,6 @@
 package io.smallrye.dux.loadbalancer.roundrobin;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,6 +24,12 @@ public class RoundRobinLoadBalancer implements LoadBalancer {
         return serviceDiscovery.getServiceInstances().collect()
                 .asList()
                 .map(this::select);
+    }
+
+    @Override
+    public ServiceInstance selectServiceInstance(List<ServiceInstance> serviceInstances) {
+        serviceInstances.sort(Comparator.comparingLong(ServiceInstance::getId));
+        return select(serviceInstances);
     }
 
     private ServiceInstance select(List<ServiceInstance> instances) {

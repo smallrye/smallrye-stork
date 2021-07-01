@@ -1,5 +1,7 @@
 package io.smallrye.dux.test;
 
+import java.util.List;
+
 import io.smallrye.dux.LoadBalancer;
 import io.smallrye.dux.ServiceDiscovery;
 import io.smallrye.dux.ServiceInstance;
@@ -20,6 +22,11 @@ public class TestLoadBalancer implements LoadBalancer {
 
     @Override
     public Uni<ServiceInstance> selectServiceInstance() {
+        return null;
+    }
+
+    @Override
+    public ServiceInstance selectServiceInstance(List<ServiceInstance> serviceInstances) {
         return null;
     }
 
