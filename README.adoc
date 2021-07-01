@@ -1,15 +1,15 @@
-image:https://github.com/smallrye/smallrye-dux/workflows/SmallRye%20Build/badge.svg?branch=main[link={ci}]
-image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-dux&metric=alert_status["Quality Gate Status", link={sonar}]
-image:https://img.shields.io/github/license/smallrye/smallrye-dux.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
-image:https://img.shields.io/maven-central/v/io.smallrye.dux/smallrye-dux?color=green["Maven", link="https://search.maven.org/search?q=g:io.smallrye.dux%20AND%20a:smallrye-dux-api"]
+image:https://github.com/smallrye/smallrye-stork/workflows/SmallRye%20Build/badge.svg?branch=main[link={ci}]
+image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-stork&metric=alert_status["Quality Gate Status", link={sonar}]
+image:https://img.shields.io/github/license/smallrye/smallrye-stork.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
+image:https://img.shields.io/maven-central/v/io.smallrye.stork/smallrye-stork?color=green["Maven", link="https://search.maven.org/search?q=g:io.smallrye.stork%20AND%20a:smallrye-stork-api"]
 
-== SmallRye Dux
+== SmallRye Stork
 
-SmallRye Dux, Dux in short, is an extensible Service Discovery and Client-Side 
+SmallRye Stork, Stork in short, is an extensible Service Discovery and Client-Side
 Load Balancer implementation designed to work well with reactive libraries.
-Dux APIs use https://smallrye.io/smallrye-mutiny/[SmallRye Mutiny].
+Stork APIs use https://smallrye.io/smallrye-mutiny/[SmallRye Mutiny].
 
-Dux maps service names to addresses. 
+Stork maps service names to addresses.
 
 Required `ServiceDiscovery` provides a list of addresses (as `ServiceInstance`)
 for a given service name.
@@ -18,33 +18,33 @@ Optional `LoadBalancer` selects a single `ServiceInstance` for a call.
 === Configuring user applications
 The project's core aims to be vendor neutral. Aside from using Mutiny for the APIs,
 it has no dependencies. As such, it provides a universal abstraction of configuration 
-and vendors can choose their own way of providing Dux configuration.
+and vendors can choose their own way of providing Stork configuration.
 
-MicroProfile based frameworks can use MicroProfile Config to configure Dux. 
+MicroProfile based frameworks can use MicroProfile Config to configure Stork.
 Below is an example snippet of such a configuration:
 
 [source,properties]
 ----
-dux.my-service.service-discovery=consul
-dux.my-service.service-discovery.some-service-discovery-property=property-value
-dux.my-service.load-balancer=round-robin
-dux.my-service.load-balancer.some-load-balancer-property=some-prop-value
+stork.my-service.service-discovery=consul
+stork.my-service.service-discovery.some-service-discovery-property=property-value
+stork.my-service.load-balancer=round-robin
+stork.my-service.load-balancer.some-load-balancer-property=some-prop-value
 
-dux.my-other-service.service-discovery=test-sd-1
-dux.my-other-service.load-balancer=test-lb-1
+stork.my-other-service.service-discovery=test-sd-1
+stork.my-other-service.load-balancer=test-lb-1
 ----
 
-MicroProfile Config support for configuring SmallRye Dux is provided by the 
-`smallrye-dux-microprofile` artifact.
+MicroProfile Config support for configuring SmallRye Stork is provided by the
+`smallrye-stork-microprofile` artifact.
 
-=== Integrating client libraries with Dux
+=== Integrating client libraries with Stork
 Client libraries would most often use a `LoadBalancer` to get a single address
 for a call.
-`LoadBalancer` for a service can be retrieved from `Dux` singleton:
+`LoadBalancer` for a service can be retrieved from `Stork` singleton:
 
 [source,java]
 ----
-LoadBalancer loadBalancer = Dux.getInstance().getLoadBalancer(serviceName);
+LoadBalancer loadBalancer = Stork.getInstance().getLoadBalancer(serviceName);
 Uni<ServiceInstance> serviceInstance = loadBalancer.selectServiceInstace();
 ----
 
@@ -53,29 +53,29 @@ given service from `ServiceDiscovery`:
 
 [source,java]
 ----
-ServiceDiscovery serviceDiscovery = Dux.getInstance().getServiceDiscovery(serviceName);
+ServiceDiscovery serviceDiscovery = Stork.getInstance().getServiceDiscovery(serviceName);
 Multi<ServiceInstance> serviceInstances = serviceDiscovery.getServiceInstances();
 ----
 
 === Extending the functionality
-In Dux, extensibility is based on the 
+In Stork, extensibility is based on the
 [Service Provider Interface](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html) mechanism.
 
 ==== Configuration provider
-To add a custom configuration provider, create an implementation of `DuxConfigProvider`
+To add a custom configuration provider, create an implementation of `ConfigProvider`
 and register it with the Service Provider Interfaces mechanism.
 
-SmallRye Dux comes with MicroProfile Config based configuration provider. 
-To use it, add `smallrye-dux-microprofile` to your project.
+SmallRye Stork comes with MicroProfile Config based configuration provider.
+To use it, add `smallrye-stork-microprofile` to your project.
 
 ==== Service Discovery
-To implement a custom service discovery for Dux, implement the `ServiceDiscoveryProvider`
+To implement a custom service discovery for Stork, implement the `ServiceDiscoveryProvider`
 interface and register it with the Service Provider Interface mechanism.
 
 Please note that the `ServiceDiscovery` implementation must be non-blocking.
 
 ==== Load Balancer
-To implement a custom load balancer for Dux, implement the `LoadBalancerProvider`
+To implement a custom load balancer for Stork, implement the `LoadBalancerProvider`
 interface and register it with the Service Provider Interface mechanism.
 
 Please note that the `LoadBalancer` implementation, similarly to `ServiceDiscovery` 
