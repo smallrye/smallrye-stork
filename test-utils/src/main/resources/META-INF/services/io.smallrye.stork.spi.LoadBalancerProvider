@@ -1,0 +1,2 @@
+io.smallrye.stork.test.TestLoadBalancer1Provider
+io.smallrye.stork.test.TestLoadBalancer2Provider

@@ -5,19 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.smallrye.dux</groupId>
-        <artifactId>smallrye-dux-parent</artifactId>
+        <groupId>io.smallrye.stork</groupId>
+        <artifactId>smallrye-stork-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-dux-microprofile</artifactId>
+    <artifactId>smallrye-stork-microprofile</artifactId>
 
-    <name>SmallRye Dux : interface for library integration</name>
+    <name>SmallRye Stork : interface for library integration</name>
 
     <dependencies>
         <dependency>
-            <groupId>io.smallrye.dux</groupId>
-            <artifactId>smallrye-dux-api</artifactId>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>smallrye-stork-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.microprofile.config</groupId>
@@ -33,8 +33,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.smallrye.dux</groupId>
-            <artifactId>smallrye-dux-test-utils</artifactId>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>smallrye-stork-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

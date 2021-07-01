@@ -24,8 +24,8 @@
         <version>28</version>
     </parent>
 
-    <groupId>io.smallrye.dux</groupId>
-    <artifactId>smallrye-dux-parent</artifactId>
+    <groupId>io.smallrye.stork</groupId>
+    <artifactId>smallrye-stork-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
@@ -41,8 +41,8 @@
         <version.mutiny>0.17.0</version.mutiny>
         <version.smallrye-config>2.3.0</version.smallrye-config>
 
-        <sonar.projectName>SmallRye Dux</sonar.projectName>
-        <sonar.projectKey>smallrye_smallrye-dux</sonar.projectKey>
+        <sonar.projectName>SmallRye Stork</sonar.projectName>
+        <sonar.projectKey>smallrye_smallrye-stork</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
     </properties>
 
@@ -55,7 +55,7 @@
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/smallrye/smallrye-dux/issues</url>
+        <url>https://github.com/smallrye/smallrye-stork/issues</url>
     </issueManagement>
 
     <scm>
@@ -90,29 +90,29 @@
 
             <!-- Dependencies provided by the project -->
             <dependency>
-                <groupId>io.smallrye.dux</groupId>
-                <artifactId>smallrye-dux-api</artifactId>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>smallrye-stork-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.smallrye.dux</groupId>
-                <artifactId>smallrye-dux-test-utils</artifactId>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>smallrye-stork-test-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.smallrye.dux</groupId>
-                <artifactId>smallrye-dux-static-list</artifactId>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>smallrye-stork-static-list</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.smallrye.dux</groupId>
+                <groupId>io.smallrye.stork</groupId>
                 <!--todo: name is lengthy, shorten it?-->
-                <artifactId>smallrye-dux-load-balancer-round-robin</artifactId>
+                <artifactId>smallrye-stork-load-balancer-round-robin</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.smallrye.dux</groupId>
-                <artifactId>smallrye-dux-service-discovery-static-list</artifactId>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>smallrye-stork-service-discovery-static-list</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
