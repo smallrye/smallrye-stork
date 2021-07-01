@@ -52,9 +52,10 @@ public class MicroProfileConfigProviderTest {
 
         Stork stork = storkForConfig(properties);
 
-        Assertions.assertThatThrownBy(() -> stork.getLoadBalancer(FIRST_SERVICE)).isInstanceOf(IllegalArgumentException.class);
+        Assertions.assertThatThrownBy(() -> stork.getService(FIRST_SERVICE).getLoadBalancer())
+                .isInstanceOf(IllegalArgumentException.class);
 
-        ServiceDiscovery serviceDiscovery = stork.getServiceDiscovery(FIRST_SERVICE);
+        ServiceDiscovery serviceDiscovery = stork.getService(FIRST_SERVICE).getServiceDiscovery();
 
         assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery.class);
 
@@ -76,7 +77,7 @@ public class MicroProfileConfigProviderTest {
 
         Stork stork = storkForConfig(properties);
 
-        ServiceDiscovery serviceDiscovery = stork.getServiceDiscovery(SECOND_SERVICE);
+        ServiceDiscovery serviceDiscovery = stork.getService(SECOND_SERVICE).getServiceDiscovery();
         assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery.class);
 
         TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
@@ -87,7 +88,7 @@ public class MicroProfileConfigProviderTest {
         assertThat(sdConfig.parameters()).hasSize(1);
         assertThat(sdConfig.parameters()).containsAllEntriesOf(Map.of("3", "http://localhost:8082"));
 
-        LoadBalancer loadBalancer = stork.getLoadBalancer(SECOND_SERVICE);
+        LoadBalancer loadBalancer = stork.getService(SECOND_SERVICE).getLoadBalancer();
         assertThat(loadBalancer).isInstanceOf(TestLoadBalancer.class);
 
         TestLoadBalancer lb = (TestLoadBalancer) loadBalancer;
@@ -114,7 +115,7 @@ public class MicroProfileConfigProviderTest {
 
         Stork stork = storkForConfig(properties);
 
-        ServiceDiscovery serviceDiscovery = stork.getServiceDiscovery(SECOND_SERVICE);
+        ServiceDiscovery serviceDiscovery = stork.getService(SECOND_SERVICE).getServiceDiscovery();
         assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery.class);
 
         TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
@@ -125,7 +126,7 @@ public class MicroProfileConfigProviderTest {
         assertThat(sdConfig.parameters()).hasSize(1);
         assertThat(sdConfig.parameters()).containsAllEntriesOf(Map.of("3", "http://localhost:8082"));
 
-        LoadBalancer loadBalancer = stork.getLoadBalancer(SECOND_SERVICE);
+        LoadBalancer loadBalancer = stork.getService(SECOND_SERVICE).getLoadBalancer();
         assertThat(loadBalancer).isInstanceOf(TestLoadBalancer.class);
 
         TestLoadBalancer lb = (TestLoadBalancer) loadBalancer;
@@ -138,7 +139,7 @@ public class MicroProfileConfigProviderTest {
                 .hasSize(1)
                 .containsAllEntriesOf(Map.of("some-prop", "some-prop-value"));
 
-        serviceDiscovery = stork.getServiceDiscovery(THIRD_SERVICE);
+        serviceDiscovery = stork.getService(THIRD_SERVICE).getServiceDiscovery();
         assertThat(serviceDiscovery).isInstanceOf(TestServiceDiscovery.class);
         sd = (TestServiceDiscovery) serviceDiscovery;
 
@@ -146,7 +147,7 @@ public class MicroProfileConfigProviderTest {
         assertThat(sd.getConfig().type()).isEqualTo("test-sd-1");
         assertThat(sd.getConfig().parameters()).isEmpty();
 
-        loadBalancer = stork.getLoadBalancer(THIRD_SERVICE);
+        loadBalancer = stork.getService(THIRD_SERVICE).getLoadBalancer();
         assertThat(loadBalancer).isInstanceOf(TestLoadBalancer.class);
         lb = (TestLoadBalancer) loadBalancer;
 
