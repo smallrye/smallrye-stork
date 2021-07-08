@@ -3,7 +3,7 @@ package io.smallrye.stork.servicediscovery.staticlist;
 import java.util.Collections;
 import java.util.List;
 
-import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.ServiceInstance;
 
@@ -16,7 +16,7 @@ public final class StaticListServiceDiscovery implements ServiceDiscovery {
     }
 
     @Override
-    public Multi<ServiceInstance> getServiceInstances() {
-        return Multi.createFrom().iterable(instances);
+    public Uni<List<ServiceInstance>> getServiceInstances() {
+        return Uni.createFrom().item(instances);
     }
 }

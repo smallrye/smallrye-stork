@@ -1,20 +1,20 @@
-package io.smallrye.stork.test;
+package io.smallrye.stork.servicediscovery.consul;
 
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
+import io.vertx.core.Vertx;
 
-public class TestServiceDiscovery1Provider implements ServiceDiscoveryProvider {
-
-    public static final String TYPE = "test-sd-1";
+public class ConsulServiceDiscoveryProvider implements ServiceDiscoveryProvider {
 
     @Override
     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
-        return new TestServiceDiscovery(config, TYPE);
+        return new ConsulServiceDiscovery(serviceName, config, Vertx.vertx()); // TODO: ability to provide a vertx instance
+
     }
 
     @Override
     public String type() {
-        return TYPE;
+        return "consul";
     }
 }

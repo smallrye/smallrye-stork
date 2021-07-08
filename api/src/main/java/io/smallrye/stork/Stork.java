@@ -68,7 +68,8 @@ public final class Stork {
                 throw new IllegalArgumentException("ServiceDiscoveryProvider not found for type " + serviceDiscoveryType);
             }
 
-            final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig);
+            final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
+                    serviceConfig.serviceName());
 
             final var loadBalancerConfig = serviceConfig.loadBalancer();
             final LoadBalancer loadBalancer;

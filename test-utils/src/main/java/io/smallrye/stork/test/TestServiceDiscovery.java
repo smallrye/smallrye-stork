@@ -1,6 +1,8 @@
 package io.smallrye.stork.test;
 
-import io.smallrye.mutiny.Multi;
+import java.util.List;
+
+import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
@@ -16,7 +18,7 @@ public class TestServiceDiscovery implements ServiceDiscovery {
     }
 
     @Override
-    public Multi<ServiceInstance> getServiceInstances() {
+    public Uni<List<ServiceInstance>> getServiceInstances() {
         return null;
     }
 
