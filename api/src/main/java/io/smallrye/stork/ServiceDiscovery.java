@@ -1,6 +1,8 @@
 package io.smallrye.stork;
 
-import io.smallrye.mutiny.Multi;
+import java.util.List;
+
+import io.smallrye.mutiny.Uni;
 
 /**
  * Works with a single service. Provides a stream of all available service instances for a given service.
@@ -13,5 +15,5 @@ public interface ServiceDiscovery {
      *
      * @return all `ServiceInstance`'s for the service
      */
-    Multi<ServiceInstance> getServiceInstances();
+    Uni<List<ServiceInstance>> getServiceInstances();
 }

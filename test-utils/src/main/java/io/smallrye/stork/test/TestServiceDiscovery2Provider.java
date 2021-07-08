@@ -9,7 +9,7 @@ public class TestServiceDiscovery2Provider implements ServiceDiscoveryProvider {
     public static final String TYPE = "test-sd-2";
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config) {
+    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
         return new TestServiceDiscovery(config, TYPE);
     }
 

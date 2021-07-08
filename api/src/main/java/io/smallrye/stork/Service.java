@@ -1,5 +1,7 @@
 package io.smallrye.stork;
 
+import java.util.List;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
@@ -21,8 +23,7 @@ public class Service {
      * @return a Uni with a ServiceInstance
      */
     public Uni<ServiceInstance> selectServiceInstance() {
-        return serviceDiscovery.getServiceInstances().collect()
-                .asList()
+        return serviceDiscovery.getServiceInstances()
                 .map(loadBalancer::selectServiceInstance);
     }
 
@@ -31,7 +32,7 @@ public class Service {
      *
      * @return a Multi - stream of ServiceInstances
      */
-    public Multi<ServiceInstance> getServiceInstances() {
+    public Uni<List<ServiceInstance>> getServiceInstances() {
         return serviceDiscovery.getServiceInstances();
     }
 
