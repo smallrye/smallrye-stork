@@ -1,6 +1,7 @@
 package io.smallrye.stork.servicediscovery.consul;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import io.smallrye.stork.Service;
@@ -26,23 +28,26 @@ import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
 import io.vertx.ext.consul.ServiceOptions;
 
+@Testcontainers
 public class ConsulServiceDiscoveryTest {
     @Container
     public GenericContainer consul = new GenericContainer(DockerImageName.parse("consul:1.9"))
             .withExposedPorts(8500);
 
     Stork stork;
+    int consulPort;
 
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
+        consulPort = consul.getMappedPort(8500);
         TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", "8500"));
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
         stork = StorkTestUtils.getNewStorkInstance();
     }
 
     @Test
-    void shouldDoTheTest() throws InterruptedException {
+    void shouldGetServiceFromConsul() throws InterruptedException {
         String serviceName = "my-service";
         setUpService(serviceName, "example.com", 8406);
 
@@ -50,6 +55,7 @@ public class ConsulServiceDiscoveryTest {
 
         Service service = stork.getService(serviceName);
         service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Consul", th))
                 .subscribe().with(instances::set);
 
         await().atMost(Duration.ofSeconds(5))
@@ -60,11 +66,16 @@ public class ConsulServiceDiscoveryTest {
     }
 
     private void setUpService(String serviceName, String address, int port) throws InterruptedException {
-        ConsulClient client = ConsulClient.create(Vertx.vertx(), new ConsulClientOptions().setHost("localhost").setPort(8500));
+        ConsulClient client = ConsulClient.create(Vertx.vertx(), new ConsulClientOptions().setHost("localhost").setPort(consulPort));
 
         CountDownLatch latch = new CountDownLatch(1);
         client.registerService(new ServiceOptions().setName(serviceName).setAddress(address).setPort(port))
-                .onComplete(ignored -> latch.countDown());
+                .onComplete(result -> {
+                    if (result.failed()) {
+                       fail("Failed to register service in Consul", result.cause());
+                    }
+                    latch.countDown();
+                });
 
         latch.await(5, TimeUnit.SECONDS);
     }

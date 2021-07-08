@@ -44,9 +44,14 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
     public Uni<List<ServiceInstance>> getServiceInstances() {
         Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
                 emitter -> client.healthServiceNodes(serviceName, true) // TODO: a property to configure t his!
-                        .onComplete(result -> emitter.complete(result.result()))
-                        .onFailure(emitter::fail));
-        return serviceEntryList.onItem().transform(this::map);
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+        return serviceEntryList.onItem().transform(this::map); // TODO: logging
     }
 
     private List<ServiceInstance> map(ServiceEntryList serviceEntryList) {
