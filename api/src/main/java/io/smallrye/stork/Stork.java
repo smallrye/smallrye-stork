@@ -8,6 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.smallrye.stork.config.ConfigProvider;
 import io.smallrye.stork.config.ServiceConfig;
 import io.smallrye.stork.spi.ElementWithType;
@@ -22,6 +25,8 @@ import io.smallrye.stork.spi.ServiceDiscoveryProvider;
  */
 public final class Stork {
     // TODO replace all the exceptions here with dedicated ones?
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Stork.class);
 
     private final Map<String, Service> services = new ConcurrentHashMap<>();
 
@@ -75,7 +80,7 @@ public final class Stork {
             final LoadBalancer loadBalancer;
             if (loadBalancerConfig == null) {
                 // no load balancer, maybe someone intends to use service discovery only, ignoring
-                // TODO: log debug sth
+                LOGGER.info("No load balancer configured for type " + serviceDiscoveryType);
                 loadBalancer = null;
             } else {
                 String loadBalancerType = loadBalancerConfig.type();

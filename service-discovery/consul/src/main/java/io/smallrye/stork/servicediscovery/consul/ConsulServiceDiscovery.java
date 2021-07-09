@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.ServiceInstance;
@@ -19,6 +22,9 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
 
     private final ConsulClient client;
     private final String serviceName;
+    private boolean passing = true; // default true?
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsulServiceDiscovery.class);
 
     public ConsulServiceDiscovery(String serviceName, ServiceDiscoveryConfig config, Vertx vertx) {
         this.serviceName = serviceName;
@@ -37,13 +43,17 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
                 throw new IllegalArgumentException("Port not parseable to int: " + port + " for service " + serviceName);
             }
         }
-
+        String passingConfig = parameters.get("use-health-checks");
+        if (passingConfig != null) {
+            LOGGER.info("Processing Consul use-health-checks configured value: %s", passingConfig);
+            passing = Boolean.parseBoolean(passingConfig);
+        }
         client = ConsulClient.create(vertx, options);
     }
 
     public Uni<List<ServiceInstance>> getServiceInstances() {
         Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
-                emitter -> client.healthServiceNodes(serviceName, true) // TODO: a property to configure t his!
+                emitter -> client.healthServiceNodes(serviceName, passing)
                         .onComplete(result -> {
                             if (result.failed()) {
                                 emitter.fail(result.cause());
@@ -58,11 +68,9 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
         List<ServiceEntry> list = serviceEntryList.getList();
         List<ServiceInstance> serviceInstances = new ArrayList<ServiceInstance>();
         for (ServiceEntry serviceEntry : list) {
-            // TODO: separate address and port in the ServiceInstance
-            String address = String.format("%s:%s", serviceEntry.getService().getAddress(),
-                    serviceEntry.getService().getPort());
             // TODO: reuse service instance IDs on refresh (so that they don't change)
-            ServiceInstance serviceInstance = new ServiceInstance(ServiceInstanceIds.next(), address);
+            ServiceInstance serviceInstance = new ServiceInstance(ServiceInstanceIds.next(),
+                    serviceEntry.getService().getAddress(), serviceEntry.getService().getPort());
             serviceInstances.add(serviceInstance);
         }
         return serviceInstances;

@@ -29,7 +29,7 @@ import io.vertx.ext.consul.ConsulClientOptions;
 import io.vertx.ext.consul.ServiceOptions;
 
 @Testcontainers
-public class ConsulServiceDiscoveryTest {
+public class ConsulServiceDiscoveryIT {
     @Container
     public GenericContainer consul = new GenericContainer(DockerImageName.parse("consul:1.9"))
             .withExposedPorts(8500);
@@ -62,17 +62,19 @@ public class ConsulServiceDiscoveryTest {
                 .until(() -> instances.get() != null);
 
         assertThat(instances.get()).hasSize(1);
-        assertThat(instances.get().get(0).getValue()).isEqualTo("example.com:8406");
+        assertThat(instances.get().get(0).getHost()).isEqualTo("example.com");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(8406);
     }
 
     private void setUpService(String serviceName, String address, int port) throws InterruptedException {
-        ConsulClient client = ConsulClient.create(Vertx.vertx(), new ConsulClientOptions().setHost("localhost").setPort(consulPort));
+        ConsulClient client = ConsulClient.create(Vertx.vertx(),
+                new ConsulClientOptions().setHost("localhost").setPort(consulPort));
 
         CountDownLatch latch = new CountDownLatch(1);
         client.registerService(new ServiceOptions().setName(serviceName).setAddress(address).setPort(port))
                 .onComplete(result -> {
                     if (result.failed()) {
-                       fail("Failed to register service in Consul", result.cause());
+                        fail("Failed to register service in Consul", result.cause());
                     }
                     latch.countDown();
                 });

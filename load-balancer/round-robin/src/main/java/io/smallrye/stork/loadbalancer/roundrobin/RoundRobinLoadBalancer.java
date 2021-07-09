@@ -1,5 +1,6 @@
 package io.smallrye.stork.loadbalancer.roundrobin;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,7 +14,8 @@ public class RoundRobinLoadBalancer implements LoadBalancer {
 
     @Override
     public ServiceInstance selectServiceInstance(List<ServiceInstance> serviceInstances) {
-        serviceInstances.sort(Comparator.comparingLong(ServiceInstance::getId));
+        List<ServiceInstance> modifiableList = new ArrayList<>(serviceInstances.size());
+        modifiableList.sort(Comparator.comparingLong(ServiceInstance::getId));
         return select(serviceInstances);
     }
 

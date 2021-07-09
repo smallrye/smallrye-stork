@@ -40,8 +40,10 @@ public class StaticListServiceDiscoveryTest {
                 .await().atMost(Duration.ofSeconds(5));
 
         assertThat(serviceInstances).hasSize(2);
-        assertThat(serviceInstances.stream().map(ServiceInstance::getValue)).containsExactlyInAnyOrder("http://localhost:8080",
-                "http://localhost:8081");
+        assertThat(serviceInstances.stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("localhost",
+                "localhost");
+        assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
+                8081);
     }
 
 }
