@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.stork.Service;
+import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
@@ -41,8 +42,19 @@ public class RoundRobinLoadBalancerTest {
     public void shouldGetServiceInstance() {
         Service service = stork.getService("first-service");
 
-        assertThat(service.selectServiceInstance().await().atMost(Duration.ofSeconds(5)).getValue()).isEqualTo(FST_SRVC_1);
-        assertThat(service.selectServiceInstance().await().atMost(Duration.ofSeconds(5)).getValue()).isEqualTo(FST_SRVC_2);
-        assertThat(service.selectServiceInstance().await().atMost(Duration.ofSeconds(5)).getValue()).isEqualTo(FST_SRVC_1);
+        assertThat(selectInstance(service)).isEqualTo(FST_SRVC_1);
+        assertThat(selectInstance(service)).isEqualTo(FST_SRVC_2);
+        assertThat(selectInstance(service)).isEqualTo(FST_SRVC_1);
+    }
+
+    private String selectInstance(Service service) {
+        try {
+            ServiceInstance serviceInstance = service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
+            String serviceUrl = String.format("http://%s:%s", serviceInstance.getHost(), serviceInstance.getPort());
+            return serviceUrl;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

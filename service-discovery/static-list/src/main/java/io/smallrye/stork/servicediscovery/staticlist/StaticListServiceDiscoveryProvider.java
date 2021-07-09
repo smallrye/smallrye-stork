@@ -1,5 +1,7 @@
 package io.smallrye.stork.servicediscovery.staticlist;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -29,8 +31,18 @@ public class StaticListServiceDiscoveryProvider implements ServiceDiscoveryProvi
         parameters.keySet().stream()
                 .filter(k -> number.matcher(k).matches())
                 .sorted(Comparator.comparing(Integer::valueOf))
-                .forEach(k -> addressList.add(new ServiceInstance(ServiceInstanceIds.next(), parameters.get(k))));
-
+                .forEach(k -> {//
+                    URL url = null;
+                    try {
+                        url = new URL(parameters.get(k));
+                        String host = url.getHost();
+                        int port = url.getPort();
+                        addressList.add(new ServiceInstance(ServiceInstanceIds.next(), host, port));
+                    } catch (MalformedURLException e) {
+                        throw new IllegalArgumentException(
+                                "Address not parseable to URL: " + url + " for service " + serviceName);
+                    }
+                });
         return new StaticListServiceDiscovery(addressList);
     }
 
