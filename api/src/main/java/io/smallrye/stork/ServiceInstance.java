@@ -2,20 +2,27 @@ package io.smallrye.stork;
 
 public final class ServiceInstance {
 
-    private final Long id;
+    private final long id;
 
-    private final String value;
+    private final String host;
 
-    public ServiceInstance(Long id, String value) {
+    private final int port;
+
+    public ServiceInstance(long id, String host, int port) {
         this.id = id;
-        this.value = value;
+        this.host = host;
+        this.port = port;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public String getValue() {
-        return value;
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
     }
 }

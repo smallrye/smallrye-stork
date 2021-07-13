@@ -35,13 +35,15 @@ public class StaticListServiceDiscoveryTest {
 
     @Test
     void shouldGetAllServiceInstances() {
-        List<ServiceInstance> serviceInstances = Stork.getInstance().getServiceDiscovery("first-service")
+        List<ServiceInstance> serviceInstances = Stork.getInstance().getService("first-service")
                 .getServiceInstances()
-                .collect().asList().await().atMost(Duration.ofSeconds(5));
+                .await().atMost(Duration.ofSeconds(5));
 
         assertThat(serviceInstances).hasSize(2);
-        assertThat(serviceInstances.stream().map(ServiceInstance::getValue)).containsExactlyInAnyOrder("http://localhost:8080",
-                "http://localhost:8081");
+        assertThat(serviceInstances.stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("localhost",
+                "localhost");
+        assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
+                8081);
     }
 
 }

@@ -92,3 +92,23 @@ Java 8. To fix it, go to Maven -> Profiles and deselect
 `include-jdk-misc` and `compile-java8-release-flag`
 profiles.
 
+
+==== TODOs
+
+===== Service Discovery refresh
+We may have a couple of modes for service discovery refresh
+
+- server push - we keep a list of service instances and always return the list until a
+notification comes that we need to update it
+- eager refresh - refresh service instances on an interval basis
+- lazy refresh - when invoked and configured interval since the last refresh happened,
+refetch the data before return the result
+    * it may be good to have a separate option to return the old data until the
+refresh is complete
+
+===== Gathering statistics
+For smart Load Balancers we need statistics for calls.
+
+===== Scheduling
+For eager refresh, it may be good to provide a "helper" - a facade for scheduling tasks.
+Such a facade could have bindings for Vert.x, Quartz, etc.

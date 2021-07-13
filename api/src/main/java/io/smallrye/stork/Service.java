@@ -1,5 +1,7 @@
 package io.smallrye.stork;
 
+import java.util.List;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
@@ -7,10 +9,12 @@ public class Service {
 
     private final LoadBalancer loadBalancer;
     private final ServiceDiscovery serviceDiscovery;
+    private final String serviceName;
 
-    public Service(LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery) {
+    public Service(String serviceName, LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery) {
         this.loadBalancer = loadBalancer;
         this.serviceDiscovery = serviceDiscovery;
+        this.serviceName = serviceName;
     }
 
     /**
@@ -19,19 +23,36 @@ public class Service {
      * @return a Uni with a ServiceInstance
      */
     public Uni<ServiceInstance> selectServiceInstance() {
-        return serviceDiscovery.getServiceInstances().collect()
-                .asList()
+        return serviceDiscovery.getServiceInstances()
                 .map(loadBalancer::selectServiceInstance);
     }
 
-    public Multi<ServiceInstance> getServiceInstances() {
+    /**
+     * Provide a collection of {@link ServiceInstance}s
+     *
+     * @return a Multi - stream of ServiceInstances
+     */
+    public Uni<List<ServiceInstance>> getServiceInstances() {
         return serviceDiscovery.getServiceInstances();
     }
 
+    /**
+     * Get the underlying load balancer
+     *
+     * @return load balancer
+     */
     public LoadBalancer getLoadBalancer() {
+        if (loadBalancer == null) {
+            throw new IllegalArgumentException("No load balancer for service '" + serviceName + "' defined");
+        }
         return loadBalancer;
     }
 
+    /**
+     * Get the underlying service discovery
+     *
+     * @return service discovery
+     */
     public ServiceDiscovery getServiceDiscovery() {
         return serviceDiscovery;
     }

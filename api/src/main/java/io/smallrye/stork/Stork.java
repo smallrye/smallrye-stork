@@ -8,6 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.smallrye.stork.config.ConfigProvider;
 import io.smallrye.stork.config.ServiceConfig;
 import io.smallrye.stork.spi.ElementWithType;
@@ -16,42 +19,36 @@ import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 
 /**
  * The entrypoint for SmallRye Stork
- *
+ * <p>
  * Use `Stork.getInstance()` to get a hold of a configured instance, and retrieve `ServiceDiscovery` and/or `LoadBalancer`
  * from it.
  */
 public final class Stork {
     // TODO replace all the exceptions here with dedicated ones?
 
-    private final Map<String, ServiceDiscovery> serviceDiscoveries = new ConcurrentHashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Stork.class);
 
-    private final Map<String, LoadBalancer> loadBalancers = new ConcurrentHashMap<>();
+    private final Map<String, Service> services = new ConcurrentHashMap<>();
 
-    public ServiceDiscovery getServiceDiscovery(String serviceName) {
-        ServiceDiscovery serviceDiscovery = serviceDiscoveries.get(serviceName);
-        if (serviceDiscovery == null) {
-            // TODO dedicated exception?
-            throw new IllegalArgumentException("No service discovery defined for service name " + serviceName);
+    public Service getService(String serviceName) {
+        Service service = services.get(serviceName);
+        if (service == null) {
+            throw new IllegalArgumentException("No service defined for name " + serviceName);
         }
-        return serviceDiscovery;
+        return service;
     }
 
-    public LoadBalancer getLoadBalancer(String serviceName) {
-        LoadBalancer loadBalancer = loadBalancers.get(serviceName);
-        if (loadBalancer == null) {
-            // TODO dedicated exception?
-            throw new IllegalArgumentException("No load balancer defined for service name " + serviceName);
-        }
-        return loadBalancer;
-    }
-
-    @Deprecated // for tests only
+    /**
+     * Exposed for tests.
+     * Not to be used in production code
+     */
+    @Deprecated
     Stork() {
         Map<String, LoadBalancerProvider> loadBalancerProviders = getAll(LoadBalancerProvider.class);
         Map<String, ServiceDiscoveryProvider> serviceDiscoveryProviders = getAll(ServiceDiscoveryProvider.class);
 
         ServiceLoader<ConfigProvider> configs = ServiceLoader.load(ConfigProvider.class);
-        // mstodo test for multiple config providers!!
+        // TODO test for multiple config providers!!
         Optional<ConfigProvider> highestPrioConfigProvider = configs.stream()
                 .map(ServiceLoader.Provider::get)
                 .max(Comparator.comparingInt(ConfigProvider::priority));
@@ -76,13 +73,15 @@ public final class Stork {
                 throw new IllegalArgumentException("ServiceDiscoveryProvider not found for type " + serviceDiscoveryType);
             }
 
-            final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig);
-            serviceDiscoveries.put(serviceConfig.serviceName(), serviceDiscovery);
+            final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
+                    serviceConfig.serviceName());
 
             final var loadBalancerConfig = serviceConfig.loadBalancer();
+            final LoadBalancer loadBalancer;
             if (loadBalancerConfig == null) {
                 // no load balancer, maybe someone intends to use service discovery only, ignoring
-                // TODO: log debug sth
+                LOGGER.info("No load balancer configured for type " + serviceDiscoveryType);
+                loadBalancer = null;
             } else {
                 String loadBalancerType = loadBalancerConfig.type();
                 final var loadBalancerProvider = loadBalancerProviders.get(loadBalancerType);
@@ -90,9 +89,10 @@ public final class Stork {
                     throw new IllegalArgumentException("No LoadBalancerProvider for type " + loadBalancerType);
                 }
 
-                final var loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
-                loadBalancers.put(serviceConfig.serviceName(), loadBalancer);
+                loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
             }
+
+            services.put(serviceConfig.serviceName(), new Service(serviceConfig.serviceName(), loadBalancer, serviceDiscovery));
         }
     }
 

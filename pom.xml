@@ -40,6 +40,10 @@
         <version.microprofile-config-api>2.0</version.microprofile-config-api>
         <version.mutiny>0.18.0</version.mutiny>
         <version.smallrye-config>2.4.1</version.smallrye-config>
+        <vertx-consul-client.version>4.1.1</vertx-consul-client.version>
+        <version.slf4j>1.7.30</version.slf4j>
+
+        <plugin.version.failsafe>3.0.0-M5</plugin.version.failsafe>
 
         <sonar.projectName>SmallRye Stork</sonar.projectName>
         <sonar.projectKey>smallrye_smallrye-stork</sonar.projectKey>
@@ -87,6 +91,18 @@
                 <artifactId>assertj-core</artifactId>
                 <version>${version.assertj}</version>
             </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${version.slf4j}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${version.slf4j}</version>
+            </dependency>
+
 
             <!-- Dependencies provided by the project -->
             <dependency>
@@ -95,9 +111,20 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-consul-client</artifactId>
+                <version>${vertx-consul-client.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.smallrye.stork</groupId>
                 <artifactId>smallrye-stork-test-utils</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${version.testcontainers}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.smallrye.stork</groupId>
@@ -118,10 +145,29 @@
         </dependencies>
     </dependencyManagement>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${plugin.version.failsafe}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <modules>
         <module>api</module>
         <module>microprofile</module>
         <module>service-discovery/static-list</module>
+        <module>service-discovery/consul</module>
         <module>load-balancer/round-robin</module>
         <module>test-utils</module>
     </modules>

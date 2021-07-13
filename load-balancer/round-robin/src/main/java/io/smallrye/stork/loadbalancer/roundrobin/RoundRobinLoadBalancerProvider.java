@@ -9,7 +9,7 @@ public class RoundRobinLoadBalancerProvider implements LoadBalancerProvider {
 
     @Override
     public LoadBalancer createLoadBalancer(LoadBalancerConfig config, ServiceDiscovery serviceDiscovery) {
-        return new RoundRobinLoadBalancer(serviceDiscovery);
+        return new RoundRobinLoadBalancer();
     }
 
     @Override
