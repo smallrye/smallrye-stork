@@ -34,6 +34,12 @@
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
+            <artifactId>smallrye-stork-service-discovery-consul</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
             <artifactId>smallrye-stork-load-balancer-round-robin</artifactId>
             <version>${project.version}</version>
         </dependency>
