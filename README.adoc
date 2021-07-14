@@ -1,3 +1,6 @@
+:ci: https://github.com/smallrye/smallrye-stork/actions?query=workflow%3A%22SmallRye+Build%22
+:sonar: https://sonarcloud.io/dashboard?id=smallrye_smallrye-stork
+
 image:https://github.com/smallrye/smallrye-stork/workflows/SmallRye%20Build/badge.svg?branch=main[link={ci}]
 image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-stork&metric=alert_status["Quality Gate Status", link={sonar}]
 image:https://img.shields.io/github/license/smallrye/smallrye-stork.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
