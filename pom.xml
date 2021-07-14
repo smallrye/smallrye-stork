@@ -46,7 +46,7 @@
         <plugin.version.failsafe>3.0.0-M5</plugin.version.failsafe>
 
         <sonar.projectName>SmallRye Stork</sonar.projectName>
-        <sonar.projectKey>smallrye-smallrye-stork</sonar.projectKey>
+        <sonar.projectKey>smallrye_smallrye-stork</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
     </properties>
 
