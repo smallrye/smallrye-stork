@@ -79,6 +79,8 @@ public class ConsulServiceDiscoveryIT {
                     latch.countDown();
                 });
 
-        latch.await(5, TimeUnit.SECONDS);
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+            fail("Failed to register service in consul in time");
+        }
     }
 }

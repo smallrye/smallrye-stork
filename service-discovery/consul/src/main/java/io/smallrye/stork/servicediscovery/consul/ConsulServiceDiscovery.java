@@ -66,7 +66,7 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
 
     private List<ServiceInstance> map(ServiceEntryList serviceEntryList) {
         List<ServiceEntry> list = serviceEntryList.getList();
-        List<ServiceInstance> serviceInstances = new ArrayList<ServiceInstance>();
+        List<ServiceInstance> serviceInstances = new ArrayList<>();
         for (ServiceEntry serviceEntry : list) {
             // TODO: reuse service instance IDs on refresh (so that they don't change)
             ServiceInstance serviceInstance = new ServiceInstance(ServiceInstanceIds.next(),
