@@ -122,3 +122,11 @@ Such a facade could have bindings for Vert.x, Quartz, etc.
 
 ===== Service Discovery
 Eureka, ZooKeeper, DNS (e.g. for Kubernetes)
+
+===== Documentation
+We need some info like below in vendor's docs:
+
+NOTE: If you run your application on Kubernetes or other environment that provides
+service discovery and load balancing, and you don't need highly customizable
+load-balancing, you should probably stick to what your infrastructure provides.
+
