@@ -45,7 +45,7 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
         }
         String passingConfig = parameters.get("use-health-checks");
         if (passingConfig != null) {
-            LOGGER.info("Processing Consul use-health-checks configured value: %s", passingConfig);
+            LOGGER.info("Processing Consul use-health-checks configured value: {}", passingConfig);
             passing = Boolean.parseBoolean(passingConfig);
         }
         client = ConsulClient.create(vertx, options);
