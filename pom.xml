@@ -41,7 +41,7 @@
         <version.mutiny>1.0.0</version.mutiny>
         <version.smallrye-config>2.4.2</version.smallrye-config>
         <vertx-consul-client.version>4.1.1</vertx-consul-client.version>
-        <version.slf4j>1.7.31</version.slf4j>
+        <version.slf4j>1.7.32</version.slf4j>
 
         <plugin.version.failsafe>3.0.0-M5</plugin.version.failsafe>
 
