@@ -1,13 +1,7 @@
 package io.smallrye.stork.servicediscovery.consul;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.smallrye.mutiny.Uni;
+import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
@@ -17,6 +11,12 @@ import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
 import io.vertx.ext.consul.ServiceEntry;
 import io.vertx.ext.consul.ServiceEntryList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ConsulServiceDiscovery implements ServiceDiscovery {
 
@@ -69,7 +69,7 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
         List<ServiceInstance> serviceInstances = new ArrayList<>();
         for (ServiceEntry serviceEntry : list) {
             // TODO: reuse service instance IDs on refresh (so that they don't change)
-            ServiceInstance serviceInstance = new ServiceInstance(ServiceInstanceIds.next(),
+            ServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
                     serviceEntry.getService().getAddress(), serviceEntry.getService().getPort());
             serviceInstances.add(serviceInstance);
         }

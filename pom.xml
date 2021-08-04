@@ -174,6 +174,7 @@
         <module>service-discovery/static-list</module>
         <module>service-discovery/consul</module>
         <module>load-balancer/round-robin</module>
+        <module>load-balancer/response-time</module>
         <module>test-utils</module>
     </modules>
 

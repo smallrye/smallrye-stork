@@ -11,7 +11,7 @@ import java.util.List;
 public interface LoadBalancer {
 
     /**
-     * Provide a single {@link ServiceInstance} from the given list.
+     * Provide a single {@link DefaultServiceInstance} from the given list.
      *
      * @param serviceInstances instances to choose from
      * @return a ServiceInstance
