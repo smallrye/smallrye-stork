@@ -1,28 +1,16 @@
 package io.smallrye.stork;
 
-public final class ServiceInstance {
+public interface ServiceInstance {
+    long getId();
 
-    private final long id;
+    String getHost();
 
-    private final String host;
+    int getPort();
 
-    private final int port;
-
-    public ServiceInstance(long id, String host, int port) {
-        this.id = id;
-        this.host = host;
-        this.port = port;
+    default boolean gatherStatistics() {
+        return false;
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
+    default void recordResult(long time, Exception error) {
     }
 }

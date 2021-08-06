@@ -1,9 +1,8 @@
 package io.smallrye.stork;
 
-import java.util.List;
-
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+
+import java.util.List;
 
 public class Service {
 
@@ -18,7 +17,7 @@ public class Service {
     }
 
     /**
-     * Provide a single {@link ServiceInstance}
+     * Provide a single {@link DefaultServiceInstance}
      *
      * @return a Uni with a ServiceInstance
      */
@@ -28,7 +27,7 @@ public class Service {
     }
 
     /**
-     * Provide a collection of {@link ServiceInstance}s
+     * Provide a collection of {@link DefaultServiceInstance}s
      *
      * @return a Multi - stream of ServiceInstances
      */

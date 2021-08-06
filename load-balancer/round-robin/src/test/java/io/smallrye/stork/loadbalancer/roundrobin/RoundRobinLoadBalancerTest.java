@@ -1,18 +1,17 @@
 package io.smallrye.stork.loadbalancer.roundrobin;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.Duration;
-import java.util.Map;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import io.smallrye.stork.Service;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RoundRobinLoadBalancerTest {
 
@@ -50,8 +49,7 @@ public class RoundRobinLoadBalancerTest {
     private String selectInstance(Service service) {
         try {
             ServiceInstance serviceInstance = service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
-            String serviceUrl = String.format("http://%s:%s", serviceInstance.getHost(), serviceInstance.getPort());
-            return serviceUrl;
+            return String.format("http://%s:%s", serviceInstance.getHost(), serviceInstance.getPort());
         } catch (Exception e) {
             e.printStackTrace();
         }
