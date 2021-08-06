@@ -7,7 +7,7 @@ package io.smallrye.stork.config;
 public interface ServiceConfig {
     /**
      *
-     * @return name of the service
+     * @return (required) name of the service
      */
     String serviceName();
 
