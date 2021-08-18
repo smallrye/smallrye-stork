@@ -1,10 +1,10 @@
 package io.smallrye.stork.loadbalancer.responsetime;
 
+import java.util.List;
+
 import io.smallrye.stork.LoadBalancer;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.ServiceInstanceWithStatGathering;
-
-import java.util.List;
 
 public class StatBasedLoadBalancer implements LoadBalancer {
 

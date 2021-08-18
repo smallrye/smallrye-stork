@@ -1,5 +1,12 @@
 package io.smallrye.stork.servicediscovery.consul;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceDiscovery;
@@ -11,12 +18,6 @@ import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
 import io.vertx.ext.consul.ServiceEntry;
 import io.vertx.ext.consul.ServiceEntryList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class ConsulServiceDiscovery implements ServiceDiscovery {
 

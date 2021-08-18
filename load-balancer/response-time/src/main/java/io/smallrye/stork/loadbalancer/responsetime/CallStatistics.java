@@ -1,10 +1,10 @@
 package io.smallrye.stork.loadbalancer.responsetime;
 
-import io.smallrye.stork.spi.CallStatisticsCollector;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+
+import io.smallrye.stork.spi.CallStatisticsCollector;
 
 public class CallStatistics implements CallStatisticsCollector {
 
