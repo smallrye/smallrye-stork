@@ -1,11 +1,5 @@
 package io.smallrye.stork.servicediscovery.staticlist;
 
-import io.smallrye.stork.DefaultServiceInstance;
-import io.smallrye.stork.ServiceDiscovery;
-import io.smallrye.stork.config.ServiceDiscoveryConfig;
-import io.smallrye.stork.spi.ServiceDiscoveryProvider;
-import io.smallrye.stork.spi.ServiceInstanceIds;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -13,6 +7,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import io.smallrye.stork.DefaultServiceInstance;
+import io.smallrye.stork.ServiceDiscovery;
+import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.spi.ServiceDiscoveryProvider;
+import io.smallrye.stork.spi.ServiceInstanceIds;
 
 public class StaticListServiceDiscoveryProvider implements ServiceDiscoveryProvider {
 

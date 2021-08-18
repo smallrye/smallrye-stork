@@ -1,12 +1,12 @@
 package io.smallrye.stork.servicediscovery.staticlist;
 
+import java.util.Collections;
+import java.util.List;
+
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.ServiceInstance;
-
-import java.util.Collections;
-import java.util.List;
 
 public final class StaticListServiceDiscovery implements ServiceDiscovery {
 

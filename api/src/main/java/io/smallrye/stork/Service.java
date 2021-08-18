@@ -1,8 +1,8 @@
 package io.smallrye.stork;
 
-import io.smallrye.mutiny.Uni;
-
 import java.util.List;
+
+import io.smallrye.mutiny.Uni;
 
 public class Service {
 
