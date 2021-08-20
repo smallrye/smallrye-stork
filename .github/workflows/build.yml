@@ -23,16 +23,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [11, 16]
+        java: [11, 16, 17-ea]
     name: build with jdk ${{matrix.java}}
 
     steps:
       - uses: actions/checkout@v2
         name: checkout
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         name: set up jdk ${{matrix.java}}
         with:
+          distribution: adopt
           java-version: ${{matrix.java}}
 
       - name: build with maven
@@ -42,17 +43,18 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        java: [11, 16]
+        java: [11, 16, 17-ea]
     name: build with jdk ${{matrix.java}} windows
 
     steps:
       - uses: actions/checkout@v2
         name: checkout
 
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         name: set up jdk ${{matrix.java}}
         with:
           java-version: ${{matrix.java}}
+          distribution: adopt
 
       - name: build with maven
 #        Skip integration tests. TestContainers does not support Windows Server 2019: https://github.com/testcontainers/testcontainers-java/issues/2960
