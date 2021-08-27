@@ -39,7 +39,8 @@
         <version.microprofile-config-api>2.0</version.microprofile-config-api>
         <version.mutiny>1.0.0</version.mutiny>
         <version.smallrye-config>2.4.4</version.smallrye-config>
-        <vertx-consul-client.version>4.1.2</vertx-consul-client.version>
+        <vertx.version>4.1.2</vertx.version>
+        <kubernetes-client.version>5.7.0</kubernetes-client.version>
         <version.slf4j>1.7.32</version.slf4j>
 
         <plugin.version.failsafe>3.0.0-M5</plugin.version.failsafe>
@@ -101,6 +102,24 @@
                 <artifactId>slf4j-simple</artifactId>
                 <version>${version.slf4j}</version>
             </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${kubernetes-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-server-mock</artifactId>
+                <version>${kubernetes-client.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${version.testcontainers}</version>
+                <scope>test</scope>
+            </dependency>
+
 
 
             <!-- Dependencies provided by the project -->
@@ -112,7 +131,12 @@
             <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-consul-client</artifactId>
-                <version>${vertx-consul-client.version}</version>
+                <version>${vertx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-core</artifactId>
+                <version>${vertx.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.smallrye.stork</groupId>
@@ -172,6 +196,7 @@
         <module>microprofile</module>
         <module>service-discovery/static-list</module>
         <module>service-discovery/consul</module>
+        <module>service-discovery/kubernetes</module>
         <module>load-balancer/round-robin</module>
         <module>load-balancer/response-time</module>
         <module>test-utils</module>
