@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
@@ -122,7 +123,7 @@ public class KubernetesServiceDiscovery implements ServiceDiscovery {
                     if (endpointPorts.size() == 1) {
                         port = endpointPorts.get(0).getPort();
                     }
-                    return new ServiceInstance(ServiceInstanceIds.next(),
+                    return new DefaultServiceInstance(ServiceInstanceIds.next(),
                             hostname, port);
                 }).collect(Collectors.toList()));
             }
@@ -144,7 +145,7 @@ public class KubernetesServiceDiscovery implements ServiceDiscovery {
                 if (endpointPorts.size() == 1) {
                     port = endpointPorts.get(0).getPort();
                 }
-                return new ServiceInstance(ServiceInstanceIds.next(),
+                return new DefaultServiceInstance(ServiceInstanceIds.next(),
                         hostname, port);
             }).collect(Collectors.toList()));
         }
