@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.Config;
@@ -19,8 +18,7 @@ import io.smallrye.stork.Stork;
 import io.smallrye.stork.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
-public class KubernetesServiceDiscoveryRealClusterTest {
-
+public class KubernetesServiceDiscoveryRealClusterIT {
 
     @BeforeEach
     void setUp() {
@@ -28,7 +26,6 @@ public class KubernetesServiceDiscoveryRealClusterTest {
         System.setProperty(Config.KUBERNETES_TRUST_CERT_SYSTEM_PROPERTY, "true");
     }
 
-    @Test
     void shouldGetServiceFromK8sDefaultNamespace() throws InterruptedException {
 
         TestConfigProvider.addServiceConfig("demo", null, "kubernetes",
