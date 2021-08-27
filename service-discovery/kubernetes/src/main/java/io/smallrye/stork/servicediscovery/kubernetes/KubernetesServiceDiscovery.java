@@ -62,8 +62,8 @@ public class KubernetesServiceDiscovery implements ServiceDiscovery {
     public Uni<List<ServiceInstance>> getServiceInstances() {
         Uni<List<Endpoints>> endpointsUni = Uni.createFrom().emitter(
                 emitter -> {
-                    List<Endpoints> endpoints = new ArrayList<>();
                     vertx.executeBlocking(future -> {
+                        List<Endpoints> endpoints = new ArrayList<>();
                         if (allNamespaces) {
                             endpoints.addAll(client.endpoints().inAnyNamespace().withField("metadata.name", serviceName).list()
                                     .getItems());
@@ -72,9 +72,10 @@ public class KubernetesServiceDiscovery implements ServiceDiscovery {
                                     client.endpoints().inNamespace(namespace).withField("metadata.name", serviceName).list()
                                             .getItems());
                         }
-                        future.complete();
+                        future.complete(endpoints);
                     }, result -> {
                         if (result.succeeded()) {
+                            List<Endpoints> endpoints = (List<Endpoints>) result.result();
                             emitter.complete(endpoints);
                         } else {
                             //TODO logging
@@ -86,6 +87,7 @@ public class KubernetesServiceDiscovery implements ServiceDiscovery {
 
     }
 
+    // TODO review this method and remove it if isn't needed
     public Uni<List<ServiceInstance>> fullAsynchronousGetServiceInstances() {
         Uni<Endpoints> endpointsUni = Uni.createFrom()
                 .emitter(emitter -> client.informers().sharedIndexInformerFor(Endpoints.class, 0L).addEventHandler(

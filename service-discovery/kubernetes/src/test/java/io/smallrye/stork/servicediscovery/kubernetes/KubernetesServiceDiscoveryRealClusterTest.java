@@ -19,18 +19,13 @@ import io.smallrye.stork.Stork;
 import io.smallrye.stork.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
-//@EnableKubernetesMockClient(crud = true)
 public class KubernetesServiceDiscoveryRealClusterTest {
 
-    //    KubernetesClient client;
-
-    //    String k8sMasterUrl;
 
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
         System.setProperty(Config.KUBERNETES_TRUST_CERT_SYSTEM_PROPERTY, "true");
-        //        k8sMasterUrl = client.getMasterUrl().toString();
     }
 
     @Test
@@ -39,20 +34,6 @@ public class KubernetesServiceDiscoveryRealClusterTest {
         TestConfigProvider.addServiceConfig("demo", null, "kubernetes",
                 null, null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
-
-        //        Endpoints endpoint = new EndpointsBuilder()
-        //                .withNewMetadata().withName("svc").endMetadata()
-        //                .addToSubsets(new EndpointSubsetBuilder()
-        //                        .addToAddresses(new EndpointAddressBuilder().withIp("10.96.96.231").build(),
-        //                                new EndpointAddressBuilder().withIp("10.96.96.232").build(),
-        //                                new EndpointAddressBuilder().withIp("10.96.96.233").build())
-        //                        .addToPorts(new EndpointPortBuilder().withPort(8080).build())
-        //                        .build())
-        //                .build();
-        //
-        //        client.endpoints().inNamespace("default").withName("svc").create(endpoint);
-
-        //        List<Endpoints> items = client.endpoints().list().getItems();
 
         String serviceName = "demo";
 
