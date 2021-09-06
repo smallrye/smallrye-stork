@@ -11,6 +11,6 @@ public interface ServiceInstance {
         return false;
     }
 
-    default void recordResult(long time, Exception error) {
+    default void recordResult(long timeInNs, Throwable error) {
     }
 }

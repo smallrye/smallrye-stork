@@ -8,8 +8,8 @@ import io.smallrye.stork.spi.CallStatisticsCollector;
 
 public class CallStatistics implements CallStatisticsCollector {
 
-    private AtomicLong callCount = new AtomicLong(1);
-    private ConcurrentHashMap<Long, CallsData> storage = new ConcurrentHashMap<>();
+    private final AtomicLong callCount = new AtomicLong(1);
+    private final ConcurrentHashMap<Long, CallsData> storage = new ConcurrentHashMap<>();
 
     static double errorImportanceDeclineFactor = 0.999;
     static double[] declineFactorPowers = new double[16];
@@ -28,7 +28,7 @@ public class CallStatistics implements CallStatisticsCollector {
     }
 
     @Override
-    public void storeResult(long id, long timeInNs, Exception error) {
+    public void storeResult(long id, long timeInNs, Throwable error) {
         long callIdx = callCount.incrementAndGet();
 
         while (true) {
@@ -47,10 +47,10 @@ public class CallStatistics implements CallStatisticsCollector {
                             rescaledFailureRate + 1);
                 }
                 if (storage.replace(id, oldData, newData)) {
-                    break; // otherwise, try once again, until succeess
+                    break; // otherwise, try once again, until success
                 }
             } else {
-                // no previously storage data
+                // no previously stored data
                 CallsData newData;
                 if (error == null) {
                     newData = new CallsData(callIdx, 0, timeInNs, 1, 0);

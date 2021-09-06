@@ -31,7 +31,7 @@ public class ServiceInstanceWithStatGathering implements ServiceInstance {
         return delegate.getPort();
     }
 
-    public void recordResult(long time, Exception error) {
-        statistics.storeResult(getId(), time, error);
+    public void recordResult(long timeInNs, Throwable error) {
+        statistics.storeResult(getId(), timeInNs, error);
     }
 }
