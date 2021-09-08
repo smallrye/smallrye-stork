@@ -65,6 +65,8 @@ public class CallStatistics implements CallStatisticsCollector {
         }
     }
 
+    // TODO clearing the data for stored service instances if disappeared?
+    // TODO or clearing it periodically, etc
     public CallsData statsForInstance(long id) {
         return storage.get(id);
     }

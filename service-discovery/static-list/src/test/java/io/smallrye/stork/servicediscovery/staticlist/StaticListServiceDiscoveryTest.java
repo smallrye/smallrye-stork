@@ -22,13 +22,13 @@ public class StaticListServiceDiscoveryTest {
     void setUp() {
         TestConfigProvider.clear();
         TestConfigProvider.addServiceConfig("first-service", null, "static",
-                null, Map.of("1", "http://localhost:8080", "2", "http://localhost:8081"));
+                null, Map.of("1", "localhost:8080", "2", "localhost:8081"));
 
         TestConfigProvider.addServiceConfig("second-service", null, "static",
-                null, Map.of("3", "http://localhost:8082"));
+                null, Map.of("3", "localhost:8082"));
 
         TestConfigProvider.addServiceConfig("third-service", null, "static",
-                null, Map.of("4", "http://localhost:8083"));
+                null, Map.of("4", "localhost:8083"));
 
         stork = StorkTestUtils.getNewStorkInstance();
     }

@@ -16,8 +16,8 @@ import io.smallrye.stork.test.TestConfigProvider;
 
 public class StatBasedLoadBalancerTest {
 
-    public static final String FST_SRVC_1 = "http://localhost:8080";
-    public static final String FST_SRVC_2 = "http://localhost:8081";
+    public static final String FST_SRVC_1 = "localhost:8080";
+    public static final String FST_SRVC_2 = "localhost:8081";
     private Stork stork;
 
     @BeforeEach
@@ -79,7 +79,7 @@ public class StatBasedLoadBalancerTest {
 
     private String asString(ServiceInstance serviceInstance) {
         try {
-            return String.format("http://%s:%s", serviceInstance.getHost(), serviceInstance.getPort());
+            return String.format("%s:%s", serviceInstance.getHost(), serviceInstance.getPort());
         } catch (Exception e) {
             e.printStackTrace();
         }
