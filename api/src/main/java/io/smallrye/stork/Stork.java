@@ -38,6 +38,11 @@ public final class Stork {
         return service;
     }
 
+    public Optional<Service> getServiceOptional(String serviceName) {
+        Service service = services.get(serviceName);
+        return Optional.ofNullable(service);
+    }
+
     /**
      * Exposed for tests.
      * Not to be used in production code

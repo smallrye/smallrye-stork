@@ -16,8 +16,10 @@ import io.smallrye.stork.test.TestConfigProvider;
 
 public class RoundRobinLoadBalancerTest {
 
-    public static final String FST_SRVC_1 = "http://localhost:8080";
-    public static final String FST_SRVC_2 = "http://localhost:8081";
+    public static final String FST_SRVC_1 = "localhost:8080";
+    public static final String FST_SRVC_1_HTTP = String.format("http://%s", FST_SRVC_1);
+    public static final String FST_SRVC_2 = "localhost:8081";
+    public static final String FST_SRVC_2_HTTP = String.format("http://%s", FST_SRVC_2);
     private Stork stork;
 
     @BeforeEach
@@ -29,11 +31,11 @@ public class RoundRobinLoadBalancerTest {
 
         TestConfigProvider.addServiceConfig("second-service", "round-robin", "static",
                 null,
-                Map.of("3", "http://localhost:8082"));
+                Map.of("3", "localhost:8082"));
 
         TestConfigProvider.addServiceConfig("third-service", null, "static",
                 null,
-                Map.of("4", "http://localhost:8083"));
+                Map.of("4", "localhost:8083"));
 
         stork = StorkTestUtils.getNewStorkInstance();
     }
@@ -42,9 +44,9 @@ public class RoundRobinLoadBalancerTest {
     public void shouldGetServiceInstance() {
         Service service = stork.getService("first-service");
 
-        assertThat(selectInstance(service)).isEqualTo(FST_SRVC_1);
-        assertThat(selectInstance(service)).isEqualTo(FST_SRVC_2);
-        assertThat(selectInstance(service)).isEqualTo(FST_SRVC_1);
+        assertThat(selectInstance(service)).isEqualTo(FST_SRVC_1_HTTP);
+        assertThat(selectInstance(service)).isEqualTo(FST_SRVC_2_HTTP);
+        assertThat(selectInstance(service)).isEqualTo(FST_SRVC_1_HTTP);
     }
 
     private String selectInstance(Service service) {

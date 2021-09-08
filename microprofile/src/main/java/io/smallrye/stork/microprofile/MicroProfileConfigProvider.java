@@ -16,7 +16,7 @@ public class MicroProfileConfigProvider implements ConfigProvider {
 
     private static final Logger log = Logger.getLogger(MicroProfileConfigProvider.class);
 
-    public static final String DUX = "stork";
+    public static final String STORK = "stork";
     public static final String LOAD_BALANCER = "load-balancer";
     public static final String SERVICE_DISCOVERY = "service-discovery";
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
@@ -28,7 +28,7 @@ public class MicroProfileConfigProvider implements ConfigProvider {
 
         for (String propertyName : config.getPropertyNames()) {
             String[] property = propertyName.split("\\.");
-            if (property.length < 1 || !property[0].equals(DUX)) {
+            if (property.length < 1 || !property[0].equals(STORK)) {
                 continue;
             }
 
