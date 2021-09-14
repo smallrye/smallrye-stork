@@ -1,4 +1,4 @@
-package io.smallrye.stork.loadbalancer.responsetime;
+package io.smallrye.stork.loadbalancer.leastresponsetime;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;

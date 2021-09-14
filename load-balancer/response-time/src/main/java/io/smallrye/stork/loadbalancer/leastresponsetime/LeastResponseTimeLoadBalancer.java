@@ -1,4 +1,4 @@
-package io.smallrye.stork.loadbalancer.responsetime;
+package io.smallrye.stork.loadbalancer.leastresponsetime;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import io.smallrye.stork.LoadBalancer;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.ServiceInstanceWithStatGathering;
 
-public class StatBasedLoadBalancer implements LoadBalancer {
+public class LeastResponseTimeLoadBalancer implements LoadBalancer {
 
     // TODO make them configurable
     // TODO sampling instead of collecting everything

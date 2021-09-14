@@ -26,6 +26,8 @@ import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 public final class Stork {
     // TODO replace all the exceptions here with dedicated ones?
 
+    public static final String STORK = "stork";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Stork.class);
 
     private final Map<String, Service> services = new ConcurrentHashMap<>();
