@@ -1,1 +1,1 @@
-io.smallrye.stork.loadbalancer.responsetime.StatBasedLoadBalancerProvider
+io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider

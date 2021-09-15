@@ -1,5 +1,7 @@
 package io.smallrye.stork.microprofile;
 
+import static io.smallrye.stork.Stork.STORK;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +18,6 @@ public class MicroProfileConfigProvider implements ConfigProvider {
 
     private static final Logger log = Logger.getLogger(MicroProfileConfigProvider.class);
 
-    public static final String STORK = "stork";
     public static final String LOAD_BALANCER = "load-balancer";
     public static final String SERVICE_DISCOVERY = "service-discovery";
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
