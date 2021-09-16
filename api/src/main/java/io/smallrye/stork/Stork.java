@@ -118,10 +118,6 @@ public final class Stork {
         return stork.get();
     }
 
-    static {
-        initialize();
-    }
-
     public static void shutdown() {
         stork.set(null);
         initialized.set(false);
