@@ -22,7 +22,7 @@
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-microprofile</artifactId>
+            <artifactId>smallrye-stork-microprofile-config</artifactId>
             <version>${project.version}</version>
         </dependency>
 
