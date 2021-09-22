@@ -41,14 +41,59 @@ public class ConsulServiceDiscoveryIT {
     void setUp() {
         TestConfigProvider.clear();
         consulPort = consul.getMappedPort(8500);
+
+    }
+
+    @Test
+    void shouldNotRefetchWhenRefreshPeriodNotReached() throws InterruptedException {
+        //        fail("unimplemented");
+        // call service discovery
+        // change consul settings
+        // call service discovery and verify if the results are not taking into account the changes
+        String serviceName = "my-service";
         TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refreshPeriod", "1"));
         stork = StorkTestUtils.getNewStorkInstance();
+        setUpService(serviceName, "example.com", 8406);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Consul", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        setUpService(serviceName, "another.example.com", 8506);
+
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Consul", th))
+                .subscribe().with(instances::set);
+
+        assertThat(instances.get()).hasSize(1);
+        assertThat(instances.get().get(0).getHost()).isEqualTo("example.com");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(8406);
+
+    }
+
+    @Test
+    void shouldRefetchWhenRefreshPeriodReached() {
+        fail("unimplemented");
+        // call service discovery
+        // change consul settings
+        // wait until refresh interval is reached
+        // call service discovery and verify if the results are taking into account the changes
     }
 
     @Test
     void shouldGetServiceFromConsul() throws InterruptedException {
         String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig("my-service", null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        stork = StorkTestUtils.getNewStorkInstance();
         setUpService(serviceName, "example.com", 8406);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();

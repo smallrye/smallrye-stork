@@ -1,5 +1,8 @@
 package io.smallrye.stork.servicediscovery.consul;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +24,13 @@ import io.vertx.ext.consul.ServiceEntryList;
 
 public class ConsulServiceDiscovery implements ServiceDiscovery {
 
+    public static final Duration DEFAULT_REFRESH_INTERVAL = Duration.ofMinutes(5);
     private final ConsulClient client;
     private final String serviceName;
+    private final Duration refreshPeriod;
     private boolean passing = true; // default true?
+
+    private volatile ServiceInstancesFetchResult fetchResult;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulServiceDiscovery.class);
 
@@ -50,9 +57,44 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
             passing = Boolean.parseBoolean(passingConfig);
         }
         client = ConsulClient.create(vertx, options);
+
+        String refreshPeriod = config.parameters().get("refresh-period");
+        try {
+            // TODO: document it
+            this.refreshPeriod = refreshPeriod != null
+                    ? parseDuration(refreshPeriod)
+                    : DEFAULT_REFRESH_INTERVAL;
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("refresh-period for service discovery should be a number, got: " +
+                    refreshPeriod,
+                    e);
+        }
+    }
+
+    private Duration parseDuration(String refreshPeriod) {
+        if (refreshPeriod.startsWith("-")) {
+            throw new IllegalArgumentException("Negative refresh-period specified for service discovery: " + refreshPeriod);
+        }
+        if (refreshPeriod.charAt(0) >= '0' && refreshPeriod.charAt(0) <= '9') {
+            return Duration.parse(String.format("PT%s", refreshPeriod));
+        }
+        return Duration.parse(refreshPeriod);
     }
 
     public Uni<List<ServiceInstance>> getServiceInstances() {
+        if (refreshNotNeed()) {
+            return Uni.createFrom().item(fetchResult.serviceInstances);
+        }
+
+        return fetchNewServiceInstances();
+    }
+
+    private boolean refreshNotNeed() {
+        return fetchResult != null
+                && fetchResult.date.isAfter(LocalDateTime.now().minus(refreshPeriod));
+    }
+
+    private Uni<List<ServiceInstance>> fetchNewServiceInstances() {
         Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
                 emitter -> client.healthServiceNodes(serviceName, passing)
                         .onComplete(result -> {
@@ -62,7 +104,8 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
                                 emitter.complete(result.result());
                             }
                         }));
-        return serviceEntryList.onItem().transform(this::map); // TODO: logging
+        return serviceEntryList.onItem().transform(this::map)
+                .onItem().invoke(services -> this.fetchResult = new ServiceInstancesFetchResult(services, LocalDateTime.now())); // TODO: logging
     }
 
     private List<ServiceInstance> map(ServiceEntryList serviceEntryList) {
@@ -75,5 +118,15 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
             serviceInstances.add(serviceInstance);
         }
         return serviceInstances;
+    }
+
+    public static class ServiceInstancesFetchResult {
+        List<ServiceInstance> serviceInstances;
+        LocalDateTime date;
+
+        public ServiceInstancesFetchResult(List<ServiceInstance> serviceInstances, LocalDateTime date) {
+            this.serviceInstances = serviceInstances;
+            this.date = date;
+        }
     }
 }
