@@ -76,7 +76,7 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
             throw new IllegalArgumentException("Negative refresh-period specified for service discovery: " + refreshPeriod);
         }
         if (refreshPeriod.charAt(0) >= '0' && refreshPeriod.charAt(0) <= '9') {
-            return Duration.parse(String.format("PT%sM", refreshPeriod));
+            return Duration.parse(String.format("PT%sS", refreshPeriod));
         }
         return Duration.parse(refreshPeriod);
     }

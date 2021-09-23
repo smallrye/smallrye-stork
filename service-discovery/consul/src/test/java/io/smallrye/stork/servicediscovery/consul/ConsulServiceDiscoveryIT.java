@@ -51,7 +51,7 @@ public class ConsulServiceDiscoveryIT {
         //Given a service `my-service` registered in consul
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refreshPeriod", "1"));
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refreshPeriod", "10"));
         stork = StorkTestUtils.getNewStorkInstance();
         setUpService(serviceName, "example.com", 8406);
 
@@ -85,7 +85,7 @@ public class ConsulServiceDiscoveryIT {
         //Given a service `my-service` registered in consul
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "1"));
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "3"));
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
         setUpService(serviceName, "example.com", 8406);
@@ -108,7 +108,7 @@ public class ConsulServiceDiscoveryIT {
         deregisterService(serviceName);
 
         // When the refresh interval is reached
-        Thread.sleep(65000);
+        Thread.sleep(5000);
 
         //the service settings change in consul
         setUpService(serviceName, "another.example.com", 8506);
