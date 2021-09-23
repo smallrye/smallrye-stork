@@ -48,10 +48,10 @@ public class ConsulServiceDiscoveryIT {
 
     @Test
     void shouldNotFetchWhenRefreshPeriodNotReached() throws InterruptedException {
-        //Given a service `my-service` registered in consul
+        //Given a service `my-service` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refreshPeriod", "10"));
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refreshPeriod", "5M"));
         stork = StorkTestUtils.getNewStorkInstance();
         setUpService(serviceName, "example.com", 8406);
 
@@ -66,12 +66,17 @@ public class ConsulServiceDiscoveryIT {
         await().atMost(Duration.ofSeconds(5))
                 .until(() -> instances.get() != null);
 
+        deregisterService(serviceName);
+
         setUpService(serviceName, "another.example.com", 8506);
 
         // when the consul service discovery is called before the end of refreshing period
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Consul", th))
                 .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
 
         //Then stork returns the instances from the cache
         assertThat(instances.get()).hasSize(1);
@@ -82,10 +87,10 @@ public class ConsulServiceDiscoveryIT {
 
     @Test
     void shouldRefetchWhenRefreshPeriodReached() throws InterruptedException {
-        //Given a service `my-service` registered in consul
+        //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "3"));
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
         setUpService(serviceName, "example.com", 8406);

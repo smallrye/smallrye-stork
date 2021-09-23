@@ -6,6 +6,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import io.vertx.ext.consul.ServiceEntryList;
 public class ConsulServiceDiscovery implements ServiceDiscovery {
 
     public static final Duration DEFAULT_REFRESH_INTERVAL = Duration.ofMinutes(5);
+    private static final Pattern DIGITS = Pattern.compile("^[-+]?\\d+$");
     private final ConsulClient client;
     private final String serviceName;
     private final Duration refreshPeriod;
@@ -71,14 +73,23 @@ public class ConsulServiceDiscovery implements ServiceDiscovery {
         }
     }
 
+    /**
+     * Converts a value representing the refresh period which start with a number by implicitly appending `PT` to it.
+     * If the value consists only of a number, it implicitly treats the value as seconds.
+     * Otherwise, tries to convert the value assuming that it is in the accepted ISO-8601 duration format.
+     *
+     * @param refreshPeriod duration as String
+     * @return {@link Duration}
+     */
     private Duration parseDuration(String refreshPeriod) {
         if (refreshPeriod.startsWith("-")) {
             throw new IllegalArgumentException("Negative refresh-period specified for service discovery: " + refreshPeriod);
         }
-        if (refreshPeriod.charAt(0) >= '0' && refreshPeriod.charAt(0) <= '9') {
-            return Duration.parse(String.format("PT%sS", refreshPeriod));
+        if (DIGITS.asPredicate().test(refreshPeriod)) {
+            return Duration.ofSeconds(Long.valueOf(refreshPeriod));
         }
-        return Duration.parse(refreshPeriod);
+        return Duration.parse("PT" + refreshPeriod);
+
     }
 
     public Uni<List<ServiceInstance>> getServiceInstances() {
