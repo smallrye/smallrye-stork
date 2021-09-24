@@ -40,7 +40,7 @@
         <version.mutiny>1.0.0</version.mutiny>
         <version.smallrye-config>2.5.0</version.smallrye-config>
         <vertx.version>4.1.4</vertx.version>
-        <kubernetes-client.version>5.7.3</kubernetes-client.version>
+        <kubernetes-client.version>5.8.0</kubernetes-client.version>
         <version.slf4j>1.7.32</version.slf4j>
 
         <jandex-maven-plugin.version>1.2.0</jandex-maven-plugin.version>
