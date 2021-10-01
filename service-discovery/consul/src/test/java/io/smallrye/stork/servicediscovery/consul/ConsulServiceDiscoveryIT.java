@@ -51,7 +51,7 @@ public class ConsulServiceDiscoveryIT {
         //Given a service `my-service` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refreshPeriod", "5M"));
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5M"));
         stork = StorkTestUtils.getNewStorkInstance();
         setUpService(serviceName, "example.com", 8406);
 

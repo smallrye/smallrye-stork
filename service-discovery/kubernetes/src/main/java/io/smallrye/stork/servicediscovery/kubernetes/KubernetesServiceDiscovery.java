@@ -15,14 +15,14 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.stork.CachingServiceDiscovery;
 import io.smallrye.stork.DefaultServiceInstance;
-import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.vertx.core.Vertx;
 
-public class KubernetesServiceDiscovery implements ServiceDiscovery {
+public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     private final KubernetesClient client;
     private final String serviceName;
@@ -33,6 +33,7 @@ public class KubernetesServiceDiscovery implements ServiceDiscovery {
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
     public KubernetesServiceDiscovery(String serviceName, ServiceDiscoveryConfig config, Vertx vertx) {
+        super(config);
         Config base = Config.autoConfigure(null);
         this.serviceName = serviceName;
         Map<String, String> parameters = config.parameters();
@@ -51,16 +52,8 @@ public class KubernetesServiceDiscovery implements ServiceDiscovery {
         this.vertx = vertx;
     }
 
-    public Uni<List<ServiceInstance>> blockingGetServiceInstances() {
-        List<Endpoints> endpoints = allNamespaces
-                ? client.endpoints().inAnyNamespace().withField("metadata.name", serviceName).list()
-                        .getItems()
-                : client.endpoints().inNamespace(namespace).withField("metadata.name", serviceName).list().getItems();
-        Uni<List<ServiceInstance>> serviceEntryList = Uni.createFrom().item(map(endpoints));
-        return serviceEntryList; // TODO: logging
-    }
-
-    public Uni<List<ServiceInstance>> getServiceInstances() {
+    @Override
+    public Uni<List<ServiceInstance>> fetchNewServiceInstances() {
         Uni<List<Endpoints>> endpointsUni = Uni.createFrom().emitter(
                 emitter -> {
                     vertx.executeBlocking(future -> {
@@ -84,8 +77,17 @@ public class KubernetesServiceDiscovery implements ServiceDiscovery {
                         }
                     });
                 });
-        return endpointsUni.onItem().transform(this::map); // TODO: logging
+        return endpointsUni.onItem().transform(this::map);
 
+    }
+
+    public Uni<List<ServiceInstance>> blockingGetServiceInstances() {
+        List<Endpoints> endpoints = allNamespaces
+                ? client.endpoints().inAnyNamespace().withField("metadata.name", serviceName).list()
+                        .getItems()
+                : client.endpoints().inNamespace(namespace).withField("metadata.name", serviceName).list().getItems();
+        Uni<List<ServiceInstance>> serviceEntryList = Uni.createFrom().item(map(endpoints));
+        return serviceEntryList; // TODO: logging
     }
 
     // TODO review this method and remove it if isn't needed

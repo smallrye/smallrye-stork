@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,21 +45,9 @@ public class KubernetesServiceDiscoveryTest {
                 null, Map.of("k8s-host", k8sMasterUrl));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        Endpoints endpoint = new EndpointsBuilder()
-                .withNewMetadata().withName("svc").endMetadata()
-                .addToSubsets(new EndpointSubsetBuilder()
-                        .addToAddresses(new EndpointAddressBuilder().withIp("10.96.96.231").build(),
-                                new EndpointAddressBuilder().withIp("10.96.96.232").build(),
-                                new EndpointAddressBuilder().withIp("10.96.96.233").build())
-                        .addToPorts(new EndpointPortBuilder().withPort(8080).build())
-                        .build())
-                .build();
-
-        client.endpoints().inNamespace("default").withName("svc").create(endpoint);
-
-        List<Endpoints> items = client.endpoints().list().getItems();
-
         String serviceName = "svc";
+
+        setUpKubernetesService(serviceName, "default", "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -82,21 +72,9 @@ public class KubernetesServiceDiscoveryTest {
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", client.getNamespace()));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        Endpoints endpoint = new EndpointsBuilder()
-                .withNewMetadata().withName("svc").endMetadata()
-                .addToSubsets(new EndpointSubsetBuilder()
-                        .addToAddresses(new EndpointAddressBuilder().withIp("10.96.96.231").build(),
-                                new EndpointAddressBuilder().withIp("10.96.96.232").build(),
-                                new EndpointAddressBuilder().withIp("10.96.96.233").build())
-                        .addToPorts(new EndpointPortBuilder().withPort(8080).build())
-                        .build())
-                .build();
-
-        client.endpoints().inNamespace(client.getNamespace()).withName("svc").create(endpoint);
-
-        List<Endpoints> items = client.endpoints().list().getItems();
-
         String serviceName = "svc";
+
+        setUpKubernetesService(serviceName, client.getNamespace(), "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -120,33 +98,10 @@ public class KubernetesServiceDiscoveryTest {
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "all"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
-
-        Endpoints endpoint = new EndpointsBuilder()
-                .withNewMetadata().withName("svc").endMetadata()
-                .addToSubsets(new EndpointSubsetBuilder()
-                        .addToAddresses(new EndpointAddressBuilder().withIp("10.96.96.231").build(),
-                                new EndpointAddressBuilder().withIp("10.96.96.232").build(),
-                                new EndpointAddressBuilder().withIp("10.96.96.233").build())
-                        .addToPorts(new EndpointPortBuilder().withPort(8080).build())
-                        .build())
-                .build();
-
-        Endpoints endpoint2 = new EndpointsBuilder()
-                .withNewMetadata().withName("svc").endMetadata()
-                .addToSubsets(new EndpointSubsetBuilder()
-                        .addToAddresses(new EndpointAddressBuilder().withIp("10.99.99.241").build(),
-                                new EndpointAddressBuilder().withIp("10.99.99.242").build(),
-                                new EndpointAddressBuilder().withIp("10.99.99.243").build())
-                        .addToPorts(new EndpointPortBuilder().withPort(8080).build())
-                        .build())
-                .build();
-
-        client.endpoints().inNamespace("ns1").withName("svc").create(endpoint);
-        client.endpoints().inNamespace("ns2").withName("svc").create(endpoint2);
-
-        List<Endpoints> items = client.endpoints().list().getItems();
-
         String serviceName = "svc";
+
+        setUpKubernetesService(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        setUpKubernetesService(serviceName, "ns2", "10.99.99.241", "10.99.99.242", "10.99.99.243");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -165,27 +120,19 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
-    void notBlockingShouldGetServiceFromK8s() throws InterruptedException {
-
+    void shouldNotFetchWhenRefreshPeriodNotReached() throws InterruptedException {
+        //Given a service `my-service` registered in k8s and a refresh-period of 5 minutes
+        // 1- services instance are gathered form k8s
+        // 2- we remove the service
+        // when the k8s service discovery is called before the end of refreshing period
+        // Then stork returns the instances from the cache
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        Endpoints endpoint = new EndpointsBuilder()
-                .withNewMetadata().withName("svc").endMetadata()
-                .addToSubsets(new EndpointSubsetBuilder()
-                        .addToAddresses(new EndpointAddressBuilder().withIp("10.96.96.231").build(),
-                                new EndpointAddressBuilder().withIp("10.96.96.232").build(),
-                                new EndpointAddressBuilder().withIp("10.96.96.233").build())
-                        .addToPorts(new EndpointPortBuilder().withPort(8080).build())
-                        .build())
-                .build();
-
-        client.endpoints().inNamespace("default").withName("svc").create(endpoint);
-
-        List<Endpoints> items = client.endpoints().list().getItems();
-
         String serviceName = "svc";
+
+        setUpKubernetesService(serviceName, "default", "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -194,13 +141,83 @@ public class KubernetesServiceDiscoveryTest {
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
                 .subscribe().with(instances::set);
 
-        await().atMost(Duration.ofSeconds(10))
+        await().atMost(Duration.ofSeconds(5))
                 .until(() -> instances.get() != null);
 
         assertThat(instances.get()).hasSize(3);
         assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
+
+        client.endpoints().inNamespace("default").withName(serviceName).delete();
+
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+
+    }
+
+    @Test
+    void shouldRefetchWhenRefreshPeriodReached() throws InterruptedException {
+
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
+                null, Map.of("k8s-host", k8sMasterUrl, "refresh-period", "3"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "svc";
+
+        setUpKubernetesService(serviceName, "default", "10.96.96.231", "10.96.96.232", "10.96.96.233");
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+
+        client.endpoints().inNamespace("default").withName(serviceName).delete();
+
+        Thread.sleep(5000);
+
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(0);
+
+    }
+
+    private void setUpKubernetesService(String serviceName, String namespace, String... ipAdresses) {
+        List<EndpointAddress> endpoints = Arrays.stream(ipAdresses)
+                .map(ipAdress -> new EndpointAddressBuilder().withIp(ipAdress).build()).collect(Collectors.toList());
+        Endpoints endpoint = new EndpointsBuilder()
+                .withNewMetadata().withName(serviceName).endMetadata()
+                .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpoints)
+                        .addToPorts(new EndpointPortBuilder().withPort(8080).build())
+                        .build())
+                .build();
+
+        client.endpoints().inNamespace(namespace).withName(serviceName).create(endpoint);
+
     }
 
 }
