@@ -43,7 +43,7 @@
         <kubernetes-client.version>5.8.0</kubernetes-client.version>
         <version.slf4j>1.7.32</version.slf4j>
 
-        <jandex-maven-plugin.version>1.2.0</jandex-maven-plugin.version>
+        <jandex-maven-plugin.version>1.2.1</jandex-maven-plugin.version>
 
         <plugin.version.failsafe>3.0.0-M5</plugin.version.failsafe>
 
