@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -112,7 +111,6 @@ public final class Stork {
     }
 
     private static final AtomicReference<Stork> stork = new AtomicReference<>();
-    private static final AtomicBoolean initialized = new AtomicBoolean(false);
 
     public static Stork getInstance() {
         return stork.get();
@@ -120,12 +118,9 @@ public final class Stork {
 
     public static void shutdown() {
         stork.set(null);
-        initialized.set(false);
     }
 
     public static void initialize() {
-        if (initialized.compareAndSet(false, true)) {
-            stork.set(new Stork());
-        }
+        stork.compareAndSet(null, new Stork());
     }
 }
