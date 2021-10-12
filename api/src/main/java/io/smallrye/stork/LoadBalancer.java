@@ -1,6 +1,6 @@
 package io.smallrye.stork;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Works with a single service name.
@@ -16,5 +16,5 @@ public interface LoadBalancer {
      * @param serviceInstances instances to choose from
      * @return a ServiceInstance
      */
-    ServiceInstance selectServiceInstance(List<ServiceInstance> serviceInstances);
+    ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances);
 }
