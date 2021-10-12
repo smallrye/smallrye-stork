@@ -6,6 +6,4 @@ import io.smallrye.stork.config.LoadBalancerConfig;
 
 public interface LoadBalancerProvider extends ElementWithType {
     LoadBalancer createLoadBalancer(LoadBalancerConfig config, ServiceDiscovery serviceDiscovery);
-
-    String type();
 }
