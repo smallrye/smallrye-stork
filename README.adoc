@@ -1,132 +1,62 @@
 :ci: https://github.com/smallrye/smallrye-stork/actions?query=workflow%3A%22SmallRye+Build%22
 :sonar: https://sonarcloud.io/dashboard?id=smallrye_smallrye-stork
 
-image:https://github.com/smallrye/smallrye-stork/workflows/SmallRye%20Build/badge.svg?branch=main[link={ci}]
-image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-stork&metric=alert_status["Quality Gate Status", link={sonar}]
-image:https://img.shields.io/github/license/smallrye/smallrye-stork.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
-image:https://img.shields.io/maven-central/v/io.smallrye.stork/smallrye-stork?color=green["Maven", link="https://search.maven.org/search?q=g:io.smallrye.stork%20AND%20a:smallrye-stork-api"]
-
 == SmallRye Stork
 
-SmallRye Stork, Stork in short, is an extensible Service Discovery and Client-Side
-Load Balancer implementation designed to work well with reactive libraries.
-Stork APIs use https://smallrye.io/smallrye-mutiny/[SmallRye Mutiny].
+image:https://img.shields.io/maven-central/v/io.smallrye.stork/smallrye-stork-api?color=green["Maven"] | image:https://img.shields.io/github/license/smallrye/smallrye-stork.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"] | image:https://github.com/smallrye/smallrye-stork/workflows/SmallRye%20Build/badge.svg?branch=main[link={ci}] | image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-stork&metric=alert_status["Quality Gate Status", link={sonar}]
 
-Stork maps service names to addresses.
+_SmallRye Stork, Stork, in short, is a Service Discovery and Client-Side Load Balancer framework._
 
-Required `ServiceDiscovery` provides a list of addresses (as `ServiceInstance`)
-for a given service name.
-Optional `LoadBalancer` selects a single `ServiceInstance` for a call.  
+=== Main features
 
-=== Configuring user applications
-The project's core aims to be vendor neutral. Aside from using Mutiny for the APIs,
-it has no dependencies. As such, it provides a universal abstraction of configuration 
-and vendors can choose their own way of providing Stork configuration.
+* Extensible service discovery mechanisms
+* Built-in support for Consul and Kubernetes
+* Customizable client load-balancing strategy
+* API and _managed_ approaches
+* Quarkus integration, but can be used in any environment
+* Imperative and Reactive
 
-MicroProfile based frameworks can use MicroProfile Config to configure Stork.
-Below is an example snippet of such a configuration:
+=== Example
 
-[source,properties]
+Let's imagine you use https://www.consul.io/[Consul].
+Consul stores the list of service _instances_ you have and lets you locate them.
+
+Stork bridges your application and Consul and lets you retrieve the services stored in Consul and select the most appropriate one:
+
+[source, java]
 ----
-stork.my-service.service-discovery=consul
-stork.my-service.service-discovery.some-service-discovery-property=property-value
-stork.my-service.load-balancer=round-robin
-stork.my-service.load-balancer.some-load-balancer-property=some-prop-value
-
-stork.my-other-service.service-discovery=test-sd-1
-stork.my-other-service.load-balancer=test-lb-1
+Stork.initialize();                                                 // <1>
+Stork stork = Stork.getInstance();                                  // <2>
+Service service = stork.getService("my-service");                   // <3>
+ServiceInstance instance = service.selectServiceInstance()          // <4>
+    .await().atMost(Duration.ofSeconds(1));
+String url = "http://" + instance.getHost() + instance.getPort();   // <5>
 ----
+1. Initializes Stork - you need to do that only once.
+2. Gets the Stork instance.
+3. Gets the `Service` object for `my-service`.
+4. Retrieves the service instance for `my-service`. This performs a lookup in Consul and a selection using a load-balancer.
+5. Builds your URL.
 
-MicroProfile Config support for configuring SmallRye Stork is provided by the
-`smallrye-stork-microprofile-config` artifact.
+That example uses the programmatic API.
+When integrated into the framework, all these steps can be omitted, and you only need to configure the application:
 
-=== Integrating client libraries with Stork
-Client libraries would most often use a `LoadBalancer` to get a single address
-for a call.
-`LoadBalancer` for a service can be retrieved from `Stork` singleton:
-
-[source,java]
+[source, properties]
 ----
-LoadBalancer loadBalancer = Stork.getInstance().getLoadBalancer(serviceName);
-Uni<ServiceInstance> serviceInstance = loadBalancer.selectServiceInstace();
+stork.my-service.service-discovery=consul            # <1>
+stork.my-service.load-balancer=least-response-time   # <2>
+
+hello/mp-rest/url=stork://my-service/hello           # <3>
 ----
-
-Alternatively, one can retrieve a stream of all available `ServiceInstance`'s for a 
-given service from `ServiceDiscovery`:
-
-[source,java]
-----
-ServiceDiscovery serviceDiscovery = Stork.getInstance().getServiceDiscovery(serviceName);
-Multi<ServiceInstance> serviceInstances = serviceDiscovery.getServiceInstances();
-----
-
-=== Extending the functionality
-In Stork, extensibility is based on the
-[Service Provider Interface](https://docs.oracle.com/javase/tutorial/sound/SPI-intro.html) mechanism.
-
-==== Configuration provider
-To add a custom configuration provider, create an implementation of `ConfigProvider`
-and register it with the Service Provider Interfaces mechanism.
-
-SmallRye Stork comes with MicroProfile Config based configuration provider.
-To use it, add `smallrye-stork-microprofile-config` to your project.
-
-==== Service Discovery
-To implement a custom service discovery for Stork, implement the `ServiceDiscoveryProvider`
-interface and register it with the Service Provider Interface mechanism.
-
-Please note that the `ServiceDiscovery` implementation must be non-blocking.
-
-==== Load Balancer
-To implement a custom load balancer for Stork, implement the `LoadBalancerProvider`
-interface and register it with the Service Provider Interface mechanism.
-
-Please note that the `LoadBalancer` implementation, similarly to `ServiceDiscovery` 
-must be non-blocking.
+1. Configures that the `my-service` service uses Consul as service discovery backend
+2. Configures the load balancer for `my-service`
+3. Uses the `stork` scheme and indicates which service is targeted. When accessed, it will select the service instance using Stork.
 
 === Contributing
-The following are required to build the project:
 
-- JDK 11+
-- Maven 3.6.3+
+Check the link:CONTRIBUTING.md[contribution guide] to get build and contribution instructions.
 
-IntelliJ IDEA may think that the project uses
-Java 8. To fix it, go to Maven -> Profiles and deselect
-`include-jdk-misc` and `compile-java8-release-flag`
-profiles.
+=== Sponsors
 
-
-==== TODOs
-
-===== Configuration
-Global defaults (useful e.g. for configuring Consul for all the services).
-
-===== Service Discovery refresh
-We may have a couple of modes for service discovery refresh
-
-- server push - we keep a list of service instances and always return the list until a
-notification comes that we need to update it
-- eager refresh - refresh service instances on an interval basis
-- lazy refresh - when invoked and configured interval since the last refresh happened,
-refetch the data before return the result
-    * it may be good to have a separate option to return the old data until the
-refresh is complete
-
-===== Gathering statistics
-For smart Load Balancers we need statistics for calls.
-This would let e.g., choose the geographically closest client (it should respond fastest)
-
-===== Scheduling
-For eager refresh, it may be good to provide a "helper" - a facade for scheduling tasks.
-Such a facade could have bindings for Vert.x, Quartz, etc.
-
-===== Service Discovery
-Eureka, ZooKeeper, DNS (e.g. for Kubernetes)
-
-===== Documentation
-We need some info like below in vendor's docs:
-
-NOTE: If you run your application on Kubernetes or other environment that provides
-service discovery and load balancing, and you don't need highly customizable
-load-balancing, you should probably stick to what your infrastructure provides.
-
+Stork is part of the https://smallrye.io[SmallRye project].
+Red Hat sponsors the development of this project.
