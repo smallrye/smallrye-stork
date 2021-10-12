@@ -1,6 +1,6 @@
 package io.smallrye.stork.test;
 
-import java.util.List;
+import java.util.Collection;
 
 import io.smallrye.stork.LoadBalancer;
 import io.smallrye.stork.ServiceDiscovery;
@@ -20,7 +20,7 @@ public class TestLoadBalancer implements LoadBalancer {
     }
 
     @Override
-    public ServiceInstance selectServiceInstance(List<ServiceInstance> serviceInstances) {
+    public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
         return null;
     }
 

@@ -1,6 +1,6 @@
 package io.smallrye.stork.loadbalancer.leastresponsetime;
 
-import java.util.List;
+import java.util.Collection;
 
 import io.smallrye.stork.LoadBalancer;
 import io.smallrye.stork.ServiceInstance;
@@ -17,7 +17,7 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
 
     // TODO good tests
     @Override
-    public ServiceInstance selectServiceInstance(List<ServiceInstance> serviceInstances) {
+    public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
         // we may want sampling in the future. Right now let's collect all the results.
         // compared to IO ops, it should be cheap...
         ServiceInstance best = null;
