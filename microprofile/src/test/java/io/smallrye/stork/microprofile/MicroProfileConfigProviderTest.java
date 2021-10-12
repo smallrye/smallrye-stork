@@ -156,6 +156,39 @@ public class MicroProfileConfigProviderTest {
         assertThat(lb.getConfig().parameters()).isEmpty();
     }
 
+    @Test
+    void shouldHandleServiceNamesInQuotes() {
+        String serviceName = "my.service";
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put("stork.\"my.service\".service-discovery", "test-sd-2");
+        properties.put("stork.\"my.service\".load-balancer", "test-lb-2");
+        properties.put("stork.\"my.service\".service-discovery.1", "http://localhost:8082");
+
+        Stork stork = storkForConfig(properties);
+
+        ServiceDiscovery serviceDiscovery = stork.getService(serviceName).getServiceDiscovery();
+        assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery.class);
+
+        TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
+        assertThat(sd.getType()).isEqualTo("test-sd-2");
+
+        ServiceDiscoveryConfig sdConfig = sd.getConfig();
+        assertThat(sdConfig.type()).isEqualTo("test-sd-2");
+        assertThat(sdConfig.parameters()).hasSize(1);
+        assertThat(sdConfig.parameters()).containsAllEntriesOf(Map.of("1", "http://localhost:8082"));
+
+        LoadBalancer loadBalancer = stork.getService(serviceName).getLoadBalancer();
+        assertThat(loadBalancer).isInstanceOf(TestLoadBalancer.class);
+
+        TestLoadBalancer lb = (TestLoadBalancer) loadBalancer;
+
+        assertThat(lb.getServiceDiscovery()).isEqualTo(serviceDiscovery);
+        assertThat(lb.getType()).isEqualTo("test-lb-2");
+        LoadBalancerConfig lbConfig = lb.getConfig();
+        assertThat(lbConfig.type()).isEqualTo("test-lb-2");
+    }
+
     private Stork storkForConfig(Map<String, String> properties) {
         SmallRyeConfig config = new SmallRyeConfigBuilder()
                 .withSources(new ConfigValuePropertiesConfigSource(properties, "test-config-source", 0))

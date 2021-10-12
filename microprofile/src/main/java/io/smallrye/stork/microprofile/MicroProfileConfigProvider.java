@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.microprofile.config.Config;
 import org.jboss.logging.Logger;
@@ -28,22 +30,35 @@ public class MicroProfileConfigProvider implements ConfigProvider {
         Map<String, Map<String, String>> propertiesByServiceName = new HashMap<>();
 
         for (String propertyName : config.getPropertyNames()) {
-            String[] property = propertyName.split("\\.");
-            if (property.length < 1 || !property[0].equals(STORK)) {
+            String configPropertyPartExpression = "\".*\"|[^.]+";
+            Pattern CONFIG_PROP_PART = Pattern.compile(configPropertyPartExpression);
+
+            Matcher matcher = CONFIG_PROP_PART.matcher(propertyName);
+
+            if (!matcher.find() || !STORK.equals(matcher.group())) {
                 continue;
             }
 
             // all properties are now of form
             // stork.<service-name>.(load-balancer|service-discovery)...
-            if (property.length < 3) {
+            // or stork."<service-name>".(load-balancer|service-discovery)...
+            if (!matcher.find()) {
+                log.warn("Potentially invalid property for SmallRye Stork: " + propertyName);
+            }
+            String serviceName = unwrapFromQuotes(matcher.group());
+
+            int serviceNameEndIdx = matcher.end();
+
+            if (!matcher.find()) {
                 log.warn("Potentially invalid property for SmallRye Stork: " + propertyName);
             }
 
-            String serviceName = property[1];
+            // serviceName can be in quotes, single or double
             Map<String, String> serviceProperties = propertiesByServiceName.computeIfAbsent(serviceName,
                     ignored -> new HashMap<>());
 
-            serviceProperties.put(propertyName.substring(property[0].length() + property[1].length() + 2),
+            String serviceProperty = servicePropertyKey(propertyName.substring(serviceNameEndIdx));
+            serviceProperties.put(serviceProperty,
                     config.getValue(propertyName, String.class));
         }
 
@@ -70,6 +85,24 @@ public class MicroProfileConfigProvider implements ConfigProvider {
 
             serviceConfigs.add(builder.build());
         }
+    }
+
+    private String unwrapFromQuotes(String text) {
+        if (text.length() < 2) {
+            return text;
+        }
+        if (text.charAt(0) == '"' && text.charAt(text.length() - 1) == '"') {
+            return text.substring(1, text.length() - 1);
+        } else {
+            return text;
+        }
+    }
+
+    private String servicePropertyKey(String text) {
+        if (!text.isEmpty() && text.charAt(0) == '.') {
+            return text.substring(1);
+        }
+        return text;
     }
 
     private Map<String, String> propertiesForPrefix(String prefix, Map<String, String> original) {

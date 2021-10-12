@@ -69,7 +69,7 @@ public final class Stork {
             final var serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
             if (serviceDiscoveryConfig == null) {
                 throw new IllegalArgumentException(
-                        "No service discovery not defined for service " + serviceConfig.serviceName());
+                        "No service discovery defined for service " + serviceConfig.serviceName());
             }
             String serviceDiscoveryType = serviceDiscoveryConfig.type();
             if (serviceDiscoveryType == null) {
