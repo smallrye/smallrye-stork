@@ -54,6 +54,47 @@ mvn install
 
 Wait for a bit, and you're done.
 
+## Building the documentation
+
+The documentation is built using [MKDoc](https://www.mkdocs.org/). 
+
+### Prerequisites
+
+You need Python 3 installed on your machine, with the following modules:
+
+```shell
+pip3 install mkdocs
+pip3 install mkdocs-material
+pip3 install mkdocs-macros-plugin
+pip3 install mike    
+```
+
+### Structure
+
+The website configuration is in the `mkdocs.yml` file. 
+The content is in the `docs` module.
+
+### Build
+
+You can build the web site using, from the project root:
+
+```shell
+mkdocs build
+```
+
+The website is generated in the `site` directory.
+
+You can also enable the _serve_ mode, which update the web site while you update it:
+
+```shell
+mkdocs serve
+```
+
+### Deployment
+
+The website is automatically deployed when a new tag is created in the repository.
+The documentation is automatically versioned. 
+
 ## Before you contribute
 
 To contribute, use GitHub Pull Requests, from your **own** fork.
