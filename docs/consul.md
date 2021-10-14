@@ -36,5 +36,5 @@ Supported attributes are the following:
 | Attribute            | Mandatory  | Default Value  | Description                  |
 |----------------------|------------|----------------|------------------------------|
 | `consul-host`        | No         | `localhost`    | The Consul host              |
-| `consul-port`        | No         | `8500`         |  The Consul port             |
+| `consul-port`        | No         | `8500`         | The Consul port              |
 | `use-health-checks`  | No         | `false`        | Whether to use health check  |
