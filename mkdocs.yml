@@ -1,0 +1,60 @@
+site_name: Smallrye Stork
+repo_url: https://github.com/smallrye/smallrye-stork
+edit_uri: edit/main/docs/
+
+nav:
+  - Overview: 'index.md'
+  - Concepts: 'concepts.md'
+#  - Javadoc: './apidocs/index.html'
+  - Using Stork with Quarkus: './quarkus.md'
+  - Service Discovery:
+    - Consul: 'consul.md'
+    - Kubernetes: 'kubernetes.md'
+    - Custom: 'custom-service-discovery.md'
+  - Load-Balancing:
+    - Round Robin: 'round-robin.md'
+    - Response Time: 'response-time.md'
+    - Custom: 'custom-load-balancing.md'
+
+
+copyright: >-
+  Sponsored by <a href="https://www.redhat.com"><img style="vertical-align: middle; height: 2.5em;" alt="Red Hat" src="./images/redhat_reversed.svg"/></a> <br/>
+  <a href="https://creativecommons.org/licenses/by/3.0/">CC by 3.0</a> |
+  <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
+
+theme:
+  name: material
+  palette:
+    primary: black
+    accent: red
+  font:
+    text: Red Hat Text
+    code: Ubuntu Mono
+  features:
+    - navigation.sections
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - admonition
+
+plugins:
+  - search
+  - build_plantuml:
+      render: "server"
+      server: "http://www.plantuml.com/plantuml"
+      output_format: "png"
+      diagram_root: "docs"
+      output_folder: "target"
+      input_folder: "diagrams"
+      input_extensions: "puml"
+  - macros
+
+
+
+extra:
+  manifest: manifest.webmanifest
+  version:
+    current: !ENV [STORK_VERSION, "SNAPSHOT"]
+    provider: mike
