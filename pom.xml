@@ -37,7 +37,7 @@
 
         <version.assertj>3.21.0</version.assertj>
         <version.microprofile-config-api>2.0</version.microprofile-config-api>
-        <version.mutiny>1.1.1</version.mutiny>
+        <version.mutiny>1.1.2</version.mutiny>
         <version.smallrye-config>2.5.1</version.smallrye-config>
         <vertx.version>4.1.5</vertx.version>
         <kubernetes-client.version>5.8.0</kubernetes-client.version>
