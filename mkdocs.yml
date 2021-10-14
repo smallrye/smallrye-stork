@@ -30,8 +30,13 @@ theme:
   font:
     text: Red Hat Text
     code: Ubuntu Mono
+  logo: images/stork-white.png
+  favicon: images/stork-white.png
   features:
     - navigation.sections
+
+extra_css:
+  - extra.css
 
 markdown_extensions:
   - pymdownx.highlight
