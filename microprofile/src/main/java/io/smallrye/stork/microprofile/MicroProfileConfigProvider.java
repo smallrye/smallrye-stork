@@ -20,6 +20,9 @@ public class MicroProfileConfigProvider implements ConfigProvider {
 
     private static final Logger log = Logger.getLogger(MicroProfileConfigProvider.class);
 
+    private static final String CONFIG_PROPERTY_PART_EXPRESSION = "\".*\"|[^.]+";
+    private static final Pattern CONFIG_PROP_PART = Pattern.compile(CONFIG_PROPERTY_PART_EXPRESSION);
+
     public static final String LOAD_BALANCER = "load-balancer";
     public static final String SERVICE_DISCOVERY = "service-discovery";
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
@@ -30,8 +33,6 @@ public class MicroProfileConfigProvider implements ConfigProvider {
         Map<String, Map<String, String>> propertiesByServiceName = new HashMap<>();
 
         for (String propertyName : config.getPropertyNames()) {
-            String configPropertyPartExpression = "\".*\"|[^.]+";
-            Pattern CONFIG_PROP_PART = Pattern.compile(configPropertyPartExpression);
 
             Matcher matcher = CONFIG_PROP_PART.matcher(propertyName);
 
