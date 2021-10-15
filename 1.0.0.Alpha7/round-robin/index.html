@@ -14,7 +14,7 @@
     
     
       
-        <title>Kubernetes - Smallrye Stork</title>
+        <title>Round Robin - Smallrye Stork</title>
       
     
     
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#kubernetes-service-discovery" class="md-skip">
+        <a href="#round-robin-load-balancing" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Kubernetes
+              Round Robin
             
           </span>
         </div>
@@ -255,16 +255,14 @@
 
   
   
-    
-  
   
     
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
       
       
       
@@ -299,6 +297,72 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="../kubernetes/" class="md-nav__link">
+        Kubernetes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-service-discovery/" class="md-nav__link">
+        Custom
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Load-Balancing
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Load-Balancing" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Load-Balancing
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
     
   
   
@@ -311,12 +375,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Kubernetes
+          Round Robin
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Kubernetes
+        Round Robin
       </a>
       
         
@@ -351,70 +415,6 @@
   
 </nav>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../custom-service-discovery/" class="md-nav__link">
-        Custom
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_5">
-          Load-Balancing
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Load-Balancing" data-md-level="1">
-        <label class="md-nav__title" for="__nav_5">
-          <span class="md-nav__icon md-icon"></span>
-          Load-Balancing
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../round-robin/" class="md-nav__link">
-        Round Robin
-      </a>
     </li>
   
 
@@ -505,56 +505,28 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/smallrye/smallrye-stork/edit/main/docs/kubernetes.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/smallrye/smallrye-stork/edit/main/docs/round-robin.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="kubernetes-service-discovery">Kubernetes Service Discovery</h1>
-<p>Kubernetes provides has a built-in support for service discovery and load-balancing.
-However, you may need more flexibility to carefully select the service instance you want.</p>
-<p>This page explains how Stork can use the Kubernetes API to handle the service discovery.</p>
+                <h1 id="round-robin-load-balancing">Round-Robin Load Balancing</h1>
+<p>The round-robin is a straightforward load-balancing solution that just iterates over the set of service instances.
+While being simple, this solution shares the load among the instances and may be sufficient in many cases.</p>
 <h2 id="dependency">Dependency</h2>
-<p>First, you need to add the Stork Kubernetes Service Discovery provider:</p>
+<p>First, you need to add the round-robin load-balancer to your project:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
     <span class="nt">&lt;groupId&gt;</span>io.smallrye.stork<span class="nt">&lt;/groupId&gt;</span>
-    <span class="nt">&lt;artifactId&gt;</span>smallrye-stork-service-discovery-kubernetes<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>smallrye-stork-load-balancer-round-robin<span class="nt">&lt;/artifactId&gt;</span>
     <span class="nt">&lt;version&gt;</span>SNAPSHOT<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 </code></pre></div>
 <h2 id="configuration">Configuration</h2>
-<p>For each service expected to be exposed as <em>Kubernetes Service</em>, configure the lookup:</p>
-<div class="highlight"><pre><span></span><code><span class="na">stork.my-service.service-discovery</span><span class="o">=</span><span class="s">kubernetes</span>
-<span class="na">stork.my-service.service-discovery.k8s-namespace</span><span class="o">=</span><span class="s">my-namespace</span>
+<p>For each service expected to use a round-robin selection, configure the <code>load-balancer</code> to be <code>round-robin</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="na">stork.my-service.service-discovery</span><span class="o">=</span><span class="s">...</span>
+<span class="na">stork.my-service.service-discovery...</span><span class="o">=</span><span class="s">...</span>
+<span class="na">stork.my-service.load-balancer</span><span class="o">=</span><span class="s">round-robin</span>
 </code></pre></div>
-<p>Stork looks for the <em>Kubernetes Service</em> with the given name (<code>my-service</code> in the previous example).</p>
-<p>Instead of use the <em>Kubernetes Service</em> IP directly, and let Kubernetes handle the selection and balancing, Stork inspect the service and retrieve the list of <em>pods</em> providing the service.
-Then, it can select the instance.</p>
-<p>Supported attributes are the following:</p>
-<table>
-<thead>
-<tr>
-<th>Attribute</th>
-<th>Mandatory</th>
-<th>Default Value</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>k8s-host</code></td>
-<td>No</td>
-<td><em>master url</em></td>
-<td>The Kubernetes API host</td>
-</tr>
-<tr>
-<td><code>k8s-namespace</code></td>
-<td>No</td>
-<td><code>all</code></td>
-<td>The namespace of the service</td>
-</tr>
-</tbody>
-</table>
                 
               
               
@@ -574,7 +546,7 @@ Then, it can select the instance.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../consul/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Consul" rel="prev">
+        <a href="../custom-service-discovery/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Custom" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -583,20 +555,20 @@ Then, it can select the instance.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Consul
+              Custom
             </div>
           </div>
         </a>
       
       
         
-        <a href="../custom-service-discovery/" class="md-footer__link md-footer__link--next" aria-label="Next: Custom" rel="next">
+        <a href="../response-time/" class="md-footer__link md-footer__link--next" aria-label="Next: Response Time" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Custom
+              Response Time
             </div>
           </div>
           <div class="md-footer__button md-icon">

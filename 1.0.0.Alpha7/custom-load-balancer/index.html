@@ -14,7 +14,7 @@
     
     
       
-        <title>Kubernetes - Smallrye Stork</title>
+        <title>Custom - Smallrye Stork</title>
       
     
     
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#kubernetes-service-discovery" class="md-skip">
+        <a href="#implement-your-own-load-balancer-mechanism" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Kubernetes
+              Custom
             
           </span>
         </div>
@@ -255,16 +255,14 @@
 
   
   
-    
-  
   
     
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
       
       
       
@@ -299,58 +297,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Kubernetes
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../kubernetes/" class="md-nav__link">
         Kubernetes
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#dependency" class="md-nav__link">
-    Dependency
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    Configuration
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -382,14 +333,16 @@
 
   
   
+    
+  
   
     
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
       
       
       
@@ -438,11 +391,65 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../custom-load-balancer/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Custom
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Custom
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dependency" class="md-nav__link">
+    Dependency
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementing-a-load-balancer-provider" class="md-nav__link">
+    Implementing a load balancer provider
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-your-load-balancer" class="md-nav__link">
+    Using your load balancer
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -487,8 +494,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    Configuration
+  <a href="#implementing-a-load-balancer-provider" class="md-nav__link">
+    Implementing a load balancer provider
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-your-load-balancer" class="md-nav__link">
+    Using your load balancer
   </a>
   
 </li>
@@ -505,56 +519,138 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/smallrye/smallrye-stork/edit/main/docs/kubernetes.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/smallrye/smallrye-stork/edit/main/docs/custom-load-balancer.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="kubernetes-service-discovery">Kubernetes Service Discovery</h1>
-<p>Kubernetes provides has a built-in support for service discovery and load-balancing.
-However, you may need more flexibility to carefully select the service instance you want.</p>
-<p>This page explains how Stork can use the Kubernetes API to handle the service discovery.</p>
+                <h1 id="implement-your-own-load-balancer-mechanism">Implement your own load balancer mechanism</h1>
+<p>Stork is extensible, and you can implement your service selection (load-balancer) mechanism.
+Stork uses the SPI mechanism for loading implementations matching <em>Load Balancer Provider</em> interface</p>
 <h2 id="dependency">Dependency</h2>
-<p>First, you need to add the Stork Kubernetes Service Discovery provider:</p>
+<p>To implement your <em>Load Balancer Provider</em>, make sure your project depends on:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
-    <span class="nt">&lt;groupId&gt;</span>io.smallrye.stork<span class="nt">&lt;/groupId&gt;</span>
-    <span class="nt">&lt;artifactId&gt;</span>smallrye-stork-service-discovery-kubernetes<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;groupI&gt;</span>io.smallrye.stork<span class="nt">&lt;/groupI&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>smallrye-stork-api<span class="nt">&lt;/artifactId&gt;</span>
     <span class="nt">&lt;version&gt;</span>SNAPSHOT<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 </code></pre></div>
-<h2 id="configuration">Configuration</h2>
-<p>For each service expected to be exposed as <em>Kubernetes Service</em>, configure the lookup:</p>
-<div class="highlight"><pre><span></span><code><span class="na">stork.my-service.service-discovery</span><span class="o">=</span><span class="s">kubernetes</span>
-<span class="na">stork.my-service.service-discovery.k8s-namespace</span><span class="o">=</span><span class="s">my-namespace</span>
+<h2 id="implementing-a-load-balancer-provider">Implementing a load balancer provider</h2>
+<p>Stork uses the SPI mechanism for loading implementations matching <em>Load Balancer Provider</em> interface during its initialization.
+As a consequence, a load balancer provider implementation will contain:</p>
+<p><img alt="structure" src="../target/load-balancer-provider-structure.png" /></p>
+<p>The <em>provider</em> is a factory that creates an <code>io.smallrye.stork.LoadBalancer</code> instance for each configured service using this load balancer provider.
+A <em>type</em> identifies each provider.
+You will use that <em>type</em> in the configuration to reference the load-balancer provider you want for each service:</p>
+<div class="highlight"><pre><span></span><code><span class="na">stork.my-service.load-balancer</span><span class="o">=</span><span class="s">acme</span>
 </code></pre></div>
-<p>Stork looks for the <em>Kubernetes Service</em> with the given name (<code>my-service</code> in the previous example).</p>
-<p>Instead of use the <em>Kubernetes Service</em> IP directly, and let Kubernetes handle the selection and balancing, Stork inspect the service and retrieve the list of <em>pods</em> providing the service.
-Then, it can select the instance.</p>
-<p>Supported attributes are the following:</p>
-<table>
-<thead>
-<tr>
-<th>Attribute</th>
-<th>Mandatory</th>
-<th>Default Value</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>k8s-host</code></td>
-<td>No</td>
-<td><em>master url</em></td>
-<td>The Kubernetes API host</td>
-</tr>
-<tr>
-<td><code>k8s-namespace</code></td>
-<td>No</td>
-<td><code>all</code></td>
-<td>The namespace of the service</td>
-</tr>
-</tbody>
-</table>
+<p>The first step consists of implementing the <code>io.smallrye.stork.spi.LoadBalancerProvider</code> interface:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">examples</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.LoadBalancer</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.ServiceDiscovery</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.config.LoadBalancerConfig</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.config.ServiceDiscoveryConfig</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.spi.LoadBalancerProvider</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.spi.ServiceDiscoveryProvider</span><span class="p">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AcmeLoadBalancerProvider</span> <span class="kd">implements</span> <span class="n">LoadBalancerProvider</span> <span class="p">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">type</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">&quot;acme&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">LoadBalancer</span> <span class="nf">createLoadBalancer</span><span class="p">(</span><span class="n">LoadBalancerConfig</span> <span class="n">config</span><span class="p">,</span> <span class="n">ServiceDiscovery</span> <span class="n">serviceDiscovery</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">AcmeLoadBalancer</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</td></tr></table>
+<p>This implementation is straightforward.
+The <code>type</code> method returns the load balancer provider identifier.
+The <code>createLoadBalancer</code> method is the factory method.
+It receives the instance configuration (a map constructed from all <code>stork.my-service.load-balancer.attr=value</code> properties)</p>
+<p>Then, obviously, we need to implement the <code>LoadBalancer</code> interface:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">examples</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.LoadBalancer</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.ServiceInstance</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.config.LoadBalancerConfig</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Collection</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Random</span><span class="p">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AcmeLoadBalancer</span> <span class="kd">implements</span> <span class="n">LoadBalancer</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Random</span> <span class="n">random</span><span class="p">;</span>
+
+    <span class="kd">public</span> <span class="nf">AcmeLoadBalancer</span><span class="p">(</span><span class="n">LoadBalancerConfig</span> <span class="n">config</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">random</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Random</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">ServiceInstance</span> <span class="nf">selectServiceInstance</span><span class="p">(</span><span class="n">Collection</span><span class="o">&lt;</span><span class="n">ServiceInstance</span><span class="o">&gt;</span> <span class="n">serviceInstances</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="na">nextInt</span><span class="p">(</span><span class="n">serviceInstances</span><span class="p">.</span><span class="na">size</span><span class="p">());</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">serviceInstances</span><span class="p">).</span><span class="na">get</span><span class="p">(</span><span class="n">index</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</td></tr></table>
+<p>Again, this implementation is simplistic and just picks a random instance from the received list.</p>
+<p>The final step is to declare our <code>LoadBalancerProvider</code> in the <code>META-INF/services/io.smallrye.stork.spi.LoadBalancerProvider</code> file:</p>
+<div class="highlight"><pre><span></span><code>examples.AcmeLoadBalancerProvider
+</code></pre></div>
+<h2 id="using-your-load-balancer">Using your load balancer</h2>
+<p>In the project using it, don't forget to add the dependency on the module providing your implementation.
+Then, in the configuration, just add:</p>
+<div class="highlight"><pre><span></span><code><span class="na">stork.my-service.service-discovery</span><span class="o">=</span><span class="s">...</span>
+<span class="na">stork.my-service.load-balancer</span><span class="o">=</span><span class="s">acme</span>
+</code></pre></div>
+<p>Then, Stork will use your implementation to select the <code>my-service</code> service instance.</p>
                 
               
               
@@ -574,7 +670,7 @@ Then, it can select the instance.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../consul/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Consul" rel="prev">
+        <a href="../response-time/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Response Time" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -583,26 +679,11 @@ Then, it can select the instance.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Consul
+              Response Time
             </div>
           </div>
         </a>
       
-      
-        
-        <a href="../custom-service-discovery/" class="md-footer__link md-footer__link--next" aria-label="Next: Custom" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Custom
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-          </div>
-        </a>
       
     </nav>
   

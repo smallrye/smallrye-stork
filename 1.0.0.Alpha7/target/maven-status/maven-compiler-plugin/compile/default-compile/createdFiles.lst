@@ -1,0 +1,8 @@
+examples/StorkServiceExample.class
+examples/AcmeServiceDiscoveryProvider.class
+examples/AcmeServiceDiscovery.class
+examples/AcmeLoadBalancerProvider.class
+examples/AcmeLoadBalancer.class
+examples/StorkServiceSelectionExample.class
+examples/StorkServiceLookupExample.class
+examples/StorkEntryPointExample.class

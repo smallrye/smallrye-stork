@@ -14,7 +14,7 @@
     
     
       
-        <title>Kubernetes - Smallrye Stork</title>
+        <title>Custom - Smallrye Stork</title>
       
     
     
@@ -69,7 +69,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#kubernetes-service-discovery" class="md-skip">
+        <a href="#implement-your-own-service-discovery-mechanism" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Kubernetes
+              Custom
             
           </span>
         </div>
@@ -299,6 +299,20 @@
               
   
   
+  
+    <li class="md-nav__item">
+      <a href="../kubernetes/" class="md-nav__link">
+        Kubernetes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
     
   
   
@@ -311,12 +325,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Kubernetes
+          Custom
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Kubernetes
+        Custom
       </a>
       
         
@@ -341,8 +355,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    Configuration
+  <a href="#implementing-a-service-discovery-provider" class="md-nav__link">
+    Implementing a service discovery provider
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-your-service-discovery" class="md-nav__link">
+    Using your service discovery
   </a>
   
 </li>
@@ -351,20 +372,6 @@
   
 </nav>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../custom-service-discovery/" class="md-nav__link">
-        Custom
-      </a>
     </li>
   
 
@@ -487,8 +494,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    Configuration
+  <a href="#implementing-a-service-discovery-provider" class="md-nav__link">
+    Implementing a service discovery provider
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-your-service-discovery" class="md-nav__link">
+    Using your service discovery
   </a>
   
 </li>
@@ -505,56 +519,155 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/smallrye/smallrye-stork/edit/main/docs/kubernetes.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/smallrye/smallrye-stork/edit/main/docs/custom-service-discovery.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="kubernetes-service-discovery">Kubernetes Service Discovery</h1>
-<p>Kubernetes provides has a built-in support for service discovery and load-balancing.
-However, you may need more flexibility to carefully select the service instance you want.</p>
-<p>This page explains how Stork can use the Kubernetes API to handle the service discovery.</p>
+                <h1 id="implement-your-own-service-discovery-mechanism">Implement your own service discovery mechanism</h1>
+<p>Stork is extensible, and you can implement your own service discovery mechanism.
+Stork uses the SPI mechanism for loading implementations matching <em>Service Discovery Provider</em> interface.</p>
 <h2 id="dependency">Dependency</h2>
-<p>First, you need to add the Stork Kubernetes Service Discovery provider:</p>
+<p>To implement your <em>Service Discovery Provider</em>, make sure your project depends on:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
-    <span class="nt">&lt;groupId&gt;</span>io.smallrye.stork<span class="nt">&lt;/groupId&gt;</span>
-    <span class="nt">&lt;artifactId&gt;</span>smallrye-stork-service-discovery-kubernetes<span class="nt">&lt;/artifactId&gt;</span>
+    <span class="nt">&lt;groupI&gt;</span>io.smallrye.stork<span class="nt">&lt;/groupI&gt;</span>
+    <span class="nt">&lt;artifactId&gt;</span>smallrye-stork-api<span class="nt">&lt;/artifactId&gt;</span>
     <span class="nt">&lt;version&gt;</span>SNAPSHOT<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 </code></pre></div>
-<h2 id="configuration">Configuration</h2>
-<p>For each service expected to be exposed as <em>Kubernetes Service</em>, configure the lookup:</p>
-<div class="highlight"><pre><span></span><code><span class="na">stork.my-service.service-discovery</span><span class="o">=</span><span class="s">kubernetes</span>
-<span class="na">stork.my-service.service-discovery.k8s-namespace</span><span class="o">=</span><span class="s">my-namespace</span>
+<h2 id="implementing-a-service-discovery-provider">Implementing a service discovery provider</h2>
+<p>Stork uses the SPI mechanism for loading implementations matching <em>Service Discovery Provider</em> interface during its initialization.As a consequence, a service discovery provider implementation will contain:</p>
+<p><img alt="structure" src="../target/service-discovery-provider-structure.png" /></p>
+<p>The <em>provider</em> is a factory that creates an <code>io.smallrye.stork.ServiceDiscovery</code> instance for each configured service using this service discovery provider.
+A <em>type</em>, for example, <code>acme</code>, identifies each provider. 
+This <em>type</em> is used in the configuration to reference the provider:</p>
+<div class="highlight"><pre><span></span><code><span class="na">stork.my-service.service-discovery</span><span class="o">=</span><span class="s">acme</span>
 </code></pre></div>
-<p>Stork looks for the <em>Kubernetes Service</em> with the given name (<code>my-service</code> in the previous example).</p>
-<p>Instead of use the <em>Kubernetes Service</em> IP directly, and let Kubernetes handle the selection and balancing, Stork inspect the service and retrieve the list of <em>pods</em> providing the service.
-Then, it can select the instance.</p>
-<p>Supported attributes are the following:</p>
-<table>
-<thead>
-<tr>
-<th>Attribute</th>
-<th>Mandatory</th>
-<th>Default Value</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>k8s-host</code></td>
-<td>No</td>
-<td><em>master url</em></td>
-<td>The Kubernetes API host</td>
-</tr>
-<tr>
-<td><code>k8s-namespace</code></td>
-<td>No</td>
-<td><code>all</code></td>
-<td>The namespace of the service</td>
-</tr>
-</tbody>
-</table>
+<p>The first step consists of implementing the <code>io.smallrye.stork.spi.ServiceDiscoveryProvider</code> interface:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">examples</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.ServiceDiscovery</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.config.ServiceDiscoveryConfig</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.spi.ServiceDiscoveryProvider</span><span class="p">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AcmeServiceDiscoveryProvider</span> <span class="kd">implements</span> <span class="n">ServiceDiscoveryProvider</span> <span class="p">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">type</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">&quot;acme&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">ServiceDiscovery</span> <span class="nf">createServiceDiscovery</span><span class="p">(</span><span class="n">ServiceDiscoveryConfig</span> <span class="n">config</span><span class="p">,</span>
+                                                   <span class="n">String</span> <span class="n">serviceName</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="n">AcmeServiceDiscovery</span><span class="p">(</span><span class="n">config</span><span class="p">.</span><span class="na">parameters</span><span class="p">());</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</td></tr></table>
+<p>This implementation is straightforward.
+The <code>type</code> method returns the service discovery provider identifier.
+The <code>createServiceDiscovery</code> method is the factory method.
+It receives the instance configuration (a map constructed from all <code>stork.my-service.service-discovery.attr=value</code> properties)</p>
+<p>Then, obviously, we need to implement the <code>ServiceDiscovery</code> interface:</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nn">examples</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">io.smallrye.mutiny.Uni</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.DefaultServiceInstance</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.ServiceDiscovery</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.ServiceInstance</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.config.ServiceDiscoveryConfig</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.spi.ServiceDiscoveryProvider</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">io.smallrye.stork.spi.ServiceInstanceIds</span><span class="p">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.Collections</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="p">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="p">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AcmeServiceDiscovery</span> <span class="kd">implements</span> <span class="n">ServiceDiscovery</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">host</span><span class="p">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">port</span><span class="p">;</span>
+
+    <span class="kd">public</span> <span class="nf">AcmeServiceDiscovery</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">configuration</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">host</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;host&quot;</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="na">port</span> <span class="o">=</span> <span class="n">Integer</span><span class="p">.</span><span class="na">parseInt</span><span class="p">(</span><span class="n">configuration</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;port&quot;</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Uni</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ServiceInstance</span><span class="o">&gt;&gt;</span> <span class="nf">getServiceInstances</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// Proceed to the lookup...</span>
+        <span class="c1">// Here, we just return a DefaultServiceInstance with the configured host and port</span>
+        <span class="n">DefaultServiceInstance</span> <span class="n">instance</span> <span class="o">=</span>
+                <span class="k">new</span> <span class="n">DefaultServiceInstance</span><span class="p">(</span><span class="n">ServiceInstanceIds</span><span class="p">.</span><span class="na">next</span><span class="p">(),</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">Uni</span><span class="p">.</span><span class="na">createFrom</span><span class="p">().</span><span class="na">item</span><span class="p">(()</span> <span class="o">-&gt;</span> <span class="n">Collections</span><span class="p">.</span><span class="na">singletonList</span><span class="p">(</span><span class="n">instance</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</td></tr></table>
+<p>Again, this implementation is simplistic.
+Typically, instead of creating a service instance with values from the configuration, you would connect to a service discovery backend, look for the service and build the list of service instance accordingly.
+That's why the method returns a <code>Uni</code>.
+Most of the time, the lookup is a remote operation.</p>
+<p>The final step is to declare our <code>ServiceDiscoveryProvider</code> in the <code>META-INF/services/io.smallrye.stork.spi.ServiceDiscoveryProvider</code> file:</p>
+<div class="highlight"><pre><span></span><code>examples.AcmeServiceDiscoveryProvider
+</code></pre></div>
+<h2 id="using-your-service-discovery">Using your service discovery</h2>
+<p>In the project using it, don't forget to add the dependency on the module providing your implementation.
+Then, in the configuration, just add:</p>
+<div class="highlight"><pre><span></span><code><span class="na">stork.my-service.service-discovery</span><span class="o">=</span><span class="s">acme</span>
+<span class="na">stork.my-service.service-discovery.host</span><span class="o">=</span><span class="s">localhost</span>
+<span class="na">stork.my-service.service-discovery.port</span><span class="o">=</span><span class="s">1234</span>
+</code></pre></div>
+<p>Then, Stork will use your implementation to locate the <code>my-service</code> service.</p>
                 
               
               
@@ -574,7 +687,7 @@ Then, it can select the instance.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../consul/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Consul" rel="prev">
+        <a href="../kubernetes/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Kubernetes" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -583,20 +696,20 @@ Then, it can select the instance.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Consul
+              Kubernetes
             </div>
           </div>
         </a>
       
       
         
-        <a href="../custom-service-discovery/" class="md-footer__link md-footer__link--next" aria-label="Next: Custom" rel="next">
+        <a href="../round-robin/" class="md-footer__link md-footer__link--next" aria-label="Next: Round Robin" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Custom
+              Round Robin
             </div>
           </div>
           <div class="md-footer__button md-icon">
