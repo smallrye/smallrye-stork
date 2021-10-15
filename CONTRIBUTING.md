@@ -66,6 +66,7 @@ You need Python 3 installed on your machine, with the following modules:
 pip3 install mkdocs
 pip3 install mkdocs-material
 pip3 install mkdocs-macros-plugin
+pip3 install mkdocs-build-plantuml-plugin
 pip3 install mike    
 ```
 
