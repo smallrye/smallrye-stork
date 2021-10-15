@@ -5,7 +5,6 @@ import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.Stork;
 
 import java.time.Duration;
-import java.util.List;
 
 public class StorkServiceSelectionExample {
 

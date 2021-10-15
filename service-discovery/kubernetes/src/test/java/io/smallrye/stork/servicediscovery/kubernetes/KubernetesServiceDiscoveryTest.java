@@ -202,7 +202,7 @@ public class KubernetesServiceDiscoveryTest {
         await().atMost(Duration.ofSeconds(5))
                 .until(() -> instances.get() != null);
 
-        assertThat(instances.get()).hasSize(0);
+        assertThat(instances.get()).isEmpty();
 
     }
 
