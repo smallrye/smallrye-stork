@@ -24,6 +24,7 @@ import io.vertx.core.Vertx;
 
 public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
+    public static final String METADATA_NAME = "metadata.name";
     private final KubernetesClient client;
     private final String serviceName;
     private boolean allNamespaces = false;
@@ -59,11 +60,11 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     vertx.executeBlocking(future -> {
                         List<Endpoints> endpoints = new ArrayList<>();
                         if (allNamespaces) {
-                            endpoints.addAll(client.endpoints().inAnyNamespace().withField("metadata.name", serviceName).list()
+                            endpoints.addAll(client.endpoints().inAnyNamespace().withField(METADATA_NAME, serviceName).list()
                                     .getItems());
                         } else {
                             endpoints.addAll(
-                                    client.endpoints().inNamespace(namespace).withField("metadata.name", serviceName).list()
+                                    client.endpoints().inNamespace(namespace).withField(METADATA_NAME, serviceName).list()
                                             .getItems());
                         }
                         future.complete(endpoints);
@@ -83,9 +84,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     public Uni<List<ServiceInstance>> blockingGetServiceInstances() {
         List<Endpoints> endpoints = allNamespaces
-                ? client.endpoints().inAnyNamespace().withField("metadata.name", serviceName).list()
+                ? client.endpoints().inAnyNamespace().withField(METADATA_NAME, serviceName).list()
                         .getItems()
-                : client.endpoints().inNamespace(namespace).withField("metadata.name", serviceName).list().getItems();
+                : client.endpoints().inNamespace(namespace).withField(METADATA_NAME, serviceName).list().getItems();
         Uni<List<ServiceInstance>> serviceEntryList = Uni.createFrom().item(map(endpoints));
         return serviceEntryList; // TODO: logging
     }

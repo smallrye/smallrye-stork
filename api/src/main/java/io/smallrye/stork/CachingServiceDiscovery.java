@@ -18,19 +18,19 @@ import io.smallrye.stork.utils.DurationUtils;
 public abstract class CachingServiceDiscovery implements ServiceDiscovery {
 
     private volatile ServiceInstancesCache cacheData;
-    public Duration refreshPeriod;
+    public final Duration refreshPeriod;
     public static final Duration DEFAULT_REFRESH_INTERVAL = Duration.ofMinutes(5);
 
     public CachingServiceDiscovery(ServiceDiscoveryConfig config) {
-        String refreshPeriod = config.parameters().get("refresh-period");
+        String period = config.parameters().get("refresh-period");
         try {
             // TODO: document it
-            this.refreshPeriod = refreshPeriod != null
-                    ? DurationUtils.parseDuration(refreshPeriod)
+            this.refreshPeriod = period != null
+                    ? DurationUtils.parseDuration(period)
                     : DEFAULT_REFRESH_INTERVAL;
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("refresh-period for service discovery should be a number, got: " +
-                    refreshPeriod,
+                    period,
                     e);
         }
     }

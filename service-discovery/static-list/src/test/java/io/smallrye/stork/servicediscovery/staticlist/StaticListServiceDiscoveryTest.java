@@ -1,6 +1,7 @@
 package io.smallrye.stork.servicediscovery.staticlist;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import java.util.List;
@@ -44,6 +45,13 @@ public class StaticListServiceDiscoveryTest {
                 "localhost");
         assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
                 8081);
+    }
+
+    @Test
+    void shouldFailOnMissingService() {
+        assertThatThrownBy(() -> stork.getService("missing")).isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(stork.getServiceOptional("missing")).isEmpty();
     }
 
 }

@@ -110,17 +110,17 @@ public final class Stork {
                 .collect(Collectors.toMap(ElementWithType::type, Function.identity()));
     }
 
-    private static final AtomicReference<Stork> stork = new AtomicReference<>();
+    private static final AtomicReference<Stork> REFERENCE = new AtomicReference<>();
 
     public static Stork getInstance() {
-        return stork.get();
+        return REFERENCE.get();
     }
 
     public static void shutdown() {
-        stork.set(null);
+        REFERENCE.set(null);
     }
 
     public static void initialize() {
-        stork.compareAndSet(null, new Stork());
+        REFERENCE.compareAndSet(null, new Stork());
     }
 }

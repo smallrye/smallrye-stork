@@ -7,6 +7,10 @@ public class DurationUtils {
 
     public static final Pattern DIGITS = Pattern.compile("^[-+]?\\d+$");
 
+    private DurationUtils() {
+        // Avoid direct instantiation
+    }
+
     /**
      * Converts a value representing the refresh period which start with a number by implicitly appending `PT` to it.
      * If the value consists only of a number, it implicitly treats the value as seconds.
@@ -20,7 +24,7 @@ public class DurationUtils {
             throw new IllegalArgumentException("Negative refresh-period specified for service discovery: " + duration);
         }
         if (DIGITS.asPredicate().test(duration)) {
-            return Duration.ofSeconds(Long.valueOf(duration));
+            return Duration.ofSeconds(Long.parseLong(duration));
         }
         return Duration.parse("PT" + duration);
 
