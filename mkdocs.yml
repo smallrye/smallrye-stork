@@ -14,7 +14,7 @@ nav:
   - Load-Balancing:
     - Round Robin: 'round-robin.md'
     - Response Time: 'response-time.md'
-    - Custom: 'custom-load-balancing.md'
+    - Custom: 'custom-load-balancer.md'
 
 
 copyright: >-

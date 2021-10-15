@@ -1,7 +1,7 @@
 # Implement your own service discovery mechanism
 
 Stork is extensible, and you can implement your own service discovery mechanism.
-To achieve this, you need to implement a _Service Discovery Provider_.
+Stork uses the SPI mechanism for loading implementations matching _Service Discovery Provider_ interface.
 
 ## Dependency
 
@@ -17,19 +17,19 @@ To implement your _Service Discovery Provider_, make sure your project depends o
 
 ## Implementing a service discovery provider
 
-Stork uses an SPI mechanism so that it can find all the service discovery providers during its initialization.
-As a consequence, a service discovery provider implementation will contain:
+Stork uses the SPI mechanism for loading implementations matching _Service Discovery Provider_ interface during its initialization.As a consequence, a service discovery provider implementation will contain:
 
 ![structure](target/service-discovery-provider-structure.png)
 
 The _provider_ is a factory that creates an `io.smallrye.stork.ServiceDiscovery` instance for each configured service using this service discovery provider.
-The _provider_ is identified with a name, for example, `acme`, and thus, will be used for all services using that service discovery:
+A _type_, for example, `acme`, identifies each provider. 
+This _type_ is used in the configuration to reference the provider:
 
 ```properties
 stork.my-service.service-discovery=acme
 ```
 
-The first step consists into implementing the `io.smallrye.stork.spi.ServiceDiscoveryProvider` interface:
+The first step consists of implementing the `io.smallrye.stork.spi.ServiceDiscoveryProvider` interface:
 
 ```java linenums="1"
 --8<-- "docs/snippets/examples/AcmeServiceDiscoveryProvider.java"
@@ -40,14 +40,14 @@ The `type` method returns the service discovery provider identifier.
 The `createServiceDiscovery` method is the factory method.
 It receives the instance configuration (a map constructed from all `stork.my-service.service-discovery.attr=value` properties)
 
-Then, obviously, we need to implement the `ServiceDiscovery` implementation:
+Then, obviously, we need to implement the `ServiceDiscovery` interface:
 
 ```java linenums="1"
 --8<-- "docs/snippets/examples/AcmeServiceDiscovery.java"
 ```
 
 Again, this implementation is simplistic.
-Typically, instead of creating a service instance with values from the configuration, you would connect to a service discovery backend, looks for the service, and build the list of service instance accordingly.
+Typically, instead of creating a service instance with values from the configuration, you would connect to a service discovery backend, look for the service and build the list of service instance accordingly.
 That's why the method returns a `Uni`.
 Most of the time, the lookup is a remote operation.
 
