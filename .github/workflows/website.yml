@@ -34,6 +34,6 @@ jobs:
           pip install mkdocs-build-plantuml-plugin
           pip install mike          
       - name: Build local artifacts
-        run: mvn -s .build/maven-ci-settings.xml -B install -DskipTests
+        run: mvn -B install -DskipTests
       - name: Render docs and publish
         run: .github/render-documentation.sh
