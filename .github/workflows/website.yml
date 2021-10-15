@@ -31,6 +31,7 @@ jobs:
           sudo snap install yq
           pip install mkdocs-material
           pip install mkdocs-macros-plugin
+          pip install mkdocs-build-plantuml-plugin
           pip install mike          
       - name: Build local artifacts
         run: mvn -s .build/maven-ci-settings.xml -B install -DskipTests
