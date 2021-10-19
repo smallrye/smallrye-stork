@@ -56,7 +56,6 @@ public final class Stork {
         Map<String, ServiceDiscoveryProvider> serviceDiscoveryProviders = getAll(ServiceDiscoveryProvider.class);
 
         ServiceLoader<ConfigProvider> configs = ServiceLoader.load(ConfigProvider.class);
-        // TODO test for multiple config providers!!
         Optional<ConfigProvider> highestPrioConfigProvider = configs.stream()
                 .map(ServiceLoader.Provider::get)
                 .max(Comparator.comparingInt(ConfigProvider::priority));

@@ -23,18 +23,23 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [11, 16, 17-ea]
-    name: build with jdk ${{matrix.java}}
+        java: [
+          { 'version': '11', opts: '' },
+          { 'version': '16', 'opts': '' },
+          { 'version': '17', 'opts': '' }
+        ]
+    name: build with jdk ${{matrix.java.version}}
 
     steps:
       - uses: actions/checkout@v2
         name: checkout
 
       - uses: actions/setup-java@v2
-        name: set up jdk ${{matrix.java}}
+        name: set up jdk ${{matrix.java.version}}
         with:
-          distribution: adopt
-          java-version: ${{matrix.java}}
+          distribution: temurin
+          java-version: ${{matrix.java.version}}
+          cache: maven
 
       - name: build with maven
         run: mvn -B formatter:validate verify --file pom.xml
@@ -43,18 +48,23 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        java: [11, 16, 17-ea]
-    name: build with jdk ${{matrix.java}} windows
+        java: [
+          { 'version': '11', opts: '' },
+          { 'version': '16', 'opts': '' },
+          { 'version': '17', 'opts': '' }
+        ]
+    name: build with jdk ${{matrix.java.version}} windows
 
     steps:
       - uses: actions/checkout@v2
         name: checkout
 
       - uses: actions/setup-java@v2
-        name: set up jdk ${{matrix.java}}
+        name: set up jdk ${{matrix.java.version}}
         with:
-          java-version: ${{matrix.java}}
-          distribution: adopt
+          distribution: temurin
+          java-version: ${{matrix.java.version}}
+          cache: maven
 
       - name: build with maven
 #        Skip integration tests. TestContainers does not support Windows Server 2019: https://github.com/testcontainers/testcontainers-java/issues/2960
@@ -70,9 +80,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
+          distribution: temurin
           java-version: 11
+          cache: maven
 
       - name: sonar
         env:

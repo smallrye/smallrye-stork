@@ -11,6 +11,10 @@
 
     <name>SmallRye Stork : Doc</name>
 
+    <properties>
+        <sonar.skip>true</sonar.skip>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
