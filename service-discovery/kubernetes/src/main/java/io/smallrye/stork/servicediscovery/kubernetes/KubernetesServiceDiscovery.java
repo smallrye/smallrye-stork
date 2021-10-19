@@ -27,8 +27,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     public static final String METADATA_NAME = "metadata.name";
     private final KubernetesClient client;
     private final String serviceName;
-    private boolean allNamespaces = false;
-    private String namespace;
+    private final boolean allNamespaces;
+    private final String namespace;
     private final Vertx vertx;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
@@ -43,9 +43,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             masterUrl = base.getMasterUrl();
         }
         namespace = parameters != null ? parameters.get("k8s-namespace") : base.getNamespace();
-        if (namespace != null && namespace.equalsIgnoreCase("all")) {
-            allNamespaces = true;
-        }
+        allNamespaces = namespace != null && namespace.equalsIgnoreCase("all");
+
         Config properties = new ConfigBuilder(base)
                 .withMasterUrl(masterUrl)
                 .withNamespace(namespace).build();
@@ -73,7 +72,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                             List<Endpoints> endpoints = (List<Endpoints>) result.result();
                             emitter.complete(endpoints);
                         } else {
-                            //TODO logging
+                            LOGGER.error("Unable to retrieve the endpoint from the {} service", serviceName, result.cause());
                             emitter.fail(result.cause());
                         }
                     });
