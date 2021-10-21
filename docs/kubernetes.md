@@ -28,8 +28,9 @@ stork.my-service.service-discovery.k8s-namespace=my-namespace
 
 Stork looks for the _Kubernetes Service_ with the given name (`my-service` in the previous example) in the specified namespace.
 
-Instead of use the _Kubernetes Service_ IP directly, and let Kubernetes handle the selection and balancing, Stork inspect the service and retrieve the list of _pods_ providing the service.
+Instead of using the _Kubernetes Service_ IP directly, and let Kubernetes handle the selection and balancing, Stork inspects the service and retrieves the list of _pods_ providing the service.
 Then, it can select the instance.
+
 
 Supported attributes are the following:
 
