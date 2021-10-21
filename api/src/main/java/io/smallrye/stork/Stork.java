@@ -99,7 +99,8 @@ public final class Stork {
                 loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
             }
 
-            services.put(serviceConfig.serviceName(), new Service(serviceConfig.serviceName(), loadBalancer, serviceDiscovery));
+            services.put(serviceConfig.serviceName(),
+                    new Service(serviceConfig.serviceName(), Optional.ofNullable(loadBalancer), serviceDiscovery));
         }
     }
 
