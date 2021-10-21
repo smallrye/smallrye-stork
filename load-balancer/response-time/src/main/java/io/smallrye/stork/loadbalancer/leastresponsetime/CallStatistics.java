@@ -11,7 +11,9 @@ public class CallStatistics implements CallStatisticsCollector {
     private final AtomicLong callCount = new AtomicLong(1);
     private final ConcurrentHashMap<Long, CallsData> storage = new ConcurrentHashMap<>();
 
+    // denoted in comments as e
     static double errorImportanceDeclineFactor = 0.999;
+    // e^0, e^1, e^2, e^4, e^8,
     static double[] declineFactorPowers = new double[16];
 
     static double responseTimeFactor = 0.5;
@@ -21,6 +23,7 @@ public class CallStatistics implements CallStatisticsCollector {
     // rescaled error rate is \prod_{i=0}^{k}[f(i) == 1]declineFactorPowers[i]
 
     static {
+        declineFactorPowers[0] = 1;
         declineFactorPowers[1] = errorImportanceDeclineFactor;
         for (int i = 2; i < 16; i++) {
             declineFactorPowers[i] = declineFactorPowers[i - 1] * declineFactorPowers[i - 1];
@@ -115,10 +118,11 @@ public class CallStatistics implements CallStatisticsCollector {
 
             // 1 0 1 0 0 0 0 0 is probably better than 0 1 1 1 1 1 1 1 1 1 or even 0 0 1 1 1 1 1 1 1
             // we need something reasonably decreasing with timeSinceLastError increasing.
-            // let's do sum_{i=0}^{15} [if_failed(now-i)]0.999^i
+            // let's rescale the error by multiplying it by e ^ timeSinceLastError
             double result = weightedErrorCount;
-            for (int i = 1; i < 16; i++) {
-                if ((timeSinceLastError & i) == 0) {
+            for (int i = 0; i < 16; i++) {
+                int powerOf2 = 1 << i;
+                if ((timeSinceLastError & powerOf2) != 0) {
                     result *= declineFactorPowers[i];
                 }
             }

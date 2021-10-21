@@ -39,6 +39,35 @@ public class LeastResponseTimeLoadBalancerTest {
     }
 
     @Test
+    void shouldSelectNonFailing() {
+        Service service = stork.getService("first-service");
+
+        // svc1 is not that fast
+        ServiceInstance svc1 = selectInstance(service);
+        assertThat(asString(svc1)).isEqualTo(FST_SRVC_1);
+        svc1.recordResult(80, null);
+
+        // svc2 is faster
+        ServiceInstance svc2 = selectInstance(service);
+        assertThat(asString(svc2)).isEqualTo(FST_SRVC_2);
+        svc2.recordResult(50, null);
+
+        ServiceInstance selected;
+
+        selected = selectInstance(service);
+        assertThat(asString(selected)).isEqualTo(FST_SRVC_2);
+
+        // but svc2 sometimes fails
+        svc2.recordResult(10, new RuntimeException("induced failure"));
+
+        // so we should select svc1 for next calls
+        selected = selectInstance(service);
+        assertThat(asString(selected)).isEqualTo(FST_SRVC_1);
+        selected = selectInstance(service);
+        assertThat(asString(selected)).isEqualTo(FST_SRVC_1);
+    }
+
+    @Test
     void shouldSelectFastest() {
         Service service = stork.getService("first-service");
 

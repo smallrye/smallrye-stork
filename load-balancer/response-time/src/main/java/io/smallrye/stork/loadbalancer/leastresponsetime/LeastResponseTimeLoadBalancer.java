@@ -53,8 +53,10 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
             }
             long now = callStatistics.currentCall();
             // TODO we only take into account the best, we should probably use one of the bests
-            return callsData.scaledTime() * (1 + callsData.scaledErrorCount(now - bestData.lastFailure)) <= bestData
-                    .scaledTime() * (1 + callsData.scaledErrorCount(now - callsData.lastFailure));
+            // @formatter:off
+            return callsData.scaledTime() * (1 + callsData.scaledErrorCount(now - callsData.lastFailure))
+                    <= bestData.scaledTime() * (1 + bestData.scaledErrorCount(now - bestData.lastFailure));
+            // @formatter:on
         } else if (callsData.lastSuccess != 0) {
             return true;
         } else {
