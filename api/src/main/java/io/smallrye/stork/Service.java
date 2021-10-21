@@ -1,6 +1,7 @@
 package io.smallrye.stork;
 
 import java.util.List;
+import java.util.Optional;
 
 import io.smallrye.mutiny.Uni;
 
@@ -11,11 +12,11 @@ import io.smallrye.mutiny.Uni;
  */
 public class Service {
 
-    private final LoadBalancer loadBalancer;
+    private final Optional<LoadBalancer> loadBalancer;
     private final ServiceDiscovery serviceDiscovery;
     private final String serviceName;
 
-    public Service(String serviceName, LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery) {
+    public Service(String serviceName, Optional<LoadBalancer> loadBalancer, ServiceDiscovery serviceDiscovery) {
         this.loadBalancer = loadBalancer;
         this.serviceDiscovery = serviceDiscovery;
         this.serviceName = serviceName;
@@ -27,8 +28,10 @@ public class Service {
      * The selection looks for the service instances and select the one to use using the load balancer.
      *
      * @return a Uni with a ServiceInstance
+     * @throws IllegalArgumentException if the current service does not use a load balancer.
      */
     public Uni<ServiceInstance> selectServiceInstance() {
+        LoadBalancer loadBalancer = getLoadBalancer();
         return serviceDiscovery.getServiceInstances()
                 .map(loadBalancer::selectServiceInstance);
     }
@@ -49,10 +52,8 @@ public class Service {
      * @throws IllegalArgumentException if the current service does not use a load balancer.
      */
     public LoadBalancer getLoadBalancer() {
-        if (loadBalancer == null) {
-            throw new IllegalArgumentException("No load balancer for service '" + serviceName + "' defined");
-        }
-        return loadBalancer;
+        return loadBalancer
+                .orElseThrow(() -> new IllegalArgumentException("No load balancer for service '" + serviceName + "' defined"));
     }
 
     /**
