@@ -54,7 +54,7 @@ public class MicroProfileConfigProvider implements ConfigProvider {
                 log.warn("Potentially invalid property for SmallRye Stork: " + propertyName);
             }
 
-            // serviceName can be in quotes, single or double
+            // serviceName can be in double quotes
             Map<String, String> serviceProperties = propertiesByServiceName.computeIfAbsent(serviceName,
                     ignored -> new HashMap<>());
 

@@ -13,7 +13,6 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.CachingServiceDiscovery;
 import io.smallrye.stork.DefaultServiceInstance;
@@ -81,38 +80,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     }
 
-    public Uni<List<ServiceInstance>> blockingGetServiceInstances() {
-        List<Endpoints> endpoints = allNamespaces
-                ? client.endpoints().inAnyNamespace().withField(METADATA_NAME, serviceName).list()
-                        .getItems()
-                : client.endpoints().inNamespace(namespace).withField(METADATA_NAME, serviceName).list().getItems();
-        Uni<List<ServiceInstance>> serviceEntryList = Uni.createFrom().item(map(endpoints));
-        return serviceEntryList; // TODO: logging
-    }
-
-    // TODO review this method and remove it if isn't needed
-    public Uni<List<ServiceInstance>> fullAsynchronousGetServiceInstances() {
-        Uni<Endpoints> endpointsUni = Uni.createFrom()
-                .emitter(emitter -> client.informers().sharedIndexInformerFor(Endpoints.class, 0L).addEventHandler(
-                        new ResourceEventHandler<Endpoints>() {
-                            @Override
-                            public void onAdd(Endpoints obj) {
-                                emitter.complete(obj);
-                            }
-
-                            @Override
-                            public void onUpdate(Endpoints oldObj, Endpoints newObj) {
-                            }
-
-                            @Override
-                            public void onDelete(Endpoints oldObj, boolean deletedFinalStateUnknown) {
-                            }
-                        }));
-        return endpointsUni.onItem().transform(this::map);
-    }
-
     private List<ServiceInstance> map(List<Endpoints> endpointList) {
-        List<ServiceInstance> serviceInstances = new ArrayList<ServiceInstance>();
+        List<ServiceInstance> serviceInstances = new ArrayList<>();
         for (Endpoints endPoints : endpointList) {
             for (EndpointSubset subset : endPoints.getSubsets()) {
                 serviceInstances.addAll(subset.getAddresses().stream().map(endpointAddress -> {
@@ -131,26 +100,6 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             }
         }
 
-        return serviceInstances;
-    }
-
-    private List<ServiceInstance> map(Endpoints endpoints) {
-        List<ServiceInstance> serviceInstances = new ArrayList<ServiceInstance>();
-        for (EndpointSubset subset : endpoints.getSubsets()) {
-            serviceInstances.addAll(subset.getAddresses().stream().map(endpointAddress -> {
-                String hostname = endpointAddress.getIp();
-                if (hostname == null) { // should we take the hostName?
-                    hostname = endpointAddress.getHostname();
-                }
-                List<EndpointPort> endpointPorts = subset.getPorts();
-                Integer port = 0;
-                if (endpointPorts.size() == 1) {
-                    port = endpointPorts.get(0).getPort();
-                }
-                return new DefaultServiceInstance(ServiceInstanceIds.next(),
-                        hostname, port);
-            }).collect(Collectors.toList()));
-        }
         return serviceInstances;
     }
 }
