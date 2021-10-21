@@ -10,13 +10,13 @@ However, when using the programmatic API, you will use these concepts directly.
 
 When using the programmatic API of Stork, you:
 
-1. Retrieves the _singleton_ `Stork` instance. This instance is configured with the set of `Service` it manages.
-2. Retrieves the `Service` you want to use. Each `Service` is associated with a name.
-3. Retrieves the `ServiceInstance` which will provides the metadata to access the actual service.
+1. Retrieve the _singleton_ `Stork` instance. This instance is configured with the set of `Service` it manages.
+2. Retrieve the `Service` you want to use. Each `Service` is associated with a name.
+3. Retrieve the `ServiceInstance` which will provide the metadata to access the actual service.
 
 ![concepts](target/sequence.png)
 
-Behind the scene, Stork will handle the service lookup and selection.
+Behind the scenes, Stork will handle the service lookup and selection.
 
 !!!note
 
@@ -37,7 +37,7 @@ During the initialization, Stork looks for `io.smallrye.stork.config.ConfigProvi
 
 * A service is identified by a **name**. 
 * A service has a service discovery configuration indicating how Stork will look for service instances
-* A service can have a load-balancer configuration indicate how Stork can select the most appropriate instance.
+* A service can have a load-balancer configuration indicating how Stork can select the most appropriate instance.
 
 ## Service
 
