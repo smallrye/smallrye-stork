@@ -47,7 +47,7 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, "default", "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -66,15 +66,15 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
-    void shouldGetServiceFromK8sTestNamespace() throws InterruptedException {
+    void shouldGetServiceFromK8sNamespace() throws InterruptedException {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", client.getNamespace()));
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, client.getNamespace(), "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        setUpKubernetesService(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -132,7 +132,7 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, "default", "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -149,7 +149,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
 
-        client.endpoints().inNamespace("default").withName(serviceName).delete();
+        client.endpoints().withName(serviceName).delete();
 
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
@@ -174,7 +174,7 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, "default", "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -191,7 +191,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
 
-        client.endpoints().inNamespace("default").withName(serviceName).delete();
+        client.endpoints().withName(serviceName).delete();
 
         Thread.sleep(5000);
 
