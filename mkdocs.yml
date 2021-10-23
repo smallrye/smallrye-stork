@@ -10,6 +10,7 @@ nav:
   - Service Discovery:
     - Consul: 'consul.md'
     - Kubernetes: 'kubernetes.md'
+    - Eureka: 'eureka.md'
     - Custom: 'custom-service-discovery.md'
   - Load-Balancing:
     - Round Robin: 'round-robin.md'
