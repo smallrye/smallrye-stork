@@ -1,6 +1,7 @@
 package io.smallrye.stork.servicediscovery.consul;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,10 +18,16 @@ import io.smallrye.stork.spi.ServiceInstanceUtils;
 import io.vertx.core.Vertx;
 import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
+import io.vertx.ext.consul.Service;
 import io.vertx.ext.consul.ServiceEntry;
 import io.vertx.ext.consul.ServiceEntryList;
 
 public class ConsulServiceDiscovery extends CachingServiceDiscovery {
+
+    public static final String META_CONSUL_SERVICE_ID = "consul-service-id";
+    public static final String META_CONSUL_SERVICE_TAGS = "consul-service-tags";
+    public static final String META_CONSUL_SERVICE_NODE = "consul-service-node";
+    public static final String META_CONSUL_SERVICE_NODE_ADDRESS = "consul-service-node-address";
 
     private final ConsulClient client;
     private final String serviceName;
@@ -77,18 +84,23 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         List<ServiceInstance> serviceInstances = new ArrayList<>();
 
         for (ServiceEntry serviceEntry : list) {
-            String address = serviceEntry.getService().getAddress();
+            Service service = serviceEntry.getService();
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put(META_CONSUL_SERVICE_ID, service.getId());
+            metadata.put(META_CONSUL_SERVICE_TAGS, service.getTags());
+            metadata.put(META_CONSUL_SERVICE_NODE, service.getNode());
+            metadata.put(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNodeAddress());
+            String address = service.getAddress();
             int port = serviceEntry.getService().getPort();
             if (address == null) {
                 throw new IllegalArgumentException("Got null address for service " + serviceName);
             }
-
             ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, address, port);
             if (matching != null) {
                 serviceInstances.add(matching);
             } else {
                 ServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
-                        address, port, secure);
+                        address, port, secure, metadata);
                 serviceInstances.add(serviceInstance);
             }
         }

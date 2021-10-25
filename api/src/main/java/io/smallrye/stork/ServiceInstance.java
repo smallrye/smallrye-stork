@@ -1,5 +1,8 @@
 package io.smallrye.stork;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * Represents an instance of service.
  */
@@ -24,6 +27,13 @@ public interface ServiceInstance {
      * @return whether the communication should happen over a secure connection
      */
     boolean isSecure();
+
+    /**
+     * @return the metadata of the instance, empty if none.
+     */
+    default Map<String, Object> getMetadata() {
+        return Collections.emptyMap();
+    }
 
     /**
      * @return whether the interaction with the service are monitored, allowing statistic-based load-balancing.

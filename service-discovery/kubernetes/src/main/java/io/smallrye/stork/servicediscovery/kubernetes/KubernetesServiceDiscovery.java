@@ -1,13 +1,18 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.EndpointAddress;
+import io.fabric8.kubernetes.api.model.EndpointPort;
+import io.fabric8.kubernetes.api.model.EndpointSubset;
+import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -86,6 +91,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             List<ServiceInstance> previousInstances) {
         List<ServiceInstance> serviceInstances = new ArrayList<>();
         for (Endpoints endPoints : endpointList) {
+            Map<String, Object> labels;
+            Map<String, String> endpointLabels = endPoints.getMetadata().getLabels();
+            if (endpointLabels != null) {
+                labels = new HashMap<>(endpointLabels);
+            } else {
+                labels = Collections.emptyMap();
+            }
             for (EndpointSubset subset : endPoints.getSubsets()) {
                 for (EndpointAddress endpointAddress : subset.getAddresses()) {
                     String hostname = endpointAddress.getIp();
@@ -103,7 +115,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     if (matching != null) {
                         serviceInstances.add(matching);
                     } else {
-                        serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure));
+                        serviceInstances
+                                .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure, labels));
                     }
                 }
             }
