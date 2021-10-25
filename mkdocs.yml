@@ -5,7 +5,7 @@ edit_uri: edit/main/docs/
 nav:
   - Overview: 'index.md'
   - Concepts: 'concepts.md'
-#  - Javadoc: './apidocs/index.html'
+  - Javadoc: 'https://javadoc.io/doc/io.smallrye.stork/smallrye-stork-api/latest/index.html'
   - Using Stork with Quarkus: './quarkus.md'
   - Service Discovery:
     - Consul: 'consul.md'
