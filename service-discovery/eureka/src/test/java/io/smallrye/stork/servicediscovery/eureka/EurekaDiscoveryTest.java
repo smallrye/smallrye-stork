@@ -3,6 +3,7 @@ package io.smallrye.stork.servicediscovery.eureka;
 import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.registerApplicationInstance;
 import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.updateApplicationInstanceStatus;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.*;
@@ -55,6 +56,9 @@ public class EurekaDiscoveryTest {
     public void testWithoutApplicationInstancesThenOne() {
         String serviceName = "my-service";
         registerApplicationInstance(client, "another-service", "id1", "acme.com", 1234, null, -1, "UP");
+
+        waitForCacheExpiration();
+
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
@@ -83,6 +87,8 @@ public class EurekaDiscoveryTest {
         registerApplicationInstance(client, "my-service", "id2", "acme2.com", 1235, null, -1, "UP");
         registerApplicationInstance(client, "my-second-service", "second", "acme.com", 1236, null, -1, "UP");
 
+        waitForCacheExpiration();
+
         String serviceName = "my-service";
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
@@ -109,6 +115,7 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName, "secure", "true");
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
         List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(2)
                 .anySatisfy(instance -> {
@@ -131,6 +138,7 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
         List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .allSatisfy(instance -> {
@@ -162,18 +170,19 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
         List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
 
         updateApplicationInstanceStatus(client, "my-service", "id1", "STARTING");
         updateApplicationInstanceStatus(client, "my-service", "id2", "STARTING");
-        waitForCacheExpiration();
 
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
         instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
 
         updateApplicationInstanceStatus(client, "my-service", "id1", "UP");
-        waitForCacheExpiration();
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
 
         instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
@@ -183,7 +192,7 @@ public class EurekaDiscoveryTest {
                 });
 
         updateApplicationInstanceStatus(client, "my-service", "id2", "UP");
-        waitForCacheExpiration();
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
         instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(2)
                 .anySatisfy(instance -> {
@@ -205,6 +214,7 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
         List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
@@ -213,13 +223,13 @@ public class EurekaDiscoveryTest {
                 });
 
         updateApplicationInstanceStatus(client, "my-service", "id1", "OUT_OF_SERVICE");
-        waitForCacheExpiration();
 
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
         instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
 
         registerApplicationInstance(client, "my-service", "id2", "acme.com", 1235, null, -1, "UP");
-        waitForCacheExpiration();
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
         instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
@@ -230,7 +240,7 @@ public class EurekaDiscoveryTest {
     }
 
     @Test
-    public void testWithTwoUpApplicationInstancesBytOnlyOneSecure() {
+    public void testWithTwoUpApplicationInstancesButOnlyOneSecure() {
         registerApplicationInstance(client, "my-service", "id1", "acme.com", 1234, null, -1, "UP");
         registerApplicationInstance(client, "my-service", "id2", "acme2.com", 1235, "ssl.acme.com", 433, "UP");
         registerApplicationInstance(client, "my-second-service", "second", "acme.com", 1236, null, -1, "UP");
@@ -239,6 +249,7 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName, "secure", "true");
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
         List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
@@ -257,6 +268,7 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName, "instance", "id2");
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
+        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
         List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
@@ -265,10 +277,9 @@ public class EurekaDiscoveryTest {
                 });
 
         stork = configureAndGetStork(serviceName, "instance", "missing");
-        service = stork.getService(serviceName);
+        Service missing = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
-        assertThat(instances).isEmpty();
+        await().until(() -> missing.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
     }
 
     private Stork configureAndGetStork(String serviceName) {
