@@ -4,7 +4,7 @@ import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.jupiter.api.Assertions;
 import org.springframework.boot.SpringApplication;
@@ -27,7 +27,7 @@ import io.vertx.mutiny.ext.web.client.WebClient;
  * <p>
  * This class is responsible for starting and stopping the Eureka server.
  * The spring application reads the `src/test/resources/application.properties` file.
- *
+ * <p>
  * This class starts the server and provides helper methods to handle registrations and status updates.
  */
 @SpringBootApplication
@@ -51,29 +51,32 @@ public class EurekaServer {
 
     public static void stop() {
         if (context != null) {
-            context.close();
+            try {
+                context.close();
+            } catch (Exception ignored) {
+                // ignored
+            }
         }
     }
 
-    public static void unregisterAll(WebClient client) {
-        HttpResponse<Buffer> response = client.get("/eureka/apps")
-                .putHeader("Accept", "application/json")
-                .sendAndAwait();
-        Assertions.assertEquals(200, response.statusCode());
-        JsonObject applications = response.bodyAsJsonObject().getJsonObject("applications");
-        applications.getJsonArray("application").forEach(app -> {
-            JsonObject json = (JsonObject) app;
-            String appName = ((JsonObject) app).getString("name");
-            List<String> instances = json.getJsonArray("instance").stream().map(o -> (JsonObject) o)
-                    .map(j -> j.getString("instanceId")).collect(Collectors.toList());
-            for (String instance : instances) {
-                HttpResponse<Buffer> deletion = client.delete("/eureka/apps/" + appName + "/" + instance)
-                        .putHeader("Accept", "application/json")
-                        .sendAndAwait();
-                Assertions.assertEquals(200, deletion.statusCode());
-            }
+    private static class ApplicationInstance {
+        public final String app;
+        public final String instance;
 
-        });
+        private ApplicationInstance(String app, String instance) {
+            this.app = app;
+            this.instance = instance;
+        }
+    }
+
+    private static final List<ApplicationInstance> instances = new CopyOnWriteArrayList<>();
+
+    public static void unregisterAll(WebClient client) {
+        instances.forEach(ai -> client.delete("/eureka/apps/" + ai.app + "/" + ai.instance)
+                .putHeader("Accept", "application/json")
+                .sendAndAwait());
+
+        instances.clear();
     }
 
     public static void registerApplicationInstance(WebClient client, String applicationId, String instanceId,
@@ -82,7 +85,6 @@ public class EurekaServer {
         JsonObject instance = new JsonObject();
         JsonObject registration = new JsonObject();
         instance.put("instance", registration);
-
         registration
                 .put("hostName", "localhost")
                 .put("instanceId", instanceId)
@@ -103,7 +105,8 @@ public class EurekaServer {
                 .put("status", state.toUpperCase())
                 .put("dataCenterInfo", new JsonObject()
                         .put("@class", "com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo")
-                        .put("name", "MyOwn"));
+                        .put("name", "MyOwn"))
+                .put("leaseInfo", new JsonObject().put("renewalIntervalInSecs", 10000).put("durationInSecs", 10000));
 
         HttpResponse<Buffer> response = client.post("/eureka/apps/" + applicationId)
                 .putHeader("content-type", "application/json")
@@ -111,15 +114,23 @@ public class EurekaServer {
                 .sendJsonObjectAndAwait(instance);
 
         Assertions.assertEquals(204, response.statusCode());
+        waitForInstance(client, applicationId, instanceId);
+        instances.add(new ApplicationInstance(applicationId, instanceId));
     }
 
     static void updateApplicationInstanceStatus(WebClient client, String app, String id, String status) {
         String url = "/eureka/apps/" + app + "/" + id + "/status";
-        HttpResponse<Buffer> response = client.put(url)
-                .addQueryParam("value", status)
-                .putHeader("Accept", "application/json")
-                .sendAndAwait();
-        Assertions.assertEquals(200, response.statusCode());
+        await().untilAsserted(() -> {
+            HttpResponse<Buffer> response = client.put(url)
+                    .addQueryParam("value", status)
+                    .putHeader("Accept", "application/json")
+                    .sendAndAwait();
+            Assertions.assertEquals(200, response.statusCode());
+        });
     }
 
+    public static void waitForInstance(WebClient client, String app, String instance) {
+        await().untilAsserted(() -> Assertions.assertEquals(200,
+                client.get("/eureka/apps/" + app + "/" + instance).sendAndAwait().statusCode()));
+    }
 }
