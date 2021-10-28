@@ -1,7 +1,6 @@
 package io.smallrye.stork;
 
 import java.util.Collections;
-import java.util.Map;
 
 /**
  * Represents an instance of service.
@@ -31,8 +30,8 @@ public interface ServiceInstance {
     /**
      * @return the metadata of the instance, empty if none.
      */
-    default Map<String, String> getMetadata() {
-        return Collections.emptyMap();
+    default ServiceMetadata getMetadata() {
+        return new ServiceMetadata(Collections.emptyMap(), Collections.emptyMap());
     }
 
     /**

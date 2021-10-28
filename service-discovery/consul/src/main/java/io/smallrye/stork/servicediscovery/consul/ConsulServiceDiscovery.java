@@ -1,10 +1,6 @@
 package io.smallrye.stork.servicediscovery.consul;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +9,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.CachingServiceDiscovery;
 import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceInstance;
+import io.smallrye.stork.ServiceMetadata;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.smallrye.stork.spi.ServiceInstanceUtils;
@@ -86,11 +83,11 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
         for (ServiceEntry serviceEntry : list) {
             Service service = serviceEntry.getService();
-            Map<String, String> metadata = new HashMap<>();
-            String tags = service.getTags().stream()
-                    .collect(Collectors.joining(","));
+            Map<String, Object> metadata = new HashMap<>();
+            //            String tags = service.getTags().stream()
+            //                    .collect(Collectors.joining(","));
             metadata.put(META_CONSUL_SERVICE_ID, service.getId());
-            metadata.put(META_CONSUL_SERVICE_TAGS, tags);
+            metadata.put(META_CONSUL_SERVICE_TAGS, service.getTags());
             metadata.put(META_CONSUL_SERVICE_NODE, service.getNode());
             metadata.put(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNodeAddress());
             String address = service.getAddress();
@@ -103,7 +100,11 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
                 serviceInstances.add(matching);
             } else {
                 ServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
+<<<<<<< HEAD
                         address, port, secure, metadata);
+=======
+                        address, port, new ServiceMetadata(Collections.emptyMap(), metadata));
+>>>>>>> 5684728... refactor: wrap metadata labels and other metadata in a specific object
                 serviceInstances.add(serviceInstance);
             }
         }
