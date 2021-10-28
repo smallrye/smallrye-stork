@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,9 +86,11 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
         for (ServiceEntry serviceEntry : list) {
             Service service = serviceEntry.getService();
-            Map<String, Object> metadata = new HashMap<>();
+            Map<String, String> metadata = new HashMap<>();
+            String tags = service.getTags().stream()
+                    .collect(Collectors.joining(","));
             metadata.put(META_CONSUL_SERVICE_ID, service.getId());
-            metadata.put(META_CONSUL_SERVICE_TAGS, service.getTags());
+            metadata.put(META_CONSUL_SERVICE_TAGS, tags);
             metadata.put(META_CONSUL_SERVICE_NODE, service.getNode());
             metadata.put(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNodeAddress());
             String address = service.getAddress();

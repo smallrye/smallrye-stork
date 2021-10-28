@@ -2,7 +2,6 @@ package io.smallrye.stork.servicediscovery.kubernetes;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -91,13 +90,6 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             List<ServiceInstance> previousInstances) {
         List<ServiceInstance> serviceInstances = new ArrayList<>();
         for (Endpoints endPoints : endpointList) {
-            Map<String, Object> labels;
-            Map<String, String> endpointLabels = endPoints.getMetadata().getLabels();
-            if (endpointLabels != null) {
-                labels = new HashMap<>(endpointLabels);
-            } else {
-                labels = Collections.emptyMap();
-            }
             for (EndpointSubset subset : endPoints.getSubsets()) {
                 for (EndpointAddress endpointAddress : subset.getAddresses()) {
                     String hostname = endpointAddress.getIp();
@@ -111,7 +103,6 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     }
 
                     ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, hostname, port);
-
                     if (matching != null) {
                         serviceInstances.add(matching);
                     } else {

@@ -47,7 +47,7 @@ public class DefaultServiceInstance implements ServiceInstance {
     }
 
     @Override
-    public Map<String, Object> getMetadata() {
+    public Map<String, String> getMetadata() {
         return metadata;
     }
 }
