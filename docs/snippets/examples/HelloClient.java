@@ -9,7 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 @Path("/")
-@RegisterRestClient(configKey = "hello")
+@RegisterRestClient(baseUri = "stork://hello-service/hello")
 public interface HelloClient {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
