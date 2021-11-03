@@ -28,11 +28,12 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     private final String serviceName;
     private final boolean allNamespaces;
     private final String namespace;
+    private final boolean secure;
     private final Vertx vertx;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
-    public KubernetesServiceDiscovery(String serviceName, ServiceDiscoveryConfig config, Vertx vertx) {
+    public KubernetesServiceDiscovery(String serviceName, ServiceDiscoveryConfig config, Vertx vertx, boolean secure) {
         super(config);
         Config base = Config.autoConfigure(null);
         this.serviceName = serviceName;
@@ -49,6 +50,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                 .withNamespace(namespace).build();
         client = new DefaultKubernetesClient(properties);
         this.vertx = vertx;
+        this.secure = secure;
     }
 
     @Override
@@ -101,7 +103,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     if (matching != null) {
                         serviceInstances.add(matching);
                     } else {
-                        serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port));
+                        serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure));
                     }
                 }
             }

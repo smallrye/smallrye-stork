@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceDiscovery;
+import io.smallrye.stork.config.ServiceConfig;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 import io.smallrye.stork.spi.ServiceInstanceIds;
@@ -18,7 +19,8 @@ import io.smallrye.stork.utils.StorkAddressUtils;
 public class StaticListServiceDiscoveryProvider implements ServiceDiscoveryProvider {
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
+    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+            ServiceConfig serviceConfig) {
         // we're configuring service discovery for
         // config prefix stork.<service-name>.discovery
         // URLs for static config should be listed as:
@@ -38,7 +40,8 @@ public class StaticListServiceDiscoveryProvider implements ServiceDiscoveryProvi
                         String address = parameters.get(k);
                         HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(address, 80, serviceName);
                         addressList
-                                .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostAndPort.host, hostAndPort.port));
+                                .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostAndPort.host, hostAndPort.port,
+                                        serviceConfig.secure()));
                     } catch (Exception e) {
                         throw new IllegalArgumentException(
                                 "Address not parseable to URL: " + url + " for service " + serviceName);

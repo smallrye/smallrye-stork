@@ -27,10 +27,20 @@ public class TestConfigProvider implements ConfigProvider {
 
     public static void addServiceConfig(String name, String loadBalancer, String serviceDiscovery,
             Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams) {
+        addServiceConfig(name, loadBalancer, serviceDiscovery, loadBalancerParams, serviceDiscoveryParams, false);
+    }
+
+    public static void addServiceConfig(String name, String loadBalancer, String serviceDiscovery,
+            Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams, boolean secure) {
         configs.add(new ServiceConfig() {
             @Override
             public String serviceName() {
                 return name;
+            }
+
+            @Override
+            public boolean secure() {
+                return secure;
             }
 
             @Override

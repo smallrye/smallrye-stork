@@ -1,13 +1,17 @@
 package io.smallrye.stork;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import io.smallrye.stork.config.ConfigProvider;
@@ -22,6 +26,7 @@ import io.smallrye.stork.spi.ServiceDiscoveryProvider;
  */
 class StorkTest {
 
+    @SuppressWarnings("rawtypes")
     private MockedStatic<ServiceLoader> loader;
 
     @AfterEach
@@ -70,7 +75,8 @@ class StorkTest {
         ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
+                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                            ServiceConfig serviceConfig) {
                         return null;
                     }
 
@@ -106,7 +112,8 @@ class StorkTest {
         ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
+                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                            ServiceConfig serviceConfig) {
                         return null;
                     }
 
@@ -140,7 +147,8 @@ class StorkTest {
         ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
+                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                            ServiceConfig serviceConfig) {
                         return null;
                     }
 
@@ -169,7 +177,8 @@ class StorkTest {
         ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
+                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                            ServiceConfig serviceConfig) {
                         return null;
                     }
 
@@ -198,7 +207,8 @@ class StorkTest {
         ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
+                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                            ServiceConfig serviceConfig) {
                         return null;
                     }
 
@@ -241,7 +251,8 @@ class StorkTest {
         ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
+                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                            ServiceConfig serviceConfig) {
                         return null;
                     }
 
@@ -337,6 +348,11 @@ class StorkTest {
         @Override
         public ServiceDiscoveryConfig serviceDiscovery() {
             return sd;
+        }
+
+        @Override
+        public boolean secure() {
+            return false;
         }
     }
 

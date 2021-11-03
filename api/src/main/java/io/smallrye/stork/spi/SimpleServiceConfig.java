@@ -10,15 +10,19 @@ import io.smallrye.stork.config.ServiceDiscoveryConfig;
 public class SimpleServiceConfig implements ServiceConfig {
 
     private final String serviceName;
+    private final boolean secure;
 
     private final LoadBalancerConfig loadBalancerConfig;
     private final ServiceDiscoveryConfig serviceDiscoveryConfig;
 
-    private SimpleServiceConfig(String serviceName, LoadBalancerConfig loadBalancerConfig,
-            ServiceDiscoveryConfig serviceDiscoveryConfig) {
+    private SimpleServiceConfig(String serviceName,
+            LoadBalancerConfig loadBalancerConfig,
+            ServiceDiscoveryConfig serviceDiscoveryConfig,
+            boolean secure) {
         this.serviceName = serviceName;
         this.loadBalancerConfig = loadBalancerConfig;
         this.serviceDiscoveryConfig = serviceDiscoveryConfig;
+        this.secure = secure;
     }
 
     @Override
@@ -32,6 +36,11 @@ public class SimpleServiceConfig implements ServiceConfig {
     }
 
     @Override
+    public boolean secure() {
+        return secure;
+    }
+
+    @Override
     public ServiceDiscoveryConfig serviceDiscovery() {
         return serviceDiscoveryConfig;
     }
@@ -40,6 +49,7 @@ public class SimpleServiceConfig implements ServiceConfig {
         String serviceName;
         LoadBalancerConfig loadBalancerConfig;
         ServiceDiscoveryConfig serviceDiscoveryConfig;
+        boolean secure;
 
         public Builder setLoadBalancer(LoadBalancerConfig loadBalancer) {
             loadBalancerConfig = loadBalancer;
@@ -56,8 +66,13 @@ public class SimpleServiceConfig implements ServiceConfig {
             return this;
         }
 
+        public Builder setSecure(boolean secure) {
+            this.secure = secure;
+            return this;
+        }
+
         public SimpleServiceConfig build() {
-            return new SimpleServiceConfig(serviceName, loadBalancerConfig, serviceDiscoveryConfig);
+            return new SimpleServiceConfig(serviceName, loadBalancerConfig, serviceDiscoveryConfig, secure);
         }
     }
 

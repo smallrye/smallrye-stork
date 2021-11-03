@@ -24,13 +24,15 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
     private final ConsulClient client;
     private final String serviceName;
+    private final boolean secure;
     private boolean passing = true; // default true?
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulServiceDiscovery.class);
 
-    public ConsulServiceDiscovery(String serviceName, ServiceDiscoveryConfig config, Vertx vertx) {
+    public ConsulServiceDiscovery(String serviceName, ServiceDiscoveryConfig config, Vertx vertx, boolean secure) {
         super(config);
         this.serviceName = serviceName;
+        this.secure = secure;
 
         ConsulClientOptions options = new ConsulClientOptions();
         Map<String, String> parameters = config.parameters();
@@ -86,7 +88,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
                 serviceInstances.add(matching);
             } else {
                 ServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
-                        address, port);
+                        address, port, secure);
                 serviceInstances.add(serviceInstance);
             }
         }

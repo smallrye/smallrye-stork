@@ -8,10 +8,13 @@ public class DefaultServiceInstance implements ServiceInstance {
 
     private final int port;
 
-    public DefaultServiceInstance(long id, String host, int port) {
+    private final boolean secure;
+
+    public DefaultServiceInstance(long id, String host, int port, boolean secure) {
         this.id = id;
         this.host = host;
         this.port = port;
+        this.secure = secure;
     }
 
     public long getId() {
@@ -24,5 +27,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 
     public int getPort() {
         return port;
+    }
+
+    public boolean isSecure() {
+        return secure;
     }
 }

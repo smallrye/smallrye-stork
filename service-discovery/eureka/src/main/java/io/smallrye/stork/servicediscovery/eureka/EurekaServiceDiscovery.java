@@ -41,8 +41,9 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<String> instance;
 
-    public EurekaServiceDiscovery(ServiceDiscoveryConfig config, String serviceName) {
+    public EurekaServiceDiscovery(ServiceDiscoveryConfig config, String serviceName, boolean secure) {
         super(config);
+        this.secure = secure;
         Vertx vertx = Vertx.vertx(); // TODO Find a way to access the managed instance.
 
         // Eureka instance
@@ -54,9 +55,6 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
         // Service selection
         String app = getOrDefault(config, "application", serviceName);
         instance = get(config, "instance");
-
-        // Address selection
-        secure = getBooleanOrDefault(config, "secure", false);
 
         client = WebClient.create(vertx, new WebClientOptions()
                 .setDefaultHost(host).setDefaultPort(port).setSsl(eurekaTls).setTrustAll(trustAll));
@@ -112,7 +110,8 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
                     }
 
                     ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, virtualAddress, port);
-                    return matching == null ? new DefaultServiceInstance(ServiceInstanceIds.next(), virtualAddress, port)
+                    return matching == null
+                            ? new DefaultServiceInstance(ServiceInstanceIds.next(), virtualAddress, port, secure)
                             : matching;
                 })
                 .collect(Collectors.toList());

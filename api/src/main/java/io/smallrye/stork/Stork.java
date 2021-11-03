@@ -81,7 +81,7 @@ public final class Stork {
             }
 
             final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
-                    serviceConfig.serviceName());
+                    serviceConfig.serviceName(), serviceConfig);
 
             final var loadBalancerConfig = serviceConfig.loadBalancer();
             final LoadBalancer loadBalancer;
@@ -100,7 +100,8 @@ public final class Stork {
             }
 
             services.put(serviceConfig.serviceName(),
-                    new Service(serviceConfig.serviceName(), Optional.ofNullable(loadBalancer), serviceDiscovery));
+                    new Service(serviceConfig.serviceName(), Optional.ofNullable(loadBalancer), serviceDiscovery,
+                            serviceConfig.secure()));
         }
     }
 

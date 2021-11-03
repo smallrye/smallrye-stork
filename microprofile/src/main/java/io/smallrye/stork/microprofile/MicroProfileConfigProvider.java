@@ -23,8 +23,11 @@ public class MicroProfileConfigProvider implements ConfigProvider {
     private static final String CONFIG_PROPERTY_PART_EXPRESSION = "\".*\"|[^.]+";
     private static final Pattern CONFIG_PROP_PART = Pattern.compile(CONFIG_PROPERTY_PART_EXPRESSION);
 
+    private static final String SECURE = "secure";
+
     public static final String LOAD_BALANCER = "load-balancer";
     public static final String SERVICE_DISCOVERY = "service-discovery";
+
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
 
     public MicroProfileConfigProvider() {
@@ -67,8 +70,13 @@ public class MicroProfileConfigProvider implements ConfigProvider {
             SimpleServiceConfig.Builder builder = new SimpleServiceConfig.Builder();
 
             Map<String, String> properties = serviceEntry.getValue();
+
+            String serviceName = serviceEntry.getKey();
+
+            builder.setSecure(isSecureValueTrue(properties.get(SECURE), serviceName));
+
             String loadBalancerType = properties.get(LOAD_BALANCER);
-            builder.setServiceName(serviceEntry.getKey());
+            builder.setServiceName(serviceName);
             if (loadBalancerType != null) {
                 SimpleServiceConfig.SimpleLoadBalancerConfig loadBalancer = new SimpleServiceConfig.SimpleLoadBalancerConfig(
                         loadBalancerType, propertiesForPrefix(LOAD_BALANCER, properties));
@@ -85,6 +93,21 @@ public class MicroProfileConfigProvider implements ConfigProvider {
             }
 
             serviceConfigs.add(builder.build());
+        }
+    }
+
+    private boolean isSecureValueTrue(String secure, String serviceName) {
+        if (secure == null) {
+            return false;
+        }
+
+        if (Boolean.TRUE.toString().equalsIgnoreCase(secure)) {
+            return true;
+        } else if (Boolean.FALSE.toString().equalsIgnoreCase(secure)) {
+            return false;
+        } else {
+            throw new IllegalArgumentException("Unsupported value for the 'secure' property for service: '"
+                    + serviceName + "'. Expected 'true' or 'false'");
         }
     }
 

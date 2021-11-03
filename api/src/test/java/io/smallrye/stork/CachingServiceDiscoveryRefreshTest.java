@@ -79,8 +79,8 @@ class CachingServiceDiscoveryRefreshTest {
     private Uni<List<ServiceInstance>> fetchNewServiceInstances(AtomicInteger refreshCount) {
         refreshCount.incrementAndGet();
         return Uni.createFrom().emitter(e -> {
-            List<ServiceInstance> results = asList(new DefaultServiceInstance(1, "localhost", 8406),
-                    new DefaultServiceInstance(2, "localhost", 8407));
+            List<ServiceInstance> results = asList(new DefaultServiceInstance(1, "localhost", 8406, false),
+                    new DefaultServiceInstance(2, "localhost", 8407, false));
             vertx.setTimer(2000, ignored -> e.complete(results));
         });
     }

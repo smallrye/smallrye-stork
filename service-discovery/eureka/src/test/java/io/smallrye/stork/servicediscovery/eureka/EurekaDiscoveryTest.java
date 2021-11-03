@@ -131,7 +131,7 @@ public class EurekaDiscoveryTest {
         registerApplicationInstance(client, serviceName, "id2", "acme2.com", 1235, null, 8433, "UP");
         registerApplicationInstance(client, secondService, "second", "acme.com", 1236, null, -1, "UP");
 
-        Stork stork = configureAndGetStork(serviceName, "secure", "true");
+        Stork stork = configureAndGetStork(serviceName, true);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
         await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
@@ -140,10 +140,12 @@ public class EurekaDiscoveryTest {
                 .anySatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("secure.acme.com");
                     assertThat(instance.getPort()).isEqualTo(433);
+                    assertThat(instance.isSecure()).isTrue();
                 })
                 .anySatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("acme2.com");
                     assertThat(instance.getPort()).isEqualTo(8433);
+                    assertThat(instance.isSecure()).isTrue();
                 });
     }
 
@@ -262,7 +264,7 @@ public class EurekaDiscoveryTest {
         registerApplicationInstance(client, serviceName, "id2", "acme2.com", 1235, "ssl.acme.com", 433, "UP");
         registerApplicationInstance(client, secondService, "second", "acme.com", 1236, null, -1, "UP");
 
-        Stork stork = configureAndGetStork(serviceName, "secure", "true");
+        Stork stork = configureAndGetStork(serviceName, true);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
         await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
@@ -282,7 +284,7 @@ public class EurekaDiscoveryTest {
         registerApplicationInstance(client, serviceName, "id2", "acme2.com", 1235, "ssl.acme.com", 433, "UP");
         registerApplicationInstance(client, secondService, "second", "acme.com", 1236, null, -1, "UP");
 
-        Stork stork = configureAndGetStork(serviceName, "instance", "id2");
+        Stork stork = configureAndGetStork(serviceName, false, "instance", "id2");
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
         await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
@@ -293,22 +295,17 @@ public class EurekaDiscoveryTest {
                     assertThat(instance.getPort()).isEqualTo(1235);
                 });
 
-        stork = configureAndGetStork(serviceName, "instance", "missing");
+        stork = configureAndGetStork(serviceName, false, "instance", "missing");
         Service missing = stork.getService(serviceName);
         Assertions.assertNotNull(service);
         await().until(() -> missing.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
     }
 
     private Stork configureAndGetStork(String serviceName) {
-        Map<String, String> params = Map.of(
-                "eureka-host", EurekaServer.EUREKA_HOST,
-                "eureka-port", Integer.toString(EurekaServer.EUREKA_PORT),
-                "refresh-period", "1S");
-        TestConfigProvider.addServiceConfig(serviceName, null, "eureka", null, params);
-        return StorkTestUtils.getNewStorkInstance();
+        return configureAndGetStork(serviceName, false);
     }
 
-    private Stork configureAndGetStork(String serviceName, String... extra) {
+    private Stork configureAndGetStork(String serviceName, boolean secure, String... extra) {
         Map<String, String> params = new HashMap<>(Map.of(
                 "eureka-host", EurekaServer.EUREKA_HOST,
                 "eureka-port", Integer.toString(EurekaServer.EUREKA_PORT),
@@ -321,7 +318,7 @@ public class EurekaDiscoveryTest {
             }
         }
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "eureka", null, params);
+        TestConfigProvider.addServiceConfig(serviceName, null, "eureka", null, params, secure);
         return StorkTestUtils.getNewStorkInstance();
     }
 
