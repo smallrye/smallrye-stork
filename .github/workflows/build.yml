@@ -42,8 +42,7 @@ jobs:
           cache: maven
 
       - name: build with maven
-#        TODO: remove  -Djava.version=17.0.0 when vertx-consul-client's POM is fixed
-        run: mvn -B formatter:validate verify --file pom.xml '-Djava.version=17.0.0'
+        run: mvn -B formatter:validate verify --file pom.xml
 
   build-windows:
     runs-on: windows-latest
@@ -69,8 +68,7 @@ jobs:
 
       - name: build with maven
 #        Skip integration tests. TestContainers does not support Windows Server 2019: https://github.com/testcontainers/testcontainers-java/issues/2960
-#        TODO: remove  -Djava.version=17.0.0 when vertx-consul-client's POM is fixed
-        run: mvn -B formatter:validate test --file pom.xml '-Djava.version=17.0.0'
+        run: mvn -B formatter:validate test --file pom.xml
 
   quality:
     needs: [build]
