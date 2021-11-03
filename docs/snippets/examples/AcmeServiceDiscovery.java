@@ -24,8 +24,9 @@ public class AcmeServiceDiscovery implements ServiceDiscovery {
     public Uni<List<ServiceInstance>> getServiceInstances() {
         // Proceed to the lookup...
         // Here, we just return a DefaultServiceInstance with the configured host and port
+        // The last parameter specifies whether the communication with the instance should happen over a secure connection
         DefaultServiceInstance instance =
-                new DefaultServiceInstance(ServiceInstanceIds.next(), host, port);
+                new DefaultServiceInstance(ServiceInstanceIds.next(), host, port, false);
         return Uni.createFrom().item(() -> Collections.singletonList(instance));
     }
 }

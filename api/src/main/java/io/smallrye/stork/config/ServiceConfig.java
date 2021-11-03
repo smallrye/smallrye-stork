@@ -25,4 +25,11 @@ public interface ServiceConfig {
      */
     ServiceDiscoveryConfig serviceDiscovery();
 
+    /**
+     * Whether the communication should use a connection (etc. HTTPS)
+     * 
+     * @return true if SSL, TLS, etc. should be used for the communication
+     */
+    boolean secure();
+
 }

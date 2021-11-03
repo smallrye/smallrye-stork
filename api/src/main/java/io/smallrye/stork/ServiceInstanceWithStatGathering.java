@@ -31,6 +31,11 @@ public class ServiceInstanceWithStatGathering implements ServiceInstance {
         return delegate.getPort();
     }
 
+    @Override
+    public boolean isSecure() {
+        return delegate.isSecure();
+    }
+
     public void recordResult(long timeInNs, Throwable failure) {
         statistics.storeResult(getId(), timeInNs, failure);
     }

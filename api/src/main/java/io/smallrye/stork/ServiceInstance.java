@@ -21,6 +21,11 @@ public interface ServiceInstance {
     int getPort();
 
     /**
+     * @return whether the communication should happen over a secure connection
+     */
+    boolean isSecure();
+
+    /**
      * @return whether the interaction with the service are monitored, allowing statistic-based load-balancing.
      */
     default boolean gatherStatistics() {

@@ -15,11 +15,13 @@ public class Service {
     private final Optional<LoadBalancer> loadBalancer;
     private final ServiceDiscovery serviceDiscovery;
     private final String serviceName;
+    private final boolean secure;
 
-    public Service(String serviceName, Optional<LoadBalancer> loadBalancer, ServiceDiscovery serviceDiscovery) {
+    public Service(String serviceName, Optional<LoadBalancer> loadBalancer, ServiceDiscovery serviceDiscovery, boolean secure) {
         this.loadBalancer = loadBalancer;
         this.serviceDiscovery = serviceDiscovery;
         this.serviceName = serviceName;
+        this.secure = secure;
     }
 
     /**
@@ -63,5 +65,9 @@ public class Service {
      */
     public ServiceDiscovery getServiceDiscovery() {
         return serviceDiscovery;
+    }
+
+    public boolean isSecure() {
+        return secure;
     }
 }
