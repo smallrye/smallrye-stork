@@ -1,13 +1,17 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.EndpointAddress;
+import io.fabric8.kubernetes.api.model.EndpointPort;
+import io.fabric8.kubernetes.api.model.EndpointSubset;
+import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -99,11 +103,16 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     }
 
                     ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, hostname, port);
-
                     if (matching != null) {
                         serviceInstances.add(matching);
                     } else {
-                        serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure));
+                        Map<String, String> labels = endPoints.getMetadata().getLabels() != null
+                                ? endPoints.getMetadata().getLabels()
+                                : Collections.emptyMap();
+                        //TODO add some useful metadata?
+                        Map<String, Object> metadata = Collections.emptyMap();
+                        serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure,
+                                labels, metadata));
                     }
                 }
             }
