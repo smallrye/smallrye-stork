@@ -1,6 +1,11 @@
 package io.smallrye.stork.servicediscovery.consul;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +14,6 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.CachingServiceDiscovery;
 import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.ServiceMetadata;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.smallrye.stork.spi.ServiceInstanceUtils;
@@ -84,10 +88,9 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         for (ServiceEntry serviceEntry : list) {
             Service service = serviceEntry.getService();
             Map<String, Object> metadata = new HashMap<>();
-            //            String tags = service.getTags().stream()
-            //                    .collect(Collectors.joining(","));
+            Map<String, String> labels = service.getTags().stream().collect(Collectors.toMap(Function.identity(), s -> s));
             metadata.put(META_CONSUL_SERVICE_ID, service.getId());
-            metadata.put(META_CONSUL_SERVICE_TAGS, service.getTags());
+            //            metadata.put(META_CONSUL_SERVICE_TAGS, service.getTags());
             metadata.put(META_CONSUL_SERVICE_NODE, service.getNode());
             metadata.put(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNodeAddress());
             String address = service.getAddress();
@@ -95,16 +98,13 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
             if (address == null) {
                 throw new IllegalArgumentException("Got null address for service " + serviceName);
             }
+
             ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, address, port);
             if (matching != null) {
                 serviceInstances.add(matching);
             } else {
                 ServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
-<<<<<<< HEAD
-                        address, port, secure, metadata);
-=======
-                        address, port, new ServiceMetadata(Collections.emptyMap(), metadata));
->>>>>>> 5684728... refactor: wrap metadata labels and other metadata in a specific object
+                        address, port, secure, labels, metadata);
                 serviceInstances.add(serviceInstance);
             }
         }

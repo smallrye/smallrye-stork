@@ -20,7 +20,6 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.CachingServiceDiscovery;
 import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.ServiceMetadata;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.smallrye.stork.spi.ServiceInstanceUtils;
@@ -107,16 +106,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     if (matching != null) {
                         serviceInstances.add(matching);
                     } else {
-<<<<<<< HEAD
-                        serviceInstances
-                                .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure, labels));
-=======
                         Map<String, String> labels = endPoints.getMetadata().getLabels() != null
                                 ? endPoints.getMetadata().getLabels()
                                 : Collections.emptyMap();
-                        ServiceMetadata metadata = new ServiceMetadata(labels, Collections.emptyMap());
-                        serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, metadata));
->>>>>>> 5684728... refactor: wrap metadata labels and other metadata in a specific object
+                        //TODO add some useful metadata?
+                        Map<String, Object> metadata = Collections.emptyMap();
+                        serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure,
+                                labels, metadata));
                     }
                 }
             }
