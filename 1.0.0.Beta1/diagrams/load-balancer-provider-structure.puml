@@ -1,0 +1,19 @@
+@startuml
+salt
+{
+  {T
+     +      pom.xml
+     ++       src
+     +++        main
+     ++++         java
+     +++++          org
+     ++++++            acme
+     +++++++            AcmeLoadBalancerProvider   # the provider implementation
+     +++++++            AcmeLoadBalancer               # instances used by Stork to select a specific service instance
+     ++++         resources
+     +++++         META-INF
+     ++++++         services
+     +++++++         io.smallrye.stork.spi.LoadBalancerProvider # just contains `org.acme.AcmeLoadBalancerProvider`
+  }
+}
+@enduml
