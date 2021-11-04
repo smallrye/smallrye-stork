@@ -3,8 +3,8 @@ package io.smallrye.stork;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.mock;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,13 +13,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Timeout;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.vertx.core.Vertx;
 
 class CachingServiceDiscoveryRefreshTest {
@@ -31,26 +31,31 @@ class CachingServiceDiscoveryRefreshTest {
     void shouldTriggerSupplierOnceAndCompleteAllConsumersWhenDone() throws InterruptedException {
         int amountOfGets = 300;
 
-        final AtomicReference<CachingServiceDiscovery.Refresh> refresh = new AtomicReference<>(null);
-
-        List<Uni<List<ServiceInstance>>> results = Collections.synchronizedList(new ArrayList<>());
+        List<List<ServiceInstance>> results = Collections.synchronizedList(new ArrayList<>());
 
         AtomicInteger refreshCount = new AtomicInteger(0);
         CountDownLatch awaitFinish = new CountDownLatch(amountOfGets);
 
         ExecutorService executor = Executors.newFixedThreadPool(amountOfGets);
 
+        CachingServiceDiscovery discovery = new CachingServiceDiscovery(mock(ServiceDiscoveryConfig.class)) {
+            @Override
+            public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
+                refreshCount.incrementAndGet();
+                return Uni.createFrom().emitter(e -> {
+                    List<ServiceInstance> results = asList(new DefaultServiceInstance(1, "localhost", 8406, false),
+                            new DefaultServiceInstance(2, "localhost", 8407, false));
+                    vertx.setTimer(2000, ignored -> e.complete(results));
+                });
+            }
+        };
         for (int i = 0; i < amountOfGets; i++) {
             executor.execute(() -> {
-                CachingServiceDiscovery.Refresh previousRefresher = refresh.compareAndExchange(null,
-                        new CachingServiceDiscovery.Refresh());
-                if (previousRefresher != null) {
-                    results.add(previousRefresher.result());
-                } else {
-                    refresh.get().trigger(() -> fetchNewServiceInstances(refreshCount));
-                    results.add(refresh.get().result());
-                }
-                awaitFinish.countDown();
+                discovery.getServiceInstances()
+                        .subscribe().with(instances -> {
+                            results.add(instances);
+                            awaitFinish.countDown();
+                        });
             });
 
         }
@@ -62,8 +67,7 @@ class CachingServiceDiscoveryRefreshTest {
         assertThat(results).hasSize(amountOfGets);
 
         List<ServiceInstance> originalList = null;
-        for (Uni<List<ServiceInstance>> result : results) {
-            List<ServiceInstance> servicesList = result.await().atMost(Duration.ofSeconds(10));
+        for (List<ServiceInstance> servicesList : results) {
             assertThat(servicesList).hasSize(2);
 
             // verify it's the exact same list that is returned:
@@ -74,14 +78,5 @@ class CachingServiceDiscoveryRefreshTest {
             assertThat(servicesList == originalList).isTrue();
         }
 
-    }
-
-    private Uni<List<ServiceInstance>> fetchNewServiceInstances(AtomicInteger refreshCount) {
-        refreshCount.incrementAndGet();
-        return Uni.createFrom().emitter(e -> {
-            List<ServiceInstance> results = asList(new DefaultServiceInstance(1, "localhost", 8406, false),
-                    new DefaultServiceInstance(2, "localhost", 8407, false));
-            vertx.setTimer(2000, ignored -> e.complete(results));
-        });
     }
 }

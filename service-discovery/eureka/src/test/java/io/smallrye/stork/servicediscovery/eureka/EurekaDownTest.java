@@ -1,6 +1,6 @@
 package io.smallrye.stork.servicediscovery.eureka;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.Map;
@@ -53,7 +53,6 @@ public class EurekaDownTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        assertThatThrownBy(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)))
-                .hasMessageContaining("ConnectException");
+        assertThat(service.getServiceInstances().await().atMost(Duration.ofSeconds(5))).hasSize(0);
     }
 }
