@@ -31,8 +31,8 @@ public interface ServiceInstance {
     /**
      * @return the metadata of the instance, empty if none.
      */
-    default Map<String, Object> getMetadata() {
-        return Collections.emptyMap();
+    default Metadata<? extends MetadataKey> getMetadata() {
+        return new Metadata<MetadataKey>(Collections.emptyMap());
     }
 
     /**

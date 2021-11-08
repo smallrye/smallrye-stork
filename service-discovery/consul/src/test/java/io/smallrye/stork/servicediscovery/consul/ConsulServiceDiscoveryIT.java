@@ -1,6 +1,7 @@
 package io.smallrye.stork.servicediscovery.consul;
 
 import static io.smallrye.stork.servicediscovery.consul.ConsulServiceDiscovery.META_CONSUL_SERVICE_ID;
+import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -21,10 +23,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import io.smallrye.stork.Service;
-import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.Stork;
-import io.smallrye.stork.StorkTestUtils;
+import io.smallrye.stork.*;
 import io.smallrye.stork.test.TestConfigProvider;
 import io.vertx.core.Vertx;
 import io.vertx.ext.consul.ConsulClient;
@@ -58,7 +57,8 @@ public class ConsulServiceDiscoveryIT {
         TestConfigProvider.addServiceConfig("my-service", null, "consul",
                 null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5M"));
         stork = StorkTestUtils.getNewStorkInstance();
-        setUpServices(serviceName, 8406, "example.com");
+        List<String> tags = Arrays.asList("primary");
+        registerService(serviceName, 8406, tags, "example.com");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -68,12 +68,13 @@ public class ConsulServiceDiscoveryIT {
                 .onFailure().invoke(th -> fail("Failed to get service instances from Consul", th))
                 .subscribe().with(instances::set);
 
-        await().atMost(Duration.ofSeconds(5))
+        await().atMost(Duration.ofSeconds(10))
                 .until(() -> instances.get() != null);
 
         deregisterServiceInstances(instances.get());
 
-        setUpServices(serviceName, 8506, "another.example.com");
+        List<String> sTags = Arrays.asList("secondary");
+        registerService(serviceName, 8506, sTags, "another.example.com");
 
         // when the consul service discovery is called before the end of refreshing period
         service.getServiceDiscovery().getServiceInstances()
@@ -85,8 +86,13 @@ public class ConsulServiceDiscoveryIT {
 
         //Then stork returns the instances from the cache
         assertThat(instances.get()).hasSize(1);
-        assertThat(instances.get().get(0).getHost()).isEqualTo("example.com");
-        assertThat(instances.get().get(0).getPort()).isEqualTo(8406);
+        ServiceInstance serviceInstance = instances.get().get(0);
+        assertThat(serviceInstance.getHost()).isEqualTo("example.com");
+        assertThat(serviceInstance.getPort()).isEqualTo(8406);
+        assertThat(serviceInstance.getLabels()).containsKey("primary");
+        Metadata<ConsulMetadataKey> consulMetadata = (Metadata<ConsulMetadataKey>) serviceInstance.getMetadata();
+        assertThat(consulMetadata.getMetadata()).containsKeys(META_CONSUL_SERVICE_ID, META_CONSUL_SERVICE_NODE,
+                META_CONSUL_SERVICE_NODE_ADDRESS);
 
     }
 
@@ -98,7 +104,9 @@ public class ConsulServiceDiscoveryIT {
                 null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
-        setUpServices(serviceName, 8406, "example.com");
+        List<String> tags = Arrays.asList("primary");
+        Map<String, String> metadata = Maps.newHashMap("meta", "metadata for my-service");
+        registerService(serviceName, 8406, tags, "example.com");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -121,7 +129,8 @@ public class ConsulServiceDiscoveryIT {
         Thread.sleep(5000);
 
         //the service settings change in consul
-        setUpServices(serviceName, 8506, "another.example.com");
+        List<String> sTags = Arrays.asList("secondary");
+        registerService(serviceName, 8506, sTags, "another.example.com");
 
         instances.set(null);
         service.getServiceDiscovery().getServiceInstances()
@@ -135,6 +144,10 @@ public class ConsulServiceDiscoveryIT {
         assertThat(instances.get()).hasSize(1);
         assertThat(instances.get().get(0).getHost()).isEqualTo("another.example.com");
         assertThat(instances.get().get(0).getPort()).isEqualTo(8506);
+        assertThat(instances.get().get(0).getLabels()).containsKey("secondary");
+        Metadata<ConsulMetadataKey> consulMetadata = (Metadata<ConsulMetadataKey>) instances.get().get(0).getMetadata();
+        assertThat(consulMetadata.getMetadata()).containsKeys(META_CONSUL_SERVICE_ID, META_CONSUL_SERVICE_NODE,
+                META_CONSUL_SERVICE_NODE_ADDRESS);
     }
 
     @Test
@@ -173,7 +186,8 @@ public class ConsulServiceDiscoveryIT {
                 null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
-        setUpServices(serviceName, 8406, "example.com");
+        List<String> tags = Arrays.asList("primary");
+        registerService(serviceName, 8406, tags, "example.com");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -199,7 +213,7 @@ public class ConsulServiceDiscoveryIT {
         Thread.sleep(5000);
 
         //the service settings change in consul
-        setUpServices(serviceName, 8406, "example.com", "another.example.com");
+        registerService(serviceName, 8406, tags, "example.com", "another.example.com");
 
         instances.set(null);
         service.getServiceDiscovery().getServiceInstances()
@@ -224,12 +238,14 @@ public class ConsulServiceDiscoveryIT {
                 .hasValueSatisfying(instance -> assertThat(instance.getId()).isNotEqualTo(serviceId));
     }
 
-    private void setUpServices(String serviceName, int port, String... addresses) throws InterruptedException {
+    private void registerService(String serviceName, int port, List<String> tags,
+            String... addresses) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(addresses.length);
 
         for (String address : addresses) {
             client.registerService(
-                    new ServiceOptions().setId("" + (consulId++)).setName(serviceName).setAddress(address).setPort(port))
+                    new ServiceOptions().setId("" + (consulId++)).setName(serviceName).setTags(tags)
+                            .setAddress(address).setPort(port))
                     .onComplete(result -> {
                         if (result.failed()) {
                             fail("Failed to register service in Consul", result.cause());

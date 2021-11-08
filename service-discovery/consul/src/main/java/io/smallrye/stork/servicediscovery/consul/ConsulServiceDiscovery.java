@@ -5,8 +5,12 @@ import static io.smallrye.stork.config.StorkConfigHelper.getBoolean;
 import static io.smallrye.stork.config.StorkConfigHelper.getInteger;
 import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
 
+import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.*;
+import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
+import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE;
+
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.CachingServiceDiscovery;
 import io.smallrye.stork.DefaultServiceInstance;
+import io.smallrye.stork.Metadata;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceInstanceIds;
@@ -31,11 +36,6 @@ import io.vertx.ext.consul.ServiceEntry;
 import io.vertx.ext.consul.ServiceEntryList;
 
 public class ConsulServiceDiscovery extends CachingServiceDiscovery {
-
-    public static final String META_CONSUL_SERVICE_ID = "consul-service-id";
-    public static final String META_CONSUL_SERVICE_TAGS = "consul-service-tags";
-    public static final String META_CONSUL_SERVICE_NODE = "consul-service-node";
-    public static final String META_CONSUL_SERVICE_NODE_ADDRESS = "consul-service-node-address";
 
     private final ConsulClient client;
     private final String serviceName;
@@ -90,11 +90,12 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
         for (ServiceEntry serviceEntry : list) {
             Service service = serviceEntry.getService();
-            Map<String, Object> metadata = new HashMap<>();
+            Map<ConsulMetadataKey, Object> metadata = new EnumMap<>(ConsulMetadataKey.class);
             Map<String, String> labels = service.getTags().stream().collect(Collectors.toMap(Function.identity(), s -> s));
             metadata.put(META_CONSUL_SERVICE_ID, service.getId());
             metadata.put(META_CONSUL_SERVICE_NODE, service.getNode());
             metadata.put(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNodeAddress());
+            Metadata<ConsulMetadataKey> consulMetadata = new Metadata<>(metadata);
             String address = service.getAddress();
             int port = serviceEntry.getService().getPort();
             if (address == null) {
@@ -106,7 +107,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
                 serviceInstances.add(matching);
             } else {
                 ServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
-                        address, port, secure, labels, metadata);
+                        address, port, secure, labels, consulMetadata);
                 serviceInstances.add(serviceInstance);
             }
         }
