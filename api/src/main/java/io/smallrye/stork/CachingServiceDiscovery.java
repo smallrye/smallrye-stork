@@ -30,7 +30,7 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
     private final Uni<List<ServiceInstance>> instances;
 
     public CachingServiceDiscovery(ServiceDiscoveryConfig config) {
-        String period = config.parameters().get("refresh-period");
+        String period = config.parameters() != null ? config.parameters().get("refresh-period") : null;
         try {
             // TODO: document it
             this.refreshPeriod = period != null
