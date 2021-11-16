@@ -1,10 +1,10 @@
 package io.smallrye.stork.servicediscovery.eureka;
 
-import static io.smallrye.stork.servicediscovery.eureka.StorkConfigHelper.get;
-import static io.smallrye.stork.servicediscovery.eureka.StorkConfigHelper.getBooleanOrDefault;
-import static io.smallrye.stork.servicediscovery.eureka.StorkConfigHelper.getIntegerOrDefault;
-import static io.smallrye.stork.servicediscovery.eureka.StorkConfigHelper.getOrDefault;
-import static io.smallrye.stork.servicediscovery.eureka.StorkConfigHelper.getOrDie;
+import static io.smallrye.stork.config.StorkConfigHelper.get;
+import static io.smallrye.stork.config.StorkConfigHelper.getBooleanOrDefault;
+import static io.smallrye.stork.config.StorkConfigHelper.getIntegerOrDefault;
+import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
+import static io.smallrye.stork.config.StorkConfigHelper.getOrDie;
 
 import java.util.List;
 import java.util.Optional;

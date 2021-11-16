@@ -68,6 +68,33 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
+    void shouldDiscoverServiceWithSpecificName() {
+
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
+                null, Map.of("k8s-host", k8sMasterUrl, "application", "rest-service"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "svc";
+
+        setUpKubernetesService("rest-service", null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+    }
+
+    @Test
     void shouldGetServiceFromK8sNamespace() {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",

@@ -134,6 +134,33 @@ public class ConsulServiceDiscoveryIT {
     }
 
     @Test
+    void shouldDiscoverServiceWithSpecificName() throws InterruptedException {
+        //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig("my-service", null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5",
+                        "application", "my-consul-service"));
+        stork = StorkTestUtils.getNewStorkInstance();
+        //Given a service `my-service` registered in consul
+        setUpServices("my-consul-service", 8406, "example.com");
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        // call stork service discovery and gather service instances in the cache
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Consul", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(1);
+        assertThat(instances.get().get(0).getHost()).isEqualTo("example.com");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(8406);
+    }
+
+    @Test
     void shouldPreserveIdsOnRefetch() throws InterruptedException {
         //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
         String serviceName = "my-service";

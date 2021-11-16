@@ -1,5 +1,7 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
+import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +32,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     public static final String METADATA_NAME = "metadata.name";
     private final KubernetesClient client;
     private final String serviceName;
+    private String application;
     private final boolean allNamespaces;
     private final String namespace;
     private final boolean secure;
@@ -42,17 +45,15 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         Config base = Config.autoConfigure(null);
         this.serviceName = serviceName;
         Map<String, String> parameters = config.parameters();
-        String masterUrl = parameters != null ? parameters.get("k8s-host") : base.getMasterUrl();
-        if (masterUrl == null) {
-            masterUrl = base.getMasterUrl();
-        }
-        namespace = parameters != null ? parameters.get("k8s-namespace") : base.getNamespace();
+        String masterUrl = getOrDefault(config, "k8s-host", base.getMasterUrl());
+        this.application = getOrDefault(config, "application", serviceName);
+        namespace = getOrDefault(config, "k8s-namespace", base.getNamespace());
         allNamespaces = namespace != null && namespace.equalsIgnoreCase("all");
 
-        Config properties = new ConfigBuilder(base)
+        Config k8sConfig = new ConfigBuilder(base)
                 .withMasterUrl(masterUrl)
                 .withNamespace(namespace).build();
-        client = new DefaultKubernetesClient(properties);
+        client = new DefaultKubernetesClient(k8sConfig);
         this.vertx = vertx;
         this.secure = secure;
     }
@@ -64,11 +65,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     vertx.executeBlocking(future -> {
                         List<Endpoints> endpoints = new ArrayList<>();
                         if (allNamespaces) {
-                            endpoints.addAll(client.endpoints().inAnyNamespace().withField(METADATA_NAME, serviceName).list()
-                                    .getItems());
+                            endpoints.addAll(
+                                    client.endpoints().inAnyNamespace().withField(METADATA_NAME, application).list()
+                                            .getItems());
                         } else {
                             endpoints.addAll(
-                                    client.endpoints().inNamespace(namespace).withField(METADATA_NAME, serviceName).list()
+                                    client.endpoints().inNamespace(namespace).withField(METADATA_NAME, application)
+                                            .list()
                                             .getItems());
                         }
                         future.complete(endpoints);
@@ -78,7 +81,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                             List<Endpoints> endpoints = (List<Endpoints>) result.result();
                             emitter.complete(endpoints);
                         } else {
-                            LOGGER.error("Unable to retrieve the endpoint from the {} service", serviceName, result.cause());
+                            LOGGER.error("Unable to retrieve the endpoint from the {} service", application,
+                                    result.cause());
                             emitter.fail(result.cause());
                         }
                     });
