@@ -38,6 +38,7 @@ public class ConsulServiceDiscoveryIT {
     Stork stork;
     int consulPort;
     ConsulClient client;
+    int consulId;
 
     @BeforeEach
     void setUp() {
@@ -142,7 +143,8 @@ public class ConsulServiceDiscoveryIT {
                         "application", "my-consul-service"));
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
-        setUpServices("my-consul-service", 8406, "example.com");
+        setUpServices("my-consul-service", 8406, "consul.com");
+        setUpServices("my-service", 8606, "example.com");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -156,7 +158,7 @@ public class ConsulServiceDiscoveryIT {
                 .until(() -> instances.get() != null);
 
         assertThat(instances.get()).hasSize(1);
-        assertThat(instances.get().get(0).getHost()).isEqualTo("example.com");
+        assertThat(instances.get().get(0).getHost()).isEqualTo("consul.com");
         assertThat(instances.get().get(0).getPort()).isEqualTo(8406);
     }
 
@@ -222,10 +224,9 @@ public class ConsulServiceDiscoveryIT {
     private void setUpServices(String serviceName, int port, String... addresses) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(addresses.length);
 
-        int id = 0;
         for (String address : addresses) {
             client.registerService(
-                    new ServiceOptions().setId("" + (id++)).setName(serviceName).setAddress(address).setPort(port))
+                    new ServiceOptions().setId("" + (consulId++)).setName(serviceName).setAddress(address).setPort(port))
                     .onComplete(result -> {
                         if (result.failed()) {
                             fail("Failed to register service in Consul", result.cause());
