@@ -1,5 +1,6 @@
 package io.smallrye.stork.servicediscovery.consul;
 
+import static io.smallrye.stork.servicediscovery.consul.ConsulServiceDiscovery.META_CONSUL_SERVICE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,11 +40,13 @@ public class ConsulServiceDiscoveryIT {
     Stork stork;
     int consulPort;
     ConsulClient client;
+    long consulId;
 
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
         consulPort = consul.getMappedPort(8500);
+        consulId = 0L;
         client = ConsulClient.create(Vertx.vertx(),
                 new ConsulClientOptions().setHost("localhost").setPort(consulPort));
     }
@@ -67,7 +71,7 @@ public class ConsulServiceDiscoveryIT {
         await().atMost(Duration.ofSeconds(5))
                 .until(() -> instances.get() != null);
 
-        deregisterService(serviceName);
+        deregisterServiceInstances(instances.get());
 
         setUpServices(serviceName, 8506, "another.example.com");
 
@@ -111,7 +115,7 @@ public class ConsulServiceDiscoveryIT {
         assertThat(instances.get().get(0).getHost()).isEqualTo("example.com");
         assertThat(instances.get().get(0).getPort()).isEqualTo(8406);
 
-        deregisterService(serviceName);
+        deregisterServiceInstances(instances.get());
 
         // When the refresh interval is reached
         Thread.sleep(5000);
@@ -131,6 +135,34 @@ public class ConsulServiceDiscoveryIT {
         assertThat(instances.get()).hasSize(1);
         assertThat(instances.get().get(0).getHost()).isEqualTo("another.example.com");
         assertThat(instances.get().get(0).getPort()).isEqualTo(8506);
+    }
+
+    @Test
+    void shouldDiscoverServiceWithSpecificName() throws InterruptedException {
+        //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
+        String serviceName = "my-consul-service";
+        TestConfigProvider.addServiceConfig("my-consul-service", null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5",
+                        "application", "my-consul-service"));
+        stork = StorkTestUtils.getNewStorkInstance();
+        //Given a service `my-service` registered in consul
+        setUpServices("my-consul-service", 8406, "consul.com");
+        setUpServices("another-service", 8606, "another.example.com");
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        // call stork service discovery and gather service instances in the cache
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Consul", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(1);
+        assertThat(instances.get().get(0).getHost()).isEqualTo("consul.com");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(8406);
     }
 
     @Test
@@ -161,7 +193,7 @@ public class ConsulServiceDiscoveryIT {
 
         long serviceId = serviceInstance.getId();
 
-        deregisterService(serviceName);
+        deregisterServiceInstances(instances.get());
 
         // When the refresh interval is reached
         Thread.sleep(5000);
@@ -195,10 +227,9 @@ public class ConsulServiceDiscoveryIT {
     private void setUpServices(String serviceName, int port, String... addresses) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(addresses.length);
 
-        int id = 0;
         for (String address : addresses) {
             client.registerService(
-                    new ServiceOptions().setId("" + (id++)).setName(serviceName).setAddress(address).setPort(port))
+                    new ServiceOptions().setId("" + (consulId++)).setName(serviceName).setAddress(address).setPort(port))
                     .onComplete(result -> {
                         if (result.failed()) {
                             fail("Failed to register service in Consul", result.cause());
@@ -212,17 +243,24 @@ public class ConsulServiceDiscoveryIT {
         }
     }
 
-    private void deregisterService(String serviceName) throws InterruptedException {
+    private void deregisterServiceInstances(List<ServiceInstance> serviceInstances) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        client.deregisterService(serviceName, res -> {
-            if (res.succeeded()) {
-                latch.countDown();
-            } else {
-                res.cause().printStackTrace();
+        List<String> consulIds = serviceInstances.stream().map(ServiceInstance::getMetadata)
+                .map(metadata -> metadata.get(META_CONSUL_SERVICE_ID))
+                .filter(consulId -> consulId instanceof String)
+                .map(consulId -> (String) consulId)
+                .collect(Collectors.toList());
+        for (String id : consulIds) {
+            client.deregisterService(id, res -> {
+                if (res.succeeded()) {
+                    latch.countDown();
+                } else {
+                    res.cause().printStackTrace();
+                }
+            });
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                fail("Failed to deregister service in consul in time");
             }
-        });
-        if (!latch.await(5, TimeUnit.SECONDS)) {
-            fail("Failed to deregister service in consul in time");
         }
     }
 

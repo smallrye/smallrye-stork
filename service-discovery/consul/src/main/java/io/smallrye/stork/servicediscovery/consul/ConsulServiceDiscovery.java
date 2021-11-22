@@ -1,9 +1,15 @@
 package io.smallrye.stork.servicediscovery.consul;
 
+import static io.smallrye.stork.config.StorkConfigHelper.get;
+import static io.smallrye.stork.config.StorkConfigHelper.getBoolean;
+import static io.smallrye.stork.config.StorkConfigHelper.getInteger;
+import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,6 +39,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
     private final ConsulClient client;
     private final String serviceName;
+    private String application;
     private final boolean secure;
     private boolean passing = true; // default true?
 
@@ -45,23 +52,20 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
         ConsulClientOptions options = new ConsulClientOptions();
         Map<String, String> parameters = config.parameters();
-        String host = parameters.get("consul-host");
-        if (host != null) {
-            options.setHost(host);
+        Optional<String> host = get(config, "consul-host");
+        if (host.isPresent()) {
+            options.setHost(host.get());
         }
-        String port = parameters.get("consul-port");
-        if (port != null) {
-            try {
-                options.setPort(Integer.parseInt(port));
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Port not parseable to int: " + port + " for service " + serviceName);
-            }
+        Optional<Integer> port = getInteger(serviceName, config, "consul-port");
+        if (port.isPresent()) {
+            options.setPort(port.get());
         }
-        String passingConfig = parameters.get("use-health-checks");
-        if (passingConfig != null) {
+        Optional<Boolean> passingConfig = getBoolean(config, "use-health-checks");
+        if (passingConfig.isPresent()) {
             LOGGER.info("Processing Consul use-health-checks configured value: {}", passingConfig);
-            passing = Boolean.parseBoolean(passingConfig);
+            passing = passingConfig.get();
         }
+        this.application = getOrDefault(config, "application", serviceName);
         client = ConsulClient.create(vertx, options);
 
     }
@@ -69,7 +73,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
     @Override
     public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
         Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
-                emitter -> client.healthServiceNodes(serviceName, passing)
+                emitter -> client.healthServiceNodes(application, passing)
                         .onComplete(result -> {
                             if (result.failed()) {
                                 emitter.fail(result.cause());
@@ -90,7 +94,6 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
             Map<String, Object> metadata = new HashMap<>();
             Map<String, String> labels = service.getTags().stream().collect(Collectors.toMap(Function.identity(), s -> s));
             metadata.put(META_CONSUL_SERVICE_ID, service.getId());
-            //            metadata.put(META_CONSUL_SERVICE_TAGS, service.getTags());
             metadata.put(META_CONSUL_SERVICE_NODE, service.getNode());
             metadata.put(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNodeAddress());
             String address = service.getAddress();

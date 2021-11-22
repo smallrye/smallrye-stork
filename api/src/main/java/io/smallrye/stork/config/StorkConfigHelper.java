@@ -1,9 +1,7 @@
-package io.smallrye.stork.servicediscovery.eureka;
+package io.smallrye.stork.config;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
-
-import io.smallrye.stork.config.ServiceDiscoveryConfig;
 
 public class StorkConfigHelper {
 
@@ -31,8 +29,21 @@ public class StorkConfigHelper {
         try {
             return Integer.parseInt(v);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Unable to read the property `" + name
-                    + "` from the service discovery configuration for service '" + sn + "'", e);
+            throw new IllegalArgumentException("Unable to parse the property `" + name
+                    + "` to int from the service discovery configuration for service '" + sn + "'", e);
+        }
+    }
+
+    public static Optional<Integer> getInteger(String sn, ServiceDiscoveryConfig config, String name) {
+        String v = config.parameters().get(name);
+        if (v == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(Integer.parseInt(v));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Unable to parse the property `" + name
+                    + "` to int from the service discovery configuration for service '" + sn + "'", e);
         }
     }
 
@@ -42,6 +53,15 @@ public class StorkConfigHelper {
             return def;
         }
         return Boolean.parseBoolean(v);
+
+    }
+
+    public static Optional<Boolean> getBoolean(ServiceDiscoveryConfig config, String name) {
+        String v = config.parameters().get(name);
+        if (v == null) {
+            return Optional.empty();
+        }
+        return Optional.of(Boolean.parseBoolean(v));
 
     }
 
