@@ -19,7 +19,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
     public DefaultServiceInstance(long id, String host, int port, boolean secure) {
         this(id, host, port, secure, Collections.emptyMap(),
-                new Metadata<MetadataKey>(Collections.emptyMap()));
+                new Metadata());
     }
 
     public DefaultServiceInstance(long id, String host, int port, boolean secure, Map<String, String> labels,

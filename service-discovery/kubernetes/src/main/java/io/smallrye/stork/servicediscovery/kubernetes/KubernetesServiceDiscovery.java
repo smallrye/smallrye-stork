@@ -1,10 +1,10 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
 import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
+import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -120,10 +120,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                                 ? endPoints.getMetadata().getLabels()
                                 : Collections.emptyMap();
                         //TODO add some useful metadata?
-                        Map<KubernetesMetadataKey, Object> metadata = new EnumMap<>(KubernetesMetadataKey.class);
-                        metadata.put(META_K8S_SERVICE_ID, hostname);
-                        Metadata<KubernetesMetadataKey> k8sMetadata = new Metadata<>(metadata);
-
+                        Metadata<KubernetesMetadataKey> k8sMetadata = new Metadata<>(KubernetesMetadataKey.class);
+                        k8sMetadata.put(META_K8S_SERVICE_ID, hostname);
                         serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure,
                                 labels, k8sMetadata));
                     }

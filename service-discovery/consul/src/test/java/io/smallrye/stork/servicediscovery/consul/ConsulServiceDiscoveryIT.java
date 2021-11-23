@@ -1,12 +1,14 @@
 package io.smallrye.stork.servicediscovery.consul;
 
-import static io.smallrye.stork.servicediscovery.consul.ConsulServiceDiscovery.META_CONSUL_SERVICE_ID;
-import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.*;
+import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
+import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE;
+import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE_ADDRESS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -159,8 +161,8 @@ public class ConsulServiceDiscoveryIT {
                         "application", "my-consul-service"));
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
-        setUpServices("my-consul-service", 8406, "consul.com");
-        setUpServices("another-service", 8606, "another.example.com");
+        registerService("my-consul-service", 8406, null, "consul.com");
+        registerService("another-service", 8606, null, "another.example.com");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -262,7 +264,7 @@ public class ConsulServiceDiscoveryIT {
     private void deregisterServiceInstances(List<ServiceInstance> serviceInstances) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         List<String> consulIds = serviceInstances.stream().map(ServiceInstance::getMetadata)
-                .map(metadata -> metadata.get(META_CONSUL_SERVICE_ID))
+                .map(metadata -> metadata.getMetadata().get(META_CONSUL_SERVICE_ID))
                 .filter(consulId -> consulId instanceof String)
                 .map(consulId -> (String) consulId)
                 .collect(Collectors.toList());

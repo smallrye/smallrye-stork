@@ -89,8 +89,8 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService("rest-service", null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
-        setUpKubernetesService("svc", null, "10.95.95.125");
+        registerKubernetesService("rest-service", null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        registerKubernetesService("svc", null, "10.95.95.125");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 

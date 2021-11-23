@@ -4,13 +4,11 @@ import static io.smallrye.stork.config.StorkConfigHelper.get;
 import static io.smallrye.stork.config.StorkConfigHelper.getBoolean;
 import static io.smallrye.stork.config.StorkConfigHelper.getInteger;
 import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
-
-import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.*;
 import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
 import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE;
+import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE_ADDRESS;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -90,12 +88,11 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
         for (ServiceEntry serviceEntry : list) {
             Service service = serviceEntry.getService();
-            Map<ConsulMetadataKey, Object> metadata = new EnumMap<>(ConsulMetadataKey.class);
             Map<String, String> labels = service.getTags().stream().collect(Collectors.toMap(Function.identity(), s -> s));
-            metadata.put(META_CONSUL_SERVICE_ID, service.getId());
-            metadata.put(META_CONSUL_SERVICE_NODE, service.getNode());
-            metadata.put(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNodeAddress());
-            Metadata<ConsulMetadataKey> consulMetadata = new Metadata<>(metadata);
+            Metadata<ConsulMetadataKey> consulMetadata = new Metadata<>(ConsulMetadataKey.class);
+            consulMetadata.put(META_CONSUL_SERVICE_ID, service.getId());
+            consulMetadata.put(META_CONSUL_SERVICE_NODE, service.getNode());
+            consulMetadata.put(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNodeAddress());
             String address = service.getAddress();
             int port = serviceEntry.getService().getPort();
             if (address == null) {
