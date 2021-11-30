@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +53,28 @@ public class KubernetesServiceDiscoveryRealClusterIT {
         assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
+    }
+
+    @Test
+    @Disabled
+    void shouldGetServicesForDefaultNamespaceOnNonSpecified() {
+        String serviceName = "pod1";
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes",
+                Collections.emptyMap(), Map.of("k8s-host", "https://192.168.49.2:8443/"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(1);
     }
 
 }
