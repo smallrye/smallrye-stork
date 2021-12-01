@@ -103,6 +103,10 @@ public final class Stork {
                     new Service(serviceConfig.serviceName(), Optional.ofNullable(loadBalancer), serviceDiscovery,
                             serviceConfig.secure()));
         }
+        for (Service service : services.values()) {
+            service.getServiceDiscovery().initialize(this);
+        }
+
     }
 
     private <T extends ElementWithType> Map<String, T> getAll(Class<T> providerClass) {

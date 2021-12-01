@@ -16,4 +16,13 @@ public interface ServiceDiscovery {
      * @return all `ServiceInstance`'s for the service
      */
     Uni<List<ServiceInstance>> getServiceInstances();
+
+    /**
+     * Optional initialization.
+     * This method will be invoked after all service discoveries and load balancers are registered in Stork
+     *
+     * @param stork the Stork instance
+     */
+    default void initialize(Stork stork) {
+    }
 }

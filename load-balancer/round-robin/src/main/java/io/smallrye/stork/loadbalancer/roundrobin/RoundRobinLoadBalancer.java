@@ -15,6 +15,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer {
 
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
+        // todo do better, cache the list if possible maybe?
         List<ServiceInstance> modifiableList = new ArrayList<>(serviceInstances);
         modifiableList.sort(Comparator.comparingLong(ServiceInstance::getId));
         return select(modifiableList);

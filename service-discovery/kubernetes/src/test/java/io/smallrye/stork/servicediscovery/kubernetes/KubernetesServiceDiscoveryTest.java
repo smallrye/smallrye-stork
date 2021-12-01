@@ -32,19 +32,21 @@ public class KubernetesServiceDiscoveryTest {
     KubernetesClient client;
 
     String k8sMasterUrl;
+    String k8sNamespace;
 
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
         System.setProperty(Config.KUBERNETES_TRUST_CERT_SYSTEM_PROPERTY, "true");
         k8sMasterUrl = client.getMasterUrl().toString();
+        k8sNamespace = client.getNamespace();
     }
 
     @Test
     void shouldGetServiceFromK8sDefaultNamespace() {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl));
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", k8sNamespace));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -71,7 +73,7 @@ public class KubernetesServiceDiscoveryTest {
     void shouldDiscoverServiceWithSpecificName() {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "application", "rest-service"));
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", k8sNamespace, "application", "rest-service"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -157,7 +159,7 @@ public class KubernetesServiceDiscoveryTest {
         // when the k8s service discovery is called before the end of refreshing period
         // Then stork returns the instances from the cache
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl));
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", k8sNamespace));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -199,7 +201,7 @@ public class KubernetesServiceDiscoveryTest {
     void shouldRefetchWhenRefreshPeriodReached() throws InterruptedException {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "refresh-period", "3"));
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", k8sNamespace, "refresh-period", "3"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -237,7 +239,7 @@ public class KubernetesServiceDiscoveryTest {
     void shouldPreserveIdsOnRefetch() throws InterruptedException {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "refresh-period", "3"));
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", k8sNamespace, "refresh-period", "3"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";

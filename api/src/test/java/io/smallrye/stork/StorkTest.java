@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import io.smallrye.stork.config.ConfigProvider;
 import io.smallrye.stork.config.LoadBalancerConfig;
@@ -77,7 +78,7 @@ class StorkTest {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
                             ServiceConfig serviceConfig) {
-                        return null;
+                        return Mockito.mock(ServiceDiscovery.class);
                     }
 
                     @Override
@@ -114,7 +115,7 @@ class StorkTest {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
                             ServiceConfig serviceConfig) {
-                        return null;
+                        return Mockito.mock(ServiceDiscovery.class);
                     }
 
                     @Override
@@ -149,7 +150,7 @@ class StorkTest {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
                             ServiceConfig serviceConfig) {
-                        return null;
+                        return Mockito.mock(ServiceDiscovery.class);
                     }
 
                     @Override
@@ -179,7 +180,7 @@ class StorkTest {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
                             ServiceConfig serviceConfig) {
-                        return null;
+                        return Mockito.mock(ServiceDiscovery.class);
                     }
 
                     @Override
@@ -209,7 +210,7 @@ class StorkTest {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
                             ServiceConfig serviceConfig) {
-                        return null;
+                        return Mockito.mock(ServiceDiscovery.class);
                     }
 
                     @Override

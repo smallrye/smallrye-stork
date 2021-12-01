@@ -44,11 +44,15 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         super(config);
         Config base = Config.autoConfigure(null);
         this.serviceName = serviceName;
-        Map<String, String> parameters = config.parameters();
         String masterUrl = getOrDefault(config, "k8s-host", base.getMasterUrl());
         this.application = getOrDefault(config, "application", serviceName);
         namespace = getOrDefault(config, "k8s-namespace", base.getNamespace());
         allNamespaces = namespace != null && namespace.equalsIgnoreCase("all");
+
+        if (namespace == null) {
+            throw new IllegalArgumentException("Namespace is not configured for service '" + serviceName
+                    + "'. Please provide a namespace. Use 'all' to discover services in all namespaces");
+        }
 
         Config k8sConfig = new ConfigBuilder(base)
                 .withMasterUrl(masterUrl)
