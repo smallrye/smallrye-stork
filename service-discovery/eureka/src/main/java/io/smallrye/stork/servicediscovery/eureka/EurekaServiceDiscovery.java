@@ -16,6 +16,7 @@ import io.smallrye.stork.CachingServiceDiscovery;
 import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.integration.StorkInfrastructure;
 import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.smallrye.stork.spi.ServiceInstanceUtils;
 import io.vertx.core.json.JsonArray;
@@ -41,10 +42,11 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<String> instance;
 
-    public EurekaServiceDiscovery(ServiceDiscoveryConfig config, String serviceName, boolean secure) {
+    public EurekaServiceDiscovery(ServiceDiscoveryConfig config, String serviceName, boolean secure,
+            StorkInfrastructure infrastructure) {
         super(config);
         this.secure = secure;
-        Vertx vertx = Vertx.vertx(); // TODO Find a way to access the managed instance.
+        Vertx vertx = infrastructure.get(Vertx.class, Vertx::vertx);
 
         // Eureka instance
         String host = getOrDie(serviceName, config, "eureka-host");

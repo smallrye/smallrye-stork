@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import io.smallrye.stork.config.ConfigProvider;
 import io.smallrye.stork.config.ServiceConfig;
+import io.smallrye.stork.integration.DefaultStorkInfrastructure;
+import io.smallrye.stork.integration.StorkInfrastructure;
 import io.smallrye.stork.spi.ElementWithType;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
@@ -51,7 +53,7 @@ public final class Stork {
      * Not to be used in production code
      */
     @Deprecated
-    Stork() {
+    Stork(StorkInfrastructure storkInfrastructure) {
         Map<String, LoadBalancerProvider> loadBalancerProviders = getAll(LoadBalancerProvider.class);
         Map<String, ServiceDiscoveryProvider> serviceDiscoveryProviders = getAll(ServiceDiscoveryProvider.class);
 
@@ -81,7 +83,7 @@ public final class Stork {
             }
 
             final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
-                    serviceConfig.serviceName(), serviceConfig);
+                    serviceConfig.serviceName(), serviceConfig, storkInfrastructure);
 
             final var loadBalancerConfig = serviceConfig.loadBalancer();
             final LoadBalancer loadBalancer;
@@ -125,7 +127,11 @@ public final class Stork {
         REFERENCE.set(null);
     }
 
+    public static void initialize(StorkInfrastructure infrastructure) {
+        REFERENCE.compareAndSet(null, new Stork(infrastructure));
+    }
+
     public static void initialize() {
-        REFERENCE.compareAndSet(null, new Stork());
+        initialize(new DefaultStorkInfrastructure());
     }
 }

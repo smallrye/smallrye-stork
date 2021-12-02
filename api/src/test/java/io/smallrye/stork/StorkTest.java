@@ -19,6 +19,7 @@ import io.smallrye.stork.config.ConfigProvider;
 import io.smallrye.stork.config.LoadBalancerConfig;
 import io.smallrye.stork.config.ServiceConfig;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.integration.StorkInfrastructure;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 
@@ -57,7 +58,7 @@ class StorkTest {
         when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
         when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
 
-        Assertions.assertDoesNotThrow(Stork::initialize);
+        Assertions.assertDoesNotThrow(() -> Stork.initialize());
         Stork stork = Stork.getInstance();
         Assertions.assertTrue(stork.getServiceOptional("missing").isEmpty());
         Assertions.assertThrows(IllegalArgumentException.class, () -> stork.getService("missing"));
@@ -77,7 +78,7 @@ class StorkTest {
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig) {
+                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
                         return Mockito.mock(ServiceDiscovery.class);
                     }
 
@@ -114,7 +115,7 @@ class StorkTest {
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig) {
+                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
                         return Mockito.mock(ServiceDiscovery.class);
                     }
 
@@ -149,7 +150,7 @@ class StorkTest {
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig) {
+                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
                         return Mockito.mock(ServiceDiscovery.class);
                     }
 
@@ -179,7 +180,7 @@ class StorkTest {
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig) {
+                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
                         return Mockito.mock(ServiceDiscovery.class);
                     }
 
@@ -209,7 +210,7 @@ class StorkTest {
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig) {
+                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
                         return Mockito.mock(ServiceDiscovery.class);
                     }
 
@@ -253,7 +254,7 @@ class StorkTest {
                 Collections.singletonList(new ServiceDiscoveryProvider() {
                     @Override
                     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig) {
+                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
                         return null;
                     }
 

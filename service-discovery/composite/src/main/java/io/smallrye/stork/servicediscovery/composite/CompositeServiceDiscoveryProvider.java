@@ -7,13 +7,14 @@ import java.util.Map;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.config.ServiceConfig;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.integration.StorkInfrastructure;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 
 public class CompositeServiceDiscoveryProvider implements ServiceDiscoveryProvider {
 
     @Override
     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-            ServiceConfig serviceConfig) {
+            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         // we're configuring service discovery for
         // config prefix stork.<service-name>.discovery
         // Service names for composite config should be listed as a comma separated list:

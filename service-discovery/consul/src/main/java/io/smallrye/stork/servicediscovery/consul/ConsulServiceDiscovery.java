@@ -39,7 +39,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
     private final ConsulClient client;
     private final String serviceName;
-    private String application;
+    private final String application;
     private final boolean secure;
     private boolean passing = true; // default true?
 
@@ -51,7 +51,6 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         this.secure = secure;
 
         ConsulClientOptions options = new ConsulClientOptions();
-        Map<String, String> parameters = config.parameters();
         Optional<String> host = get(config, "consul-host");
         if (host.isPresent()) {
             options.setHost(host.get());
