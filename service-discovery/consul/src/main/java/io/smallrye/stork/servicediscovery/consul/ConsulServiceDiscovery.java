@@ -51,7 +51,6 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         this.secure = secure;
 
         ConsulClientOptions options = new ConsulClientOptions();
-        Map<String, String> parameters = config.parameters();
         Optional<String> host = get(config, "consul-host");
         if (host.isPresent()) {
             options.setHost(host.get());

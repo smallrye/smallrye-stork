@@ -1,6 +1,7 @@
 package io.smallrye.stork.test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +54,9 @@ public class TestConfigProvider implements ConfigProvider {
 
                     @Override
                     public Map<String, String> parameters() {
+                        if (loadBalancerParams == null) {
+                            return Collections.emptyMap();
+                        }
                         return loadBalancerParams;
                     }
                 };
@@ -68,6 +72,9 @@ public class TestConfigProvider implements ConfigProvider {
 
                     @Override
                     public Map<String, String> parameters() {
+                        if (serviceDiscoveryParams == null) {
+                            return Collections.emptyMap();
+                        }
                         return serviceDiscoveryParams;
                     }
                 };

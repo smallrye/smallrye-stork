@@ -78,18 +78,18 @@ public class MicroProfileConfigProvider implements ConfigProvider {
             String loadBalancerType = properties.get(LOAD_BALANCER);
             builder.setServiceName(serviceName);
             if (loadBalancerType != null) {
-                SimpleServiceConfig.SimpleLoadBalancerConfig loadBalancer = new SimpleServiceConfig.SimpleLoadBalancerConfig(
+                SimpleServiceConfig.SimpleLoadBalancerConfig loadBalancerConfig = new SimpleServiceConfig.SimpleLoadBalancerConfig(
                         loadBalancerType, propertiesForPrefix(LOAD_BALANCER, properties));
 
-                builder = builder.setLoadBalancer(loadBalancer);
+                builder = builder.setLoadBalancer(loadBalancerConfig);
             }
 
             String serviceDiscoveryType = properties.get(SERVICE_DISCOVERY);
             if (serviceDiscoveryType != null) {
-                SimpleServiceConfig.SimpleServiceDiscoveryConfig serviceDiscovery = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(
+                SimpleServiceConfig.SimpleServiceDiscoveryConfig serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(
                         serviceDiscoveryType, propertiesForPrefix(SERVICE_DISCOVERY, properties));
 
-                builder = builder.setServiceDiscovery(serviceDiscovery);
+                builder = builder.setServiceDiscovery(serviceDiscoveryConfig);
             }
 
             serviceConfigs.add(builder.build());
