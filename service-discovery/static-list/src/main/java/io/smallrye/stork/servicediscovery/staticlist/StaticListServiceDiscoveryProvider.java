@@ -11,6 +11,7 @@ import io.smallrye.stork.DefaultServiceInstance;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.config.ServiceConfig;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.integration.StorkInfrastructure;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.smallrye.stork.utils.HostAndPort;
@@ -20,7 +21,7 @@ public class StaticListServiceDiscoveryProvider implements ServiceDiscoveryProvi
 
     @Override
     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-            ServiceConfig serviceConfig) {
+            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         // we're configuring service discovery for
         // config prefix stork.<service-name>.discovery
         // URLs for static config should be listed as:

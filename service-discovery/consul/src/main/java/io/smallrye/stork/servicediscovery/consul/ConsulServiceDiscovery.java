@@ -39,7 +39,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
     private final ConsulClient client;
     private final String serviceName;
-    private String application;
+    private final String application;
     private final boolean secure;
     private boolean passing = true; // default true?
 

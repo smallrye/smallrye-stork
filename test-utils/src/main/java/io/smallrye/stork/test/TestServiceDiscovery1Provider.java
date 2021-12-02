@@ -3,6 +3,7 @@ package io.smallrye.stork.test;
 import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.config.ServiceConfig;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.integration.StorkInfrastructure;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 
 public class TestServiceDiscovery1Provider implements ServiceDiscoveryProvider {
@@ -11,7 +12,7 @@ public class TestServiceDiscovery1Provider implements ServiceDiscoveryProvider {
 
     @Override
     public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-            ServiceConfig serviceConfig) {
+            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         return new TestServiceDiscovery(config, TYPE, serviceConfig.secure());
     }
 
