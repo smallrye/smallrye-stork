@@ -30,7 +30,7 @@
 
 
     <properties>
-        <spring-cloud.version>2020.0.4</spring-cloud.version>
+        <spring-cloud.version>2021.0.0</spring-cloud.version>
     </properties>
 
     <dependencies>
