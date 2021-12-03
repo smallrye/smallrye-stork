@@ -26,7 +26,10 @@ public class MicroProfileConfigProvider implements ConfigProvider {
     private static final String SECURE = "secure";
 
     public static final String LOAD_BALANCER = "load-balancer";
+    public static final String LOAD_BALANCER_EMBEDDED = "load-balancer.type";
+
     public static final String SERVICE_DISCOVERY = "service-discovery";
+    public static final String SERVICE_DISCOVERY_EMBEDDED = "service-discovery.type";
 
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
 
@@ -76,6 +79,9 @@ public class MicroProfileConfigProvider implements ConfigProvider {
             builder.setSecure(isSecureValueTrue(properties.get(SECURE), serviceName));
 
             String loadBalancerType = properties.get(LOAD_BALANCER);
+            if (loadBalancerType == null) {
+                loadBalancerType = properties.get(LOAD_BALANCER_EMBEDDED);
+            }
             builder.setServiceName(serviceName);
             if (loadBalancerType != null) {
                 SimpleServiceConfig.SimpleLoadBalancerConfig loadBalancerConfig = new SimpleServiceConfig.SimpleLoadBalancerConfig(
@@ -85,6 +91,10 @@ public class MicroProfileConfigProvider implements ConfigProvider {
             }
 
             String serviceDiscoveryType = properties.get(SERVICE_DISCOVERY);
+            // for yaml it is more convenient to have stork.my-service.service-discovery.type, so let's support it too:
+            if (serviceDiscoveryType == null) {
+                serviceDiscoveryType = properties.get(SERVICE_DISCOVERY_EMBEDDED);
+            }
             if (serviceDiscoveryType != null) {
                 SimpleServiceConfig.SimpleServiceDiscoveryConfig serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(
                         serviceDiscoveryType, propertiesForPrefix(SERVICE_DISCOVERY, properties));

@@ -68,10 +68,30 @@ public class MicroProfileConfigProviderTest {
     }
 
     @Test
+    void shouldConfigureServiceDiscoveryOnlyUsingEmbeddedType() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("stork." + FIRST_SERVICE + ".service-discovery.type", "test-sd-1");
+        properties.put("stork." + FIRST_SERVICE + ".service-discovery.1", "http://localhost:8080");
+
+        Stork stork = storkForConfig(properties);
+
+        ServiceDiscovery serviceDiscovery = stork.getService(FIRST_SERVICE).getServiceDiscovery();
+
+        assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery.class);
+
+        TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
+        assertThat(sd.getType()).isEqualTo("test-sd-1");
+        assertThat(sd.getConfig().type()).isEqualTo("test-sd-1");
+        assertThat(sd.getConfig().parameters()).hasSize(2)
+                .containsAllEntriesOf(Map.of("1", "http://localhost:8080",
+                        "type", "test-sd-1"));
+    }
+
+    @Test
     void shouldConfigureServiceDiscoveryAndLoadBalancer() {
         Map<String, String> properties = new HashMap<>();
         properties.put("stork." + SECOND_SERVICE + ".service-discovery", "test-sd-2");
-        properties.put("stork." + SECOND_SERVICE + ".load-balancer", "test-lb-2");
+        properties.put("stork." + SECOND_SERVICE + ".load-balancer.type", "test-lb-2");
         properties.put("stork." + SECOND_SERVICE + ".load-balancer.some-prop", "some-prop-value");
         properties.put("stork." + SECOND_SERVICE + ".service-discovery.3", "http://localhost:8082");
 
@@ -98,8 +118,9 @@ public class MicroProfileConfigProviderTest {
         LoadBalancerConfig lbConfig = lb.getConfig();
         assertThat(lbConfig.type()).isEqualTo("test-lb-2");
         assertThat(lbConfig.parameters())
-                .hasSize(1)
-                .containsAllEntriesOf(Map.of("some-prop", "some-prop-value"));
+                .hasSize(2)
+                .containsAllEntriesOf(Map.of("some-prop", "some-prop-value",
+                        "type", "test-lb-2"));
     }
 
     @Test
