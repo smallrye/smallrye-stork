@@ -127,12 +127,14 @@ public class ConsulServiceDiscoveryIT {
 
         deregisterServiceInstances(instances.get());
 
-        // When the refresh interval is reached
-        Thread.sleep(5000);
-
         //the service settings change in consul
         List<String> sTags = Arrays.asList("secondary");
         registerService(serviceName, 8506, sTags, "another.example.com");
+
+        // let's wait until the new services are populated to Stork (from Consul)
+        await().atMost(Duration.ofSeconds(7))
+                .until(() -> service.getServiceDiscovery().getServiceInstances().await().indefinitely().get(0).getHost()
+                        .equals("another.example.com"));
 
         instances.set(null);
         service.getServiceDiscovery().getServiceInstances()
@@ -211,11 +213,12 @@ public class ConsulServiceDiscoveryIT {
 
         deregisterServiceInstances(instances.get());
 
-        // When the refresh interval is reached
-        Thread.sleep(5000);
-
         //the service settings change in consul
         registerService(serviceName, 8406, tags, "example.com", "another.example.com");
+
+        // let's wait until the new services are populated to Stork (from Consul)
+        await().atMost(Duration.ofSeconds(10)).until(
+                () -> service.getServiceDiscovery().getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
 
         instances.set(null);
         service.getServiceDiscovery().getServiceInstances()
@@ -243,7 +246,6 @@ public class ConsulServiceDiscoveryIT {
     private void registerService(String serviceName, int port, List<String> tags,
             String... addresses) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(addresses.length);
-
         for (String address : addresses) {
             client.registerService(
                     new ServiceOptions().setId("" + (consulId++)).setName(serviceName).setTags(tags)
@@ -255,7 +257,6 @@ public class ConsulServiceDiscoveryIT {
                         latch.countDown();
                     });
         }
-
         if (!latch.await(5, TimeUnit.SECONDS)) {
             fail("Failed to register service in consul in time");
         }

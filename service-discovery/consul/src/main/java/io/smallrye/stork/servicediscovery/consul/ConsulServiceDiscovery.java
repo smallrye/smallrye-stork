@@ -89,10 +89,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         for (ServiceEntry serviceEntry : list) {
             Service service = serviceEntry.getService();
             Map<String, String> labels = service.getTags().stream().collect(Collectors.toMap(Function.identity(), s -> s));
-            Metadata<ConsulMetadataKey> consulMetadata = new Metadata<>(ConsulMetadataKey.class);
-            consulMetadata.put(META_CONSUL_SERVICE_ID, service.getId());
-            consulMetadata.put(META_CONSUL_SERVICE_NODE, service.getNode());
-            consulMetadata.put(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNodeAddress());
+            Metadata<ConsulMetadataKey> consulMetadata = createConsulMetadata(serviceEntry);
             String address = service.getAddress();
             int port = serviceEntry.getService().getPort();
             if (address == null) {
@@ -109,5 +106,19 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
             }
         }
         return serviceInstances;
+    }
+
+    private Metadata<ConsulMetadataKey> createConsulMetadata(ServiceEntry service) {
+        Metadata<ConsulMetadataKey> consulMetadata = Metadata.of(ConsulMetadataKey.class);
+        if (service.getService() != null && service.getService().getId() != null) {
+            consulMetadata = consulMetadata.with(META_CONSUL_SERVICE_ID, service.getService().getId());
+        }
+        if (service.getNode() != null && service.getNode().getName() != null) {
+            consulMetadata = consulMetadata.with(META_CONSUL_SERVICE_NODE, service.getNode().getName());
+        }
+        if (service.getNode() != null && service.getNode().getAddress() != null) {
+            consulMetadata = consulMetadata.with(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNode().getAddress());
+        }
+        return consulMetadata;
     }
 }

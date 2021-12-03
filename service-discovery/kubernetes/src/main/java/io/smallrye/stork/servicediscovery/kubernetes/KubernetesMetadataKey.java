@@ -14,6 +14,6 @@ public enum KubernetesMetadataKey implements MetadataKey {
 
     @Override
     public String getName() {
-        return null;
+        return name;
     }
 }

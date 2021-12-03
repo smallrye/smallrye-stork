@@ -120,10 +120,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                                 ? endPoints.getMetadata().getLabels()
                                 : Collections.emptyMap();
                         //TODO add some useful metadata?
-                        Metadata<KubernetesMetadataKey> k8sMetadata = new Metadata<>(KubernetesMetadataKey.class);
-                        k8sMetadata.put(META_K8S_SERVICE_ID, hostname);
+                        Metadata<KubernetesMetadataKey> k8sMetadata = Metadata.of(KubernetesMetadataKey.class);
                         serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure,
-                                labels, k8sMetadata));
+                                labels, k8sMetadata.with(META_K8S_SERVICE_ID, hostname)));
                     }
                 }
             }
