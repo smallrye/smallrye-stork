@@ -1,6 +1,7 @@
 package examples;
 
 import io.smallrye.stork.LoadBalancer;
+import io.smallrye.stork.NoServiceInstanceFoundException;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.LoadBalancerConfig;
 
@@ -18,6 +19,9 @@ public class AcmeLoadBalancer implements LoadBalancer {
 
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
+        if (serviceInstances.isEmpty()) {
+            throw new NoServiceInstanceFoundException("No services found.");
+        }
         int index = random.nextInt(serviceInstances.size());
         return new ArrayList<>(serviceInstances).get(index);
     }
