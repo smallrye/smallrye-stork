@@ -3,6 +3,7 @@ package io.smallrye.stork.loadbalancer.leastresponsetime;
 import java.util.Collection;
 
 import io.smallrye.stork.LoadBalancer;
+import io.smallrye.stork.NoServiceInstanceFoundException;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.ServiceInstanceWithStatGathering;
 
@@ -18,6 +19,9 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
     // TODO good tests
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
+        if (serviceInstances.isEmpty()) {
+            throw new NoServiceInstanceFoundException("No service instance found");
+        }
         // we may want sampling in the future. Right now let's collect all the results.
         // compared to IO ops, it should be cheap...
         ServiceInstance best = null;

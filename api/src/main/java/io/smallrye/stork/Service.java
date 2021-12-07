@@ -29,8 +29,9 @@ public class Service {
      *
      * The selection looks for the service instances and select the one to use using the load balancer.
      *
-     * @return a Uni with a ServiceInstance
-     * @throws IllegalArgumentException if the current service does not use a load balancer.
+     * @return a Uni with a ServiceInstance, or with {@link NoServiceInstanceFoundException} if the load balancer failed to find
+     *         a service instance capable of handling a call
+     * @throws IllegalArgumentException if the current service does not use a load balancer
      */
     public Uni<ServiceInstance> selectServiceInstance() {
         LoadBalancer loadBalancer = getLoadBalancer();

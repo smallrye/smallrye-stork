@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.smallrye.stork.LoadBalancer;
+import io.smallrye.stork.NoServiceInstanceFoundException;
 import io.smallrye.stork.ServiceInstance;
 
 public class RoundRobinLoadBalancer implements LoadBalancer {
@@ -15,6 +16,9 @@ public class RoundRobinLoadBalancer implements LoadBalancer {
 
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
+        if (serviceInstances.isEmpty()) {
+            throw new NoServiceInstanceFoundException("No services found.");
+        }
         // todo do better, cache the list if possible maybe?
         List<ServiceInstance> modifiableList = new ArrayList<>(serviceInstances);
         modifiableList.sort(Comparator.comparingLong(ServiceInstance::getId));
