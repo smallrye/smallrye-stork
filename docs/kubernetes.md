@@ -37,7 +37,7 @@ Then, it can select the instance.
 
 Supported attributes are the following:
 
-| Attribute              | Mandatory    | Default Value     | Description                                                         |
-|-- -------------------- | ------------ | ----------------- | ------------------------------------------------------------------- |
-| `k8s-host`             | No           | _master url_      | The Kubernetes API host                                             |
-| `k8s-namespace`        | Yes          |                   | The namespace of the service. Use `all` to discover all namespaces. |
+| Attribute              | Mandatory    | Default Value                                                                               | Description                                                         |
+|-- -------------------- | ------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `k8s-host`             | No           | _master url_                                                                                | The Kubernetes API host                                             |
+| `k8s-namespace`        | No           | Current namespace from the `.kube/config` file in your home directory or the mounted volume | The namespace of the service. Use `all` to discover all namespaces. |
