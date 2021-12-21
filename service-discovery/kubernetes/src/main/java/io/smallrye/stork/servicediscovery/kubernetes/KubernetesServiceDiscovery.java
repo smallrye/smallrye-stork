@@ -1,6 +1,7 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
 import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
+import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.CachingServiceDiscovery;
 import io.smallrye.stork.DefaultServiceInstance;
+import io.smallrye.stork.Metadata;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
 import io.smallrye.stork.spi.ServiceInstanceIds;
@@ -118,9 +120,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                                 ? endPoints.getMetadata().getLabels()
                                 : Collections.emptyMap();
                         //TODO add some useful metadata?
-                        Map<String, Object> metadata = Collections.emptyMap();
+                        Metadata<KubernetesMetadataKey> k8sMetadata = Metadata.of(KubernetesMetadataKey.class);
                         serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure,
-                                labels, metadata));
+                                labels, k8sMetadata.with(META_K8S_SERVICE_ID, hostname)));
                     }
                 }
             }

@@ -15,20 +15,21 @@ public class DefaultServiceInstance implements ServiceInstance {
 
     private final Map<String, String> labels;
 
-    private final Map<String, Object> metadata;
+    private Metadata<? extends MetadataKey> metadata;
 
     public DefaultServiceInstance(long id, String host, int port, boolean secure) {
-        this(id, host, port, secure, Collections.emptyMap(), Collections.emptyMap());
+        this(id, host, port, secure, Collections.emptyMap(),
+                Metadata.empty());
     }
 
     public DefaultServiceInstance(long id, String host, int port, boolean secure, Map<String, String> labels,
-            Map<String, Object> metadata) {
+            Metadata<? extends MetadataKey> metadata) {
         this.id = id;
         this.host = host;
         this.port = port;
         this.secure = secure;
         this.labels = Collections.unmodifiableMap(labels);
-        this.metadata = Collections.unmodifiableMap(metadata);
+        this.metadata = metadata;
     }
 
     @Override
@@ -52,7 +53,7 @@ public class DefaultServiceInstance implements ServiceInstance {
     }
 
     @Override
-    public Map<String, Object> getMetadata() {
+    public Metadata<? extends MetadataKey> getMetadata() {
         return metadata;
     }
 

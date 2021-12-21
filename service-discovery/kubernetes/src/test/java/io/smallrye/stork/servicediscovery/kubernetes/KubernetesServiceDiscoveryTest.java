@@ -1,5 +1,7 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
+import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
@@ -20,6 +22,7 @@ import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
+import io.smallrye.stork.Metadata;
 import io.smallrye.stork.Service;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.Stork;
@@ -51,7 +54,7 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        registerKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -67,6 +70,14 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
+        instances.get().stream().map(ServiceInstance::getLabels)
+                .forEach(serviceInstanceLabels -> assertThat(serviceInstanceLabels)
+                        .contains(entry("app.kubernetes.io/name", "svc"), entry("app.kubernetes.io/version", "1.0")));
+        instances.get().stream().map(ServiceInstance::getMetadata).forEach(metadata -> {
+            Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+            assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+        });
+
     }
 
     @Test
@@ -78,8 +89,8 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService("rest-service", null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
-        setUpKubernetesService("svc", null, "10.95.95.125");
+        registerKubernetesService("rest-service", null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        registerKubernetesService("svc", null, "10.95.95.125");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -106,7 +117,7 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        registerKubernetesService(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -122,6 +133,13 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
+        instances.get().stream().map(ServiceInstance::getLabels)
+                .forEach(serviceInstanceLabels -> assertThat(serviceInstanceLabels)
+                        .contains(entry("app.kubernetes.io/name", "svc"), entry("app.kubernetes.io/version", "1.0")));
+        instances.get().stream().map(ServiceInstance::getMetadata).forEach(metadata -> {
+            Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+            assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+        });
     }
 
     @Test
@@ -132,8 +150,8 @@ public class KubernetesServiceDiscoveryTest {
         Stork stork = StorkTestUtils.getNewStorkInstance();
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
-        setUpKubernetesService(serviceName, "ns2", "10.99.99.241", "10.99.99.242", "10.99.99.243");
+        registerKubernetesService(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        registerKubernetesService(serviceName, "ns2", "10.99.99.241", "10.99.99.242", "10.99.99.243");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -149,6 +167,13 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233", "10.99.99.241", "10.99.99.242", "10.99.99.243");
+        instances.get().stream().map(ServiceInstance::getLabels)
+                .forEach(serviceInstanceLabels -> assertThat(serviceInstanceLabels)
+                        .contains(entry("app.kubernetes.io/name", "svc"), entry("app.kubernetes.io/version", "1.0")));
+        instances.get().stream().map(ServiceInstance::getMetadata).forEach(metadata -> {
+            Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+            assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+        });
     }
 
     @Test
@@ -164,7 +189,7 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        registerKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -206,7 +231,7 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        registerKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -244,7 +269,7 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        registerKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -264,7 +289,7 @@ public class KubernetesServiceDiscoveryTest {
         Map<String, Long> idsByHostname = mapHostnameToIds(instances.get());
 
         client.endpoints().withName(serviceName).delete();
-        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232");
+        registerKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232");
 
         Thread.sleep(5000);
 
@@ -280,7 +305,7 @@ public class KubernetesServiceDiscoveryTest {
         }
 
         client.endpoints().withName(serviceName).delete();
-        setUpKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.234");
+        registerKubernetesService(serviceName, null, "10.96.96.231", "10.96.96.232", "10.96.96.234");
 
         Thread.sleep(5000);
 
@@ -308,11 +333,15 @@ public class KubernetesServiceDiscoveryTest {
         return result;
     }
 
-    private void setUpKubernetesService(String serviceName, String namespace, String... ipAdresses) {
+    private void registerKubernetesService(String serviceName, String namespace, String... ipAdresses) {
+
+        Map<String, String> labels = new HashMap<>();
+        labels.put("app.kubernetes.io/name", "svc");
+        labels.put("app.kubernetes.io/version", "1.0");
         List<EndpointAddress> endpointAddresses = Arrays.stream(ipAdresses)
                 .map(ipAdress -> new EndpointAddressBuilder().withIp(ipAdress).build()).collect(Collectors.toList());
         Endpoints endpoint = new EndpointsBuilder()
-                .withNewMetadata().withName(serviceName).endMetadata()
+                .withNewMetadata().withName(serviceName).withLabels(labels).endMetadata()
                 .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddresses)
                         .addToPorts(new EndpointPortBuilder().withPort(8080).build())
                         .build())
