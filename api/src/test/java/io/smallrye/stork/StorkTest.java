@@ -1,19 +1,19 @@
 package io.smallrye.stork;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.config.ConfigProvider;
@@ -26,20 +26,73 @@ import io.smallrye.stork.integration.StorkInfrastructure;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 
-/**
- * **IMPORTANT**: Because we mock ServiceLoader, this class cannot use AssertJ.
- */
-class StorkTest {
+@SuppressWarnings("unchecked")
+public class StorkTest {
 
-    @SuppressWarnings("rawtypes")
-    private MockedStatic<ServiceLoader> loader;
+    static final File SPI_ROOT = new File("target/test-classes/META-INF/services");
+    static final List<ServiceConfig> configurations = new ArrayList<>();
+    static final List<ServiceInstance> services = new ArrayList<>();
+
+    private static final ServiceDiscoveryConfig FAKE_SERVICE_DISCOVERY_CONFIG = new ServiceDiscoveryConfig() {
+
+        @Override
+        public String type() {
+            return "fake";
+        }
+
+        @Override
+        public Map<String, String> parameters() {
+            return Collections.emptyMap();
+        }
+    };
+
+    private static final LoadBalancerConfig FAKE_LOAD_BALANCER_CONFIG = new LoadBalancerConfig() {
+
+        @Override
+        public String type() {
+            return "fake";
+        }
+
+        @Override
+        public Map<String, String> parameters() {
+            return Collections.emptyMap();
+        }
+    };
+
+    @BeforeEach
+    public void init() {
+        SPI_ROOT.mkdirs();
+        services.clear();
+        configurations.clear();
+    }
 
     @AfterEach
     public void cleanup() {
-        if (loader != null) {
-            loader.close();
-        }
         Stork.shutdown();
+        clearSPIs();
+        services.clear();
+        configurations.clear();
+    }
+
+    private static void clearSPIs() {
+        FileUtils.deleteQuietly(SPI_ROOT);
+    }
+
+    private static <T> void install(Class<T> itf, Class<? extends T>... impls) {
+        File out = new File(SPI_ROOT, itf.getName());
+        if (out.isFile()) {
+            throw new IllegalArgumentException(out.getAbsolutePath() + " does already exist");
+        }
+        if (impls == null || impls.length == 0) {
+            throw new IllegalArgumentException("The list of providers must not be `null` or empty");
+        }
+
+        List<String> list = Arrays.stream(impls).map(Class::getName).collect(Collectors.toList());
+        try {
+            Files.write(out.toPath(), list);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Test
@@ -49,17 +102,9 @@ class StorkTest {
 
     @Test
     void initWithoutServiceDiscoveryOrLoadBalancer() {
-        loader = mockStatic(ServiceLoader.class);
-
-        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
-                List.of(new FakeConfigProvider(Collections.emptyList(), 5)));
-        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
-                Collections.emptyList());
-        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class, Collections.emptyList());
-
-        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
-        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
-        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, EmptyServiceDiscoveryProvider.class);
+        install(LoadBalancerProvider.class, EmptyLoadBalancerProvider.class);
 
         Assertions.assertDoesNotThrow(() -> Stork.initialize());
         Stork stork = Stork.getInstance();
@@ -69,32 +114,9 @@ class StorkTest {
 
     @Test
     public void initializationWithTwoConfigProviders() {
-        loader = mockStatic(ServiceLoader.class);
-
-        ServiceConfig service1 = new FakeServiceConfig("a", new FakeServiceDiscoveryConfig(), null);
-        ServiceConfig service2 = new FakeServiceConfig("b", new FakeServiceDiscoveryConfig(), null);
-
-        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
-                List.of(new FakeConfigProvider(List.of(service1), 5),
-                        new FakeConfigProvider(List.of(service2), 100)));
-        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
-                Collections.singletonList(new ServiceDiscoveryProvider() {
-                    @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-                        return Mockito.mock(ServiceDiscovery.class);
-                    }
-
-                    @Override
-                    public String type() {
-                        return "fake";
-                    }
-                }));
-        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class, Collections.emptyList());
-
-        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
-        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
-        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
+        install(ConfigProvider.class, ServiceAConfigProvider.class, ServiceBConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, AnchoredServiceDiscoveryProvider.class);
+        install(LoadBalancerProvider.class, EmptyLoadBalancerProvider.class);
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
@@ -103,324 +125,278 @@ class StorkTest {
         Assertions.assertTrue(stork.getServiceOptional("missing").isEmpty());
         Assertions.assertTrue(stork.getServiceOptional("b").isPresent());
         Assertions.assertNotNull(stork.getService("b"));
-
     }
 
     @Test
-    public void testServiceWithoutServiceDiscovery() {
-        loader = mockStatic(ServiceLoader.class);
-
-        ServiceConfig service1 = new FakeServiceConfig("a", null, null);
-
-        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
-                List.of(new FakeConfigProvider(List.of(service1), 5)));
-        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
-                Collections.singletonList(new ServiceDiscoveryProvider() {
-                    @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-                        return Mockito.mock(ServiceDiscovery.class);
-                    }
-
-                    @Override
-                    public String type() {
-                        return "fake";
-                    }
-                }));
-        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class, Collections.emptyList());
-
-        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
-        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
-        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
+    public void testServiceConfigWithoutServiceDiscovery() {
+        configurations.add(new FakeServiceConfig("a", null, null));
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, AnchoredServiceDiscoveryProvider.class);
+        install(LoadBalancerProvider.class, EmptyLoadBalancerProvider.class);
 
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
     }
 
     @Test
     public void testServiceWithoutServiceDiscoveryType() {
-        loader = mockStatic(ServiceLoader.class);
-
-        ServiceConfig service1 = new FakeServiceConfig("a", new FakeServiceDiscoveryConfig() {
+        configurations.add(new FakeServiceConfig("a", new ServiceDiscoveryConfig() {
             @Override
             public String type() {
                 return null;
             }
-        }, null);
 
-        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
-                List.of(new FakeConfigProvider(List.of(service1), 5)));
-        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
-                Collections.singletonList(new ServiceDiscoveryProvider() {
-                    @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-                        return Mockito.mock(ServiceDiscovery.class);
-                    }
+            @Override
+            public Map<String, String> parameters() {
+                return null;
+            }
+        }, null));
 
-                    @Override
-                    public String type() {
-                        return "fake";
-                    }
-                }));
-        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class, Collections.emptyList());
-
-        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
-        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
-        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, AnchoredServiceDiscoveryProvider.class);
+        install(LoadBalancerProvider.class, EmptyLoadBalancerProvider.class);
 
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
     }
 
     @Test
     public void testServiceWithServiceDiscoveryButNoMatchingProvider() {
-        loader = mockStatic(ServiceLoader.class);
-
-        ServiceConfig service1 = new FakeServiceConfig("a", new FakeServiceDiscoveryConfig(), null);
-
-        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
-                List.of(new FakeConfigProvider(List.of(service1), 5)));
-        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
-                Collections.singletonList(new ServiceDiscoveryProvider() {
-                    @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-                        return Mockito.mock(ServiceDiscovery.class);
-                    }
-
-                    @Override
-                    public String type() {
-                        return "These aren't the droids you're looking for.";
-                    }
-                }));
-        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class, Collections.emptyList());
-
-        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
-        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
-        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
-
+        configurations.add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, null));
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, WeirdTypedServiceDiscoveryProvider.class);
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
-    }
-
-    @Test
-    public void testWithLoadBalancer() {
-        loader = mockStatic(ServiceLoader.class);
-
-        ServiceConfig service1 = new FakeServiceConfig("a", new FakeServiceDiscoveryConfig(), new FakeLoadBalancerConfig());
-
-        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
-                List.of(new FakeConfigProvider(List.of(service1), 5)));
-        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
-                Collections.singletonList(new ServiceDiscoveryProvider() {
-                    @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-                        return Mockito.mock(ServiceDiscovery.class);
-                    }
-
-                    @Override
-                    public String type() {
-                        return "fake";
-                    }
-                }));
-        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class,
-                Collections.singletonList(new LoadBalancerProvider() {
-                    @Override
-                    public LoadBalancer createLoadBalancer(LoadBalancerConfig config, ServiceDiscovery serviceDiscovery) {
-                        return null;
-                    }
-
-                    @Override
-                    public String type() {
-                        return "fake";
-                    }
-                }));
-
-        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
-        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
-        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
-
-        Stork.initialize();
-        Stork stork = Stork.getInstance();
-        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
-
-    }
-
-    @Test
-    public void testWithDefaultLoadBalancer() {
-        loader = mockStatic(ServiceLoader.class);
-
-        ServiceConfig service1 = new FakeServiceConfig("a", new FakeServiceDiscoveryConfig(), null);
-
-        ServiceInstance instance1 = mock(ServiceInstance.class);
-        ServiceInstance instance2 = mock(ServiceInstance.class);
-        ServiceInstance instance3 = mock(ServiceInstance.class);
-
-        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
-                List.of(new FakeConfigProvider(List.of(service1), 5)));
-        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
-                Collections.singletonList(new ServiceDiscoveryProvider() {
-                    @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-                        return () -> Uni.createFrom().item(() -> List.of(instance1, instance2, instance3));
-                    }
-
-                    @Override
-                    public String type() {
-                        return "fake";
-                    }
-                }));
-        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class,
-                Collections.emptyList());
-
-        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
-        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
-        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
-
-        Stork.initialize();
-        Stork stork = Stork.getInstance();
-        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance3, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
-        Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
-    }
-
-    @Test
-    public void testWithRoundRobinLoadBalancer() {
-        loader = mockStatic(ServiceLoader.class);
-
-        ServiceConfig service1 = new FakeServiceConfig("a", new FakeServiceDiscoveryConfig(), new LoadBalancerConfig() {
-            @Override
-            public String type() {
-                return RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE;
-            }
-
-            @Override
-            public Map<String, String> parameters() {
-                return Collections.emptyMap();
-            }
-        });
-
-        ServiceInstance instance1 = mock(ServiceInstance.class);
-        ServiceInstance instance2 = mock(ServiceInstance.class);
-        ServiceInstance instance3 = mock(ServiceInstance.class);
-
-        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
-                List.of(new FakeConfigProvider(List.of(service1), 5)));
-        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
-                Collections.singletonList(new ServiceDiscoveryProvider() {
-                    @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-                        return () -> Uni.createFrom().item(() -> List.of(instance1, instance2, instance3));
-                    }
-
-                    @Override
-                    public String type() {
-                        return "fake";
-                    }
-                }));
-        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class,
-                Collections.emptyList());
-
-        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
-        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
-        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
-
-        Stork.initialize();
-        Stork stork = Stork.getInstance();
-        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance3, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
-        Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
     }
 
     @Test
     public void testWithLoadBalancerButNoMatchingProvider() {
-        loader = mockStatic(ServiceLoader.class);
-
-        ServiceConfig service1 = new FakeServiceConfig("a", new FakeServiceDiscoveryConfig(), new FakeLoadBalancerConfig());
-
-        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
-                List.of(new FakeConfigProvider(List.of(service1), 5)));
-        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
-                Collections.singletonList(new ServiceDiscoveryProvider() {
-                    @Override
-                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
-                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-                        return null;
-                    }
-
-                    @Override
-                    public String type() {
-                        return "fake";
-                    }
-                }));
-        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class,
-                Collections.singletonList(new LoadBalancerProvider() {
-                    @Override
-                    public LoadBalancer createLoadBalancer(LoadBalancerConfig config, ServiceDiscovery serviceDiscovery) {
-                        return null;
-                    }
-
-                    @Override
-                    public String type() {
-                        return "These aren't the droids you're looking for.";
-                    }
-                }));
-
-        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
-        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
-        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
-
+        configurations.add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, FAKE_LOAD_BALANCER_CONFIG));
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, AnchoredServiceDiscoveryProvider.class);
+        install(LoadBalancerProvider.class, WeirdTypedLoadBalancerProvider.class);
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> ServiceLoader<T> fakeServiceLoader(Class<T> clazz, List<T> providers) {
-        ServiceLoader<T> mock = mock(ServiceLoader.class);
-        when(ServiceLoader.load(clazz, StorkTest.class.getClassLoader())).thenReturn(mock);
-        when(mock.stream()).thenReturn(providers.stream().map(p -> new ServiceLoader.Provider<T>() {
-            @Override
-            public Class<? extends T> type() {
-                return clazz;
-            }
+    @Test
+    public void testWithServiceDiscoveryAndASingleServiceInstance() {
+        configurations.add(new FakeServiceConfig("a",
+                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+        ServiceInstance instance = mock(ServiceInstance.class);
+        services.add(instance);
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, AnchoredServiceDiscoveryProvider.class);
+        install(LoadBalancerProvider.class, MockLoadBalancerProvider.class);
 
-            @Override
-            public T get() {
-                return p;
-            }
-        }));
-
-        when(mock.iterator()).thenReturn(providers.iterator());
-        when(mock.findFirst()).thenReturn(providers.stream().findFirst());
-        return mock;
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
+        Assertions.assertNotNull(stork.getService("a").getServiceDiscovery());
+        Assertions.assertEquals(stork.getService("a").selectServiceInstance().await().indefinitely(), instance);
+        Assertions.assertNotNull(stork.getService("a").getLoadBalancer());
     }
 
-    private static class FakeConfigProvider implements ConfigProvider {
+    @Test
+    public void testWithServiceDiscoveryAndATwoServiceInstances() {
+        configurations.add(new FakeServiceConfig("a",
+                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+        ServiceInstance instance1 = mock(ServiceInstance.class);
+        ServiceInstance instance2 = mock(ServiceInstance.class);
+        services.add(instance1);
+        services.add(instance2);
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, AnchoredServiceDiscoveryProvider.class);
+        install(LoadBalancerProvider.class, MockLoadBalancerProvider.class);
 
-        private final List<ServiceConfig> configs;
-        private final int priority;
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
+        Assertions.assertNotNull(stork.getService("a").getServiceDiscovery());
+        Assertions.assertTrue(stork.getService("a").getServiceInstances().await().indefinitely().contains(instance1));
+        Assertions.assertTrue(stork.getService("a").getServiceInstances().await().indefinitely().contains(instance2));
+        Assertions.assertNotNull(stork.getService("a").getLoadBalancer());
+    }
 
-        public FakeConfigProvider(List<ServiceConfig> configs, int priority) {
-            this.configs = configs;
-            this.priority = priority;
-        }
+    @Test
+    public void testWithLoadBalancer() {
+        configurations.add(new FakeServiceConfig("a",
+                FAKE_SERVICE_DISCOVERY_CONFIG, FAKE_LOAD_BALANCER_CONFIG));
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, AnchoredServiceDiscoveryProvider.class);
+        install(LoadBalancerProvider.class, MockLoadBalancerProvider.class);
+
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
+        Assertions.assertNotNull(stork.getService("a").getLoadBalancer());
+    }
+
+    @Test
+    public void testWithDefaultLoadBalancer() {
+        ServiceInstance instance1 = mock(ServiceInstance.class);
+        ServiceInstance instance2 = mock(ServiceInstance.class);
+        ServiceInstance instance3 = mock(ServiceInstance.class);
+        services.add(instance1);
+        services.add(instance2);
+        services.add(instance3);
+
+        configurations.add(new FakeServiceConfig("a",
+                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, AnchoredServiceDiscoveryProvider.class);
+        install(LoadBalancerProvider.class, MockLoadBalancerProvider.class);
+
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance3, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
+        Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
+    }
+
+    @Test
+    public void testWithExplicitConfigurationOfTheRoundRobinLoadBalancer() {
+        ServiceInstance instance1 = mock(ServiceInstance.class);
+        ServiceInstance instance2 = mock(ServiceInstance.class);
+        ServiceInstance instance3 = mock(ServiceInstance.class);
+        services.add(instance1);
+        services.add(instance2);
+        services.add(instance3);
+
+        configurations.add(new FakeServiceConfig("a",
+                FAKE_SERVICE_DISCOVERY_CONFIG, new LoadBalancerConfig() {
+                    @Override
+                    public String type() {
+                        return RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE;
+                    }
+
+                    @Override
+                    public Map<String, String> parameters() {
+                        return Collections.emptyMap();
+                    }
+                }));
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        install(ServiceDiscoveryProvider.class, AnchoredServiceDiscoveryProvider.class);
+
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance3, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
+        Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
+    }
+
+    public static class ServiceAConfigProvider implements ConfigProvider {
 
         @Override
         public List<ServiceConfig> getConfigs() {
-            return configs;
+            ServiceConfig service = new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, null);
+            return List.of(service);
         }
 
         @Override
         public int priority() {
-            return priority;
+            return 5;
+        }
+    }
+
+    public static class ServiceBConfigProvider implements ConfigProvider {
+
+        @Override
+        public List<ServiceConfig> getConfigs() {
+            ServiceConfig service = new FakeServiceConfig("b", FAKE_SERVICE_DISCOVERY_CONFIG, null);
+            return List.of(service);
+        }
+
+        @Override
+        public int priority() {
+            return 100;
+        }
+    }
+
+    public static class AnchoredConfigProvider implements ConfigProvider {
+
+        @Override
+        public List<ServiceConfig> getConfigs() {
+            return new ArrayList<>(configurations);
+        }
+
+        @Override
+        public int priority() {
+            return 5;
+        }
+    }
+
+    public static class EmptyServiceDiscoveryProvider implements ServiceDiscoveryProvider {
+
+        @Override
+        public String type() {
+            return "empty";
+        }
+
+        @Override
+        public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
+            return null;
+        }
+    }
+
+    public static class EmptyLoadBalancerProvider implements LoadBalancerProvider {
+
+        @Override
+        public String type() {
+            return "empty";
+        }
+
+        @Override
+        public LoadBalancer createLoadBalancer(LoadBalancerConfig config, ServiceDiscovery serviceDiscovery) {
+            return null;
+        }
+    }
+
+    public static class AnchoredServiceDiscoveryProvider implements ServiceDiscoveryProvider {
+
+        @Override
+        public String type() {
+            return "fake";
+        }
+
+        @Override
+        public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
+            return () -> Uni.createFrom().item(() -> services);
+        }
+    }
+
+    public static class MockLoadBalancerProvider implements LoadBalancerProvider {
+
+        @Override
+        public String type() {
+            return "fake";
+        }
+
+        @Override
+        public LoadBalancer createLoadBalancer(LoadBalancerConfig config, ServiceDiscovery serviceDiscovery) {
+            return mock(LoadBalancer.class);
+        }
+    }
+
+    public static class WeirdTypedServiceDiscoveryProvider extends AnchoredServiceDiscoveryProvider {
+
+        @Override
+        public String type() {
+            return "These aren't the droids you're looking for.";
+        }
+    }
+
+    public static class WeirdTypedLoadBalancerProvider extends MockLoadBalancerProvider {
+
+        @Override
+        public String type() {
+            return "These aren't the droids you're looking for.";
         }
     }
 
@@ -457,29 +433,4 @@ class StorkTest {
         }
     }
 
-    private static class FakeServiceDiscoveryConfig implements ServiceDiscoveryConfig {
-
-        @Override
-        public String type() {
-            return "fake";
-        }
-
-        @Override
-        public Map<String, String> parameters() {
-            return Collections.emptyMap();
-        }
-    }
-
-    private static class FakeLoadBalancerConfig implements LoadBalancerConfig {
-
-        @Override
-        public String type() {
-            return "fake";
-        }
-
-        @Override
-        public Map<String, String> parameters() {
-            return Collections.emptyMap();
-        }
-    }
 }
