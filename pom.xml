@@ -181,12 +181,6 @@
             </dependency>
             <dependency>
                 <groupId>io.smallrye.stork</groupId>
-                <!--todo: name is lengthy, shorten it?-->
-                <artifactId>smallrye-stork-load-balancer-round-robin</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.smallrye.stork</groupId>
                 <artifactId>smallrye-stork-service-discovery-static-list</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -243,7 +237,6 @@
         <module>service-discovery/kubernetes</module>
         <module>service-discovery/eureka</module>
         <module>service-discovery/composite</module>
-        <module>load-balancer/round-robin</module>
         <module>load-balancer/response-time</module>
         <module>test-utils</module>
         <module>docs</module>

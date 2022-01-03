@@ -41,12 +41,12 @@ For example, if you wish to use Consul and load-balance the calls with round-rob
         <artifactId>smallrye-stork-service-discovery-consul</artifactId>
         <version>{{version.current}}</version>
     </dependency>
-    <dependency>
-        <groupId>io.smallrye.stork</groupId>
-        <artifactId>smallrye-stork-load-balancer-round-robin</artifactId>
-        <version>{{version.current}}</version>
-    </dependency>
 ```
+
+
+!!! note
+No need to add a dependency for the round-robin load-balancer. This strategy is built-in.
+
 
 When using Eureka, Kubernetes, or any other service discovery mechanism, or a different load balancer, replace the dependencies above with the ones you need.
 Based on the defined dependencies, Stork automatically registers providers for service discovery mechanisms and load balancers.
@@ -61,7 +61,5 @@ stork.hello-service.service-discovery.consul-host=localhost
 stork.hello-service.service-discovery.consul-port=8500
 ```
 
-For the round-robin load balancer, the config should just define the load balancer type:
-```properties
-stork.hello-service.load-balancer=round-robin
-```
+!!! note
+When no load-balancing is configured, Stork uses a round-robin.

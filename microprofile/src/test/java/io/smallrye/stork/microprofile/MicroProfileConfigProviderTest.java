@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,6 +19,7 @@ import io.smallrye.stork.Stork;
 import io.smallrye.stork.StorkTestUtils;
 import io.smallrye.stork.config.LoadBalancerConfig;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.impl.RoundRobinLoadBalancer;
 import io.smallrye.stork.test.TestConfigProvider;
 import io.smallrye.stork.test.TestLoadBalancer;
 import io.smallrye.stork.test.TestServiceDiscovery;
@@ -52,8 +52,8 @@ public class MicroProfileConfigProviderTest {
 
         Stork stork = storkForConfig(properties);
 
-        Assertions.assertThatThrownBy(() -> stork.getService(FIRST_SERVICE).getLoadBalancer())
-                .isInstanceOf(IllegalArgumentException.class);
+        // Use round-robin when not configured.
+        assertThat(stork.getService(FIRST_SERVICE).getLoadBalancer()).isInstanceOf(RoundRobinLoadBalancer.class);
 
         ServiceDiscovery serviceDiscovery = stork.getService(FIRST_SERVICE).getServiceDiscovery();
 

@@ -15,10 +15,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.config.ConfigProvider;
 import io.smallrye.stork.config.LoadBalancerConfig;
 import io.smallrye.stork.config.ServiceConfig;
 import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.impl.RoundRobinLoadBalancer;
+import io.smallrye.stork.impl.RoundRobinLoadBalancerProvider;
 import io.smallrye.stork.integration.StorkInfrastructure;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
@@ -240,6 +243,102 @@ class StorkTest {
         Stork stork = Stork.getInstance();
         Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
 
+    }
+
+    @Test
+    public void testWithDefaultLoadBalancer() {
+        loader = mockStatic(ServiceLoader.class);
+
+        ServiceConfig service1 = new FakeServiceConfig("a", new FakeServiceDiscoveryConfig(), null);
+
+        ServiceInstance instance1 = mock(ServiceInstance.class);
+        ServiceInstance instance2 = mock(ServiceInstance.class);
+        ServiceInstance instance3 = mock(ServiceInstance.class);
+
+        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
+                List.of(new FakeConfigProvider(List.of(service1), 5)));
+        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
+                Collections.singletonList(new ServiceDiscoveryProvider() {
+                    @Override
+                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
+                        return () -> Uni.createFrom().item(() -> List.of(instance1, instance2, instance3));
+                    }
+
+                    @Override
+                    public String type() {
+                        return "fake";
+                    }
+                }));
+        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class,
+                Collections.emptyList());
+
+        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
+        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
+        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
+
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance3, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
+        Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
+    }
+
+    @Test
+    public void testWithRoundRobinLoadBalancer() {
+        loader = mockStatic(ServiceLoader.class);
+
+        ServiceConfig service1 = new FakeServiceConfig("a", new FakeServiceDiscoveryConfig(), new LoadBalancerConfig() {
+            @Override
+            public String type() {
+                return RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE;
+            }
+
+            @Override
+            public Map<String, String> parameters() {
+                return Collections.emptyMap();
+            }
+        });
+
+        ServiceInstance instance1 = mock(ServiceInstance.class);
+        ServiceInstance instance2 = mock(ServiceInstance.class);
+        ServiceInstance instance3 = mock(ServiceInstance.class);
+
+        ServiceLoader<ConfigProvider> configProviders = fakeServiceLoader(ConfigProvider.class,
+                List.of(new FakeConfigProvider(List.of(service1), 5)));
+        ServiceLoader<ServiceDiscoveryProvider> sdProvider = fakeServiceLoader(ServiceDiscoveryProvider.class,
+                Collections.singletonList(new ServiceDiscoveryProvider() {
+                    @Override
+                    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+                            ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
+                        return () -> Uni.createFrom().item(() -> List.of(instance1, instance2, instance3));
+                    }
+
+                    @Override
+                    public String type() {
+                        return "fake";
+                    }
+                }));
+        ServiceLoader<LoadBalancerProvider> lbProvider = fakeServiceLoader(LoadBalancerProvider.class,
+                Collections.emptyList());
+
+        when(ServiceLoader.load(ConfigProvider.class)).thenReturn(configProviders);
+        when(ServiceLoader.load(ServiceDiscoveryProvider.class)).thenReturn(sdProvider);
+        when(ServiceLoader.load(LoadBalancerProvider.class)).thenReturn(lbProvider);
+
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance3, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
+        Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
     }
 
     @Test
