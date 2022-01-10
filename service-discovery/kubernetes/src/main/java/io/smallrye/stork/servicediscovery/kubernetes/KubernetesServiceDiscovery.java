@@ -73,12 +73,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                 emitter -> {
                     vertx.executeBlocking(future -> {
                         Map<Endpoints, List<Pod>> items = new HashMap<>();
-                        List<Pod> backendPods = new ArrayList<>();
+
                         if (allNamespaces) {
                             List<Endpoints> endpointsList = client.endpoints().inAnyNamespace()
                                     .withField(METADATA_NAME, application).list()
                                     .getItems();
                             for (Endpoints endpoint : endpointsList) {
+                                List<Pod> backendPods = new ArrayList<>();
                                 List<String> podNames = endpoint.getSubsets().stream()
                                         .flatMap(endpointSubset -> endpointSubset.getAddresses().stream())
                                         .map(address -> address.getTargetRef().getName()).collect(Collectors.toList());
@@ -93,6 +94,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                                     .list()
                                     .getItems();
                             for (Endpoints endpoint : endpointsList) {
+                                List<Pod> backendPods = new ArrayList<>();
                                 List<String> podNames = endpoint.getSubsets().stream()
                                         .flatMap(endpointSubset -> endpointSubset.getAddresses().stream())
                                         .map(address -> address.getTargetRef().getName()).collect(Collectors.toList());
