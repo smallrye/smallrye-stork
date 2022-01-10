@@ -1,0 +1,97 @@
+[
+  {
+    "extension": "revapi.java",
+    "id": "java",
+    "configuration": {
+      "missing-classes": {
+        "behavior": "report",
+        "ignoreMissingAnnotations": false
+      }
+    }
+  },
+  {
+    "extension": "revapi.filter",
+    "configuration": {
+      "elements": {
+        "include": [
+          "io\\.smallrye\\.stork\\.test(\\..+)?"
+        ]
+      }
+    }
+  },
+  {
+    "extension": "revapi.differences",
+    "id": "breaking-changes",
+    "configuration": {
+      "criticality": "highlight",
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "differences": [
+        {
+          "ignore": true,
+          "code": "java.class.externalClassExposedInAPI",
+          "new": "class io.smallrye.stork.Metadata<T extends java.lang.Enum<T>>",
+          "justification": "Added support to Metadata (new feature)"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.externalClassExposedInAPI",
+          "new": "interface io.smallrye.stork.MetadataKey",
+          "justification": "Added support to Metadata (new feature)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method java.util.Map<java.lang.String, java.lang.Object> io.smallrye.stork.ServiceInstance::getMetadata()",
+          "new": "method io.smallrye.stork.Metadata<? extends io.smallrye.stork.MetadataKey> io.smallrye.stork.ServiceInstance::getMetadata()",
+          "justification": "Added support to Metadata (new feature)"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.stork.StorkTestUtils",
+          "justification": "Class moved to avoid a split package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.externalClassExposedInAPI",
+          "new": "interface io.smallrye.stork.integration.StorkInfrastructure",
+          "justification": "Added Infrastructure support (new feature)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.test.TestServiceDiscovery1Provider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig)",
+          "new": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.test.TestServiceDiscovery1Provider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig, io.smallrye.stork.integration.StorkInfrastructure)",
+          "justification": "Added Infrastructure support (new feature)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.test.TestServiceDiscovery2Provider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig)",
+          "new": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.test.TestServiceDiscovery2Provider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig, io.smallrye.stork.integration.StorkInfrastructure)",
+          "justification": "Added Infrastructure support (new feature)"
+        }
+      ]
+    }
+  },
+  {
+    "extension": "revapi.reporter.json",
+    "configuration": {
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "output": "target/compatibility.json",
+      "indent": true,
+      "append": false,
+      "keepEmptyFile": true
+    }
+  },
+  {
+    "extension": "revapi.reporter.text",
+    "configuration": {
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "output": "out"
+    }
+  }
+]

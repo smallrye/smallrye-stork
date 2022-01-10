@@ -70,6 +70,19 @@ jobs:
 #        Skip integration tests. TestContainers does not support Windows Server 2019: https://github.com/testcontainers/testcontainers-java/issues/2960
         run: mvn -B formatter:validate test --file pom.xml
 
+  compatibility:
+    runs-on: ubuntu-20.04
+    name: Compatibility Check
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: temurin
+          cache: maven
+      - name: Compatibility Check
+        run: mvn verify revapi:check@check-compatibility -DskipTests -fae
+
   quality:
     needs: [build]
     if: github.event_name == 'push' && github.repository_owner == 'smallrye'

@@ -1,5 +1,6 @@
-package io.smallrye.stork;
+package io.smallrye.stork.test;
 
+import io.smallrye.stork.Stork;
 import io.smallrye.stork.integration.DefaultStorkInfrastructure;
 
 public class StorkTestUtils {

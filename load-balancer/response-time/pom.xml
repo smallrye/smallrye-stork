@@ -13,6 +13,10 @@
     <name>SmallRye Stork Load Balancer : Response Time</name>
     <description>SmallRye Stork Load Balancer provider based on response time of the reached endpoints</description>
 
+    <properties>
+        <revapi.skip>false</revapi.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.smallrye.stork</groupId>

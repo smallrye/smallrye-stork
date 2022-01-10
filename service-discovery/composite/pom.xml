@@ -34,6 +34,10 @@
         That is, it obtains service lists from all services and just then returns a combined list.
     </description>
 
+    <properties>
+        <revapi.skip>false</revapi.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
