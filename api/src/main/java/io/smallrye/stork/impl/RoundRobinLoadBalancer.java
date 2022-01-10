@@ -1,4 +1,4 @@
-package io.smallrye.stork.loadbalancer.roundrobin;
+package io.smallrye.stork.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;

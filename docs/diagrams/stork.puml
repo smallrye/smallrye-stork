@@ -24,7 +24,7 @@ class Consul implements ServiceDiscovery
 class Static implements ServiceDiscovery
 class "Custom Service Discovery" implements ServiceDiscovery
 
-class RoundRobin implements LoadBalancer
+class RoundRobin<<default>> implements LoadBalancer
 class LeastResponseTime implements LoadBalancer
 class "Custom Load Balancer" implements LoadBalancer
 

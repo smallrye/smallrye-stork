@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import io.smallrye.stork.config.ConfigProvider;
 import io.smallrye.stork.config.ServiceConfig;
+import io.smallrye.stork.impl.RoundRobinLoadBalancer;
+import io.smallrye.stork.impl.RoundRobinLoadBalancerProvider;
 import io.smallrye.stork.integration.DefaultStorkInfrastructure;
 import io.smallrye.stork.integration.StorkInfrastructure;
 import io.smallrye.stork.spi.ElementWithType;
@@ -56,6 +58,8 @@ public final class Stork {
     Stork(StorkInfrastructure storkInfrastructure) {
         Map<String, LoadBalancerProvider> loadBalancerProviders = getAll(LoadBalancerProvider.class);
         Map<String, ServiceDiscoveryProvider> serviceDiscoveryProviders = getAll(ServiceDiscoveryProvider.class);
+        loadBalancerProviders.putIfAbsent(RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE,
+                new RoundRobinLoadBalancerProvider());
 
         ServiceLoader<ConfigProvider> configs = ServiceLoader.load(ConfigProvider.class);
         Optional<ConfigProvider> highestPrioConfigProvider = configs.stream()
@@ -88,9 +92,10 @@ public final class Stork {
             final var loadBalancerConfig = serviceConfig.loadBalancer();
             final LoadBalancer loadBalancer;
             if (loadBalancerConfig == null) {
-                // no load balancer, maybe someone intends to use service discovery only, ignoring
-                LOGGER.info("No load balancer configured for type " + serviceDiscoveryType);
-                loadBalancer = null;
+                // no load balancer, use round-robin
+                LOGGER.info("No load balancer configured for type {}, using {}", serviceDiscoveryType,
+                        RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE);
+                loadBalancer = new RoundRobinLoadBalancer();
             } else {
                 String loadBalancerType = loadBalancerConfig.type();
                 final var loadBalancerProvider = loadBalancerProviders.get(loadBalancerType);
