@@ -5,8 +5,10 @@ import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKe
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointPort;
 import io.fabric8.kubernetes.api.model.EndpointSubset;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -66,25 +69,46 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     @Override
     public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
-        Uni<List<Endpoints>> endpointsUni = Uni.createFrom().emitter(
+        Uni<Map<Endpoints, List<Pod>>> endpointsUni = Uni.createFrom().emitter(
                 emitter -> {
                     vertx.executeBlocking(future -> {
-                        List<Endpoints> endpoints = new ArrayList<>();
+                        Map<Endpoints, List<Pod>> items = new HashMap<>();
+
                         if (allNamespaces) {
-                            endpoints.addAll(
-                                    client.endpoints().inAnyNamespace().withField(METADATA_NAME, application).list()
-                                            .getItems());
+                            List<Endpoints> endpointsList = client.endpoints().inAnyNamespace()
+                                    .withField(METADATA_NAME, application).list()
+                                    .getItems();
+                            for (Endpoints endpoint : endpointsList) {
+                                List<Pod> backendPods = new ArrayList<>();
+                                List<String> podNames = endpoint.getSubsets().stream()
+                                        .flatMap(endpointSubset -> endpointSubset.getAddresses().stream())
+                                        .map(address -> address.getTargetRef().getName()).collect(Collectors.toList());
+                                podNames.forEach(podName -> backendPods
+                                        .addAll(client.pods().inAnyNamespace().withField(METADATA_NAME, podName).list()
+                                                .getItems()));
+                                items.put(endpoint, backendPods);
+                            }
                         } else {
-                            endpoints.addAll(
-                                    client.endpoints().inNamespace(namespace).withField(METADATA_NAME, application)
-                                            .list()
-                                            .getItems());
+                            List<Endpoints> endpointsList = client.endpoints().inNamespace(namespace)
+                                    .withField(METADATA_NAME, application)
+                                    .list()
+                                    .getItems();
+                            for (Endpoints endpoint : endpointsList) {
+                                List<Pod> backendPods = new ArrayList<>();
+                                List<String> podNames = endpoint.getSubsets().stream()
+                                        .flatMap(endpointSubset -> endpointSubset.getAddresses().stream())
+                                        .map(address -> address.getTargetRef().getName()).collect(Collectors.toList());
+                                backendPods.addAll(podNames.stream()
+                                        .map(name -> client.pods().inNamespace(namespace).withName(name))
+                                        .map(podPodResource -> podPodResource.get()).collect(Collectors.toList()));
+                                items.put(endpoint, backendPods);
+                            }
                         }
-                        future.complete(endpoints);
+                        future.complete(items);
                     }, result -> {
                         if (result.succeeded()) {
                             @SuppressWarnings("unchecked")
-                            List<Endpoints> endpoints = (List<Endpoints>) result.result();
+                            Map<Endpoints, List<Pod>> endpoints = (Map<Endpoints, List<Pod>>) result.result();
                             emitter.complete(endpoints);
                         } else {
                             LOGGER.error("Unable to retrieve the endpoint from the {} service", application,
@@ -96,12 +120,15 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         return endpointsUni.onItem().transform(endpoints -> toStorkServiceInstances(endpoints, previousInstances));
     }
 
-    private List<ServiceInstance> toStorkServiceInstances(List<Endpoints> endpointList,
+    private List<ServiceInstance> toStorkServiceInstances(Map<Endpoints, List<Pod>> backend,
             List<ServiceInstance> previousInstances) {
         List<ServiceInstance> serviceInstances = new ArrayList<>();
-        for (Endpoints endPoints : endpointList) {
+        for (Map.Entry<Endpoints, List<Pod>> entry : backend.entrySet()) {
+            Endpoints endPoints = entry.getKey();
+            List<Pod> pods = entry.getValue();
             for (EndpointSubset subset : endPoints.getSubsets()) {
                 for (EndpointAddress endpointAddress : subset.getAddresses()) {
+                    String podName = endpointAddress.getTargetRef().getName();
                     String hostname = endpointAddress.getIp();
                     if (hostname == null) { // should we take the hostName?
                         hostname = endpointAddress.getHostname();
@@ -116,9 +143,14 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     if (matching != null) {
                         serviceInstances.add(matching);
                     } else {
-                        Map<String, String> labels = endPoints.getMetadata().getLabels() != null
+                        Map<String, String> labels = new HashMap<>(endPoints.getMetadata().getLabels() != null
                                 ? endPoints.getMetadata().getLabels()
-                                : Collections.emptyMap();
+                                : Collections.emptyMap());
+                        Map<String, String> podLabels = pods.stream().filter(pod -> pod.getMetadata().getName().equals(podName))
+                                .findFirst().get().getMetadata().getLabels();
+                        for (Map.Entry<String, String> label : podLabels.entrySet()) {
+                            labels.putIfAbsent(label.getKey(), label.getValue());
+                        }
                         //TODO add some useful metadata?
                         Metadata<KubernetesMetadataKey> k8sMetadata = Metadata.of(KubernetesMetadataKey.class);
                         serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure,
@@ -126,8 +158,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     }
                 }
             }
-        }
 
+        }
         return serviceInstances;
     }
+
 }

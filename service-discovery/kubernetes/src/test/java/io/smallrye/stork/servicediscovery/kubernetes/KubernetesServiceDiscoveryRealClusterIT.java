@@ -33,11 +33,11 @@ public class KubernetesServiceDiscoveryRealClusterIT {
     @Disabled
     void shouldGetServiceFromK8sDefaultNamespace() {
 
-        TestConfigProvider.addServiceConfig("demo", null, "kubernetes",
-                null, null);
+        TestConfigProvider.addServiceConfig("rest-service", null, "kubernetes",
+                null, Map.of("k8s-namespace", "stork-demo"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        String serviceName = "demo";
+        String serviceName = "rest-service";
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
