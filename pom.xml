@@ -43,7 +43,7 @@
         <vertx.version>4.2.2</vertx.version>
         <version.vertx-mutiny-bindings>2.17.0</version.vertx-mutiny-bindings>
 
-        <kubernetes-client.version>5.11.1</kubernetes-client.version>
+        <kubernetes-client.version>5.11.2</kubernetes-client.version>
         <version.slf4j>1.7.32</version.slf4j>
         <version.mockito>4.2.0</version.mockito>
         <version.jackson-databind>2.13.1</version.jackson-databind>
@@ -54,7 +54,7 @@
         <revapi-reporter-text.version>0.14.5</revapi-reporter-text.version>
         <revapi.skip>true</revapi.skip>
 
-        <jandex-maven-plugin.version>1.2.1</jandex-maven-plugin.version>
+        <jandex-maven-plugin.version>1.2.2</jandex-maven-plugin.version>
 
         <plugin.version.failsafe>3.0.0-M5</plugin.version.failsafe>
 
