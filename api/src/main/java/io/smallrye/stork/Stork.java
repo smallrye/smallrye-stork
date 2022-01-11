@@ -55,7 +55,7 @@ public final class Stork {
      * Not to be used in production code
      */
     @Deprecated
-    Stork(StorkInfrastructure storkInfrastructure) {
+    public Stork(StorkInfrastructure storkInfrastructure) {
         Map<String, LoadBalancerProvider> loadBalancerProviders = getAll(LoadBalancerProvider.class);
         Map<String, ServiceDiscoveryProvider> serviceDiscoveryProviders = getAll(ServiceDiscoveryProvider.class);
         loadBalancerProviders.putIfAbsent(RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE,

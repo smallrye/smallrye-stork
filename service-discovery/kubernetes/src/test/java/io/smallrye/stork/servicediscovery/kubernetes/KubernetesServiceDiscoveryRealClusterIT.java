@@ -18,7 +18,7 @@ import io.fabric8.kubernetes.client.Config;
 import io.smallrye.stork.Service;
 import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.Stork;
-import io.smallrye.stork.StorkTestUtils;
+import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
 public class KubernetesServiceDiscoveryRealClusterIT {

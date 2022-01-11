@@ -11,7 +11,11 @@
 
     <artifactId>smallrye-stork-test-utils</artifactId>
 
-    <name>SmallRye Stork Load Balancer : Test Utilities</name>
+    <properties>
+        <revapi.skip>false</revapi.skip>
+    </properties>
+
+    <name>SmallRye Stork : Test Utilities</name>
 
     <dependencies>
         <dependency>
