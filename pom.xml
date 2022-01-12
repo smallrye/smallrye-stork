@@ -14,7 +14,8 @@
  ~  See the License for the specific language governing permissions and
  ~  limitations under the License.
  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -62,6 +63,8 @@
         <sonar.projectKey>smallrye_smallrye-stork</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 
+        <microprofile-rest-client.version>2.0</microprofile-rest-client.version>
+        <auto-service.version>1.0.1</auto-service.version>
     </properties>
 
     <licenses>
@@ -165,6 +168,21 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>smallrye-stork-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>smallrye-stork-configuration-generator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>smallrye-stork-service-discovery-composite</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-consul-client</artifactId>
                 <version>${vertx.version}</version>
@@ -195,10 +213,26 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>smallrye-stork-service-discovery-eureka</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>smallrye-stork-service-discovery-kubernetes</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <!--used in docs-->
                 <groupId>org.eclipse.microprofile.rest.client</groupId>
                 <artifactId>microprofile-rest-client-api</artifactId>
-                <version>2.0</version>
+                <version>${microprofile-rest-client.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service</artifactId>
+                <version>${auto-service.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -283,6 +317,7 @@
 
     <modules>
         <module>api</module>
+        <module>core</module>
         <module>microprofile</module>
         <module>service-discovery/static-list</module>
         <module>service-discovery/consul</module>
@@ -292,6 +327,7 @@
         <module>load-balancer/response-time</module>
         <module>test-utils</module>
         <module>docs</module>
+        <module>config-generator</module>
     </modules>
 
     <profiles>

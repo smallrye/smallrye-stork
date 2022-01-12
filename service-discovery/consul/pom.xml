@@ -35,7 +35,11 @@
     <dependencies>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-api</artifactId>
+            <artifactId>smallrye-stork-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>smallrye-stork-configuration-generator</artifactId>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>

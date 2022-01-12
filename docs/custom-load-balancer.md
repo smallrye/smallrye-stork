@@ -1,59 +1,60 @@
 # Implement your own load balancer mechanism
 
 Stork is extensible, and you can implement your service selection (load-balancer) mechanism.
-Stork uses the SPI mechanism for loading implementations matching _Load Balancer Provider_ interface
 
-## Dependency
+## Dependencies
 
-To implement your _Load Balancer Provider_, make sure your project depends on:
+To implement your _Load Balancer Provider_, make sure your project depends on Core and Configuration Generator. The former brings classes necessary to implement custom load balancer, the latter contains an annotation processor that generates classes needed by Stork.
 
 ```xml
 <dependency>
     <groupI>io.smallrye.stork</groupI>
-    <artifactId>smallrye-stork-api</artifactId>
+    <artifactId>smallrye-stork-core</artifactId>
+    <version>{{version.current}}</version>
+</dependency>
+<dependency>
+    <groupId>io.smallrye.stork</groupId>
+    <artifactId>smallrye-stork-configuration-generator</artifactId>
+    <scope>provided</scope>
+    <!-- provided scope is sufficient for the annotation processor -->
     <version>{{version.current}}</version>
 </dependency>
 ```
 
 ## Implementing a load balancer provider
 
-Stork uses the SPI mechanism for loading implementations matching _Load Balancer Provider_ interface during its initialization.
-As a consequence, a load balancer provider implementation will contain:
+Load balancer implementation consists of three elements:
 
-![structure](target/load-balancer-provider-structure.png)
+- `LoadBalancer` which is responsible for selecting service instances for a single Stork service
+- `LoadBalancerProvider` which creates instances of `LoadBalancer` for a given load balancer _type_
+- `LoadBalancerProviderConfiguration` which is a configuration for the load balancer
 
-The _provider_ is a factory that creates an `io.smallrye.stork.LoadBalancer` instance for each configured service using this load balancer provider.
-A _type_ identifies each provider.
-You will use that _type_ in the configuration to reference the load-balancer provider you want for each service:
+A _type_, for example, `acme`, identifies each provider.
+This _type_ is used in the configuration to reference the provider:
 
 ```properties
 stork.my-service.load-balancer=acme
 ```
 
-The first step consists of implementing the `io.smallrye.stork.spi.LoadBalancerProvider` interface:
+A `LoadBalancerProvider` implementation needs to be annotated with `@LoadBalancerType` that defines the _type_.
+Any configuration properties that the provider expects should be defined with `@LoadBalancerAttribute` annotations placed on the provider.
 
+A load balancer provider class should look as follows:
 ```java linenums="1"
 --8<-- "docs/snippets/examples/AcmeLoadBalancerProvider.java"
 ```
 
-This implementation is straightforward.
-The `type` method returns the load balancer provider identifier.
-The `createLoadBalancer` method is the factory method.
-It receives the instance configuration (a map constructed from all `stork.my-service.load-balancer.attr=value` properties)
+Note, that the `LoadBalancerProvider` interface takes a configuration class as a parameter. This configuration class
+is generated automatically by the _Configuration Generator_.
+Its name is created by appending `Configuration` to the name of the provider class.
 
-Then, obviously, we need to implement the `LoadBalancer` interface:
+The next step is to implement the `LoadBalancer` interface:
 
 ```java linenums="1"
 --8<-- "docs/snippets/examples/AcmeLoadBalancer.java"
 ```
 
-Again, this implementation is simplistic and just picks a random instance from the received list.
-
-The final step is to declare our `LoadBalancerProvider` in the `META-INF/services/io.smallrye.stork.spi.LoadBalancerProvider` file:
-
-```text
-examples.AcmeLoadBalancerProvider
-```
+This implementation is simplistic and just picks a random instance from the received list.
 
 ## Using your load balancer
 

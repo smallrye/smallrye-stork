@@ -33,8 +33,4 @@ Stork looks for the service with the given name (`my-service` in the previous ex
 
 Supported attributes are the following:
 
-| Attribute            | Mandatory  | Default Value  | Description                  |
-|----------------------|------------|----------------|------------------------------|
-| `consul-host`        | No         | `localhost`    | The Consul host              |
-| `consul-port`        | No         | `8500`         | The Consul port              |
-| `use-health-checks`  | No         | `false`        | Whether to use health check  |
+--8<-- "service-discovery/consul/target/classes/META-INF/stork-docs/consul-sd-attributes.txt"

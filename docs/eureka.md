@@ -14,7 +14,7 @@ First, you need to add the Stork Consul Service Discovery provider:
     <artifactId>smallrye-stork-service-discovery-eureka</artifactId>
     <version>{{version.current}}</version>
 </dependency>
-```
+`````
 
 ## Configuration
 
@@ -30,17 +30,7 @@ Stork looks for the service with the given name (`my-service` in the previous ex
 
 Supported attributes are the following:
 
-| Attribute            | Mandatory  | Default Value      | Description                                                 |
-|----------------------|------------|--------------------|-------------------------------------------------------------|
-| `eureka-host`        | Yes        |                    | The Eureka server host                                      |
-| `eureka-port`        | No         | `8761`             | The Eureka server port                                      |
-| `eureka-context-path`| No         |  `/`               | The Eureka server root context path                                      |
-| `eureka-trust-all`   | No         | `false`            | Enable/Disable the TLS certificate verification             |
-| `eureka-ssl`         | No         | `false`            | Use TLS to connect to the Eureka server                     |
-| `application`        | No         | _the service name_ | The Eureka application Id                                   |
-| `instance`           | No         |                    | The Eureka application instance Id                          |
-| `secure`             | No         | `false`            | Whether it should select the secure virtual address         |
-
+--8<-- "service-discovery/eureka/target/classes/META-INF/stork-docs/eureka-sd-attributes.txt"
 
 The `application` attribute is optional.
 It uses the Stork service name (`my-service` in the previous configuration) if not set.

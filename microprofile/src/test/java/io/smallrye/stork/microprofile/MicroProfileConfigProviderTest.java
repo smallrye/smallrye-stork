@@ -13,16 +13,17 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.config.ConfigValuePropertiesConfigSource;
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigBuilder;
-import io.smallrye.stork.LoadBalancer;
-import io.smallrye.stork.ServiceDiscovery;
 import io.smallrye.stork.Stork;
-import io.smallrye.stork.config.LoadBalancerConfig;
-import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.api.LoadBalancer;
+import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.impl.RoundRobinLoadBalancer;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
-import io.smallrye.stork.test.TestLoadBalancer;
+import io.smallrye.stork.test.TestLoadBalancer1;
+import io.smallrye.stork.test.TestLoadBalancer2;
 import io.smallrye.stork.test.TestServiceDiscovery;
+import io.smallrye.stork.test.TestServiceDiscovery2;
+import io.smallrye.stork.test.TestServiceDiscovery2ProviderConfiguration;
 
 public class MicroProfileConfigProviderTest {
 
@@ -47,8 +48,8 @@ public class MicroProfileConfigProviderTest {
     void shouldConfigureServiceDiscoveryOnly() {
         Map<String, String> properties = new HashMap<>();
         properties.put("stork." + FIRST_SERVICE + ".service-discovery", "test-sd-1");
-        properties.put("stork." + FIRST_SERVICE + ".service-discovery.1", "http://localhost:8080");
-        properties.put("stork." + FIRST_SERVICE + ".service-discovery.2", "http://localhost:8081");
+        properties.put("stork." + FIRST_SERVICE + ".service-discovery.one", "http://localhost:8080");
+        properties.put("stork." + FIRST_SERVICE + ".service-discovery.two", "http://localhost:8081");
 
         Stork stork = storkForConfig(properties);
 
@@ -61,17 +62,15 @@ public class MicroProfileConfigProviderTest {
 
         TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
         assertThat(sd.getType()).isEqualTo("test-sd-1");
-        assertThat(sd.getConfig().type()).isEqualTo("test-sd-1");
-        assertThat(sd.getConfig().parameters()).hasSize(2)
-                .containsAllEntriesOf(Map.of("1", "http://localhost:8080",
-                        "2", "http://localhost:8081"));
+        assertThat(sd.getConfig().getOne()).isEqualTo("http://localhost:8080");
+        assertThat(sd.getConfig().getTwo()).isEqualTo("http://localhost:8081");
     }
 
     @Test
     void shouldConfigureServiceDiscoveryOnlyUsingEmbeddedType() {
         Map<String, String> properties = new HashMap<>();
         properties.put("stork." + FIRST_SERVICE + ".service-discovery.type", "test-sd-1");
-        properties.put("stork." + FIRST_SERVICE + ".service-discovery.1", "http://localhost:8080");
+        properties.put("stork." + FIRST_SERVICE + ".service-discovery.one", "http://localhost:8080");
 
         Stork stork = storkForConfig(properties);
 
@@ -81,10 +80,8 @@ public class MicroProfileConfigProviderTest {
 
         TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
         assertThat(sd.getType()).isEqualTo("test-sd-1");
-        assertThat(sd.getConfig().type()).isEqualTo("test-sd-1");
-        assertThat(sd.getConfig().parameters()).hasSize(2)
-                .containsAllEntriesOf(Map.of("1", "http://localhost:8080",
-                        "type", "test-sd-1"));
+        assertThat(sd.getConfig().getOne()).isEqualTo("http://localhost:8080");
+        assertThat(sd.getConfig().getTwo()).isEqualTo(null);
     }
 
     @Test
@@ -93,34 +90,29 @@ public class MicroProfileConfigProviderTest {
         properties.put("stork." + SECOND_SERVICE + ".service-discovery", "test-sd-2");
         properties.put("stork." + SECOND_SERVICE + ".load-balancer.type", "test-lb-2");
         properties.put("stork." + SECOND_SERVICE + ".load-balancer.some-prop", "some-prop-value");
-        properties.put("stork." + SECOND_SERVICE + ".service-discovery.3", "http://localhost:8082");
+        properties.put("stork." + SECOND_SERVICE + ".service-discovery.three", "http://localhost:8082");
 
         Stork stork = storkForConfig(properties);
 
         ServiceDiscovery serviceDiscovery = stork.getService(SECOND_SERVICE).getServiceDiscovery();
-        assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery.class);
+        assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery2.class);
 
-        TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
+        TestServiceDiscovery2 sd = (TestServiceDiscovery2) serviceDiscovery;
         assertThat(sd.getType()).isEqualTo("test-sd-2");
 
-        ServiceDiscoveryConfig sdConfig = sd.getConfig();
-        assertThat(sdConfig.type()).isEqualTo("test-sd-2");
-        assertThat(sdConfig.parameters()).hasSize(1);
-        assertThat(sdConfig.parameters()).containsAllEntriesOf(Map.of("3", "http://localhost:8082"));
+        TestServiceDiscovery2ProviderConfiguration sdConfig = sd.getConfig();
+        assertThat(sdConfig.getThree()).isEqualTo("http://localhost:8082");
 
         LoadBalancer loadBalancer = stork.getService(SECOND_SERVICE).getLoadBalancer();
-        assertThat(loadBalancer).isInstanceOf(TestLoadBalancer.class);
+        assertThat(loadBalancer).isInstanceOf(TestLoadBalancer2.class);
 
-        TestLoadBalancer lb = (TestLoadBalancer) loadBalancer;
+        TestLoadBalancer2 lb = (TestLoadBalancer2) loadBalancer;
 
         assertThat(lb.getServiceDiscovery()).isEqualTo(serviceDiscovery);
         assertThat(lb.getType()).isEqualTo("test-lb-2");
-        LoadBalancerConfig lbConfig = lb.getConfig();
-        assertThat(lbConfig.type()).isEqualTo("test-lb-2");
-        assertThat(lbConfig.parameters())
-                .hasSize(2)
-                .containsAllEntriesOf(Map.of("some-prop", "some-prop-value",
-                        "type", "test-lb-2"));
+        var lbConfig = lb.getConfig();
+
+        assertThat(lbConfig.getSomeProp()).isEqualTo("some-prop-value");
     }
 
     @Test
@@ -129,7 +121,7 @@ public class MicroProfileConfigProviderTest {
         properties.put("stork." + SECOND_SERVICE + ".service-discovery", "test-sd-2");
         properties.put("stork." + SECOND_SERVICE + ".load-balancer", "test-lb-2");
         properties.put("stork." + SECOND_SERVICE + ".load-balancer.some-prop", "some-prop-value");
-        properties.put("stork." + SECOND_SERVICE + ".service-discovery.3", "http://localhost:8082");
+        properties.put("stork." + SECOND_SERVICE + ".service-discovery.three", "http://localhost:8082");
 
         properties.put("stork." + THIRD_SERVICE + ".service-discovery", "test-sd-1");
         properties.put("stork." + THIRD_SERVICE + ".load-balancer", "test-lb-1");
@@ -137,44 +129,37 @@ public class MicroProfileConfigProviderTest {
         Stork stork = storkForConfig(properties);
 
         ServiceDiscovery serviceDiscovery = stork.getService(SECOND_SERVICE).getServiceDiscovery();
-        assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery.class);
+        assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery2.class);
 
-        TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
+        TestServiceDiscovery2 sd = (TestServiceDiscovery2) serviceDiscovery;
         assertThat(sd.getType()).isEqualTo("test-sd-2");
 
-        ServiceDiscoveryConfig sdConfig = sd.getConfig();
-        assertThat(sdConfig.type()).isEqualTo("test-sd-2");
-        assertThat(sdConfig.parameters()).hasSize(1);
-        assertThat(sdConfig.parameters()).containsAllEntriesOf(Map.of("3", "http://localhost:8082"));
+        TestServiceDiscovery2ProviderConfiguration sdConfig = sd.getConfig();
+        assertThat(sdConfig.getThree()).isEqualTo("http://localhost:8082");
 
         LoadBalancer loadBalancer = stork.getService(SECOND_SERVICE).getLoadBalancer();
-        assertThat(loadBalancer).isInstanceOf(TestLoadBalancer.class);
+        assertThat(loadBalancer).isInstanceOf(TestLoadBalancer2.class);
 
-        TestLoadBalancer lb = (TestLoadBalancer) loadBalancer;
+        TestLoadBalancer2 lb = (TestLoadBalancer2) loadBalancer;
 
         assertThat(lb.getServiceDiscovery()).isEqualTo(serviceDiscovery);
         assertThat(lb.getType()).isEqualTo("test-lb-2");
-        LoadBalancerConfig lbConfig = lb.getConfig();
-        assertThat(lbConfig.type()).isEqualTo("test-lb-2");
-        assertThat(lbConfig.parameters())
-                .hasSize(1)
-                .containsAllEntriesOf(Map.of("some-prop", "some-prop-value"));
+        var lbConfig = lb.getConfig();
+        assertThat(lbConfig.getSomeProp()).isEqualTo("some-prop-value");
 
         serviceDiscovery = stork.getService(THIRD_SERVICE).getServiceDiscovery();
         assertThat(serviceDiscovery).isInstanceOf(TestServiceDiscovery.class);
-        sd = (TestServiceDiscovery) serviceDiscovery;
+        TestServiceDiscovery sd3 = (TestServiceDiscovery) serviceDiscovery;
 
-        assertThat(sd.getType()).isEqualTo("test-sd-1");
-        assertThat(sd.getConfig().type()).isEqualTo("test-sd-1");
-        assertThat(sd.getConfig().parameters()).isEmpty();
+        assertThat(sd3.getType()).isEqualTo("test-sd-1");
+        assertThat(sd3.getConfig().getOne()).isNull();
+        assertThat(sd3.getConfig().getTwo()).isNull();
 
         loadBalancer = stork.getService(THIRD_SERVICE).getLoadBalancer();
-        assertThat(loadBalancer).isInstanceOf(TestLoadBalancer.class);
-        lb = (TestLoadBalancer) loadBalancer;
+        assertThat(loadBalancer).isInstanceOf(TestLoadBalancer1.class);
+        TestLoadBalancer1 lb1 = (TestLoadBalancer1) loadBalancer;
 
-        assertThat(lb.getType()).isEqualTo("test-lb-1");
-        assertThat(lb.getConfig().type()).isEqualTo("test-lb-1");
-        assertThat(lb.getConfig().parameters()).isEmpty();
+        assertThat(lb1.getType()).isEqualTo("test-lb-1");
     }
 
     @Test
@@ -184,30 +169,26 @@ public class MicroProfileConfigProviderTest {
         Map<String, String> properties = new HashMap<>();
         properties.put("stork.\"my.service\".service-discovery", "test-sd-2");
         properties.put("stork.\"my.service\".load-balancer", "test-lb-2");
-        properties.put("stork.\"my.service\".service-discovery.1", "http://localhost:8082");
+        properties.put("stork.\"my.service\".service-discovery.three", "http://localhost:8082");
 
         Stork stork = storkForConfig(properties);
 
         ServiceDiscovery serviceDiscovery = stork.getService(serviceName).getServiceDiscovery();
-        assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery.class);
+        assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery2.class);
 
-        TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
+        TestServiceDiscovery2 sd = (TestServiceDiscovery2) serviceDiscovery;
         assertThat(sd.getType()).isEqualTo("test-sd-2");
 
-        ServiceDiscoveryConfig sdConfig = sd.getConfig();
-        assertThat(sdConfig.type()).isEqualTo("test-sd-2");
-        assertThat(sdConfig.parameters()).hasSize(1);
-        assertThat(sdConfig.parameters()).containsAllEntriesOf(Map.of("1", "http://localhost:8082"));
+        TestServiceDiscovery2ProviderConfiguration sdConfig = sd.getConfig();
+        assertThat(sdConfig.getThree()).isEqualTo("http://localhost:8082");
 
         LoadBalancer loadBalancer = stork.getService(serviceName).getLoadBalancer();
-        assertThat(loadBalancer).isInstanceOf(TestLoadBalancer.class);
+        assertThat(loadBalancer).isInstanceOf(TestLoadBalancer2.class);
 
-        TestLoadBalancer lb = (TestLoadBalancer) loadBalancer;
+        TestLoadBalancer2 lb = (TestLoadBalancer2) loadBalancer;
 
         assertThat(lb.getServiceDiscovery()).isEqualTo(serviceDiscovery);
         assertThat(lb.getType()).isEqualTo("test-lb-2");
-        LoadBalancerConfig lbConfig = lb.getConfig();
-        assertThat(lbConfig.type()).isEqualTo("test-lb-2");
     }
 
     private Stork storkForConfig(Map<String, String> properties) {

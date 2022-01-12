@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 import org.eclipse.microprofile.config.Config;
 import org.jboss.logging.Logger;
 
-import io.smallrye.stork.config.ConfigProvider;
-import io.smallrye.stork.config.ServiceConfig;
+import io.smallrye.stork.api.config.ServiceConfig;
+import io.smallrye.stork.impl.config.ConfigProvider;
 import io.smallrye.stork.spi.SimpleServiceConfig;
 
 public class MicroProfileConfigProvider implements ConfigProvider {

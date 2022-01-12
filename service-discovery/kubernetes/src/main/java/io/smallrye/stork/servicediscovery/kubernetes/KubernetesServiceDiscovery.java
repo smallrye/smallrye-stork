@@ -1,6 +1,5 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
-import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
 import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
 
 import java.util.*;
@@ -19,11 +18,10 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.stork.CachingServiceDiscovery;
-import io.smallrye.stork.DefaultServiceInstance;
-import io.smallrye.stork.Metadata;
-import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.api.Metadata;
+import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.impl.CachingServiceDiscovery;
+import io.smallrye.stork.impl.DefaultServiceInstance;
 import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.smallrye.stork.spi.ServiceInstanceUtils;
 import io.vertx.core.Vertx;
@@ -41,13 +39,15 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
-    public KubernetesServiceDiscovery(String serviceName, ServiceDiscoveryConfig config, Vertx vertx, boolean secure) {
-        super(config);
+    public KubernetesServiceDiscovery(String serviceName, KubernetesServiceDiscoveryProviderConfiguration config, Vertx vertx,
+            boolean secure) {
+        super(config.getRefreshPeriod());
         Config base = Config.autoConfigure(null);
         this.serviceName = serviceName;
-        String masterUrl = getOrDefault(config, "k8s-host", base.getMasterUrl());
-        this.application = getOrDefault(config, "application", serviceName);
-        namespace = getOrDefault(config, "k8s-namespace", base.getNamespace());
+        String masterUrl = config.getK8sHost() == null ? base.getMasterUrl() : config.getK8sHost();
+        this.application = config.getApplication() == null ? serviceName : config.getApplication();
+        this.namespace = config.getK8sNamespace() == null ? base.getNamespace() : config.getK8sNamespace();
+
         allNamespaces = namespace != null && namespace.equalsIgnoreCase("all");
 
         if (namespace == null) {

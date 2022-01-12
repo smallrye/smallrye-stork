@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
@@ -20,10 +20,10 @@ public class CompositeServiceDiscoveryTest {
     Stork createStorkWithCompositeService() {
         TestConfigProvider.clear();
         TestConfigProvider.addServiceConfig("first-service", null, "static",
-                null, Map.of("1", "localhost:8080", "2", "localhost:8081"));
+                null, Map.of("address-list", "localhost:8080,localhost:8081"));
 
         TestConfigProvider.addServiceConfig("second-service", null, "static",
-                null, Map.of("3", "localhost:8082"));
+                null, Map.of("address-list", "localhost:8082"));
 
         TestConfigProvider.addServiceConfig("third-service", null, "composite",
                 null, Map.of("services", " first-service , second-service"));

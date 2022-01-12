@@ -1,20 +1,20 @@
 package examples;
 
-import io.smallrye.stork.LoadBalancer;
-import io.smallrye.stork.ServiceDiscovery;
-import io.smallrye.stork.config.LoadBalancerConfig;
-import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.api.LoadBalancer;
+import io.smallrye.stork.api.ServiceDiscovery;
+import io.smallrye.stork.api.config.LoadBalancerAttribute;
+import io.smallrye.stork.api.config.LoadBalancerType;
 import io.smallrye.stork.spi.LoadBalancerProvider;
-import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 
-public class AcmeLoadBalancerProvider implements LoadBalancerProvider {
-    @Override
-    public String type() {
-        return "acme";
-    }
+@LoadBalancerType("acme")
+@LoadBalancerAttribute(name = "my-attribute",
+        description = "Attribute that alters the behavior of the LoadBalancer")
+public class AcmeLoadBalancerProvider implements
+        LoadBalancerProvider<AcmeLoadBalancerProviderConfiguration> {
 
     @Override
-    public LoadBalancer createLoadBalancer(LoadBalancerConfig config, ServiceDiscovery serviceDiscovery) {
+    public LoadBalancer createLoadBalancer(AcmeLoadBalancerProviderConfiguration config,
+                                           ServiceDiscovery serviceDiscovery) {
         return new AcmeLoadBalancer(config);
     }
 }

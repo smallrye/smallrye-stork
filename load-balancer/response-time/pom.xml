@@ -52,5 +52,15 @@
             <artifactId>awaitility</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>smallrye-stork-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>smallrye-stork-configuration-generator</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -1,10 +1,6 @@
 package io.smallrye.stork.servicediscovery.eureka;
 
-import static io.smallrye.stork.config.StorkConfigHelper.get;
-import static io.smallrye.stork.config.StorkConfigHelper.getBooleanOrDefault;
-import static io.smallrye.stork.config.StorkConfigHelper.getIntegerOrDefault;
-import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
-import static io.smallrye.stork.config.StorkConfigHelper.getOrDie;
+import static io.smallrye.stork.impl.config.StorkConfigHelper.get;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,13 +8,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.stork.CachingServiceDiscovery;
-import io.smallrye.stork.DefaultServiceInstance;
-import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.config.ServiceDiscoveryConfig;
-import io.smallrye.stork.integration.StorkInfrastructure;
+import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.impl.CachingServiceDiscovery;
+import io.smallrye.stork.impl.DefaultServiceInstance;
 import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.smallrye.stork.spi.ServiceInstanceUtils;
+import io.smallrye.stork.spi.StorkInfrastructure;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -42,26 +37,29 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<String> instance;
 
-    public EurekaServiceDiscovery(ServiceDiscoveryConfig config, String serviceName, boolean secure,
+    public EurekaServiceDiscovery(EurekaServiceDiscoveryProviderConfiguration config, String serviceName, boolean secure,
             StorkInfrastructure infrastructure) {
-        super(config);
+        super(config.getRefreshPeriod());
         this.secure = secure;
         Vertx vertx = infrastructure.get(Vertx.class, Vertx::vertx);
 
         // Eureka instance
-        String host = getOrDie(serviceName, config, "eureka-host");
-        int port = getIntegerOrDefault(serviceName, config, "eureka-port", 8761);
-        boolean trustAll = getBooleanOrDefault(config, "eureka-trust-all", false);
-        boolean eurekaTls = getBooleanOrDefault(config, "eureka-ssl", false);
+        String host = config.getEurekaHost();
+        int port = Integer.parseInt(config.getEurekaPort());
+        boolean trustAll = Boolean.parseBoolean(config.getEurekaTrustAll());
+        boolean eurekaTls = Boolean.parseBoolean(config.getEurekaTls());
 
         // Service selection
-        String app = getOrDefault(config, "application", serviceName);
-        instance = get(config, "instance");
+        String app = config.getApplication() == null ? serviceName : config.getApplication();
+        instance = Optional.ofNullable(config.getInstance()); // null is okay, me thinks
 
         client = WebClient.create(vertx, new WebClientOptions()
                 .setDefaultHost(host).setDefaultPort(port).setSsl(eurekaTls).setTrustAll(trustAll));
-        Optional<String> contextPath = get(config, "eureka-context-path");
-        path = contextPath.isPresent() ? contextPath.get() + "/eureka/apps/" + app : "/eureka/apps/" + app;
+        String contextPath = config.getEurekaContextPath();
+        if (!contextPath.endsWith("/")) {
+            contextPath += "/";
+        }
+        path = contextPath + "eureka/apps/";
     }
 
     @Override

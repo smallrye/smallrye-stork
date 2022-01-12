@@ -1,23 +1,23 @@
 package examples;
 
-import io.smallrye.mutiny.Uni;
-import io.smallrye.stork.DefaultServiceInstance;
-import io.smallrye.stork.ServiceDiscovery;
-import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.spi.ServiceInstanceIds;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import io.smallrye.mutiny.Uni;
+import io.smallrye.stork.api.ServiceDiscovery;
+import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.impl.DefaultServiceInstance;
+import io.smallrye.stork.spi.ServiceInstanceIds;
 
 public class AcmeServiceDiscovery implements ServiceDiscovery {
 
     private final String host;
     private final int port;
 
-    public AcmeServiceDiscovery(Map<String, String> configuration) {
-        this.host = configuration.get("host");
-        this.port = Integer.parseInt(configuration.get("port"));
+    public AcmeServiceDiscovery(AcmeServiceDiscoveryProviderConfiguration configuration) {
+        this.host = configuration.getHost();
+        this.port = Integer.parseInt(configuration.getPort());
     }
 
     @Override
