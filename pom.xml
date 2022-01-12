@@ -41,7 +41,7 @@
         <version.smallrye-config>2.8.1</version.smallrye-config>
 
         <vertx.version>4.2.2</vertx.version>
-        <version.vertx-mutiny-bindings>2.17.0</version.vertx-mutiny-bindings>
+        <version.vertx-mutiny-bindings>2.18.0</version.vertx-mutiny-bindings>
 
         <kubernetes-client.version>5.11.2</kubernetes-client.version>
         <version.slf4j>1.7.32</version.slf4j>
