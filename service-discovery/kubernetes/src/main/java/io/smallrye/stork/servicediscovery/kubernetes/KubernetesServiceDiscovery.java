@@ -3,11 +3,7 @@ package io.smallrye.stork.servicediscovery.kubernetes;
 import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
 import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -146,10 +142,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         Map<String, String> labels = new HashMap<>(endPoints.getMetadata().getLabels() != null
                                 ? endPoints.getMetadata().getLabels()
                                 : Collections.emptyMap());
-                        Map<String, String> podLabels = pods.stream().filter(pod -> pod.getMetadata().getName().equals(podName))
-                                .findFirst().get().getMetadata().getLabels();
-                        for (Map.Entry<String, String> label : podLabels.entrySet()) {
-                            labels.putIfAbsent(label.getKey(), label.getValue());
+                        Optional<Pod> maybePod = pods.stream().filter(pod -> pod.getMetadata().getName().equals(podName))
+                                .findFirst();
+                        if (maybePod.isPresent()) {
+                            Map<String, String> podLabels = maybePod.get().getMetadata().getLabels();
+                            for (Map.Entry<String, String> label : podLabels.entrySet()) {
+                                labels.putIfAbsent(label.getKey(), label.getValue());
+                            }
                         }
                         //TODO add some useful metadata?
                         Metadata<KubernetesMetadataKey> k8sMetadata = Metadata.of(KubernetesMetadataKey.class);
