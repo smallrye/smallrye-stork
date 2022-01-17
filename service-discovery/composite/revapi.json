@@ -14,7 +14,10 @@
     "configuration": {
       "elements": {
         "include": [
-          "io\\.smallrye\\.stork\\.servicediscovery\\.composite(\\..+)?"
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.stork\\.servicediscovery\\.composite(\\..*)?/"
+          }
         ]
       }
     }

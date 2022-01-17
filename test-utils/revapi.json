@@ -14,7 +14,10 @@
     "configuration": {
       "elements": {
         "include": [
-          "io\\.smallrye\\.stork\\.test(\\..+)?"
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.stork\\.test(\\..*)?/"
+          }
         ]
       }
     }
@@ -29,34 +32,9 @@
       "differences": [
         {
           "ignore": true,
-          "code": "java.class.externalClassExposedInAPI",
-          "new": "class io.smallrye.stork.Metadata<T extends java.lang.Enum<T>>",
-          "justification": "Added support to Metadata (new feature)"
-        },
-        {
-          "ignore": true,
-          "code": "java.class.externalClassExposedInAPI",
-          "new": "interface io.smallrye.stork.MetadataKey",
-          "justification": "Added support to Metadata (new feature)"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.returnTypeChanged",
-          "old": "method java.util.Map<java.lang.String, java.lang.Object> io.smallrye.stork.ServiceInstance::getMetadata()",
-          "new": "method io.smallrye.stork.Metadata<? extends io.smallrye.stork.MetadataKey> io.smallrye.stork.ServiceInstance::getMetadata()",
-          "justification": "Added support to Metadata (new feature)"
-        },
-        {
-          "ignore": true,
           "code": "java.class.removed",
           "old": "class io.smallrye.stork.StorkTestUtils",
           "justification": "Class moved to avoid a split package"
-        },
-        {
-          "ignore": true,
-          "code": "java.class.externalClassExposedInAPI",
-          "new": "interface io.smallrye.stork.integration.StorkInfrastructure",
-          "justification": "Added Infrastructure support (new feature)"
         },
         {
           "ignore": true,
