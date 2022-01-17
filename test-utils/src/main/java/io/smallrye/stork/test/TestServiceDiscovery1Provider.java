@@ -1,23 +1,23 @@
 package io.smallrye.stork.test;
 
-import io.smallrye.stork.ServiceDiscovery;
-import io.smallrye.stork.config.ServiceConfig;
-import io.smallrye.stork.config.ServiceDiscoveryConfig;
-import io.smallrye.stork.integration.StorkInfrastructure;
+import io.smallrye.stork.api.ServiceDiscovery;
+import io.smallrye.stork.api.config.ServiceConfig;
+import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
+import io.smallrye.stork.api.config.ServiceDiscoveryType;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
+import io.smallrye.stork.spi.StorkInfrastructure;
 
-public class TestServiceDiscovery1Provider implements ServiceDiscoveryProvider {
+@ServiceDiscoveryAttribute(name = "one", description = "no description")
+@ServiceDiscoveryAttribute(name = "two", description = "no description")
+@ServiceDiscoveryType(TestServiceDiscovery1Provider.TYPE)
+public class TestServiceDiscovery1Provider implements ServiceDiscoveryProvider<TestServiceDiscovery1ProviderConfiguration> {
 
     public static final String TYPE = "test-sd-1";
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(ServiceDiscoveryConfig config, String serviceName,
+    public ServiceDiscovery createServiceDiscovery(TestServiceDiscovery1ProviderConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         return new TestServiceDiscovery(config, TYPE, serviceConfig.secure());
     }
 
-    @Override
-    public String type() {
-        return TYPE;
-    }
 }

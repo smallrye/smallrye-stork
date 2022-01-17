@@ -81,7 +81,7 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Compatibility Check
-        run: mvn verify revapi:check@check-compatibility -DskipTests -fae
+        run: mvn verify revapi:check@check-compatibility -DskipTests -fae -pl \!bom
 
   quality:
     needs: [build]

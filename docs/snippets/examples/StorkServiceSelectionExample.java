@@ -1,10 +1,10 @@
 package examples;
 
-import io.smallrye.stork.Service;
-import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.Stork;
-
 import java.time.Duration;
+
+import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.Service;
+import io.smallrye.stork.api.ServiceInstance;
 
 public class StorkServiceSelectionExample {
 

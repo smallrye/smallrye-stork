@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.List;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.stork.DefaultServiceInstance;
-import io.smallrye.stork.ServiceDiscovery;
-import io.smallrye.stork.ServiceInstance;
+import io.smallrye.stork.api.ServiceDiscovery;
+import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.impl.DefaultServiceInstance;
 
 public final class StaticListServiceDiscovery implements ServiceDiscovery {
 

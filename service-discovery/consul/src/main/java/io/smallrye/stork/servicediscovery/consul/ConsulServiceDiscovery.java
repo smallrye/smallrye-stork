@@ -1,9 +1,6 @@
 package io.smallrye.stork.servicediscovery.consul;
 
-import static io.smallrye.stork.config.StorkConfigHelper.get;
-import static io.smallrye.stork.config.StorkConfigHelper.getBoolean;
-import static io.smallrye.stork.config.StorkConfigHelper.getInteger;
-import static io.smallrye.stork.config.StorkConfigHelper.getOrDefault;
+import static io.smallrye.stork.impl.config.StorkConfigHelper.getInteger;
 import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
 import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE;
 import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE_ADDRESS;
@@ -11,19 +8,14 @@ import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_C
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.smallrye.mutiny.Uni;
-import io.smallrye.stork.CachingServiceDiscovery;
-import io.smallrye.stork.DefaultServiceInstance;
-import io.smallrye.stork.Metadata;
-import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.api.Metadata;
+import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.impl.CachingServiceDiscovery;
+import io.smallrye.stork.impl.DefaultServiceInstance;
 import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.smallrye.stork.spi.ServiceInstanceUtils;
 import io.vertx.core.Vertx;
@@ -39,30 +31,19 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
     private final String serviceName;
     private final String application;
     private final boolean secure;
-    private boolean passing = true; // default true?
+    private final boolean passing;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConsulServiceDiscovery.class);
-
-    public ConsulServiceDiscovery(String serviceName, ServiceDiscoveryConfig config, Vertx vertx, boolean secure) {
-        super(config);
+    public ConsulServiceDiscovery(String serviceName, ConsulServiceDiscoveryProviderConfiguration config, Vertx vertx,
+            boolean secure) {
+        super(config.getRefreshPeriod());
         this.serviceName = serviceName;
         this.secure = secure;
-
+        // TODO: more validation
         ConsulClientOptions options = new ConsulClientOptions();
-        Optional<String> host = get(config, "consul-host");
-        if (host.isPresent()) {
-            options.setHost(host.get());
-        }
-        Optional<Integer> port = getInteger(serviceName, config, "consul-port");
-        if (port.isPresent()) {
-            options.setPort(port.get());
-        }
-        Optional<Boolean> passingConfig = getBoolean(config, "use-health-checks");
-        if (passingConfig.isPresent()) {
-            LOGGER.info("Processing Consul use-health-checks configured value: {}", passingConfig);
-            passing = passingConfig.get();
-        }
-        this.application = getOrDefault(config, "application", serviceName);
+        options.setHost(config.getConsulHost());
+        options.setPort(getInteger(serviceName, "consul-port", config.getConsulPort()));
+        passing = Boolean.parseBoolean(config.getUseHealthChecks());
+        this.application = config.getApplication() == null ? serviceName : config.getApplication();
         client = ConsulClient.create(vertx, options);
 
     }

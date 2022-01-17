@@ -1,19 +1,18 @@
 package examples;
 
-import io.smallrye.stork.LoadBalancer;
-import io.smallrye.stork.NoServiceInstanceFoundException;
-import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.config.LoadBalancerConfig;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
+
+import io.smallrye.stork.api.LoadBalancer;
+import io.smallrye.stork.api.NoServiceInstanceFoundException;
+import io.smallrye.stork.api.ServiceInstance;
 
 public class AcmeLoadBalancer implements LoadBalancer {
 
     private final Random random;
 
-    public AcmeLoadBalancer(LoadBalancerConfig config) {
+    public AcmeLoadBalancer(AcmeLoadBalancerProviderConfiguration config) {
         random = new Random();
     }
 

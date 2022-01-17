@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.smallrye.stork.NoServiceInstanceFoundException;
-import io.smallrye.stork.Service;
-import io.smallrye.stork.ServiceInstance;
 import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.NoServiceInstanceFoundException;
+import io.smallrye.stork.api.Service;
+import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
@@ -33,10 +33,9 @@ public class LeastResponseTimeLoadBalancerTest {
         TestConfigProvider.clear();
         TestConfigProvider.addServiceConfig("first-service", "least-response-time", "static",
                 null,
-                Map.of("1", FST_SRVC_1, "2", FST_SRVC_2));
-        TestConfigProvider.addServiceConfig("without-instances", "least-response-time", "static",
-                null,
-                Collections.emptyMap());
+                Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
+        TestConfigProvider.addServiceConfig("without-instances", "least-response-time",
+                "empty-services", null, Collections.emptyMap());
 
         stork = StorkTestUtils.getNewStorkInstance();
     }
@@ -110,7 +109,6 @@ public class LeastResponseTimeLoadBalancerTest {
         svc1.recordResult(1000, null);
         selected = selectInstance(service);
         assertThat(asString(selected)).isEqualTo(FST_SRVC_2);
-
     }
 
     @Test

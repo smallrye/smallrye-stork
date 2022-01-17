@@ -1,6 +1,6 @@
 package examples;
 
-import io.smallrye.stork.Service;
+import io.smallrye.stork.api.Service;
 import io.smallrye.stork.Stork;
 
 public class StorkServiceExample {

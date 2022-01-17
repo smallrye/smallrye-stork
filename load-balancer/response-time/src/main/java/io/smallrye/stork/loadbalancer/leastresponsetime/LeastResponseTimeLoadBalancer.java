@@ -2,21 +2,24 @@ package io.smallrye.stork.loadbalancer.leastresponsetime;
 
 import java.util.Collection;
 
-import io.smallrye.stork.LoadBalancer;
-import io.smallrye.stork.NoServiceInstanceFoundException;
-import io.smallrye.stork.ServiceInstance;
-import io.smallrye.stork.ServiceInstanceWithStatGathering;
+import io.smallrye.stork.api.LoadBalancer;
+import io.smallrye.stork.api.NoServiceInstanceFoundException;
+import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.impl.ServiceInstanceWithStatGathering;
 
 public class LeastResponseTimeLoadBalancer implements LoadBalancer {
 
-    // TODO make them configurable
     // TODO sampling instead of collecting everything
-    private static final int RETRY_AFTER_FAILURE_THRESHOLD = 10000;
-    private static final long FORCE_RETRY_THRESHOLD = 1000;
 
     private final CallStatistics callStatistics = new CallStatistics();
+    private final long retryAfterFailureTreshold;
+    private final long forceRetryThreshold;
 
-    // TODO good tests
+    public LeastResponseTimeLoadBalancer(LeastResponseTimeLoadBalancerProviderConfiguration config) {
+        this.retryAfterFailureTreshold = Long.parseLong(config.getRetryAfterFailureThreshold());
+        this.forceRetryThreshold = Long.parseLong(config.getForceRetryThreshold());
+    }
+
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
         if (serviceInstances.isEmpty()) {
@@ -73,8 +76,8 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
             return true;
         }
         long now = callStatistics.currentCall();
-        return now - callsData.lastFailure > RETRY_AFTER_FAILURE_THRESHOLD
-                && now - callsData.lastSuccess > FORCE_RETRY_THRESHOLD
+        return now - callsData.lastFailure > retryAfterFailureTreshold
+                && now - callsData.lastSuccess > forceRetryThreshold
                 && callsData.forcedAttemptInProgress.compareAndSet(false, true);
     }
 }

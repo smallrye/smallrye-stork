@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import io.smallrye.stork.config.ConfigProvider;
-import io.smallrye.stork.config.LoadBalancerConfig;
-import io.smallrye.stork.config.ServiceConfig;
-import io.smallrye.stork.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.api.config.LoadBalancerConfig;
+import io.smallrye.stork.api.config.ServiceConfig;
+import io.smallrye.stork.api.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.impl.config.ConfigProvider;
 
 /**
  * Stork config provider for tests, allows easily configuring stuff programmatically

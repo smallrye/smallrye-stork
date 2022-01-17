@@ -1,61 +1,64 @@
 # Implement your own service discovery mechanism
 
 Stork is extensible, and you can implement your own service discovery mechanism.
-Stork uses the SPI mechanism for loading implementations matching _Service Discovery Provider_ interface.
 
-## Dependency
+## Dependencies
 
-To implement your _Service Discovery Provider_, make sure your project depends on:
+To implement your _Service Discovery Provider_, make sure your project depends on Core and Configuration Generator. The former brings classes necessary to implement custom discovery, the latter contains an annotation processor that generates classes needed by Stork.
 
 ```xml
 <dependency>
     <groupI>io.smallrye.stork</groupI>
-    <artifactId>smallrye-stork-api</artifactId>
+    <artifactId>stork-core</artifactId>
+    <version>{{version.current}}</version>
+</dependency>
+<dependency>
+    <groupId>io.smallrye.stork</groupId>
+    <artifactId>stork-configuration-generator</artifactId>
+    <scope>provided</scope>
+    <!-- provided scope is sufficient for the annotation processor -->
     <version>{{version.current}}</version>
 </dependency>
 ```
 
 ## Implementing a service discovery provider
 
-Stork uses the SPI mechanism for loading implementations matching _Service Discovery Provider_ interface during its initialization.As a consequence, a service discovery provider implementation will contain:
+Service discovery implementation consists of three elements:
 
-![structure](target/service-discovery-provider-structure.png)
+- `ServiceDiscovery` which is responsible for locating service instances for a single Stork service
+- `ServiceDiscoveryProvider` which creates instances of `ServiceDiscovery` for a given service discovery _type_.
+- `ServiceDiscoveryProviderConfiguration` which is a configuration for the discovery
 
-The _provider_ is a factory that creates an `io.smallrye.stork.ServiceDiscovery` instance for each configured service using this service discovery provider.
-A _type_, for example, `acme`, identifies each provider. 
+A _type_, for example, `acme`, identifies each provider.
 This _type_ is used in the configuration to reference the provider:
 
 ```properties
 stork.my-service.service-discovery=acme
 ```
 
-The first step consists of implementing the `io.smallrye.stork.spi.ServiceDiscoveryProvider` interface:
+A `ServiceDiscoveryProvider` implementation needs to be annotated with `@ServiceDiscoveryType` that defines the _type_.
+Any configuration properties that the provider expects should be defined with `@ServiceDiscoveryAttribute` annotations placed on the provider.
+
+A service discovery provider class should look as follows:
 
 ```java linenums="1"
 --8<-- "docs/snippets/examples/AcmeServiceDiscoveryProvider.java"
 ```
 
-This implementation is straightforward.
-The `type` method returns the service discovery provider identifier.
-The `createServiceDiscovery` method is the factory method.
-It receives the instance configuration (a map constructed from all `stork.my-service.service-discovery.attr=value` properties)
+Note, that the `ServiceDiscoveryProvider` interface takes a configuration class as a parameter. This configuration class 
+is generated automatically by the _Configuration Generator_. 
+Its name is created by appending `Configuration` to the name of the provider class.
 
-Then, obviously, we need to implement the `ServiceDiscovery` interface:
+The next step is to implement the `ServiceDiscovery` interface:
 
 ```java linenums="1"
 --8<-- "docs/snippets/examples/AcmeServiceDiscovery.java"
 ```
 
-Again, this implementation is simplistic.
+This implementation is simplistic.
 Typically, instead of creating a service instance with values from the configuration, you would connect to a service discovery backend, look for the service and build the list of service instance accordingly.
 That's why the method returns a `Uni`.
 Most of the time, the lookup is a remote operation.
-
-The final step is to declare our `ServiceDiscoveryProvider` in the `META-INF/services/io.smallrye.stork.spi.ServiceDiscoveryProvider` file:
-
-```text
-examples.AcmeServiceDiscoveryProvider
-```
 
 ## Using your service discovery
 

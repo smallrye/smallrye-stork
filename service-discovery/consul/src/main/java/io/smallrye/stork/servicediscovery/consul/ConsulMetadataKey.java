@@ -1,6 +1,6 @@
 package io.smallrye.stork.servicediscovery.consul;
 
-import io.smallrye.stork.MetadataKey;
+import io.smallrye.stork.api.MetadataKey;
 
 public enum ConsulMetadataKey implements MetadataKey {
 

@@ -53,7 +53,7 @@ The `Service` lets you retrieve the list of `ServiceInstance`, or select a singl
 
 ## Service Instance
 
-The `io.smallrye.stork.ServiceInstance` represents an actual instance of the service. 
+The `io.smallrye.stork.api.ServiceInstance` represents an actual instance of the service. 
 It provides the metadata to configure a _client_ to interact with that specific instance of service.
 
 ```java linenums="1"
