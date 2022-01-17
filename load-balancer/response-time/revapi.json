@@ -14,7 +14,10 @@
     "configuration": {
       "elements": {
         "include": [
-          "io\\.smallrye\\.stork\\.loadbalancer\\.leastresponsetime(\\..+)?"
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.stork\\.loadbalancer\\.leastresponsetime(\\..*)?/"
+          }
         ]
       }
     }

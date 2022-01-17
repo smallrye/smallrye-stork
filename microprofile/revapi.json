@@ -14,7 +14,10 @@
     "configuration": {
       "elements": {
         "include": [
-          "io\\.smallrye\\.stork.microprofile(\\..+)?"
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.stork\\.microprofile(\\..*)?/"
+          }
         ]
       }
     }
