@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * defines an attribute for a load balancer.
+ * Defines an attribute for a load balancer.
  *
  * The name of the attribute corresponds to the value used in the configuration, e.g. for name {@code my-attribute},
  * use the following to set the value:

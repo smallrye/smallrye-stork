@@ -11,7 +11,7 @@ First, you need to add the Stork Consul Service Discovery provider:
 ```xml
 <dependency>
     <groupId>io.smallrye.stork</groupId>
-    <artifactId>smallrye-stork-service-discovery-eureka</artifactId>
+    <artifactId>stork-service-discovery-eureka</artifactId>
     <version>{{version.current}}</version>
 </dependency>
 `````

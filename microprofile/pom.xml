@@ -4,11 +4,11 @@
 
     <parent>
         <groupId>io.smallrye.stork</groupId>
-        <artifactId>smallrye-stork-parent</artifactId>
+        <artifactId>stork-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-stork-microprofile-config</artifactId>
+    <artifactId>stork-microprofile-config</artifactId>
 
     <name>SmallRye Stork : MicroProfile Config integration</name>
 
@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-core</artifactId>
+            <artifactId>stork-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.microprofile.config</groupId>
@@ -36,7 +36,7 @@
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-test-utils</artifactId>
+            <artifactId>stork-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

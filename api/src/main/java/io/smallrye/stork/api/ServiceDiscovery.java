@@ -22,8 +22,9 @@ public interface ServiceDiscovery {
      * Optional initialization.
      * This method will be invoked after all service discoveries and load balancers are registered in Stork
      *
-     * @param stork the Stork instance
+     * @param services a map of all defined services by name, helpful with creating service discovery implementations
+     *        that combine results from multiple services
      */
-    default void initialize(Map<String, Service> stork) {
+    default void initialize(Map<String, Service> services) {
     }
 }

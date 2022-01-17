@@ -1,4 +1,4 @@
-package io.smallrye.stork;
+package io.smallrye.stork.impl;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,8 +19,6 @@ import org.junit.jupiter.api.Timeout;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.ServiceInstance;
-import io.smallrye.stork.impl.CachingServiceDiscovery;
-import io.smallrye.stork.impl.DefaultServiceInstance;
 import io.vertx.core.Vertx;
 
 class CachingServiceDiscoveryRefreshTest {

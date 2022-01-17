@@ -59,7 +59,7 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
         if (!contextPath.endsWith("/")) {
             contextPath += "/";
         }
-        path = contextPath + "eureka/apps/";
+        path = contextPath + "eureka/apps/" + app;
     }
 
     @Override

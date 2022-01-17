@@ -38,7 +38,7 @@ For example, if you wish to use Consul and load-balance the calls with round-rob
 ```xml
     <dependency>
         <groupId>io.smallrye.stork</groupId>
-        <artifactId>smallrye-stork-service-discovery-consul</artifactId>
+        <artifactId>stork-service-discovery-consul</artifactId>
         <version>{{version.current}}</version>
     </dependency>
 ```

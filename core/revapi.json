@@ -14,11 +14,12 @@
     "configuration": {
       "elements": {
         "include": [
-          "io\\.smallrye\\.stork(\\..+)?",
-          "io\\.smallrye\\.stork"
-        ],
-        "exclude": [
-          "io\\.smallrye\\.stork\\.impl(\\..+)?"
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.stork(\\..*)?/"
+          }
+        ], "exclude": [
+          "class io\\.smallrye\\.stork\\.impl\\..*"
         ]
       }
     }
@@ -77,6 +78,13 @@
           "old": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.spi.ServiceDiscoveryProvider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig)",
           "new": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.spi.ServiceDiscoveryProvider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig, io.smallrye.stork.integration.StorkInfrastructure)",
           "justification": "Added Infrastructure support"
+        },
+        {
+          "ignore": true,
+          "regex": true,
+          "code": "java.class.externalClassExposedInAPI",
+          "newArchive": "io\\.smallrye\\.stork:stork-api:.*",
+          "justification": "Basic API classes have been pulled out to the stork-api module"
         }
       ]
     }

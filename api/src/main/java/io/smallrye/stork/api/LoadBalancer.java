@@ -11,7 +11,7 @@ import java.util.Collection;
 public interface LoadBalancer {
 
     /**
-     * Provide a single {@link ServiceInstance} from the given list.
+     * Select a single {@link ServiceInstance} from the given list.
      *
      * @param serviceInstances instances to choose from
      * 

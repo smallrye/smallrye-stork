@@ -12,7 +12,7 @@ First, you need to add the Stork Kubernetes Service Discovery provider:
 ```xml
 <dependency>
     <groupId>io.smallrye.stork</groupId>
-    <artifactId>smallrye-stork-service-discovery-kubernetes</artifactId>
+    <artifactId>stork-service-discovery-kubernetes</artifactId>
     <version>{{version.current}}</version>
 </dependency>
 ```

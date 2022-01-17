@@ -19,12 +19,12 @@
 
     <parent>
         <groupId>io.smallrye.stork</groupId>
-        <artifactId>smallrye-stork-parent</artifactId>
+        <artifactId>stork-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>smallrye-stork-service-discovery-static-list</artifactId>
+    <artifactId>stork-service-discovery-static-list</artifactId>
 
     <name>SmallRye Stork Service Discovery : Static List</name>
 
@@ -35,16 +35,16 @@
     <dependencies>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-core</artifactId>
+            <artifactId>stork-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-configuration-generator</artifactId>
+            <artifactId>stork-configuration-generator</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-test-utils</artifactId>
+            <artifactId>stork-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

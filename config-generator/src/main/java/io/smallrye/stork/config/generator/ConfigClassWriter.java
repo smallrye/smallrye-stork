@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
@@ -48,7 +49,7 @@ public class ConfigClassWriter {
     public String createLoadBalancerLoader(Element element, String configClassName, String type) throws IOException {
         String providerClassName = element.toString();
         String className = providerClassName + "Loader";
-        String classPackage = getPackage(className);
+        String classPackage = getPackage(element);
         String simpleClassName = element.getSimpleName() + "Loader";
 
         JavaFileObject javaFile = environment.getFiler().createSourceFile(className);
@@ -84,7 +85,7 @@ public class ConfigClassWriter {
     public String createServiceDiscoveryLoader(Element element, String configClassName, String type) throws IOException {
         String providerClassName = element.toString();
         String className = providerClassName + "Loader";
-        String classPackage = getPackage(className);
+        String classPackage = getPackage(element);
         String simpleClassName = element.getSimpleName() + "Loader";
 
         JavaFileObject javaFile = environment.getFiler().createSourceFile(className);
@@ -134,7 +135,7 @@ public class ConfigClassWriter {
 
     public String createConfig(Element element, String comment, Consumer<PrintWriter> attributesWriter) throws IOException {
         String className = element.toString() + "Configuration";
-        String classPackage = getPackage(className);
+        String classPackage = getPackage(element);
         String simpleClassName = element.getSimpleName() + "Configuration";
 
         JavaFileObject file = environment.getFiler().createSourceFile(className);
@@ -213,7 +214,15 @@ public class ConfigClassWriter {
         out.println(format(" public class %s {", simpleName));
     }
 
-    private static String getPackage(String className) {
+    private String getPackage(Element classElement) {
+        String className = classElement.toString();
+        ElementKind parent = classElement.getEnclosingElement().getKind();
+        if (parent != ElementKind.PACKAGE) {
+            throw new IllegalArgumentException(
+                    "Only top level classes (i.e. no inner classes) can be used as LoadBalancerProvider and" +
+                            " ServiceDiscoveryProvider implementations, found " + className + " which is contained by a "
+                            + parent);
+        }
         int indexOfLastDot = className.lastIndexOf('.');
         if (indexOfLastDot > 0) {
             return className.substring(0, indexOfLastDot);

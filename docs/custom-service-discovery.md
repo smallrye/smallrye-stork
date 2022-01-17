@@ -9,12 +9,12 @@ To implement your _Service Discovery Provider_, make sure your project depends o
 ```xml
 <dependency>
     <groupI>io.smallrye.stork</groupI>
-    <artifactId>smallrye-stork-core</artifactId>
+    <artifactId>stork-core</artifactId>
     <version>{{version.current}}</version>
 </dependency>
 <dependency>
     <groupId>io.smallrye.stork</groupId>
-    <artifactId>smallrye-stork-configuration-generator</artifactId>
+    <artifactId>stork-configuration-generator</artifactId>
     <scope>provided</scope>
     <!-- provided scope is sufficient for the annotation processor -->
     <version>{{version.current}}</version>

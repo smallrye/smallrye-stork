@@ -10,7 +10,7 @@ First, you need to add the least-response-time load-balancer to your project:
 ```xml
 <dependency>
     <groupId>io.smallrye.stork</groupId>
-    <artifactId>smallrye-stork-load-balancer-response-time</artifactId>
+    <artifactId>stork-load-balancer-response-time</artifactId>
     <version>{{version.current}}</version>
 </dependency>
 ```

@@ -5,15 +5,15 @@
 
     <parent>
         <groupId>io.smallrye.stork</groupId>
-        <artifactId>smallrye-stork-parent</artifactId>
+        <artifactId>stork-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>smallrye-stork-api</artifactId>
+    <artifactId>stork-api</artifactId>
 
-    <name>SmallRye Stork : Basic API classes</name>
+    <name>SmallRye Stork : Main API classes</name>
 
-    <description>Basic API classes of Stork. You are likely to need `smallrye-stork-core` and not this class.</description>
+    <description>Main Stork API classes. You are likely to need `smallrye-stork-core` and not this module.</description>
 
     <properties>
         <revapi.skip>false</revapi.skip>

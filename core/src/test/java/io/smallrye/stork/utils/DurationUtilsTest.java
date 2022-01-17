@@ -1,4 +1,4 @@
-package io.smallrye.utils;
+package io.smallrye.stork.utils;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
-
-import io.smallrye.stork.utils.DurationUtils;
 
 public class DurationUtilsTest {
 

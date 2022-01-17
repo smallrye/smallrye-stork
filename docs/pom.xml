@@ -5,7 +5,7 @@
 
     <parent>
         <groupId>io.smallrye.stork</groupId>
-        <artifactId>smallrye-stork-parent</artifactId>
+        <artifactId>stork-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>smallrye-doc</artifactId>
@@ -63,21 +63,21 @@
     <dependencies>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-core</artifactId>
+            <artifactId>stork-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-configuration-generator</artifactId>
+            <artifactId>stork-configuration-generator</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-test-utils</artifactId>
+            <artifactId>stork-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-service-discovery-static-list</artifactId>
+            <artifactId>stork-service-discovery-static-list</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -90,19 +90,19 @@
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-service-discovery-composite</artifactId>
+            <artifactId>stork-service-discovery-composite</artifactId>
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-service-discovery-consul</artifactId>
+            <artifactId>stork-service-discovery-consul</artifactId>
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-service-discovery-eureka</artifactId>
+            <artifactId>stork-service-discovery-eureka</artifactId>
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
-            <artifactId>smallrye-stork-service-discovery-kubernetes</artifactId>
+            <artifactId>stork-service-discovery-kubernetes</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

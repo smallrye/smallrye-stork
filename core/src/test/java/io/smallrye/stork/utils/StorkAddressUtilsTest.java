@@ -1,11 +1,8 @@
-package io.smallrye.utils;
+package io.smallrye.stork.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
-
-import io.smallrye.stork.utils.HostAndPort;
-import io.smallrye.stork.utils.StorkAddressUtils;
 
 public class StorkAddressUtilsTest {
 

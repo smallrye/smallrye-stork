@@ -75,12 +75,12 @@ public class ConfigurationGenerator extends AbstractProcessor {
             for (Element element : serviceDiscoveries) {
                 if (element.getKind() != ElementKind.CLASS) {
                     throw new IllegalArgumentException(
-                            "ServiceDiscoveryName annotation can only be used on the class level, found one on " + element);
+                            "ServiceDiscoveryType annotation can only be used on the class level, found one on " + element);
                 }
                 TypeMirror elementType = elementUtils.getTypeElement(element.toString()).asType();
                 if (!typeUtils.isAssignable(elementType, serviceDiscoveryProviderType)) {
                     throw new IllegalArgumentException(
-                            "ServiceDiscoveryName should be used on ServiceDiscoveryProvider classes, found one on " + element);
+                            "ServiceDiscoveryType should be used on ServiceDiscoveryProvider classes, found one on " + element);
                 }
 
                 ServiceDiscoveryAttribute[] attributes = EMPTY_SD_ATTRIBUTES;
@@ -125,12 +125,12 @@ public class ConfigurationGenerator extends AbstractProcessor {
             for (Element element : loadBalancers) {
                 if (element.getKind() != ElementKind.CLASS) {
                     throw new IllegalArgumentException(
-                            "LoadBalancerName annotation can only be used on the class level, found one on " + element);
+                            "LoadBalancerType annotation can only be used on the class level, found one on " + element);
                 }
                 TypeMirror elementType = elementUtils.getTypeElement(element.toString()).asType();
                 if (!typeUtils.isAssignable(elementType, loadBalancerProviderType)) {
                     throw new IllegalArgumentException(
-                            "LoadBalancerName should be used on LoadBalancerProvider classes, found one on " + element);
+                            "LoadBalancerType should be used on LoadBalancerProvider classes, found one on " + element);
                 }
 
                 LoadBalancerAttribute[] attributes = EMPTY_LB_ATTRIBUTES;
