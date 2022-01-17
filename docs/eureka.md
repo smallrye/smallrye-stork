@@ -34,6 +34,7 @@ Supported attributes are the following:
 |----------------------|------------|--------------------|-------------------------------------------------------------|
 | `eureka-host`        | Yes        |                    | The Eureka server host                                      |
 | `eureka-port`        | No         | `8761`             | The Eureka server port                                      |
+| `eureka-context-path`| No         |  `/`               | The Eureka server root context path                                      |
 | `eureka-trust-all`   | No         | `false`            | Enable/Disable the TLS certificate verification             |
 | `eureka-ssl`         | No         | `false`            | Use TLS to connect to the Eureka server                     |
 | `application`        | No         | _the service name_ | The Eureka application Id                                   |
