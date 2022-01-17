@@ -60,8 +60,8 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
 
         client = WebClient.create(vertx, new WebClientOptions()
                 .setDefaultHost(host).setDefaultPort(port).setSsl(eurekaTls).setTrustAll(trustAll));
-
-        path = "/eureka/apps/" + app;
+        Optional<String> contextPath = get(config, "eureka-context-path");
+        path = contextPath.isPresent() ? contextPath.get() + "/eureka/apps/" + app : "/eureka/apps/" + app;
     }
 
     @Override

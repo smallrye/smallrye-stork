@@ -81,7 +81,7 @@ public class EurekaServer {
 
     public static void registerApplicationInstance(WebClient client, String applicationId, String instanceId,
             String virtualAddress, int port,
-            String secureVirtualAddress, int securePort, String state) {
+            String secureVirtualAddress, int securePort, String state, String path) {
         JsonObject instance = new JsonObject();
         JsonObject registration = new JsonObject();
         instance.put("instance", registration);
@@ -108,18 +108,18 @@ public class EurekaServer {
                         .put("name", "MyOwn"))
                 .put("leaseInfo", new JsonObject().put("renewalIntervalInSecs", 10000).put("durationInSecs", 10000));
 
-        HttpResponse<Buffer> response = client.post("/eureka/apps/" + applicationId)
+        HttpResponse<Buffer> response = client.post(path + "/eureka/apps/" + applicationId)
                 .putHeader("content-type", "application/json")
                 .putHeader("accept", "application/json")
                 .sendJsonObjectAndAwait(instance);
 
         Assertions.assertEquals(204, response.statusCode());
-        waitForInstance(client, applicationId, instanceId);
+        waitForInstance(client, applicationId, instanceId, path);
         instances.add(new ApplicationInstance(applicationId, instanceId));
     }
 
-    static void updateApplicationInstanceStatus(WebClient client, String app, String id, String status) {
-        String url = "/eureka/apps/" + app + "/" + id + "/status";
+    static void updateApplicationInstanceStatus(WebClient client, String app, String id, String status, String path) {
+        String url = path + "/eureka/apps/" + app + "/" + id + "/status";
         await().untilAsserted(() -> {
             HttpResponse<Buffer> response = client.put(url)
                     .addQueryParam("value", status)
@@ -129,8 +129,8 @@ public class EurekaServer {
         });
     }
 
-    public static void waitForInstance(WebClient client, String app, String instance) {
+    public static void waitForInstance(WebClient client, String app, String instance, String path) {
         await().untilAsserted(() -> Assertions.assertEquals(200,
-                client.get("/eureka/apps/" + app + "/" + instance).sendAndAwait().statusCode()));
+                client.get(path + "/eureka/apps/" + app + "/" + instance).sendAndAwait().statusCode()));
     }
 }
