@@ -1,4 +1,4 @@
-package io.smallrye.stork.spi;
+package io.smallrye.stork.utils;
 
 import java.util.concurrent.atomic.AtomicLong;
 

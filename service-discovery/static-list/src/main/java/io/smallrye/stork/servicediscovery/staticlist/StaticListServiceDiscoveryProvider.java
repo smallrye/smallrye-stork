@@ -10,9 +10,9 @@ import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
 import io.smallrye.stork.api.config.ServiceDiscoveryType;
 import io.smallrye.stork.impl.DefaultServiceInstance;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
-import io.smallrye.stork.spi.ServiceInstanceIds;
 import io.smallrye.stork.spi.StorkInfrastructure;
 import io.smallrye.stork.utils.HostAndPort;
+import io.smallrye.stork.utils.ServiceInstanceIds;
 import io.smallrye.stork.utils.StorkAddressUtils;
 
 @ServiceDiscoveryType("static")

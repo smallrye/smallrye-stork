@@ -49,6 +49,12 @@
           "old": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.test.TestServiceDiscovery2Provider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig)",
           "new": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.test.TestServiceDiscovery2Provider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig, io.smallrye.stork.integration.StorkInfrastructure)",
           "justification": "Added Infrastructure support (new feature)"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.noLongerImplementsInterface",
+          "old": "class io.smallrye.stork.test.TestConfigProvider",
+          "justification": "The interface was moved to the API module"
         }
       ]
     }

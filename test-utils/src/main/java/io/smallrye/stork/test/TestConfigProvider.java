@@ -8,7 +8,7 @@ import java.util.Map;
 import io.smallrye.stork.api.config.LoadBalancerConfig;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.api.config.ServiceDiscoveryConfig;
-import io.smallrye.stork.impl.config.ConfigProvider;
+import io.smallrye.stork.spi.config.ConfigProvider;
 
 /**
  * Stork config provider for tests, allows easily configuring stuff programmatically

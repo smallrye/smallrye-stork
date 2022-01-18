@@ -17,10 +17,10 @@ import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.impl.RoundRobinLoadBalancer;
 import io.smallrye.stork.impl.RoundRobinLoadBalancerProvider;
-import io.smallrye.stork.impl.config.ConfigProvider;
 import io.smallrye.stork.integration.DefaultStorkInfrastructure;
 import io.smallrye.stork.spi.ElementWithType;
 import io.smallrye.stork.spi.StorkInfrastructure;
+import io.smallrye.stork.spi.config.ConfigProvider;
 import io.smallrye.stork.spi.internal.LoadBalancerLoader;
 import io.smallrye.stork.spi.internal.ServiceDiscoveryLoader;
 

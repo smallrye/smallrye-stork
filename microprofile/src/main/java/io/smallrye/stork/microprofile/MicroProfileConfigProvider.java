@@ -13,8 +13,8 @@ import org.eclipse.microprofile.config.Config;
 import org.jboss.logging.Logger;
 
 import io.smallrye.stork.api.config.ServiceConfig;
-import io.smallrye.stork.impl.config.ConfigProvider;
-import io.smallrye.stork.spi.SimpleServiceConfig;
+import io.smallrye.stork.spi.config.ConfigProvider;
+import io.smallrye.stork.spi.config.SimpleServiceConfig;
 
 public class MicroProfileConfigProvider implements ConfigProvider {
 

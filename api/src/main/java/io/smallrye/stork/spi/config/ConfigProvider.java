@@ -1,4 +1,4 @@
-package io.smallrye.stork.impl.config;
+package io.smallrye.stork.spi.config;
 
 import java.util.List;
 
