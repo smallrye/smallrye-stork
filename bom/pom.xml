@@ -21,6 +21,7 @@
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-build-parent</artifactId>
         <version>34</version>
+        <relativePath/>
     </parent>
     <groupId>io.smallrye.stork</groupId>
     <artifactId>stork-bom</artifactId>
@@ -77,11 +78,6 @@
             </dependency>
             <dependency>
                 <groupId>io.smallrye.stork</groupId>
-                <artifactId>stork-test-utils</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.smallrye.stork</groupId>
                 <artifactId>stork-service-discovery-static-list</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -98,6 +94,23 @@
             <dependency>
                 <groupId>io.smallrye.stork</groupId>
                 <artifactId>stork-service-discovery-kubernetes</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>stork-load-balancer-response-time</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>stork-microprofile-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>stork-test-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

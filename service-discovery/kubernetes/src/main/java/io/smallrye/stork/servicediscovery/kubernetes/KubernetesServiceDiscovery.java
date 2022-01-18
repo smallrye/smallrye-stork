@@ -22,8 +22,8 @@ import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.impl.CachingServiceDiscovery;
 import io.smallrye.stork.impl.DefaultServiceInstance;
-import io.smallrye.stork.spi.ServiceInstanceIds;
-import io.smallrye.stork.spi.ServiceInstanceUtils;
+import io.smallrye.stork.utils.ServiceInstanceIds;
+import io.smallrye.stork.utils.ServiceInstanceUtils;
 import io.vertx.core.Vertx;
 
 public class KubernetesServiceDiscovery extends CachingServiceDiscovery {

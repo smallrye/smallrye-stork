@@ -2,13 +2,12 @@ package examples;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.impl.DefaultServiceInstance;
-import io.smallrye.stork.spi.ServiceInstanceIds;
+import io.smallrye.stork.utils.ServiceInstanceIds;
 
 public class AcmeServiceDiscovery implements ServiceDiscovery {
 

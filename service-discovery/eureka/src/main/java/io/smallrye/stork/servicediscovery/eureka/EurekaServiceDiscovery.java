@@ -1,7 +1,5 @@
 package io.smallrye.stork.servicediscovery.eureka;
 
-import static io.smallrye.stork.impl.config.StorkConfigHelper.get;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,9 +9,9 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.impl.CachingServiceDiscovery;
 import io.smallrye.stork.impl.DefaultServiceInstance;
-import io.smallrye.stork.spi.ServiceInstanceIds;
-import io.smallrye.stork.spi.ServiceInstanceUtils;
 import io.smallrye.stork.spi.StorkInfrastructure;
+import io.smallrye.stork.utils.ServiceInstanceIds;
+import io.smallrye.stork.utils.ServiceInstanceUtils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;

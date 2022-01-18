@@ -1,4 +1,4 @@
-package io.smallrye.stork.spi;
+package io.smallrye.stork.spi.config;
 
 import java.util.Collections;
 import java.util.Map;
