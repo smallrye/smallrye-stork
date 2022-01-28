@@ -14,6 +14,8 @@ nav:
     - Custom: 'custom-service-discovery.md'
   - Load-Balancing:
     - Round Robin: 'round-robin.md'
+    - Random: 'random.md'
+    - Least Requests: 'least-requests.md'
     - Response Time: 'response-time.md'
     - Custom: 'custom-load-balancer.md'
 

@@ -287,6 +287,8 @@
         <module>service-discovery/eureka</module>
         <module>service-discovery/composite</module>
         <module>load-balancer/response-time</module>
+        <module>load-balancer/random</module>
+        <module>load-balancer/least-requests</module>
         <module>test-utils</module>
         <module>docs</module>
         <module>config-generator</module>
