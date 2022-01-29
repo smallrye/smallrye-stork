@@ -17,6 +17,7 @@ nav:
     - Random: 'random.md'
     - Least Requests: 'least-requests.md'
     - Response Time: 'response-time.md'
+    - Power Of Two Choices: 'power-of-two-choices.md'
     - Custom: 'custom-load-balancer.md'
 
 

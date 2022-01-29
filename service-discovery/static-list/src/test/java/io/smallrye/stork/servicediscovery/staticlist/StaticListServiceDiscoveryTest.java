@@ -54,4 +54,13 @@ public class StaticListServiceDiscoveryTest {
         assertThat(stork.getServiceOptional("missing")).isEmpty();
     }
 
+    @Test
+    void shouldFailOnInvalidFormat() {
+        TestConfigProvider.clear();
+        TestConfigProvider.addServiceConfig("broken-service", null, "static",
+                null, Map.of("address-list", "localhost:8080, localhost:8081, , "));
+        assertThatThrownBy(StorkTestUtils::getNewStorkInstance).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Address not parseable");
+    }
+
 }

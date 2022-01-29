@@ -8,7 +8,7 @@ public enum ConsulMetadataKey implements MetadataKey {
     META_CONSUL_SERVICE_NODE("consul-service-node"),
     META_CONSUL_SERVICE_NODE_ADDRESS("consul-service-node-address");
 
-    private String name;
+    private final String name;
 
     ConsulMetadataKey(String name) {
         this.name = name;

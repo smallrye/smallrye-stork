@@ -49,6 +49,24 @@
             <artifactId>stork-load-balancer-response-time</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-load-balancer-random</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-load-balancer-least-requests</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-load-balancer-power-of-two-choices</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

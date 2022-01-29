@@ -10,7 +10,7 @@ import io.smallrye.stork.impl.ServiceInstanceWithStatGathering;
 
 public class LeastRequestsLoadBalancer implements LoadBalancer {
 
-    InflightRequestCollector collector = new InflightRequestCollector();
+    private final InflightRequestCollector collector = new InflightRequestCollector();
 
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
