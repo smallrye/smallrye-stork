@@ -16,18 +16,18 @@ import java.util.Map;
  */
 public class Metadata<T extends Enum<T>> {
 
-    private final EnumMap<T, Object> metatada;
+    private final EnumMap<T, Object> metadata;
     private final Class<T> clazz;
-    private static final Metadata EMPTY = new Metadata(DefaultMetadataKey.class, Collections.emptyMap());
+    private static final Metadata<? extends MetadataKey> EMPTY = new Metadata<>(DefaultMetadataKey.class,
+            Collections.emptyMap());
 
-    private Metadata(Class<T> key, Map<T, Object> metatada) {
-        if (metatada.isEmpty()) {
-            this.metatada = new EnumMap<>(key);
-            this.clazz = key;
+    private Metadata(Class<T> key, Map<T, Object> metadata) {
+        if (metadata.isEmpty()) {
+            this.metadata = new EnumMap<>(key);
         } else {
-            this.metatada = new EnumMap<>(metatada);
-            this.clazz = key;
+            this.metadata = new EnumMap<>(metadata);
         }
+        this.clazz = key;
     }
 
     /**
@@ -35,7 +35,7 @@ public class Metadata<T extends Enum<T>> {
      *
      * @return the empty instance
      */
-    public static Metadata empty() {
+    public static Metadata<? extends MetadataKey> empty() {
         return EMPTY;
     }
 
@@ -46,11 +46,11 @@ public class Metadata<T extends Enum<T>> {
      *        must not contain multiple objects of the same class
      * @return the new metadata
      */
-    public static Metadata of(Class<?> key, Map<?, Object> metadata) {
+    public static <K extends Enum<K> & MetadataKey> Metadata<K> of(Class<K> key, Map<K, Object> metadata) {
         if (metadata == null) {
             throw new IllegalArgumentException("`metadata` must not be `null`");
         }
-        return new Metadata(key, metadata);
+        return new Metadata<>(key, metadata);
     }
 
     /**
@@ -59,11 +59,11 @@ public class Metadata<T extends Enum<T>> {
      * @param key the type of metadata, must not be {@code null}
      * @return the new metadata
      */
-    public static Metadata of(Class<?> key) {
+    public static <K extends Enum<K> & MetadataKey> Metadata<K> of(Class<K> key) {
         if (key == null) {
             throw new IllegalArgumentException("`key` must not be `null`");
         }
-        return new Metadata(key, Collections.emptyMap());
+        return new Metadata<>(key, Collections.emptyMap());
     }
 
     /**
@@ -74,26 +74,26 @@ public class Metadata<T extends Enum<T>> {
      * @param item the metadata to be added, must not be {@code null}.
      * @return the new instance of {@link Metadata}
      */
-    public Metadata with(T key, Object item) {
+    public Metadata<T> with(T key, Object item) {
         if (key == null) {
             throw new IllegalArgumentException("`key` must not be `null`");
         }
         if (item == null) {
             throw new IllegalArgumentException(key.name() + " should not be `null`");
         }
-        EnumMap<T, Object> copy = new EnumMap<>(metatada);
+        EnumMap<T, Object> copy = new EnumMap<>(metadata);
         copy.put(key, item);
-        return new Metadata(this.clazz, copy);
+        return new Metadata<>(this.clazz, copy);
     }
 
     public EnumMap<T, Object> getMetadata() {
-        return metatada;
+        return metadata;
     }
 
     public enum DefaultMetadataKey implements MetadataKey {
         GENERIC_METADATA_KEY("generic");
 
-        private String name;
+        private final String name;
 
         DefaultMetadataKey(String name) {
             this.name = name;

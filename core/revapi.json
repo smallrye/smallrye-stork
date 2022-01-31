@@ -16,7 +16,15 @@
         "include": [
           {
             "matcher": "java-package",
-            "match": "/io\\.smallrye\\.stork(\\..*)?/"
+            "match": "/io\\.smallrye\\.stork/"
+          },
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.stork\\.integration(\\..*)?/"
+          },
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.stork\\.utils(\\..*)?/"
           }
         ], "exclude": [
           "class io\\.smallrye\\.stork\\.impl\\..*"

@@ -34,6 +34,88 @@
       "minSeverity": "POTENTIALLY_BREAKING",
       "minCriticality": "documented",
       "differences": [
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeTypeParametersChanged",
+          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::empty()",
+          "new": "method io.smallrye.stork.api.Metadata<? extends io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::empty()",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.parameterTypeParameterChanged",
+          "old": "parameter io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(===java.lang.Class<?>===)",
+          "new": "parameter <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(===java.lang.Class<K>===)",
+          "parameterIndex": "0",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeTypeParametersChanged",
+          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>)",
+          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>)",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.generics.elementNowParameterized",
+          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>)",
+          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>)",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.generics.formalTypeParameterAdded",
+          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>)",
+          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>)",
+          "typeParameter": "K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.parameterTypeParameterChanged",
+          "old": "parameter io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(===java.lang.Class<?>===, java.util.Map<?, java.lang.Object>)",
+          "new": "parameter <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(===java.lang.Class<K>===, java.util.Map<K, java.lang.Object>)",
+          "parameterIndex": "0",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.parameterTypeParameterChanged",
+          "old": "parameter io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>, ===java.util.Map<?, java.lang.Object>===)",
+          "new": "parameter <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>, ===java.util.Map<K, java.lang.Object>===)",
+          "parameterIndex": "1",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeTypeParametersChanged",
+          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>, java.util.Map<?, java.lang.Object>)",
+          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>, java.util.Map<K, java.lang.Object>)",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.generics.elementNowParameterized",
+          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>, java.util.Map<?, java.lang.Object>)",
+          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>, java.util.Map<K, java.lang.Object>)",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.generics.formalTypeParameterAdded",
+          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>, java.util.Map<?, java.lang.Object>)",
+          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>, java.util.Map<K, java.lang.Object>)",
+          "typeParameter": "K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeTypeParametersChanged",
+          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::with(T, java.lang.Object)",
+          "new": "method io.smallrye.stork.api.Metadata<T> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::with(T, java.lang.Object)",
+          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        }
       ]
     }
   },
