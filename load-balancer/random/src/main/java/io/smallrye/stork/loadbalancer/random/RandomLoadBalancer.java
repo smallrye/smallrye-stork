@@ -1,5 +1,6 @@
 package io.smallrye.stork.loadbalancer.random;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,7 +12,7 @@ import io.smallrye.stork.api.ServiceInstance;
 
 public class RandomLoadBalancer implements LoadBalancer {
 
-    private final Random random = new Random();
+    private final Random random = new SecureRandom();
 
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {

@@ -16,7 +16,7 @@
         "include": [
           {
             "matcher": "java-package",
-            "match": "/io\\.smallrye\\.stork\\.loadbalancer\\.requests(\\..*)?/"
+            "match": "/io\\.smallrye\\.stork\\.loadbalancer\\.poweroftwochoices(\\..*)?/"
           }
         ]
       }
