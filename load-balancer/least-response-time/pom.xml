@@ -8,9 +8,9 @@
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    <artifactId>stork-load-balancer-response-time</artifactId>
+    <artifactId>stork-load-balancer-least-response-time</artifactId>
 
-    <name>SmallRye Stork Load Balancer : Response Time</name>
+    <name>SmallRye Stork Load Balancer : Least Response Time</name>
     <description>SmallRye Stork Load Balancer provider based on response time of the reached endpoints</description>
 
     <properties>

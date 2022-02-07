@@ -306,7 +306,7 @@
         <module>service-discovery/kubernetes</module>
         <module>service-discovery/eureka</module>
         <module>service-discovery/composite</module>
-        <module>load-balancer/response-time</module>
+        <module>load-balancer/least-response-time</module>
         <module>load-balancer/random</module>
         <module>load-balancer/least-requests</module>
         <module>load-balancer/power-of-two-choices</module>
