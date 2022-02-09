@@ -44,7 +44,7 @@
         <version.vertx-mutiny-bindings>2.18.1</version.vertx-mutiny-bindings>
 
         <kubernetes-client.version>5.12.1</kubernetes-client.version>
-        <version.slf4j>1.7.35</version.slf4j>
+        <version.slf4j>1.7.36</version.slf4j>
         <version.mockito>4.3.1</version.mockito>
         <version.jackson-databind>2.13.1</version.jackson-databind>
 
