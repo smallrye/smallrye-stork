@@ -17,55 +17,71 @@
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-api</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-core</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-microprofile-config</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-service-discovery-static-list</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-service-discovery-composite</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-configuration-generator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-test-utils</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-service-discovery-consul</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-service-discovery-kubernetes</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-service-discovery-eureka</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-load-balancer-least-response-time</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-load-balancer-random</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-load-balancer-least-requests</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-load-balancer-power-of-two-choices</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
