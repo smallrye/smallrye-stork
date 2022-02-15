@@ -18,6 +18,7 @@ import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.impl.ServiceInstanceWithStatGathering;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
@@ -44,8 +45,11 @@ public class LeastResponseTimeLoadBalancerTest {
     void shouldSelectNotSelectedFirst() {
         Service service = stork.getService("first-service");
 
-        assertThat(asString(selectInstance(service))).isEqualTo(FST_SRVC_1);
-        assertThat(asString(selectInstance(service))).isEqualTo(FST_SRVC_2);
+        ServiceInstance serviceInstance = selectInstance(service);
+        assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_1);
+        serviceInstance.recordStart(true);
+        serviceInstance = selectInstance(service);
+        assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_2);
     }
 
     @Test
@@ -55,12 +59,13 @@ public class LeastResponseTimeLoadBalancerTest {
         // svc1 is not that fast
         ServiceInstance svc1 = selectInstance(service);
         assertThat(asString(svc1)).isEqualTo(FST_SRVC_1);
-        svc1.recordResult(80, null);
+        int timeInNs = 80;
+        mockRecordingTime(svc1, timeInNs);
 
         // svc2 is faster
         ServiceInstance svc2 = selectInstance(service);
         assertThat(asString(svc2)).isEqualTo(FST_SRVC_2);
-        svc2.recordResult(50, null);
+        mockRecordingTime(svc2, 50);
 
         ServiceInstance selected;
 
@@ -68,7 +73,9 @@ public class LeastResponseTimeLoadBalancerTest {
         assertThat(asString(selected)).isEqualTo(FST_SRVC_2);
 
         // but svc2 sometimes fails
-        svc2.recordResult(10, new RuntimeException("induced failure"));
+
+        mockRecordingTime(svc2, 10);
+        svc2.recordEnd(new RuntimeException("induced failure"));
 
         // so we should select svc1 for next calls
         selected = selectInstance(service);
@@ -77,36 +84,41 @@ public class LeastResponseTimeLoadBalancerTest {
         assertThat(asString(selected)).isEqualTo(FST_SRVC_1);
     }
 
+    @SuppressWarnings("deprecation")
+    private void mockRecordingTime(ServiceInstance svc1, int timeInNs) {
+        ((ServiceInstanceWithStatGathering) svc1).mockRecordingTime(timeInNs);
+    }
+
     @Test
     void shouldSelectFastest() {
         Service service = stork.getService("first-service");
 
         ServiceInstance svc1 = selectInstance(service);
         assertThat(asString(svc1)).isEqualTo(FST_SRVC_1);
-        svc1.recordResult(100, null);
+        mockRecordingTime(svc1, 100);
 
         ServiceInstance svc2 = selectInstance(service);
         assertThat(asString(svc2)).isEqualTo(FST_SRVC_2);
-        svc2.recordResult(10, null);
+        mockRecordingTime(svc2, 10);
 
         ServiceInstance selected;
 
         selected = selectInstance(service);
         assertThat(asString(selected)).isEqualTo(FST_SRVC_2);
 
-        svc2.recordResult(10, null);
+        mockRecordingTime(svc2, 10);
         selected = selectInstance(service);
         assertThat(asString(selected)).isEqualTo(FST_SRVC_2);
 
-        svc2.recordResult(10, null);
+        mockRecordingTime(svc2, 10);
         selected = selectInstance(service);
         assertThat(asString(selected)).isEqualTo(FST_SRVC_2);
 
-        svc2.recordResult(1000, null);
+        mockRecordingTime(svc2, 1000);
         selected = selectInstance(service);
         assertThat(asString(selected)).isEqualTo(FST_SRVC_1);
 
-        svc1.recordResult(1000, null);
+        mockRecordingTime(svc1, 1000);
         selected = selectInstance(service);
         assertThat(asString(selected)).isEqualTo(FST_SRVC_2);
     }

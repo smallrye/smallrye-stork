@@ -115,6 +115,11 @@
           "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::with(T, java.lang.Object)",
           "new": "method io.smallrye.stork.api.Metadata<T> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::with(T, java.lang.Object)",
           "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
+        }, {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method void io.smallrye.stork.api.ServiceInstance::recordResult(long, java.lang.Throwable)",
+          "justification": "The method was replaced with dedicated methods for recording start of a call, end of a call and failure"
         }
       ]
     }

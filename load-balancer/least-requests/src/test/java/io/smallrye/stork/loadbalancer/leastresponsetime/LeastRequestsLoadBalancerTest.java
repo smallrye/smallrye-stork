@@ -46,28 +46,28 @@ public class LeastRequestsLoadBalancerTest {
         ServiceInstance service1, service2;
 
         // First selection returns the first service
-        ServiceInstance instance = selectInstance(service);
+        ServiceInstance instance = selectInstanceAndStart(service);
         assertThat(asString(instance)).isEqualTo(FST_SRVC_1);
         assertThat(instance.gatherStatistics()).isTrue();
         service1 = instance;
 
         // Second selection returns the second service as there is an inflight-call in the first one
-        instance = selectInstance(service);
+        instance = selectInstanceAndStart(service);
         assertThat(asString(instance)).isEqualTo(FST_SRVC_2);
         assertThat(instance.gatherStatistics()).isTrue();
         service2 = instance;
 
         // Report termination of the service 2 call
-        instance.recordResult(10, null);
+        service2.recordEnd(null);
 
         // Next selection still return the second service, as we still have an inflight-call in service 1
-        instance = selectInstance(service);
+        instance = selectInstanceAndStart(service);
         assertThat(asString(instance)).isEqualTo(FST_SRVC_2);
         assertThat(instance.gatherStatistics()).isTrue();
 
-        service1.recordResult(1000, null);
+        service1.recordEnd(null);
         // Now select 1 as they have the same amount of inflight
-        instance = selectInstance(service);
+        instance = selectInstanceAndStart(service);
         assertThat(asString(instance)).isEqualTo(FST_SRVC_1);
         assertThat(instance.gatherStatistics()).isTrue();
     }
@@ -79,20 +79,20 @@ public class LeastRequestsLoadBalancerTest {
         ServiceInstance service1, service2;
 
         // First selection returns the first service
-        ServiceInstance instance = selectInstance(service);
+        ServiceInstance instance = selectInstanceAndStart(service);
         assertThat(asString(instance)).isEqualTo(FST_SRVC_1);
         assertThat(instance.gatherStatistics()).isTrue();
         service1 = instance;
 
         // Second selection returns the second service as there is an inflight-call in the first one
-        instance = selectInstance(service);
+        instance = selectInstanceAndStart(service);
         assertThat(asString(instance)).isEqualTo(FST_SRVC_2);
         assertThat(instance.gatherStatistics()).isTrue();
         service2 = instance;
 
         ServiceInstance last = service2;
         for (int i = 0; i < 100; i++) {
-            ServiceInstance selected = selectInstance(service);
+            ServiceInstance selected = selectInstanceAndStart(service);
             assertThat(asString(selected)).isNotEqualTo(asString(last));
             last = selected;
         }
@@ -104,12 +104,12 @@ public class LeastRequestsLoadBalancerTest {
         for (int i = 0; i < 100; i++) {
             if (random.nextInt(10) > 7) {
                 // Simulate failures
-                last.recordResult(1000, new Exception("boom"));
+                last.recordEnd(new Exception("boom"));
             } else {
-                last.recordResult(1000, null);
+                last.recordEnd(null);
             }
 
-            ServiceInstance selected = selectInstance(service);
+            ServiceInstance selected = selectInstanceAndStart(service);
             assertThat(asString(selected)).isEqualTo(asString(last));
             last = selected == service1 ? service2 : service1;
         }
@@ -122,7 +122,7 @@ public class LeastRequestsLoadBalancerTest {
         Set<String> instances = new HashSet<>();
 
         for (int i = 0; i < 100; i++) {
-            instances.add(asString(selectInstance(service)));
+            instances.add(asString(selectInstanceAndStart(service)));
         }
 
         assertThat(instances).hasSize(2).contains(FST_SRVC_1, FST_SRVC_2);
@@ -148,16 +148,18 @@ public class LeastRequestsLoadBalancerTest {
         Set<String> instances = new HashSet<>();
 
         for (int i = 0; i < 100; i++) {
-            ServiceInstance instance = selectInstance(service);
-            instance.recordResult(1, null);
+            ServiceInstance instance = selectInstanceAndStart(service);
+            instance.recordEnd(null);
             instances.add(asString(instance));
         }
 
         assertThat(instances).hasSize(1).contains(FST_SRVC_1);
     }
 
-    private ServiceInstance selectInstance(Service service) {
-        return service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
+    private ServiceInstance selectInstanceAndStart(Service service) {
+        ServiceInstance serviceInstance = service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
+        serviceInstance.recordStart(true);
+        return serviceInstance;
     }
 
     private String asString(ServiceInstance serviceInstance) {

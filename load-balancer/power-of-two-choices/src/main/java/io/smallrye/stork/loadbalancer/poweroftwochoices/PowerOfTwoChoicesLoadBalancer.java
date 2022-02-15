@@ -41,10 +41,8 @@ public class PowerOfTwoChoicesLoadBalancer implements LoadBalancer {
         int concurrencyOfSecond = collector.get(second.getId());
 
         if (concurrencyOfFirst < concurrencyOfSecond) {
-            collector.selected(first.getId());
             return new ServiceInstanceWithStatGathering(first, collector);
         } else {
-            collector.selected(second.getId());
             return new ServiceInstanceWithStatGathering(second, collector);
         }
     }

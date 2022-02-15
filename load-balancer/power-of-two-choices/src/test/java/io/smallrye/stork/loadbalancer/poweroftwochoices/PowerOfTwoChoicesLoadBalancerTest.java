@@ -23,6 +23,7 @@ import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.impl.ServiceInstanceWithStatGathering;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
@@ -56,7 +57,7 @@ public class PowerOfTwoChoicesLoadBalancerTest {
 
         List<ServiceInstance> instances = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            instances.add(selectInstance(service));
+            instances.add(selectInstanceAndStart(service));
         }
 
         Random random = new Random();
@@ -64,9 +65,10 @@ public class PowerOfTwoChoicesLoadBalancerTest {
         for (ServiceInstance instance : instances) {
             if (random.nextInt(10) > 7) {
                 // Simulate failures
-                instance.recordResult(1000, new Exception("boom"));
+                mockRecordingTime(instance, 1000);
+                instance.recordEnd(new Exception("boom"));
             } else {
-                instance.recordResult(1000, null);
+                mockRecordingTime(instance, 1000);
             }
 
             ServiceInstance selected = selectInstance(service);
@@ -120,7 +122,7 @@ public class PowerOfTwoChoicesLoadBalancerTest {
 
         for (int i = 0; i < 1000; i++) {
             ServiceInstance instance = selectInstance(service);
-            instance.recordResult(1, null);
+            mockRecordingTime(instance, 1);
             instances.add(asString(instance));
         }
 
@@ -138,5 +140,16 @@ public class PowerOfTwoChoicesLoadBalancerTest {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private ServiceInstance selectInstanceAndStart(Service service) {
+        ServiceInstance serviceInstance = service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
+        serviceInstance.recordStart(false);
+        return serviceInstance;
+    }
+
+    @SuppressWarnings("deprecation")
+    private void mockRecordingTime(ServiceInstance svc1, int timeInNs) {
+        ((ServiceInstanceWithStatGathering) svc1).mockRecordingTime(timeInNs);
     }
 }

@@ -51,9 +51,11 @@ class ServiceInstanceTest {
     @Test
     void defaultStatisticsAreDisabled() {
         Assertions.assertFalse(instance.gatherStatistics());
-        Assertions.assertDoesNotThrow(() -> instance.recordResult(100, null));
-        Assertions.assertDoesNotThrow(() -> instance.recordResult(-1, null));
-        Assertions.assertDoesNotThrow(() -> instance.recordResult(100, new Exception("boom")));
+        Assertions.assertDoesNotThrow(() -> instance.recordStart(true));
+        Assertions.assertDoesNotThrow(() -> instance.recordReply());
+        Assertions.assertDoesNotThrow(() -> instance.recordEnd(null));
+        Assertions.assertDoesNotThrow(() -> instance.recordStart(false));
+        Assertions.assertDoesNotThrow(() -> instance.recordEnd(new Exception("boom")));
     }
 
 }

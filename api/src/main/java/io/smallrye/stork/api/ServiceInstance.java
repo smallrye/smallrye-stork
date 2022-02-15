@@ -50,11 +50,32 @@ public interface ServiceInstance {
     }
 
     /**
-     * When {@code gatherStatistics} is enabled, reports the completion of an operation using this service instance.
+     * When {@code gatherStatistics} is enabled, reports the start of an operation using this service instance.
      *
-     * @param timeInNs the duration of the operation in nano-seconds.
-     * @param failure the failure if the operation failed. Can be {@code null}.
+     * The load balancers that keep track of inflight operations should increase the counter on this method.
+     * The load balancer that collect times of operations should only take into account operations that have
+     * {@code measureTime} set to {@code true}
+     *
+     * @param measureTime if true, {@link #recordReply()} will be called for this operation
      */
-    default void recordResult(long timeInNs, Throwable failure) {
+    default void recordStart(boolean measureTime) {
+    }
+
+    /**
+     * When {@code gatherStatistics} is enabled, reports a reply for an operation using this service instance.
+     *
+     * Should be called if and only if {@code recordStart(true)} has been called earlier
+     */
+    default void recordReply() {
+
+    }
+
+    /**
+     * When {@code gatherStatistics} is enabled, reports the end of an operation using this service instance.
+     * <p>
+     *
+     * @param failure if the operation failed, the throwable depicting the failure, {@code null} otherwise
+     */
+    default void recordEnd(Throwable failure) {
     }
 }
