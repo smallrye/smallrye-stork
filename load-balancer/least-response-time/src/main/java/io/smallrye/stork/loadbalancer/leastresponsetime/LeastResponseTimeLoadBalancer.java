@@ -41,11 +41,11 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
 
         for (ServiceInstance instance : serviceInstances) {
             CallStatistics.CallsData callsData = callStatistics.statsForInstance(instance.getId());
-            if (callsData == null) {
+            if (callsData == null || callsData.lastRecorded == CallStatistics.NO_CALL_STARTED) {
                 callStatistics.init(instance.getId()); // to mark that it was used
                 best = instance;
                 break;
-            } else if (callsData.lastRecorded > -1) {
+            } else if (callsData.lastRecorded != CallStatistics.CALL_STARTED) {
                 // with -1 the initial call is started but not recorded yet
                 // ignore such instances for now, choose random from them if no other instances available
                 double score = score(callsData);

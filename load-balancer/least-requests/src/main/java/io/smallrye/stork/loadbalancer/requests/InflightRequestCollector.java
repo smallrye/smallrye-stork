@@ -14,11 +14,12 @@ public class InflightRequestCollector implements CallStatisticsCollector {
     }
 
     @Override
-    public void storeResult(long id, long time, Throwable error) {
-        storage.get(id).decrementAndGet();
+    public void recordStart(long serviceInstanceId, boolean measureTime) {
+        storage.get(serviceInstanceId).incrementAndGet();
     }
 
-    public void selected(long id) {
-        storage.get(id).incrementAndGet();
+    @Override
+    public void recordEnd(long serviceInstanceId, Throwable throwable) {
+        storage.get(serviceInstanceId).decrementAndGet();
     }
 }

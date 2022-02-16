@@ -32,7 +32,6 @@ public class LeastRequestsLoadBalancer implements LoadBalancer {
             throw new NoAcceptableServiceInstanceFoundException("No service instance found");
         }
 
-        collector.selected(selected.getId());
         return new ServiceInstanceWithStatGathering(selected, collector);
     }
 }

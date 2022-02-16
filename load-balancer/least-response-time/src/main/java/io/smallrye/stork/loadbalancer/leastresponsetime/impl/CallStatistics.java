@@ -8,6 +8,8 @@ import io.smallrye.stork.spi.CallStatisticsCollector;
 
 public class CallStatistics implements CallStatisticsCollector {
 
+    public static final int NO_CALL_STARTED = -2;
+    public static final int CALL_STARTED = -1;
     private final AtomicLong callCount = new AtomicLong(1);
     private final ConcurrentHashMap<Long, CallsData> storage = new ConcurrentHashMap<>();
 
@@ -20,13 +22,36 @@ public class CallStatistics implements CallStatisticsCollector {
     }
 
     @Override
-    public void storeResult(long id, long timeInNs, Throwable error) {
-        long callIdx = callCount.incrementAndGet();
-        if (error != null) {
-            timeInNs = errorPenalty;
+    public void recordStart(long serviceInstanceId, boolean measureTime) {
+        CallsData oldData = storage.get(serviceInstanceId);
+
+        if (oldData == null) {
+            throw new IllegalStateException("No CallsData initialized before starting to record data");
         }
+        if (oldData.lastRecorded == NO_CALL_STARTED && measureTime) {
+            CallsData newData = new CallsData(CALL_STARTED, 0, 0);
+            // if something replaced the value in the meantime, ignore it
+            storage.replace(serviceInstanceId, oldData, newData);
+        }
+    }
+
+    @Override
+    public void recordReply(long serviceInstanceId, long timeInNs) {
+        long callIdx = callCount.incrementAndGet();
+        storeTime(serviceInstanceId, timeInNs, callIdx);
+    }
+
+    @Override
+    public void recordEnd(long serviceInstanceId, Throwable error) {
+        if (error != null) {
+            long callIdx = callCount.get(); // end is recorded separately, don't increase callIdx on error recording
+            storeTime(serviceInstanceId, errorPenalty, callIdx);
+        }
+    }
+
+    private void storeTime(long serviceInstanceId, long timeInNs, long callIdx) {
         while (true) {
-            CallsData oldData = storage.get(id);
+            CallsData oldData = storage.get(serviceInstanceId);
 
             if (oldData != null) {
                 CallsData newData;
@@ -35,7 +60,7 @@ public class CallStatistics implements CallStatisticsCollector {
                 double newWeightSum = oldData.weightSum * weightMultiplier + 1;
 
                 newData = new CallsData(callIdx, newTotalTime, newWeightSum);
-                if (storage.replace(id, oldData, newData)) {
+                if (storage.replace(serviceInstanceId, oldData, newData)) {
                     break; // otherwise, try once again, until success
                 }
             } else {
@@ -61,7 +86,7 @@ public class CallStatistics implements CallStatisticsCollector {
     }
 
     public void init(long id) {
-        CallsData result = new CallsData(-1, 0, 0);
+        CallsData result = new CallsData(NO_CALL_STARTED, 0, 0);
         storage.put(id, result);
     }
 
