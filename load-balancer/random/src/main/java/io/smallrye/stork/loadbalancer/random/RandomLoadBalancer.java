@@ -29,4 +29,9 @@ public class RandomLoadBalancer implements LoadBalancer {
         List<ServiceInstance> list = new ArrayList<>(serviceInstances);
         return list.get(random.nextInt(size));
     }
+
+    @Override
+    public boolean requiresStrictRecording() {
+        return false;
+    }
 }

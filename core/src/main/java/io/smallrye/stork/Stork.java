@@ -107,8 +107,9 @@ public final class Stork {
             }
 
             services.put(serviceConfig.serviceName(),
-                    new Service(serviceConfig.serviceName(), Optional.ofNullable(loadBalancer), serviceDiscovery,
-                            serviceConfig.secure()));
+                    new Service(serviceConfig.serviceName(), loadBalancer, serviceDiscovery,
+                            serviceConfig.secure(),
+                            loadBalancer.requiresStrictRecording()));
         }
         for (Service service : services.values()) {
             service.getServiceDiscovery().initialize(this.services);

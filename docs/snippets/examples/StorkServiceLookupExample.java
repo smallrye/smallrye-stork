@@ -14,7 +14,7 @@ public class StorkServiceLookupExample {
         Stork stork = Stork.getInstance();
 
         Service service = stork.getService("my-service");
-        List<ServiceInstance> instances = service.getServiceInstances()
+        List<ServiceInstance> instances = service.getInstances()
                 .await().atMost(Duration.ofSeconds(5));
 
         // ...

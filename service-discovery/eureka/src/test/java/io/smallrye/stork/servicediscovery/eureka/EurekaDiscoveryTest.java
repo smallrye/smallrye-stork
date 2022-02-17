@@ -72,20 +72,20 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
-        List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
+        List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
 
         registerApplicationInstance(client, serviceName, "id0", "com.example", 1111, null, -1, "STARTING", "");
 
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
+        instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
 
         updateApplicationInstanceStatus(client, serviceName, "id0", "UP", "");
 
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
+        instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1).allSatisfy(instance -> {
             assertThat(instance.getHost()).isEqualTo("com.example");
             assertThat(instance.getPort()).isEqualTo(1111);
@@ -106,13 +106,13 @@ public class EurekaDiscoveryTest {
         await()
                 .atMost(Duration.ofSeconds(20))
                 .untilAsserted(() -> {
-                    List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+                    List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
                     Assertions.assertEquals(2, instances.size(),
                             () -> "Unable to get the expected number of instances while expecting 2 - " + instances
                                     + " (" + instances.stream().map(ServiceInstance::getHost).collect(Collectors.toList())
                                     + ") " + client.get("/eureka/apps").sendAndAwait().bodyAsJsonObject());
                 });
-        List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(2)
                 .anySatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("acme.com");
@@ -135,8 +135,8 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName, true);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
-        List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
+        List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(2)
                 .anySatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("secure.acme.com");
@@ -161,8 +161,8 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
-        List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
+        List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .allSatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("acme2.com");
@@ -170,8 +170,8 @@ public class EurekaDiscoveryTest {
                 });
 
         updateApplicationInstanceStatus(client, serviceName, "id1", "UP", "");
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
+        instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(2)
                 .anySatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("acme.com");
@@ -194,24 +194,24 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
-        List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
+        List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
 
         updateApplicationInstanceStatus(client, serviceName, "id1", "STARTING", "");
         updateApplicationInstanceStatus(client, serviceName, "id2", "STARTING", "");
 
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
+        instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
 
         updateApplicationInstanceStatus(client, serviceName, "id1", "UP", "");
         await().until(() -> {
-            List<ServiceInstance> serviceInstances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+            List<ServiceInstance> serviceInstances = service.getInstances().await().atMost(Duration.ofSeconds(5));
             return serviceInstances.size() == 1;
         });
 
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .allSatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("acme.com");
@@ -219,8 +219,8 @@ public class EurekaDiscoveryTest {
                 });
 
         updateApplicationInstanceStatus(client, serviceName, "id2", "UP", "");
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 2);
+        instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(2)
                 .anySatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("acme.com");
@@ -242,8 +242,8 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
-        List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
+        List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("acme.com");
@@ -252,8 +252,8 @@ public class EurekaDiscoveryTest {
 
         updateApplicationInstanceStatus(client, serviceName, "id1", "DOWN", "");
 
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
+        instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
     }
 
@@ -268,8 +268,8 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName, true);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
-        List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
+        List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("ssl.acme.com");
@@ -288,8 +288,8 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName, false, "instance", "id2");
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
-        List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
+        List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
                     assertThat(instance.getHost()).isEqualTo("acme2.com");
@@ -299,7 +299,7 @@ public class EurekaDiscoveryTest {
         stork = configureAndGetStork(serviceName, false, "instance", "missing");
         Service missing = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        await().until(() -> missing.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
+        await().until(() -> missing.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
     }
 
     @Disabled(value = "Enable if you want to test a contextualized server, it will requirers adding a server.servlet.context-path=/myserviceregistry property to application.properties file")
@@ -312,21 +312,21 @@ public class EurekaDiscoveryTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
-        List<ServiceInstance> instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
+        List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
 
         registerApplicationInstance(client, serviceName, "id0", "com.example", 1111, null, -1, "STARTING",
                 "/myserviceregistry");
 
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
+        instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).isEmpty();
 
         updateApplicationInstanceStatus(client, serviceName, "id0", "UP", "/myserviceregistry");
 
-        await().until(() -> service.getServiceInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
-        instances = service.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+        await().until(() -> service.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 1);
+        instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1).allSatisfy(instance -> {
             assertThat(instance.getHost()).isEqualTo("com.example");
             assertThat(instance.getPort()).isEqualTo(1111);

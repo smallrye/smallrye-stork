@@ -24,4 +24,9 @@ public class AcmeLoadBalancer implements LoadBalancer {
         int index = random.nextInt(serviceInstances.size());
         return new ArrayList<>(serviceInstances).get(index);
     }
+
+    @Override
+    public boolean requiresStrictRecording() {
+        return false;
+    }
 }

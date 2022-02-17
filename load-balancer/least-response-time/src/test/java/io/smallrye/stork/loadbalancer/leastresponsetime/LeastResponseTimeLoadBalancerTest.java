@@ -1,13 +1,23 @@
 package io.smallrye.stork.loadbalancer.leastresponsetime;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +29,7 @@ import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.impl.ServiceInstanceWithStatGathering;
+import io.smallrye.stork.loadbalancer.leastresponsetime.impl.TestUtils;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
@@ -47,7 +58,6 @@ public class LeastResponseTimeLoadBalancerTest {
 
         ServiceInstance serviceInstance = selectInstance(service);
         assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_1);
-        serviceInstance.recordStart(true);
         serviceInstance = selectInstance(service);
         assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_2);
     }
@@ -124,20 +134,46 @@ public class LeastResponseTimeLoadBalancerTest {
     }
 
     @Test
-    void shouldThrowNoServiceInstanceOnNoInstances() throws ExecutionException, InterruptedException {
+    void shouldThrowNoServiceInstanceOnNoInstances() throws ExecutionException, InterruptedException, TimeoutException {
+        Service service = stork.getService("first-service");
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        List<Callable<ServiceInstance>> callables = asList(
+                () -> service.selectInstanceAndRecordStart(true).await().atMost(Duration.ofSeconds(5)),
+                () -> service.selectInstanceAndRecordStart(true).await().atMost(Duration.ofSeconds(5)));
+        for (int i = 0; i < 20; i++) { // let's test it a few times
+            List<Future<ServiceInstance>> futures = executor.invokeAll(callables);
+
+            Set<Long> serviceIds = new HashSet<>();
+            for (Future<ServiceInstance> future : futures) {
+                ServiceInstance serviceInstance = future.get(5, TimeUnit.SECONDS);
+                serviceIds.add(serviceInstance.getId());
+            }
+            assertThat(serviceIds).hasSize(2); // just make sure different instances are selected
+
+            clearStats((LeastResponseTimeLoadBalancer) service.getLoadBalancer());
+        }
+    }
+
+    @Test
+    void shouldSelectAllAvailableWhenInvokedInParallel() throws ExecutionException, InterruptedException {
         Service service = stork.getService("without-instances");
 
         CompletableFuture<Throwable> result = new CompletableFuture<>();
 
-        service.selectServiceInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
+        service.selectInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
                 result::complete);
 
         await().atMost(Duration.ofSeconds(10)).until(result::isDone);
         assertThat(result.get()).isInstanceOf(NoServiceInstanceFoundException.class);
     }
 
+    @SuppressWarnings("deprecation")
+    private void clearStats(LeastResponseTimeLoadBalancer balancer) {
+        TestUtils.clear(balancer.getCallStatistics());
+    }
+
     private ServiceInstance selectInstance(Service service) {
-        return service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
+        return service.selectInstanceAndRecordStart(true).await().atMost(Duration.ofSeconds(5));
     }
 
     private String asString(ServiceInstance serviceInstance) {

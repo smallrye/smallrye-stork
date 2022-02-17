@@ -95,7 +95,7 @@ public class PowerOfTwoChoicesLoadBalancerTest {
 
         CompletableFuture<Throwable> result = new CompletableFuture<>();
 
-        service.selectServiceInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
+        service.selectInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
                 result::complete);
 
         await().atMost(Duration.ofSeconds(10)).until(result::isDone);
@@ -108,7 +108,7 @@ public class PowerOfTwoChoicesLoadBalancerTest {
 
         Set<String> set = new HashSet<>();
         for (int i = 0; i < 100; i++) {
-            set.add(asString(service.selectServiceInstance().await().atMost(Duration.ofMillis(5))));
+            set.add(asString(service.selectInstance().await().atMost(Duration.ofMillis(5))));
         }
 
         assertThat(set).hasSize(1).contains(FST_SRVC_1);
@@ -130,7 +130,7 @@ public class PowerOfTwoChoicesLoadBalancerTest {
     }
 
     private ServiceInstance selectInstance(Service service) {
-        return service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
+        return service.selectInstance().await().atMost(Duration.ofSeconds(5));
     }
 
     private String asString(ServiceInstance serviceInstance) {
@@ -143,9 +143,7 @@ public class PowerOfTwoChoicesLoadBalancerTest {
     }
 
     private ServiceInstance selectInstanceAndStart(Service service) {
-        ServiceInstance serviceInstance = service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
-        serviceInstance.recordStart(false);
-        return serviceInstance;
+        return service.selectInstanceAndRecordStart(false).await().atMost(Duration.ofSeconds(5));
     }
 
     @SuppressWarnings("deprecation")

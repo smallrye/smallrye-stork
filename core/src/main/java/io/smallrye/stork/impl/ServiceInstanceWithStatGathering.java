@@ -66,7 +66,6 @@ public class ServiceInstanceWithStatGathering implements ServiceInstance {
      */
     @Deprecated //for tests only
     public void mockRecordingTime(long timeInNs) {
-        statistics.recordStart(getId(), true);
         statistics.recordReply(getId(), timeInNs);
     }
 }

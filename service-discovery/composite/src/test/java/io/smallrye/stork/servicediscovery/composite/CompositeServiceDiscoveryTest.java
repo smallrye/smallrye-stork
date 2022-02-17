@@ -35,7 +35,7 @@ public class CompositeServiceDiscoveryTest {
     void shouldGetAllServiceInstances() {
         Stork stork = createStorkWithCompositeService();
         List<ServiceInstance> serviceInstances = stork.getService("third-service")
-                .getServiceInstances()
+                .getInstances()
                 .await().atMost(Duration.ofSeconds(5));
 
         assertThat(serviceInstances).hasSize(3);

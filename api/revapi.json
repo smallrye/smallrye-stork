@@ -120,6 +120,27 @@
           "code": "java.method.removed",
           "old": "method void io.smallrye.stork.api.ServiceInstance::recordResult(long, java.lang.Throwable)",
           "justification": "The method was replaced with dedicated methods for recording start of a call, end of a call and failure"
+        }, {
+          "ignore": true,
+          "code": "java.method.addedToInterface",
+          "new": "method boolean io.smallrye.stork.api.LoadBalancer::isThreadSafe()",
+          "justification": "Stork is now able to guard picking service instances for non-thread safe service instance selection. This method was added to let developers specify thread safe LoadBalancer implementations"
+        }, {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method void io.smallrye.stork.api.Service::<init>(java.lang.String, java.util.Optional<io.smallrye.stork.api.LoadBalancer>, io.smallrye.stork.api.ServiceDiscovery, boolean)",
+          "new": "method void io.smallrye.stork.api.Service::<init>(java.lang.String, io.smallrye.stork.api.LoadBalancer, io.smallrye.stork.api.ServiceDiscovery, boolean, boolean)",
+          "justification": "A new parameter was added to specify if the load balancer is thread-safe. Also, the LoadBalancer is not passed as Optional anymore, since it defaults to round-robin"
+        }, {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.Uni<java.util.List<io.smallrye.stork.api.ServiceInstance>> io.smallrye.stork.api.Service::getServiceInstances()",
+          "justification": "The method was renamed to getInstances()"
+        }, {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.Uni<io.smallrye.stork.api.ServiceInstance> io.smallrye.stork.api.Service::selectServiceInstance()",
+          "justification": "The method was renamed to selectInstance()"
         }
       ]
     }
