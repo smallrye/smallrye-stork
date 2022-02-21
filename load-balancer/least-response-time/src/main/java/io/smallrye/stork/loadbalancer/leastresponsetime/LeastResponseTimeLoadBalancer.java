@@ -19,7 +19,7 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
     // TODO sampling instead of collecting everything
 
     private final CallStatistics callStatistics;
-    private final Random random = new SecureRandom();
+    private final Random random;
     private final FastPower powersOfDecliningFactor;
 
     public LeastResponseTimeLoadBalancer(LeastResponseTimeLoadBalancerProviderConfiguration config) {
@@ -27,6 +27,7 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
         double decliningFactor = Double.parseDouble(config.getDecliningFactor());
         powersOfDecliningFactor = new FastPower(decliningFactor);
         callStatistics = new CallStatistics(errorPenalty, powersOfDecliningFactor);
+        random = Boolean.parseBoolean(config.getUseSecureRandom()) ? new SecureRandom() : new Random();
     }
 
     @Override

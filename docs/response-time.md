@@ -38,7 +38,7 @@ stork.my-service.load-balancer=least-response-time
 
 The following attributes are supported:
 
---8<-- "load-balancer/response-time/target/classes/META-INF/stork-docs/least-response-time-lb-attributes.txt"
+--8<-- "load-balancer/least-response-time/target/classes/META-INF/stork-docs/least-response-time-lb-attributes.txt"
 
 ## Score calculation
 

@@ -36,6 +36,9 @@ public class RandomLoadBalancerTest {
         TestConfigProvider.addServiceConfig("first-service", "random", "static",
                 null,
                 Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
+        TestConfigProvider.addServiceConfig("first-service-secure-random", "random", "static",
+                Map.of("use-secure-random", "true"),
+                Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
         TestConfigProvider.addServiceConfig("singleton-service", "random", "static",
                 null, Map.of("address-list", FST_SRVC_1));
         TestConfigProvider.addServiceConfig("without-instances", "random",
@@ -47,6 +50,19 @@ public class RandomLoadBalancerTest {
     @Test
     void shouldPickBothService() {
         Service service = stork.getService("first-service");
+
+        Set<String> instances = new HashSet<>();
+
+        for (int i = 0; i < 100; i++) {
+            instances.add(asString(selectInstance(service)));
+        }
+
+        assertThat(instances).hasSize(2).contains(FST_SRVC_1, FST_SRVC_2);
+    }
+
+    @Test
+    void testWithSecureRandom() {
+        Service service = stork.getService("first-service-secure-random");
 
         Set<String> instances = new HashSet<>();
 

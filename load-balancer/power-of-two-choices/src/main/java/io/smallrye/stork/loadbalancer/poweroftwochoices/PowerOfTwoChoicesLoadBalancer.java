@@ -19,7 +19,11 @@ import io.smallrye.stork.loadbalancer.requests.InflightRequestCollector;
 public class PowerOfTwoChoicesLoadBalancer implements LoadBalancer {
 
     private final InflightRequestCollector collector = new InflightRequestCollector();
-    private final Random random = new SecureRandom();
+    private final Random random;
+
+    protected PowerOfTwoChoicesLoadBalancer(boolean useSecureRandom) {
+        random = useSecureRandom ? new SecureRandom() : new Random();
+    }
 
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {

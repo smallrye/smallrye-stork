@@ -32,3 +32,6 @@ stork.my-service.service-discovery=...
 stork.my-service.service-discovery...=...
 stork.my-service.load-balancer=power-of-two-choices
 ```
+Supported attributes are the following:
+
+--8<-- "load-balancer/power-of-two-choices/target/classes/META-INF/stork-docs/power-of-two-choices-lb-attributes.txt"

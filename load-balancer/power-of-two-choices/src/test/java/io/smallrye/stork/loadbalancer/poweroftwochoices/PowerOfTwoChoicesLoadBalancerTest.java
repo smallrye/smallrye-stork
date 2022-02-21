@@ -42,6 +42,9 @@ public class PowerOfTwoChoicesLoadBalancerTest {
         TestConfigProvider.addServiceConfig("first-service", "power-of-two-choices", "static",
                 null,
                 Map.of("address-list", String.format("%s,%s,%s,%s", FST_SRVC_1, FST_SRVC_2, FST_SRVC_3, FST_SRVC_4)));
+        TestConfigProvider.addServiceConfig("first-service-secure-random", "power-of-two-choices", "static",
+                Map.of("use-secure-random", "true"),
+                Map.of("address-list", String.format("%s,%s,%s,%s", FST_SRVC_1, FST_SRVC_2, FST_SRVC_3, FST_SRVC_4)));
         TestConfigProvider.addServiceConfig("singleton-service", "power-of-two-choices",
                 "static", null,
                 Map.of("address-list", FST_SRVC_1));
@@ -54,6 +57,31 @@ public class PowerOfTwoChoicesLoadBalancerTest {
     @Test
     public void shouldSelectLessLoadedAmongTwoWhenAllLoaded() {
         Service service = stork.getService("first-service");
+
+        List<ServiceInstance> instances = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            instances.add(selectInstanceAndStart(service));
+        }
+
+        Random random = new Random();
+        // Start reporting
+        for (ServiceInstance instance : instances) {
+            if (random.nextInt(10) > 7) {
+                // Simulate failures
+                mockRecordingTime(instance, 1000);
+                instance.recordEnd(new Exception("boom"));
+            } else {
+                mockRecordingTime(instance, 1000);
+            }
+
+            ServiceInstance selected = selectInstance(service);
+            assertThat(selected).isNotNull();
+        }
+    }
+
+    @Test
+    public void testWithSecureRandom() {
+        Service service = stork.getService("first-service-secure-random");
 
         List<ServiceInstance> instances = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {

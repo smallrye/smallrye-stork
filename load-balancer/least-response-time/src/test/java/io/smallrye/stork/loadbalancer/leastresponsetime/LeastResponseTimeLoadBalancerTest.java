@@ -35,6 +35,9 @@ public class LeastResponseTimeLoadBalancerTest {
         TestConfigProvider.addServiceConfig("first-service", "least-response-time", "static",
                 null,
                 Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
+        TestConfigProvider.addServiceConfig("first-service-secure-random", "least-response-time", "static",
+                Map.of("use-secure-random", "true"),
+                Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
         TestConfigProvider.addServiceConfig("without-instances", "least-response-time",
                 "empty-services", null, Collections.emptyMap());
 
@@ -44,6 +47,17 @@ public class LeastResponseTimeLoadBalancerTest {
     @Test
     void shouldSelectNotSelectedFirst() {
         Service service = stork.getService("first-service");
+
+        ServiceInstance serviceInstance = selectInstance(service);
+        assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_1);
+        serviceInstance.recordStart(true);
+        serviceInstance = selectInstance(service);
+        assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_2);
+    }
+
+    @Test
+    void testWithSecureRandom() {
+        Service service = stork.getService("first-service-secure-random");
 
         ServiceInstance serviceInstance = selectInstance(service);
         assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_1);

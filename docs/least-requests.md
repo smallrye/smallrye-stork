@@ -28,3 +28,9 @@ stork.my-service.service-discovery=...
 stork.my-service.service-discovery...=...
 stork.my-service.load-balancer=least-requests
 ```
+
+
+[//]: # (Supported attributes are the following:)
+
+[//]: # ()
+[//]: # (--8<-- "load-balancer/least-requests/target/classes/META-INF/stork-docs/least-requests-lb-attributes.txt")
