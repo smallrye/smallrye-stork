@@ -23,3 +23,7 @@ stork.my-service.service-discovery=...
 stork.my-service.service-discovery...=...
 stork.my-service.load-balancer=random
 ```
+
+Supported attributes are the following:
+
+--8<-- "load-balancer/random/target/classes/META-INF/stork-docs/random-lb-attributes.txt"
