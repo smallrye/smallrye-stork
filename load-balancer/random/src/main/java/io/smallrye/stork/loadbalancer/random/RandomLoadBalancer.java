@@ -12,7 +12,11 @@ import io.smallrye.stork.api.ServiceInstance;
 
 public class RandomLoadBalancer implements LoadBalancer {
 
-    private final Random random = new SecureRandom();
+    private final Random random;
+
+    protected RandomLoadBalancer(boolean useSecureRandom) {
+        random = useSecureRandom ? new SecureRandom() : new Random();
+    }
 
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
