@@ -134,7 +134,7 @@ public class LeastRequestsLoadBalancerTest {
 
         CompletableFuture<Throwable> result = new CompletableFuture<>();
 
-        service.selectServiceInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
+        service.selectInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
                 result::complete);
 
         await().atMost(Duration.ofSeconds(10)).until(result::isDone);
@@ -157,9 +157,7 @@ public class LeastRequestsLoadBalancerTest {
     }
 
     private ServiceInstance selectInstanceAndStart(Service service) {
-        ServiceInstance serviceInstance = service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
-        serviceInstance.recordStart(true);
-        return serviceInstance;
+        return service.selectInstanceAndRecordStart(true).await().atMost(Duration.ofSeconds(5));
     }
 
     private String asString(ServiceInstance serviceInstance) {

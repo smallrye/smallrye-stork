@@ -105,4 +105,10 @@ public class CallStatistics implements CallStatisticsCollector {
             return weightedTotalTime / weightSum;
         }
     }
+
+    @Deprecated // for tests only
+    void clear() {
+        callCount.set(0);
+        storage.clear();
+    }
 }

@@ -13,7 +13,7 @@ public class StorkServiceSelectionExample {
         Stork stork = Stork.getInstance();
 
         Service service = stork.getService("my-service");
-        ServiceInstance instance = service.selectServiceInstance()
+        ServiceInstance instance = service.selectInstance()
                 .await().atMost(Duration.ofSeconds(5));
 
         System.out.println(instance.getHost() + ":" + instance.getPort());

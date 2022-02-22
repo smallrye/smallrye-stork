@@ -25,6 +25,11 @@ public class RoundRobinLoadBalancer implements LoadBalancer {
         return select(modifiableList);
     }
 
+    @Override
+    public boolean requiresStrictRecording() {
+        return false;
+    }
+
     private ServiceInstance select(List<ServiceInstance> instances) {
         if (instances.isEmpty()) {
             return null;

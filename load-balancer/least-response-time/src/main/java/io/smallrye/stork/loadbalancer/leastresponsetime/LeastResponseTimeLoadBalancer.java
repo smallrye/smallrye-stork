@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.ServiceInstance;
@@ -16,8 +19,9 @@ import io.smallrye.stork.utils.DurationUtils;
 
 public class LeastResponseTimeLoadBalancer implements LoadBalancer {
 
-    // TODO sampling instead of collecting everything
+    private static final Logger log = LoggerFactory.getLogger(LeastResponseTimeLoadBalancer.class);
 
+    // TODO sampling instead of collecting everything
     private final CallStatistics callStatistics;
     private final Random random;
     private final FastPower powersOfDecliningFactor;
@@ -43,6 +47,8 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
         for (ServiceInstance instance : serviceInstances) {
             CallStatistics.CallsData callsData = callStatistics.statsForInstance(instance.getId());
             if (callsData == null || callsData.lastRecorded == CallStatistics.NO_CALL_STARTED) {
+                log.debug("Selected: {} callsDataNull: {} lastRecorded: {}", instance.getId(), callsData == null,
+                        callsData == null ? null : callsData.lastRecorded);
                 callStatistics.init(instance.getId()); // to mark that it was used
                 best = instance;
                 break;
@@ -53,6 +59,7 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
                 if (score < bestScore) {
                     best = instance;
                     bestScore = score;
+                    log.debug("Current best: {}", instance.getId());
                 }
             }
         }
@@ -63,10 +70,17 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
                     ? ((List<ServiceInstance>) serviceInstances).get(selectedIdx)
                     : new ArrayList<>(serviceInstances).get(selectedIdx);
         }
+        log.debug("Chosen service instance: {}", best.getId());
         return new ServiceInstanceWithStatGathering(best, callStatistics);
     }
 
     private double score(CallStatistics.CallsData callsData) {
         return callsData.scaledTime() * powersOfDecliningFactor.toPower(callStatistics.currentCall() - callsData.lastRecorded);
+    }
+
+    @Deprecated
+    // for tests only
+    CallStatistics getCallStatistics() {
+        return callStatistics;
     }
 }

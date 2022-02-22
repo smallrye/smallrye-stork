@@ -53,6 +53,6 @@ public class EurekaDownTest {
         Stork stork = configureAndGetStork(serviceName);
         Service service = stork.getService(serviceName);
         Assertions.assertNotNull(service);
-        assertThat(service.getServiceInstances().await().atMost(Duration.ofSeconds(5))).hasSize(0);
+        assertThat(service.getInstances().await().atMost(Duration.ofSeconds(5))).hasSize(0);
     }
 }

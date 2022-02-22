@@ -186,7 +186,7 @@ public class StorkTest {
         Stork stork = Stork.getInstance();
         Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
         Assertions.assertNotNull(stork.getService("a").getServiceDiscovery());
-        Assertions.assertEquals(stork.getService("a").selectServiceInstance().await().indefinitely(), instance);
+        Assertions.assertEquals(stork.getService("a").selectInstance().await().indefinitely(), instance);
         Assertions.assertNotNull(stork.getService("a").getLoadBalancer());
     }
 
@@ -205,8 +205,8 @@ public class StorkTest {
         Stork stork = Stork.getInstance();
         Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
         Assertions.assertNotNull(stork.getService("a").getServiceDiscovery());
-        Assertions.assertTrue(stork.getService("a").getServiceInstances().await().indefinitely().contains(instance1));
-        Assertions.assertTrue(stork.getService("a").getServiceInstances().await().indefinitely().contains(instance2));
+        Assertions.assertTrue(stork.getService("a").getInstances().await().indefinitely().contains(instance1));
+        Assertions.assertTrue(stork.getService("a").getInstances().await().indefinitely().contains(instance2));
         Assertions.assertNotNull(stork.getService("a").getLoadBalancer());
     }
 
@@ -237,11 +237,11 @@ public class StorkTest {
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance3, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance1, stork.getService("a").selectInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectInstance().await().indefinitely());
+        Assertions.assertEquals(instance3, stork.getService("a").selectInstance().await().indefinitely());
+        Assertions.assertEquals(instance1, stork.getService("a").selectInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectInstance().await().indefinitely());
         Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
         Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
     }
@@ -272,11 +272,11 @@ public class StorkTest {
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance3, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance1, stork.getService("a").selectServiceInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectServiceInstance().await().indefinitely());
+        Assertions.assertEquals(instance1, stork.getService("a").selectInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectInstance().await().indefinitely());
+        Assertions.assertEquals(instance3, stork.getService("a").selectInstance().await().indefinitely());
+        Assertions.assertEquals(instance1, stork.getService("a").selectInstance().await().indefinitely());
+        Assertions.assertEquals(instance2, stork.getService("a").selectInstance().await().indefinitely());
         Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
         Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
     }

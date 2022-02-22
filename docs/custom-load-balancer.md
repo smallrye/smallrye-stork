@@ -48,13 +48,19 @@ Note, that the `LoadBalancerProvider` interface takes a configuration class as a
 is generated automatically by the _Configuration Generator_.
 Its name is created by appending `Configuration` to the name of the provider class.
 
-The next step is to implement the `LoadBalancer` interface:
+The next step is to implement the `LoadBalancer` interface.
+
+The essence of load balancers' work happens in the `selectServiceInstance` method. The method returns a single `ServiceInstance` from a collection. 
 
 ```java linenums="1"
 --8<-- "docs/snippets/examples/AcmeLoadBalancer.java"
 ```
 
 This implementation is simplistic and just picks a random instance from the received list.
+
+Some load balancers make the pick based on statistics such as calls in progress or response times, or amount of errors of a service instance. To collect this information in your load balancer, you can wrap the selected service instance into `ServiceInstanceWithStatGathering`.
+
+Load balancers based on statistics often expect that an operation using a selected service instance is marked as started before the next selection. By default, Stork assumes that a `LoadBalancer` requires this and guards the calls accordingly. If this is not the case for your implementation, override the `requiresStrictRecording()` method to return `false`.
 
 ## Using your load balancer
 

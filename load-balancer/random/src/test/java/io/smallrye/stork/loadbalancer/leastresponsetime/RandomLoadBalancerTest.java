@@ -92,7 +92,7 @@ public class RandomLoadBalancerTest {
 
         CompletableFuture<Throwable> result = new CompletableFuture<>();
 
-        service.selectServiceInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
+        service.selectInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
                 result::complete);
 
         await().atMost(Duration.ofSeconds(10)).until(result::isDone);
@@ -100,7 +100,7 @@ public class RandomLoadBalancerTest {
     }
 
     private ServiceInstance selectInstance(Service service) {
-        return service.selectServiceInstance().await().atMost(Duration.ofSeconds(5));
+        return service.selectInstance().await().atMost(Duration.ofSeconds(5));
     }
 
     private String asString(ServiceInstance serviceInstance) {

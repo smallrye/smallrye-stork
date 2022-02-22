@@ -1,5 +1,6 @@
 package io.smallrye.stork.api;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -50,6 +51,12 @@ public interface ServiceInstance {
     }
 
     /**
+     * <h3>Warning</h3> Usually should not be called directly.
+     * Most client libraries should use {@link Service#selectInstanceAndRecordStart(Collection, boolean)} and
+     * {@link Service#selectInstanceAndRecordStart(boolean)}
+     * to select services. These methods invoke this method automatically
+     *
+     * <br/>
      * When {@code gatherStatistics} is enabled, reports the start of an operation using this service instance.
      *
      * The load balancers that keep track of inflight operations should increase the counter on this method.
