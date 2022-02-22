@@ -56,7 +56,7 @@ public interface ServiceInstance {
      * {@link Service#selectInstanceAndRecordStart(boolean)}
      * to select services. These methods invoke this method automatically
      *
-     * <br/>
+     * <br>
      * When {@code gatherStatistics} is enabled, reports the start of an operation using this service instance.
      *
      * The load balancers that keep track of inflight operations should increase the counter on this method.
