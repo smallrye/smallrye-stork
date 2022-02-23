@@ -1,143 +1,53 @@
-[
-  {
-    "extension": "revapi.java",
-    "id": "java",
-    "configuration": {
-      "missing-classes": {
-        "behavior": "report",
-        "ignoreMissingAnnotations": false
-      }
-    }
-  },
-  {
-    "extension": "revapi.filter",
-    "configuration": {
-      "elements": {
-        "include": [
-          {
-            "matcher": "java-package",
-            "match": "/io\\.smallrye\\.stork/"
-          },
-          {
-            "matcher": "java-package",
-            "match": "/io\\.smallrye\\.stork\\.integration(\\..*)?/"
-          },
-          {
-            "matcher": "java-package",
-            "match": "/io\\.smallrye\\.stork\\.utils(\\..*)?/"
-          }
-        ], "exclude": [
-          "class io\\.smallrye\\.stork\\.impl\\..*"
-        ]
-      }
-    }
-  },
-  {
-    "extension": "revapi.differences",
-    "id": "breaking-changes",
-    "configuration": {
-      "criticality": "highlight",
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "differences": [
-        {
-          "ignore": true,
-          "code": "java.class.removed",
-          "old": "class io.smallrye.stork.CachingServiceDiscovery.Refresh",
-          "justification": "Switched to `Uni.memoize()`, the functionality didn't change"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.removed",
-          "old": "method boolean io.smallrye.stork.CachingServiceDiscovery::refreshNotNeed()",
-          "justification": "Switched to `Uni.memoize()`, the functionality didn't change"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.parameterTypeChanged",
-          "old": "parameter void io.smallrye.stork.DefaultServiceInstance::<init>(long, java.lang.String, int, boolean, java.util.Map<java.lang.String, java.lang.String>, ===java.util.Map<java.lang.String, java.lang.Object>===)",
-          "new": "parameter void io.smallrye.stork.DefaultServiceInstance::<init>(long, java.lang.String, int, boolean, java.util.Map<java.lang.String, java.lang.String>, ===io.smallrye.stork.Metadata<? extends io.smallrye.stork.MetadataKey>===)",
-          "parameterIndex": "5",
-          "justification": "Added metadata support (new feature)"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.returnTypeChanged",
-          "old": "method java.util.Map<java.lang.String, java.lang.Object> io.smallrye.stork.DefaultServiceInstance::getMetadata()",
-          "new": "method io.smallrye.stork.Metadata<? extends io.smallrye.stork.MetadataKey> io.smallrye.stork.DefaultServiceInstance::getMetadata()",
-          "justification": "Added metadata support (new feature)"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.returnTypeChanged",
-          "old": "method java.util.Map<java.lang.String, java.lang.Object> io.smallrye.stork.ServiceInstance::getMetadata()",
-          "new": "method io.smallrye.stork.Metadata<? extends io.smallrye.stork.MetadataKey> io.smallrye.stork.ServiceInstance::getMetadata()",
-          "justification": "Added metadata support (new feature)"
-        },
-        {
-          "ignore": true,
-          "code": "java.class.removed",
-          "old": "class io.smallrye.stork.ServiceInstancesCache",
-          "justification": "Switched to `Uni.memoize()`, the functionality didn't change"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.numberOfParametersChanged",
-          "old": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.spi.ServiceDiscoveryProvider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig)",
-          "new": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.spi.ServiceDiscoveryProvider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig, io.smallrye.stork.integration.StorkInfrastructure)",
-          "justification": "Added Infrastructure support"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.externalClassExposedInAPI",
-          "newArchive": "io\\.smallrye\\.stork:stork-api:.*",
-          "justification": "Basic API classes have been pulled out to the stork-api module"
-        },
-        {
-          "ignore": true,
-          "code": "java.class.removed",
-          "old": "class io.smallrye.stork.spi.ServiceInstanceIds",
-          "justification": "The class was moved to the io.smallrye.stork.utils package"
-        },
-        {
-          "ignore": true,
-          "code": "java.class.removed",
-          "old": "class io.smallrye.stork.spi.ServiceInstanceUtils",
-          "justification": "The class was moved to the io.smallrye.stork.utils package"
-        },
-        {
-          "ignore": true,
-          "code": "java.class.removed",
-          "old": "class io.smallrye.stork.spi.SimpleServiceConfig",
-          "justification": "The class was moved to the API module"
-        },
-        {
-          "ignore": true,
-          "code": "java.class.removed",
-          "old": "interface io.smallrye.stork.impl.config.ConfigProvider",
-          "justification": "The class was moved to the API module"
-        }
-      ]
-    }
-  },
-  {
-    "extension": "revapi.reporter.json",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "target/compatibility.json",
-      "indent": true,
-      "append": false,
-      "keepEmptyFile": true
-    }
-  },
-  {
-    "extension": "revapi.reporter.text",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "out"
+[ {
+  "extension" : "revapi.java",
+  "id" : "java",
+  "configuration" : {
+    "missing-classes" : {
+      "behavior" : "report",
+      "ignoreMissingAnnotations" : false
     }
   }
-]
+}, {
+  "extension" : "revapi.filter",
+  "configuration" : {
+    "elements" : {
+      "include" : [ {
+        "matcher" : "java-package",
+        "match" : "/io\\.smallrye\\.stork/"
+      }, {
+        "matcher" : "java-package",
+        "match" : "/io\\.smallrye\\.stork\\.integration(\\..*)?/"
+      }, {
+        "matcher" : "java-package",
+        "match" : "/io\\.smallrye\\.stork\\.utils(\\..*)?/"
+      } ],
+      "exclude" : [ "class io\\.smallrye\\.stork\\.impl\\..*" ]
+    }
+  }
+}, {
+  "extension" : "revapi.differences",
+  "id" : "breaking-changes",
+  "configuration" : {
+    "criticality" : "highlight",
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "differences" : [ ]
+  }
+}, {
+  "extension" : "revapi.reporter.json",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "target/compatibility.json",
+    "indent" : true,
+    "append" : false,
+    "keepEmptyFile" : true
+  }
+}, {
+  "extension" : "revapi.reporter.text",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "out"
+  }
+} ]

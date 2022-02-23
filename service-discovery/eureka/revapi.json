@@ -1,81 +1,46 @@
-[
-  {
-    "extension": "revapi.java",
-    "id": "java",
-    "configuration": {
-      "missing-classes": {
-        "behavior": "report",
-        "ignoreMissingAnnotations": false
-      }
-    }
-  },
-  {
-    "extension": "revapi.filter",
-    "configuration": {
-      "elements": {
-        "include": [
-          {
-            "matcher": "java-package",
-            "match": "/io\\.smallrye\\.stork\\.servicediscovery\\.eureka(\\..*)?/"
-          }
-        ]
-      }
-    }
-  },
-  {
-    "extension": "revapi.differences",
-    "id": "breaking-changes",
-    "configuration": {
-      "criticality": "highlight",
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "differences": [
-        {
-          "ignore": true,
-          "code": "java.method.numberOfParametersChanged",
-          "old": "method void io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscovery::<init>(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, boolean)",
-          "new": "method void io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscovery::<init>(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, boolean, io.smallrye.stork.integration.StorkInfrastructure)",
-          "justification": "Integrate Infrastructure support (new feature)"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.removed",
-          "old": "method boolean io.smallrye.stork.CachingServiceDiscovery::refreshNotNeed() @ io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscovery",
-          "justification": "Removed unused method"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.numberOfParametersChanged",
-          "old": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscoveryProvider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig)",
-          "new": "method io.smallrye.stork.ServiceDiscovery io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscoveryProvider::createServiceDiscovery(io.smallrye.stork.config.ServiceDiscoveryConfig, java.lang.String, io.smallrye.stork.config.ServiceConfig, io.smallrye.stork.integration.StorkInfrastructure)",
-          "justification": "Integrate Infrastructure support (new feature)"
-        },
-        {
-          "ignore": true,
-          "code": "java.class.removed",
-          "old": "class io.smallrye.stork.servicediscovery.eureka.StorkConfigHelper",
-          "justification": "Removed unused class"
-        }
-      ]
-    }
-  },
-  {
-    "extension": "revapi.reporter.json",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "target/compatibility.json",
-      "indent": true,
-      "append": false,
-      "keepEmptyFile": true
-    }
-  },
-  {
-    "extension": "revapi.reporter.text",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "out"
+[ {
+  "extension" : "revapi.java",
+  "id" : "java",
+  "configuration" : {
+    "missing-classes" : {
+      "behavior" : "report",
+      "ignoreMissingAnnotations" : false
     }
   }
-]
+}, {
+  "extension" : "revapi.filter",
+  "configuration" : {
+    "elements" : {
+      "include" : [ {
+        "matcher" : "java-package",
+        "match" : "/io\\.smallrye\\.stork\\.servicediscovery\\.eureka(\\..*)?/"
+      } ]
+    }
+  }
+}, {
+  "extension" : "revapi.differences",
+  "id" : "breaking-changes",
+  "configuration" : {
+    "criticality" : "highlight",
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "differences" : [ ]
+  }
+}, {
+  "extension" : "revapi.reporter.json",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "target/compatibility.json",
+    "indent" : true,
+    "append" : false,
+    "keepEmptyFile" : true
+  }
+}, {
+  "extension" : "revapi.reporter.text",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "out"
+  }
+} ]

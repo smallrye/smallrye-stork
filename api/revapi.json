@@ -1,167 +1,49 @@
-[
-  {
-    "extension": "revapi.java",
-    "id": "java",
-    "configuration": {
-      "missing-classes": {
-        "behavior": "report",
-        "ignoreMissingAnnotations": false
-      }
-    }
-  },
-  {
-    "extension": "revapi.filter",
-    "configuration": {
-      "elements": {
-        "include": [
-          {
-            "matcher": "java-package",
-            "match": "/io\\.smallrye\\.stork\\.api(\\..*)?/"
-          },
-          {
-            "matcher": "java-package",
-            "match": "/io\\.smallrye\\.stork\\.api(\\..*)?/"
-          }
-        ]
-      }
-    }
-  },
-  {
-    "extension": "revapi.differences",
-    "id": "breaking-changes",
-    "configuration": {
-      "criticality": "highlight",
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "differences": [
-        {
-          "ignore": true,
-          "code": "java.method.returnTypeTypeParametersChanged",
-          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::empty()",
-          "new": "method io.smallrye.stork.api.Metadata<? extends io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::empty()",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.parameterTypeParameterChanged",
-          "old": "parameter io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(===java.lang.Class<?>===)",
-          "new": "parameter <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(===java.lang.Class<K>===)",
-          "parameterIndex": "0",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.returnTypeTypeParametersChanged",
-          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>)",
-          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>)",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.generics.elementNowParameterized",
-          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>)",
-          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>)",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.generics.formalTypeParameterAdded",
-          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>)",
-          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>)",
-          "typeParameter": "K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.parameterTypeParameterChanged",
-          "old": "parameter io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(===java.lang.Class<?>===, java.util.Map<?, java.lang.Object>)",
-          "new": "parameter <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(===java.lang.Class<K>===, java.util.Map<K, java.lang.Object>)",
-          "parameterIndex": "0",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.parameterTypeParameterChanged",
-          "old": "parameter io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>, ===java.util.Map<?, java.lang.Object>===)",
-          "new": "parameter <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>, ===java.util.Map<K, java.lang.Object>===)",
-          "parameterIndex": "1",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.returnTypeTypeParametersChanged",
-          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>, java.util.Map<?, java.lang.Object>)",
-          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>, java.util.Map<K, java.lang.Object>)",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.generics.elementNowParameterized",
-          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>, java.util.Map<?, java.lang.Object>)",
-          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>, java.util.Map<K, java.lang.Object>)",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.generics.formalTypeParameterAdded",
-          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<?>, java.util.Map<?, java.lang.Object>)",
-          "new": "method <K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey> io.smallrye.stork.api.Metadata<K> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::of(java.lang.Class<K>, java.util.Map<K, java.lang.Object>)",
-          "typeParameter": "K extends java.lang.Enum<K> & io.smallrye.stork.api.MetadataKey",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.returnTypeTypeParametersChanged",
-          "old": "method io.smallrye.stork.api.Metadata io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::with(T, java.lang.Object)",
-          "new": "method io.smallrye.stork.api.Metadata<T> io.smallrye.stork.api.Metadata<T extends java.lang.Enum<T>>::with(T, java.lang.Object)",
-          "justification": "Use proper parameterized types - it should be invisible to users, except less warnings"
-        }, {
-          "ignore": true,
-          "code": "java.method.removed",
-          "old": "method void io.smallrye.stork.api.ServiceInstance::recordResult(long, java.lang.Throwable)",
-          "justification": "The method was replaced with dedicated methods for recording start of a call, end of a call and failure"
-        }, {
-          "ignore": true,
-          "code": "java.method.addedToInterface",
-          "new": "method boolean io.smallrye.stork.api.LoadBalancer::isThreadSafe()",
-          "justification": "Stork is now able to guard picking service instances for non-thread safe service instance selection. This method was added to let developers specify thread safe LoadBalancer implementations"
-        }, {
-          "ignore": true,
-          "code": "java.method.numberOfParametersChanged",
-          "old": "method void io.smallrye.stork.api.Service::<init>(java.lang.String, java.util.Optional<io.smallrye.stork.api.LoadBalancer>, io.smallrye.stork.api.ServiceDiscovery, boolean)",
-          "new": "method void io.smallrye.stork.api.Service::<init>(java.lang.String, io.smallrye.stork.api.LoadBalancer, io.smallrye.stork.api.ServiceDiscovery, boolean, boolean)",
-          "justification": "A new parameter was added to specify if the load balancer is thread-safe. Also, the LoadBalancer is not passed as Optional anymore, since it defaults to round-robin"
-        }, {
-          "ignore": true,
-          "code": "java.method.removed",
-          "old": "method io.smallrye.mutiny.Uni<java.util.List<io.smallrye.stork.api.ServiceInstance>> io.smallrye.stork.api.Service::getServiceInstances()",
-          "justification": "The method was renamed to getInstances()"
-        }, {
-          "ignore": true,
-          "code": "java.method.removed",
-          "old": "method io.smallrye.mutiny.Uni<io.smallrye.stork.api.ServiceInstance> io.smallrye.stork.api.Service::selectServiceInstance()",
-          "justification": "The method was renamed to selectInstance()"
-        }
-      ]
-    }
-  },
-  {
-    "extension": "revapi.reporter.json",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "target/compatibility.json",
-      "indent": true,
-      "append": false,
-      "keepEmptyFile": true
-    }
-  },
-  {
-    "extension": "revapi.reporter.text",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "out"
+[ {
+  "extension" : "revapi.java",
+  "id" : "java",
+  "configuration" : {
+    "missing-classes" : {
+      "behavior" : "report",
+      "ignoreMissingAnnotations" : false
     }
   }
-]
+}, {
+  "extension" : "revapi.filter",
+  "configuration" : {
+    "elements" : {
+      "include" : [ {
+        "matcher" : "java-package",
+        "match" : "/io\\.smallrye\\.stork\\.api(\\..*)?/"
+      }, {
+        "matcher" : "java-package",
+        "match" : "/io\\.smallrye\\.stork\\.api(\\..*)?/"
+      } ]
+    }
+  }
+}, {
+  "extension" : "revapi.differences",
+  "id" : "breaking-changes",
+  "configuration" : {
+    "criticality" : "highlight",
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "differences" : [ ]
+  }
+}, {
+  "extension" : "revapi.reporter.json",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "target/compatibility.json",
+    "indent" : true,
+    "append" : false,
+    "keepEmptyFile" : true
+  }
+}, {
+  "extension" : "revapi.reporter.text",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "out"
+  }
+} ]

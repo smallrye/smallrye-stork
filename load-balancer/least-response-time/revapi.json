@@ -1,83 +1,46 @@
-[
-  {
-    "extension": "revapi.java",
-    "id": "java",
-    "configuration": {
-      "missing-classes": {
-        "behavior": "report",
-        "ignoreMissingAnnotations": false
-      }
-    }
-  },
-  {
-    "extension": "revapi.filter",
-    "configuration": {
-      "elements": {
-        "include": [
-          {
-            "matcher": "java-package",
-            "match": "/io\\.smallrye\\.stork\\.loadbalancer\\.leastresponsetime(\\..*)?/"
-          }
-        ]
-      }
-    }
-  },
-  {
-    "extension": "revapi.differences",
-    "id": "breaking-changes",
-    "configuration": {
-      "criticality": "highlight",
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "differences": [
-        {
-          "ignore": true,
-          "code": "java.class.removed",
-          "old": "class io.smallrye.stork.loadbalancer.leastresponsetime.CallStatistics",
-          "justification": "The class was moved to the impl package"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.removed",
-          "old": "method java.lang.String io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProviderConfiguration::getForceRetryThreshold()",
-          "justification": "The parameter of the load balancer was removed"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.removed",
-          "old": "method java.lang.String io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProviderConfiguration::getRetryAfterFailureThreshold()",
-          "justification": "The parameter of the load balancer was removed"
-        },
-        {
-          "ignore": true,
-          "code": "java.annotation.attributeValueChanged",
-          "attribute": "value",
-          "annotationType": "io.smallrye.stork.api.config.LoadBalancerAttributes",
-          "old": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider" ,
-          "oldValue": "{@io.smallrye.stork.api.config.LoadBalancerAttribute(name = \"force-retry-threshold\", defaultValue = \"1000\", description = \"after how many calls should a service instance reuse be forced on no failures\"), @io.smallrye.stork.api.config.LoadBalancerAttribute(name = \"retry-after-failure-threshold\", defaultValue = \"10000\", description = \"after how many calls should a service instance reuse be forced after failure\")}",
-          "newValue": "{@io.smallrye.stork.api.config.LoadBalancerAttribute(name = \"declining-factor\", defaultValue = \"0.9\", description = \"How much *score* should decline in time, see Score calculation in the docs for details.\"), @io.smallrye.stork.api.config.LoadBalancerAttribute(name = \"error-penalty\", defaultValue = \"60s\", description = \"This load balancer treats an erroneous response as a response after this time.\")}",
-          "justification": "The least-response-time load balancer now accepts declining-factor and error-penalty attributes, the former attributes are not supported."
-        }
-      ]
-    }
-  },
-  {
-    "extension": "revapi.reporter.json",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "target/compatibility.json",
-      "indent": true,
-      "append": false,
-      "keepEmptyFile": true
-    }
-  },
-  {
-    "extension": "revapi.reporter.text",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "out"
+[ {
+  "extension" : "revapi.java",
+  "id" : "java",
+  "configuration" : {
+    "missing-classes" : {
+      "behavior" : "report",
+      "ignoreMissingAnnotations" : false
     }
   }
-]
+}, {
+  "extension" : "revapi.filter",
+  "configuration" : {
+    "elements" : {
+      "include" : [ {
+        "matcher" : "java-package",
+        "match" : "/io\\.smallrye\\.stork\\.loadbalancer\\.leastresponsetime(\\..*)?/"
+      } ]
+    }
+  }
+}, {
+  "extension" : "revapi.differences",
+  "id" : "breaking-changes",
+  "configuration" : {
+    "criticality" : "highlight",
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "differences" : [ ]
+  }
+}, {
+  "extension" : "revapi.reporter.json",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "target/compatibility.json",
+    "indent" : true,
+    "append" : false,
+    "keepEmptyFile" : true
+  }
+}, {
+  "extension" : "revapi.reporter.text",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "out"
+  }
+} ]
