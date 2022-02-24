@@ -1,6 +1,5 @@
 package io.smallrye.stork.servicediscovery.consul;
 
-import static io.smallrye.stork.impl.config.StorkConfigHelper.getInteger;
 import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
 import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE;
 import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE_ADDRESS;
@@ -41,11 +40,10 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         // TODO: more validation
         ConsulClientOptions options = new ConsulClientOptions();
         options.setHost(config.getConsulHost());
-        options.setPort(getInteger(serviceName, "consul-port", config.getConsulPort()));
+        options.setPort(getPort(serviceName, config.getConsulPort()));
         passing = Boolean.parseBoolean(config.getUseHealthChecks());
         this.application = config.getApplication() == null ? serviceName : config.getApplication();
         client = ConsulClient.create(vertx, options);
-
     }
 
     @Override
@@ -101,5 +99,14 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
             consulMetadata = consulMetadata.with(META_CONSUL_SERVICE_NODE_ADDRESS, service.getNode().getAddress());
         }
         return consulMetadata;
+    }
+
+    private static Integer getPort(String name, String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Unable to parse the property `consul-port` to an integer from the " +
+                    "service discovery configuration for service '" + name + "'", e);
+        }
     }
 }
