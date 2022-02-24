@@ -24,7 +24,26 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscovery::<init>(io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscoveryProviderConfiguration, java.lang.String, boolean, io.smallrye.stork.spi.StorkInfrastructure)",
+        "new": "method void io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscovery::<init>(io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscoveryProviderConfiguration, java.lang.String, io.smallrye.stork.spi.StorkInfrastructure)",
+        "justification": "The 'secure' configuration is now passed as a part of the 'EurekaServiceDiscoveryProviderConfiguration'. Should not impact users."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.attributeValueChanged",
+        "old": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscoveryProvider",
+        "annotationType": "io.smallrye.stork.api.config.ServiceDiscoveryAttributes",
+        "attribute": "value",
+        "oldValue": "{@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-host\", description = \"The Eureka server host.\", required = true), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-port\", description = \"The Eureka server port.\", defaultValue = \"8761\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-context-path\", description = \"The Eureka server root context path.\", defaultValue = \"\/\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"application\", description = \"The Eureka application Id; if not defined Stork service name will be used\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-trust-all\", description = \"Enable\/Disable the TLS certificate verification\", defaultValue = \"false\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-tls\", description = \"Use TLS to connect to the Eureka server\", defaultValue = \"false\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"instance\", description = \"The Eureka application instance Id\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"refresh-period\", description = \"Service discovery cache refresh period.\", defaultValue = \"5M\")}",
+        "newValue": "{@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-host\", description = \"The Eureka server host.\", required = true), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-port\", description = \"The Eureka server port.\", defaultValue = \"8761\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-context-path\", description = \"The Eureka server root context path.\", defaultValue = \"\/\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"application\", description = \"The Eureka application Id; if not defined Stork service name will be used\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-trust-all\", description = \"Enable\/Disable the TLS certificate verification\", defaultValue = \"false\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"eureka-tls\", description = \"Use TLS to connect to the Eureka server\", defaultValue = \"false\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"instance\", description = \"The Eureka application instance Id\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"refresh-period\", description = \"Service discovery cache refresh period.\", defaultValue = \"5M\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether is should select the secured endpoint of the retrieved services.\", defaultValue = \"false\")}",
+        "justification": "Added the 'secure' attribute. Should not impact users."
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

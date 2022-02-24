@@ -24,7 +24,15 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.stork.test.TestServiceDiscovery::<init>(io.smallrye.stork.test.TestServiceDiscovery1ProviderConfiguration, java.lang.String, boolean)",
+        "new": "method void io.smallrye.stork.test.TestServiceDiscovery::<init>(io.smallrye.stork.test.TestServiceDiscovery1ProviderConfiguration, java.lang.String)",
+        "justification": "Removal of the 'secure' parameter. Instead the 'secure' attribute of the service discovery should be used. Should not impact users."
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

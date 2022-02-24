@@ -13,14 +13,14 @@ import io.vertx.core.Vertx;
 @ServiceDiscoveryAttribute(name = "k8s-namespace", description = "The namespace of the service. Use all to discover all namespaces.")
 @ServiceDiscoveryAttribute(name = "application", description = "The Eureka application Id; if not defined Stork service name will be used.")
 @ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", defaultValue = "5M")
+@ServiceDiscoveryAttribute(name = "secure", description = "Whether the connection with the service should be encrypted with TLS.")
 public class KubernetesServiceDiscoveryProvider
         implements ServiceDiscoveryProvider<KubernetesServiceDiscoveryProviderConfiguration> {
 
     @Override
     public ServiceDiscovery createServiceDiscovery(KubernetesServiceDiscoveryProviderConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-        return new KubernetesServiceDiscovery(serviceName, config, storkInfrastructure.get(Vertx.class, Vertx::vertx),
-                serviceConfig.secure());
+        return new KubernetesServiceDiscovery(serviceName, config, storkInfrastructure.get(Vertx.class, Vertx::vertx));
 
     }
 }

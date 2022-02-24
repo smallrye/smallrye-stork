@@ -23,8 +23,6 @@ public class MicroProfileConfigProvider implements ConfigProvider {
     private static final String CONFIG_PROPERTY_PART_EXPRESSION = "\".*\"|[^.]+";
     private static final Pattern CONFIG_PROP_PART = Pattern.compile(CONFIG_PROPERTY_PART_EXPRESSION);
 
-    private static final String SECURE = "secure";
-
     public static final String LOAD_BALANCER = "load-balancer";
     public static final String LOAD_BALANCER_EMBEDDED = "load-balancer.type";
 
@@ -76,8 +74,6 @@ public class MicroProfileConfigProvider implements ConfigProvider {
 
             String serviceName = serviceEntry.getKey();
 
-            builder.setSecure(isSecureValueTrue(properties.get(SECURE), serviceName));
-
             String loadBalancerType = properties.get(LOAD_BALANCER);
             if (loadBalancerType == null) {
                 loadBalancerType = properties.get(LOAD_BALANCER_EMBEDDED);
@@ -103,21 +99,6 @@ public class MicroProfileConfigProvider implements ConfigProvider {
             }
 
             serviceConfigs.add(builder.build());
-        }
-    }
-
-    private boolean isSecureValueTrue(String secure, String serviceName) {
-        if (secure == null) {
-            return false;
-        }
-
-        if (Boolean.TRUE.toString().equalsIgnoreCase(secure)) {
-            return true;
-        } else if (Boolean.FALSE.toString().equalsIgnoreCase(secure)) {
-            return false;
-        } else {
-            throw new IllegalArgumentException("Unsupported value for the 'secure' property for service: '"
-                    + serviceName + "'. Expected 'true' or 'false'");
         }
     }
 

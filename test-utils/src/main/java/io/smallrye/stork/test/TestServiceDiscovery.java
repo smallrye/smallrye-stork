@@ -11,7 +11,7 @@ public class TestServiceDiscovery implements ServiceDiscovery {
     private final TestServiceDiscovery1ProviderConfiguration config;
     private final String type;
 
-    public TestServiceDiscovery(TestServiceDiscovery1ProviderConfiguration config, String type, boolean secure) {
+    public TestServiceDiscovery(TestServiceDiscovery1ProviderConfiguration config, String type) {
         this.config = config;
         this.type = type;
     }

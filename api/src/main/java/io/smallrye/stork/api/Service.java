@@ -17,14 +17,12 @@ public class Service {
     private final LoadBalancer loadBalancer;
     private final ServiceDiscovery serviceDiscovery;
     private final String serviceName;
-    private final boolean secure;
 
     public Service(String serviceName, LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery,
-            boolean secure, boolean requiresStrictRecording) {
+            boolean requiresStrictRecording) {
         this.loadBalancer = loadBalancer;
         this.serviceDiscovery = serviceDiscovery;
         this.serviceName = serviceName;
-        this.secure = secure;
         this.instanceSelectionLock = requiresStrictRecording ? new Semaphore(1) : null;
     }
 
@@ -139,7 +137,10 @@ public class Service {
         return serviceDiscovery;
     }
 
-    public boolean isSecure() {
-        return secure;
+    /**
+     * @return the service name.
+     */
+    public String getServiceName() {
+        return serviceName;
     }
 }

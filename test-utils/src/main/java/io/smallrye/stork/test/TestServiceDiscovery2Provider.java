@@ -16,6 +16,6 @@ public class TestServiceDiscovery2Provider implements ServiceDiscoveryProvider<T
     @Override
     public ServiceDiscovery createServiceDiscovery(TestServiceDiscovery2ProviderConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
-        return new TestServiceDiscovery2(config, TYPE, serviceConfig.secure());
+        return new TestServiceDiscovery2(config, TYPE, false);
     }
 }
