@@ -107,6 +107,7 @@ public class Service {
                     instanceSelectionLock.release();
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new RuntimeException("Failed to lock for ServiceInstance selection", e);
             }
         }
