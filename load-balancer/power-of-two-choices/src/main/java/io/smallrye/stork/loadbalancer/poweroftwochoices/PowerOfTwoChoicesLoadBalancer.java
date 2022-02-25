@@ -50,4 +50,9 @@ public class PowerOfTwoChoicesLoadBalancer implements LoadBalancer {
             return new ServiceInstanceWithStatGathering(second, collector);
         }
     }
+
+    @Override
+    public boolean requiresStrictRecording() {
+        return false;
+    }
 }
