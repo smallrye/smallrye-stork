@@ -29,7 +29,11 @@ public interface ServiceConfig {
      * Whether the communication should use a secure connection (e.g. HTTPS)
      * 
      * @return true if SSL, TLS, etc. should be used for the communication
+     * @deprecated Use the service discovery 'secure' attribute instead
      */
-    boolean secure();
+    @Deprecated
+    default boolean secure() {
+        return false;
+    }
 
 }

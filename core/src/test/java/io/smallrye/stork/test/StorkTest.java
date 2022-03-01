@@ -47,6 +47,20 @@ public class StorkTest {
             return Collections.emptyMap();
         }
     };
+
+    private static final ServiceDiscoveryConfig FAKE_SECURE_SERVICE_DISCOVERY_CONFIG = new ServiceDiscoveryConfig() {
+
+        @Override
+        public String type() {
+            return "fake";
+        }
+
+        @Override
+        public Map<String, String> parameters() {
+            return Map.of("secure", "true");
+        }
+    };
+
     private static final ServiceDiscoveryConfig SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER = new ServiceDiscoveryConfig() {
 
         @Override
@@ -88,7 +102,7 @@ public class StorkTest {
     private static Set<Path> createdSpis = new HashSet<>();
 
     @BeforeEach
-    public void init() throws IOException {
+    public void init() {
         SPI_ROOT.mkdirs();
         AnchoredServiceDiscoveryProvider.services.clear();
         configurations.clear();
@@ -188,6 +202,38 @@ public class StorkTest {
         Assertions.assertNotNull(stork.getService("a").getServiceDiscovery());
         Assertions.assertEquals(stork.getService("a").selectInstance().await().indefinitely(), instance);
         Assertions.assertNotNull(stork.getService("a").getLoadBalancer());
+    }
+
+    @Test
+    public void testWithLegacySecureServiceDiscovery() {
+        configurations.add(new FakeSecureServiceConfig("s",
+                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+        ServiceInstance instance = mock(ServiceInstance.class);
+        AnchoredServiceDiscoveryProvider.services.add(instance);
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        Assertions.assertTrue(stork.getServiceOptional("s").isPresent());
+        Assertions.assertNotNull(stork.getService("s").getServiceDiscovery());
+        Assertions.assertNotNull(stork.getService("s").getLoadBalancer());
+        Assertions.assertTrue(stork.getService("s").selectInstance().await().indefinitely().isSecure());
+    }
+
+    @Test
+    public void testWithSecureServiceDiscovery() {
+        configurations.add(new FakeServiceConfig("s",
+                FAKE_SECURE_SERVICE_DISCOVERY_CONFIG, null));
+        ServiceInstance instance = mock(ServiceInstance.class);
+        AnchoredServiceDiscoveryProvider.services.add(instance);
+        install(ConfigProvider.class, AnchoredConfigProvider.class);
+
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        Assertions.assertTrue(stork.getServiceOptional("s").isPresent());
+        Assertions.assertNotNull(stork.getService("s").getServiceDiscovery());
+        Assertions.assertNotNull(stork.getService("s").getLoadBalancer());
+        Assertions.assertTrue(stork.getService("s").selectInstance().await().indefinitely().isSecure());
     }
 
     @Test
@@ -355,6 +401,19 @@ public class StorkTest {
         }
     }
 
+    private static class FakeSecureServiceConfig extends FakeServiceConfig {
+
+        private FakeSecureServiceConfig(String name, ServiceDiscoveryConfig sd, LoadBalancerConfig lb) {
+            super(name, sd, lb);
+        }
+
+        @Override
+        public boolean secure() {
+            return true;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     private static <T> void install(Class<T> itf, Class<? extends T>... impls) {
         File out = new File(SPI_ROOT, itf.getName());
         if (out.isFile()) {

@@ -16,11 +16,12 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 @ServiceDiscoveryAttribute(name = "eureka-tls", description = "Use TLS to connect to the Eureka server", defaultValue = "false")
 @ServiceDiscoveryAttribute(name = "instance", description = "The Eureka application instance Id")
 @ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", defaultValue = "5M")
+@ServiceDiscoveryAttribute(name = "secure", description = "Whether is should select the secured endpoint of the retrieved services.", defaultValue = "false")
 public class EurekaServiceDiscoveryProvider implements ServiceDiscoveryProvider<EurekaServiceDiscoveryProviderConfiguration> {
 
     @Override
     public ServiceDiscovery createServiceDiscovery(EurekaServiceDiscoveryProviderConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure infrastructure) {
-        return new EurekaServiceDiscovery(config, serviceName, serviceConfig.secure(), infrastructure);
+        return new EurekaServiceDiscovery(config, serviceName, infrastructure);
     }
 }

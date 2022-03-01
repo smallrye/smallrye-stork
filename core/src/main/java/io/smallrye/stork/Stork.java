@@ -1,6 +1,7 @@
 package io.smallrye.stork;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -21,6 +22,7 @@ import io.smallrye.stork.integration.DefaultStorkInfrastructure;
 import io.smallrye.stork.spi.ElementWithType;
 import io.smallrye.stork.spi.StorkInfrastructure;
 import io.smallrye.stork.spi.config.ConfigProvider;
+import io.smallrye.stork.spi.config.SimpleServiceConfig;
 import io.smallrye.stork.spi.internal.LoadBalancerLoader;
 import io.smallrye.stork.spi.internal.ServiceDiscoveryLoader;
 
@@ -70,7 +72,7 @@ public final class Stork {
                 () -> new IllegalStateException("No SmallRye Stork ConfigProvider found"));
 
         for (ServiceConfig serviceConfig : configProvider.getConfigs()) {
-            final var serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
+            var serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
             if (serviceDiscoveryConfig == null) {
                 throw new IllegalArgumentException(
                         "No service discovery defined for service " + serviceConfig.serviceName());
@@ -86,6 +88,15 @@ public final class Stork {
                 throw new IllegalArgumentException("ServiceDiscoveryProvider not found for type " + serviceDiscoveryType);
             }
 
+            if (serviceConfig.secure()) {
+                // Backward compatibility
+                LOGGER.warn("The 'secure' attribute is deprecated, use the 'secure' service discovery attribute instead");
+                // We do not know if we can add to the parameters, such create a new SimpleServiceDiscoveryConfig
+                Map<String, String> newConfig = new HashMap<>(serviceDiscoveryConfig.parameters());
+                newConfig.put("secure", "true");
+                serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
+            }
+
             final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
                     serviceConfig.serviceName(), serviceConfig, storkInfrastructure);
 
@@ -93,7 +104,7 @@ public final class Stork {
             final LoadBalancer loadBalancer;
             if (loadBalancerConfig == null) {
                 // no load balancer, use round-robin
-                LOGGER.info("No load balancer configured for type {}, using {}", serviceDiscoveryType,
+                LOGGER.debug("No load balancer configured for type {}, using {}", serviceDiscoveryType,
                         RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE);
                 loadBalancer = new RoundRobinLoadBalancer();
             } else {
@@ -108,7 +119,6 @@ public final class Stork {
 
             services.put(serviceConfig.serviceName(),
                     new Service(serviceConfig.serviceName(), loadBalancer, serviceDiscovery,
-                            serviceConfig.secure(),
                             loadBalancer.requiresStrictRecording()));
         }
         for (Service service : services.values()) {

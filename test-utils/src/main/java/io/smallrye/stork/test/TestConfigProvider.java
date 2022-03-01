@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.smallrye.stork.api.config.LoadBalancerConfig;
 import io.smallrye.stork.api.config.ServiceConfig;
@@ -26,22 +27,21 @@ public class TestConfigProvider implements ConfigProvider {
         return priority;
     }
 
+    @Deprecated
     public static void addServiceConfig(String name, String loadBalancer, String serviceDiscovery,
-            Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams) {
-        addServiceConfig(name, loadBalancer, serviceDiscovery, loadBalancerParams, serviceDiscoveryParams, false);
+            Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams, boolean secure) {
+        if (secure) {
+            serviceDiscoveryParams.put("secure", "true");
+        }
+        addServiceConfig(name, loadBalancer, serviceDiscovery, loadBalancerParams, serviceDiscoveryParams);
     }
 
     public static void addServiceConfig(String name, String loadBalancer, String serviceDiscovery,
-            Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams, boolean secure) {
+            Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams) {
         configs.add(new ServiceConfig() {
             @Override
             public String serviceName() {
                 return name;
-            }
-
-            @Override
-            public boolean secure() {
-                return secure;
             }
 
             @Override
@@ -54,10 +54,7 @@ public class TestConfigProvider implements ConfigProvider {
 
                     @Override
                     public Map<String, String> parameters() {
-                        if (loadBalancerParams == null) {
-                            return Collections.emptyMap();
-                        }
-                        return loadBalancerParams;
+                        return Objects.requireNonNullElse(loadBalancerParams, Collections.emptyMap());
                     }
                 };
             }
@@ -72,10 +69,7 @@ public class TestConfigProvider implements ConfigProvider {
 
                     @Override
                     public Map<String, String> parameters() {
-                        if (serviceDiscoveryParams == null) {
-                            return Collections.emptyMap();
-                        }
-                        return serviceDiscoveryParams;
+                        return Objects.requireNonNullElse(serviceDiscoveryParams, Collections.emptyMap());
                     }
                 };
             }

@@ -16,7 +16,8 @@ import io.smallrye.stork.utils.ServiceInstanceIds;
 import io.smallrye.stork.utils.StorkAddressUtils;
 
 @ServiceDiscoveryType("static")
-@ServiceDiscoveryAttribute(name = "address-list", description = "a comma-separated list of addresses")
+@ServiceDiscoveryAttribute(name = "address-list", description = "A comma-separated list of addresses (host:port). The default port is 80.")
+@ServiceDiscoveryAttribute(name = "secure", description = "Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.")
 public class StaticListServiceDiscoveryProvider
         implements ServiceDiscoveryProvider<StaticListServiceDiscoveryProviderConfiguration> {
 
@@ -35,7 +36,7 @@ public class StaticListServiceDiscoveryProvider
                 HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(address, 80, serviceName);
                 addressList
                         .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostAndPort.host, hostAndPort.port,
-                                serviceConfig.secure()));
+                                isSecure(config.getSecure(), hostAndPort.port)));
             } catch (Exception e) {
                 throw new IllegalArgumentException(
                         "Address not parseable to URL: " + url + " for service " + serviceName);
@@ -43,5 +44,14 @@ public class StaticListServiceDiscoveryProvider
         }
 
         return new StaticListServiceDiscovery(addressList);
+    }
+
+    private boolean isSecure(String secureAttribute, int port) {
+        if (secureAttribute == null) {
+            return port == 443;
+        } else {
+            return Boolean.parseBoolean(secureAttribute);
+        }
+
     }
 }

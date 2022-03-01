@@ -26,12 +26,29 @@ public class StaticListServiceDiscoveryTest {
                 null, Map.of("address-list", "localhost:8080, localhost:8081"));
 
         TestConfigProvider.addServiceConfig("second-service", null, "static",
-                null, Map.of("address-list", "localhost:8082"));
+                null, Map.of("address-list", "localhost:8082", "secure", "true"));
 
         TestConfigProvider.addServiceConfig("third-service", null, "static",
                 null, Map.of("address-list", "localhost:8083"));
 
+        TestConfigProvider.addServiceConfig("secured-service", null, "static",
+                null, Map.of("address-list", "localhost:443, localhost"));
+
         stork = StorkTestUtils.getNewStorkInstance();
+    }
+
+    @Test
+    void testSecureDetection() {
+        List<ServiceInstance> instances = stork.getService("secured-service").getInstances().await()
+                .atMost(Duration.ofSeconds(5));
+
+        assertThat(instances).hasSize(2);
+        assertThat(instances.get(0).isSecure()).isTrue();
+        assertThat(instances.get(1).isSecure()).isFalse();
+
+        instances = stork.getService("second-service").getInstances().await().atMost(Duration.ofSeconds(5));
+        assertThat(instances).hasSize(1);
+        assertThat(instances.get(0).isSecure()).isTrue();
     }
 
     @Test
@@ -45,6 +62,7 @@ public class StaticListServiceDiscoveryTest {
                 "localhost");
         assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
                 8081);
+        assertThat(serviceInstances.stream().map(ServiceInstance::isSecure)).allSatisfy(b -> assertThat(b).isFalse());
     }
 
     @Test

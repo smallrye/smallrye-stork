@@ -36,11 +36,6 @@ public class SimpleServiceConfig implements ServiceConfig {
     }
 
     @Override
-    public boolean secure() {
-        return secure;
-    }
-
-    @Override
     public ServiceDiscoveryConfig serviceDiscovery() {
         return serviceDiscoveryConfig;
     }

@@ -24,7 +24,24 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "annotation": "@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"address-list\", description = \"a comma-separated list of addresses\")",
+        "justification": "By adding a `ServiceDiscoveryAttribute` annotation, it uses the 'ServiceDiscoveryAttributes' container annotation. Should not impact users."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "annotation": "@io.smallrye.stork.api.config.ServiceDiscoveryAttributes({@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"address-list\", description = \"A comma-separated list of addresses (host:port). The default port is 80.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.\")})",
+        "justification": "By adding a `ServiceDiscoveryAttribute` annotation, it uses the 'ServiceDiscoveryAttributes' container annotation. Should not impact users."
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

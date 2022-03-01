@@ -35,10 +35,10 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<String> instance;
 
-    public EurekaServiceDiscovery(EurekaServiceDiscoveryProviderConfiguration config, String serviceName, boolean secure,
+    public EurekaServiceDiscovery(EurekaServiceDiscoveryProviderConfiguration config, String serviceName,
             StorkInfrastructure infrastructure) {
         super(config.getRefreshPeriod());
-        this.secure = secure;
+        this.secure = isSecure(config);
         Vertx vertx = infrastructure.get(Vertx.class, Vertx::vertx);
 
         // Eureka instance
@@ -141,5 +141,9 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
                     "Unable to retrieve services from Eureka, expected as 200-OK response, but got " + resp.statusCode()
                             + ", body is: " + resp.bodyAsString());
         }
+    }
+
+    private boolean isSecure(EurekaServiceDiscoveryProviderConfiguration config) {
+        return config.getSecure() != null && Boolean.parseBoolean(config.getSecure());
     }
 }

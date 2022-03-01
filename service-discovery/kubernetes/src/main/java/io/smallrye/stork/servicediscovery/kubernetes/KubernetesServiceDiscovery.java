@@ -30,7 +30,6 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     public static final String METADATA_NAME = "metadata.name";
     private final KubernetesClient client;
-    private final String serviceName;
     private String application;
     private final boolean allNamespaces;
     private final String namespace;
@@ -39,11 +38,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
-    public KubernetesServiceDiscovery(String serviceName, KubernetesServiceDiscoveryProviderConfiguration config, Vertx vertx,
-            boolean secure) {
+    public KubernetesServiceDiscovery(String serviceName, KubernetesServiceDiscoveryProviderConfiguration config, Vertx vertx) {
         super(config.getRefreshPeriod());
         Config base = Config.autoConfigure(null);
-        this.serviceName = serviceName;
         String masterUrl = config.getK8sHost() == null ? base.getMasterUrl() : config.getK8sHost();
         this.application = config.getApplication() == null ? serviceName : config.getApplication();
         this.namespace = config.getK8sNamespace() == null ? base.getNamespace() : config.getK8sNamespace();
@@ -58,9 +55,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         Config k8sConfig = new ConfigBuilder(base)
                 .withMasterUrl(masterUrl)
                 .withNamespace(namespace).build();
-        client = new DefaultKubernetesClient(k8sConfig);
+        this.client = new DefaultKubernetesClient(k8sConfig);
         this.vertx = vertx;
-        this.secure = secure;
+        this.secure = isSecure(config);
     }
 
     @Override
@@ -160,6 +157,10 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
         }
         return serviceInstances;
+    }
+
+    private static boolean isSecure(KubernetesServiceDiscoveryProviderConfiguration config) {
+        return config.getSecure() != null && Boolean.parseBoolean(config.getSecure());
     }
 
 }

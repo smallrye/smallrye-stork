@@ -32,11 +32,10 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
     private final boolean secure;
     private final boolean passing;
 
-    public ConsulServiceDiscovery(String serviceName, ConsulServiceDiscoveryProviderConfiguration config, Vertx vertx,
-            boolean secure) {
+    public ConsulServiceDiscovery(String serviceName, ConsulServiceDiscoveryProviderConfiguration config, Vertx vertx) {
         super(config.getRefreshPeriod());
         this.serviceName = serviceName;
-        this.secure = secure;
+        this.secure = isSecure(config);
         // TODO: more validation
         ConsulClientOptions options = new ConsulClientOptions();
         options.setHost(config.getConsulHost());
@@ -108,5 +107,9 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
             throw new IllegalArgumentException("Unable to parse the property `consul-port` to an integer from the " +
                     "service discovery configuration for service '" + name + "'", e);
         }
+    }
+
+    private boolean isSecure(ConsulServiceDiscoveryProviderConfiguration config) {
+        return config.getSecure() != null && Boolean.parseBoolean(config.getSecure());
     }
 }
