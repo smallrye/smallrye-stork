@@ -8,10 +8,10 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 
 @ServiceDiscoveryType("empty")
 public class EmptyServiceDiscoveryProvider
-        implements ServiceDiscoveryProvider<EmptyServiceDiscoveryProviderConfiguration> {
+        implements ServiceDiscoveryProvider<EmptyConfiguration> {
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(EmptyServiceDiscoveryProviderConfiguration config, String serviceName,
+    public ServiceDiscovery createServiceDiscovery(EmptyConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         return null;
     }

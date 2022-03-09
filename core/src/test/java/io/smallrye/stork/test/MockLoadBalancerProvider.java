@@ -7,11 +7,11 @@ import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.config.LoadBalancerType;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 
-@LoadBalancerType("fake")
-public class MockLoadBalancerProvider implements LoadBalancerProvider<MockLoadBalancerProviderConfiguration> {
+@LoadBalancerType("fake-selector")
+public class MockLoadBalancerProvider implements LoadBalancerProvider<FakeSelectorConfiguration> {
 
     @Override
-    public LoadBalancer createLoadBalancer(MockLoadBalancerProviderConfiguration config, ServiceDiscovery serviceDiscovery) {
+    public LoadBalancer createLoadBalancer(FakeSelectorConfiguration config, ServiceDiscovery serviceDiscovery) {
         return mock(LoadBalancer.class);
     }
 }

@@ -8,7 +8,7 @@ However, when using the programmatic API, you will use these concepts directly.
 
 ## Process overview
 
-When using the programmatic API of Stork, you:
+When using the programmatic API of Stork, you can:
 
 1. Retrieve the _singleton_ `Stork` instance. This instance is configured with the set of `Service` it manages.
 2. Retrieve the `Service` you want to use. Each `Service` is associated with a name.

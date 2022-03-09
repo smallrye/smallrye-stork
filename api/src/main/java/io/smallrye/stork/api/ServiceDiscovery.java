@@ -1,7 +1,6 @@
 package io.smallrye.stork.api;
 
 import java.util.List;
-import java.util.Map;
 
 import io.smallrye.mutiny.Uni;
 
@@ -22,9 +21,8 @@ public interface ServiceDiscovery {
      * Optional initialization.
      * This method will be invoked after all service discoveries and load balancers are registered in Stork
      *
-     * @param services a map of all defined services by name, helpful with creating service discovery implementations
-     *        that combine results from multiple services
+     * @param stork the stork instance managing the service.
      */
-    default void initialize(Map<String, Service> services) {
+    default void initialize(StorkServiceRegistry stork) {
     }
 }

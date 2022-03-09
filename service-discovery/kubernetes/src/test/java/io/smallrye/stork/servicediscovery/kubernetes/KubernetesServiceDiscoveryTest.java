@@ -34,6 +34,7 @@ import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.Service;
+import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
@@ -56,10 +57,47 @@ public class KubernetesServiceDiscoveryTest {
 
     @Test
     void shouldGetServiceFromK8sDefaultNamespace() {
-
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace));
         Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "svc";
+        String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
+
+        registerKubernetesService(serviceName, defaultNamespace, ips);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+        for (ServiceInstance serviceInstance : instances.get()) {
+            Map<String, String> labels = serviceInstance.getLabels();
+            assertThat(labels).contains(entry("app.kubernetes.io/name", "svc"),
+                    entry("app.kubernetes.io/version", "1.0"),
+                    entry("ui", "ui-" + ipAsSuffix(serviceInstance.getHost())));
+        }
+        instances.get().stream().map(ServiceInstance::getMetadata).forEach(metadata -> {
+            Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+            assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+        });
+        assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isFalse());
+    }
+
+    @Test
+    void shouldGetServiceFromK8sDefaultNamespaceUsingProgrammaticAPI() {
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+        stork.defineIfAbsent("svc", ServiceDefinition.of(
+                new KubernetesConfiguration().withK8sHost(k8sMasterUrl).withK8sNamespace(defaultNamespace)));
 
         String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };

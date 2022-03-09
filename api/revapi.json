@@ -41,6 +41,14 @@
         "code": "java.method.removed",
         "old": "method boolean io.smallrye.stork.api.Service::isSecure()",
         "justification": "Instead, use the `secure` attribute of each service discovery must be used, as the behavior depends on the service discovery code."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void io.smallrye.stork.api.ServiceDiscovery::initialize(===java.util.Map<java.lang.String, io.smallrye.stork.api.Service>===)",
+        "new": "parameter void io.smallrye.stork.api.ServiceDiscovery::initialize(===io.smallrye.stork.api.StorkServiceRegistry===)",
+        "parameterIndex": "0",
+        "justification": "The method is now receiving the StorkServiceRegistry instance"
       }
     ]
   }

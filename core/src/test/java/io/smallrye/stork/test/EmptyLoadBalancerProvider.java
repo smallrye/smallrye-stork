@@ -5,11 +5,11 @@ import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.config.LoadBalancerType;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 
-@LoadBalancerType("empty")
-public class EmptyLoadBalancerProvider implements LoadBalancerProvider<EmptyLoadBalancerProviderConfiguration> {
+@LoadBalancerType("empty-selector")
+public class EmptyLoadBalancerProvider implements LoadBalancerProvider<EmptySelectorConfiguration> {
 
     @Override
-    public LoadBalancer createLoadBalancer(EmptyLoadBalancerProviderConfiguration config, ServiceDiscovery serviceDiscovery) {
+    public LoadBalancer createLoadBalancer(EmptySelectorConfiguration config, ServiceDiscovery serviceDiscovery) {
         return null;
     }
 }

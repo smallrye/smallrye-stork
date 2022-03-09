@@ -1,20 +1,13 @@
 package io.smallrye.stork.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -22,6 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.NoSuchServiceDefinitionException;
+import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.api.config.LoadBalancerConfig;
 import io.smallrye.stork.api.config.ServiceConfig;
@@ -30,10 +25,8 @@ import io.smallrye.stork.impl.RoundRobinLoadBalancer;
 import io.smallrye.stork.impl.RoundRobinLoadBalancerProvider;
 import io.smallrye.stork.spi.config.ConfigProvider;
 
+@SuppressWarnings("unchecked")
 public class StorkTest {
-
-    static final File SPI_ROOT = new File("target/test-classes/META-INF/services");
-    static final List<ServiceConfig> configurations = new ArrayList<>();
 
     private static final ServiceDiscoveryConfig FAKE_SERVICE_DISCOVERY_CONFIG = new ServiceDiscoveryConfig() {
 
@@ -78,7 +71,7 @@ public class StorkTest {
 
         @Override
         public String type() {
-            return "fake";
+            return "fake-selector";
         }
 
         @Override
@@ -99,47 +92,41 @@ public class StorkTest {
             return Collections.emptyMap();
         }
     };
-    private static Set<Path> createdSpis = new HashSet<>();
 
     @BeforeEach
     public void init() {
-        SPI_ROOT.mkdirs();
+        TestEnv.SPI_ROOT.mkdirs();
         AnchoredServiceDiscoveryProvider.services.clear();
-        configurations.clear();
+        TestEnv.configurations.clear();
     }
 
     @AfterEach
     public void cleanup() throws IOException {
         Stork.shutdown();
-        clearSPIs();
+        TestEnv.clearSPIs();
         AnchoredServiceDiscoveryProvider.services.clear();
-        configurations.clear();
-    }
-
-    private static void clearSPIs() throws IOException {
-        for (Path createdSpi : createdSpis) {
-            Files.delete(createdSpi);
-        }
-        createdSpis.clear();
+        TestEnv.configurations.clear();
     }
 
     @Test
     void initWithoutConfigProvider() {
-        Assertions.assertThrows(IllegalStateException.class, Stork::initialize);
+        Stork.initialize();
+        Stork stork = Stork.getInstance();
+        assertThat(stork.getServiceOptional("anything")).isEmpty();
     }
 
     @Test
     void initWithoutServiceDiscoveryOrLoadBalancer() {
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Assertions.assertDoesNotThrow(() -> Stork.initialize());
         Stork stork = Stork.getInstance();
         Assertions.assertTrue(stork.getServiceOptional("missing").isEmpty());
-        Assertions.assertThrows(IllegalArgumentException.class, () -> stork.getService("missing"));
+        Assertions.assertThrows(NoSuchServiceDefinitionException.class, () -> stork.getService("missing"));
     }
 
     @Test
     public void initializationWithTwoConfigProviders() {
-        install(ConfigProvider.class, ServiceAConfigProvider.class, ServiceBConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, ServiceAConfigProvider.class, ServiceBConfigProvider.class);
         Stork.initialize();
         Stork stork = Stork.getInstance();
         Assertions.assertTrue(stork.getServiceOptional("a").isEmpty());
@@ -151,14 +138,14 @@ public class StorkTest {
 
     @Test
     public void testServiceConfigWithoutServiceDiscovery() {
-        configurations.add(new FakeServiceConfig("a", null, null));
-
-        Assertions.assertThrows(IllegalStateException.class, Stork::initialize);
+        Stork.initialize();
+        assertThatThrownBy(() -> Stork.getInstance().defineIfAbsent("a", ServiceDefinition.of(null)))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     public void testServiceWithoutServiceDiscoveryType() {
-        configurations.add(new FakeServiceConfig("a", new ServiceDiscoveryConfig() {
+        TestEnv.configurations.add(new FakeServiceConfig("a", new ServiceDiscoveryConfig() {
             @Override
             public String type() {
                 return null;
@@ -169,32 +156,33 @@ public class StorkTest {
                 return null;
             }
         }, null));
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
     }
 
     @Test
     public void testServiceWithServiceDiscoveryButNoMatchingProvider() {
-        configurations.add(new FakeServiceConfig("a", SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER, null));
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.configurations.add(new FakeServiceConfig("a", SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER, null));
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
     }
 
     @Test
     public void testWithLoadBalancerButNoMatchingProvider() {
-        configurations.add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LOAD_BALANCER_WITH_INVALID_PROVIDER));
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.configurations
+                .add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LOAD_BALANCER_WITH_INVALID_PROVIDER));
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
     }
 
     @Test
     public void testWithServiceDiscoveryAndASingleServiceInstance() {
-        configurations.add(new FakeServiceConfig("a",
+        TestEnv.configurations.add(new FakeServiceConfig("a",
                 FAKE_SERVICE_DISCOVERY_CONFIG, null));
         ServiceInstance instance = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance);
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
@@ -206,11 +194,11 @@ public class StorkTest {
 
     @Test
     public void testWithLegacySecureServiceDiscovery() {
-        configurations.add(new FakeSecureServiceConfig("s",
+        TestEnv.configurations.add(new FakeSecureServiceConfig("s",
                 FAKE_SERVICE_DISCOVERY_CONFIG, null));
         ServiceInstance instance = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance);
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
@@ -222,11 +210,11 @@ public class StorkTest {
 
     @Test
     public void testWithSecureServiceDiscovery() {
-        configurations.add(new FakeServiceConfig("s",
+        TestEnv.configurations.add(new FakeServiceConfig("s",
                 FAKE_SECURE_SERVICE_DISCOVERY_CONFIG, null));
         ServiceInstance instance = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance);
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
@@ -238,14 +226,14 @@ public class StorkTest {
 
     @Test
     public void testWithServiceDiscoveryAndATwoServiceInstances() {
-        configurations.add(new FakeServiceConfig("a",
+        TestEnv.configurations.add(new FakeServiceConfig("a",
                 FAKE_SERVICE_DISCOVERY_CONFIG, null));
         ServiceInstance instance1 = mock(ServiceInstance.class);
         ServiceInstance instance2 = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance1);
         AnchoredServiceDiscoveryProvider.services.add(instance2);
 
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
@@ -258,9 +246,9 @@ public class StorkTest {
 
     @Test
     public void testWithLoadBalancer() {
-        configurations.add(new FakeServiceConfig("a",
+        TestEnv.configurations.add(new FakeServiceConfig("a",
                 FAKE_SERVICE_DISCOVERY_CONFIG, FAKE_LOAD_BALANCER_CONFIG));
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Stork.initialize();
         Stork stork = Stork.getInstance();
         Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
@@ -276,10 +264,10 @@ public class StorkTest {
         AnchoredServiceDiscoveryProvider.services.add(instance2);
         AnchoredServiceDiscoveryProvider.services.add(instance3);
 
-        configurations.add(new FakeServiceConfig("a",
+        TestEnv.configurations.add(new FakeServiceConfig("a",
                 FAKE_SERVICE_DISCOVERY_CONFIG, null));
 
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
@@ -301,7 +289,7 @@ public class StorkTest {
         AnchoredServiceDiscoveryProvider.services.add(instance2);
         AnchoredServiceDiscoveryProvider.services.add(instance3);
 
-        configurations.add(new FakeServiceConfig("a",
+        TestEnv.configurations.add(new FakeServiceConfig("a",
                 FAKE_SERVICE_DISCOVERY_CONFIG, new LoadBalancerConfig() {
                     @Override
                     public String type() {
@@ -314,7 +302,7 @@ public class StorkTest {
                     }
                 }));
 
-        install(ConfigProvider.class, AnchoredConfigProvider.class);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
@@ -352,19 +340,6 @@ public class StorkTest {
         @Override
         public int priority() {
             return 100;
-        }
-    }
-
-    public static class AnchoredConfigProvider implements ConfigProvider {
-
-        @Override
-        public List<ServiceConfig> getConfigs() {
-            return new ArrayList<>(configurations);
-        }
-
-        @Override
-        public int priority() {
-            return 5;
         }
     }
 
@@ -411,25 +386,6 @@ public class StorkTest {
         public boolean secure() {
             return true;
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> void install(Class<T> itf, Class<? extends T>... impls) {
-        File out = new File(SPI_ROOT, itf.getName());
-        if (out.isFile()) {
-            throw new IllegalArgumentException(out.getAbsolutePath() + " does already exist");
-        }
-        if (impls == null || impls.length == 0) {
-            throw new IllegalArgumentException("The list of providers must not be `null` or empty");
-        }
-
-        List<String> list = Arrays.stream(impls).map(Class::getName).collect(Collectors.toList());
-        try {
-            Files.write(out.toPath(), list);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        createdSpis.add(out.toPath());
     }
 
 }

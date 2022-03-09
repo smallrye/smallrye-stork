@@ -4,7 +4,8 @@ Stork is extensible, and you can implement your own service discovery mechanism.
 
 ## Dependencies
 
-To implement your _Service Discovery Provider_, make sure your project depends on Core and Configuration Generator. The former brings classes necessary to implement custom discovery, the latter contains an annotation processor that generates classes needed by Stork.
+To implement your _Service Discovery Provider_, make sure your project depends on Core and Configuration Generator. 
+The former brings classes necessary to implement custom discovery, the latter contains an annotation processor that generates classes needed by Stork.
 
 ```xml
 <dependency>
@@ -25,9 +26,9 @@ To implement your _Service Discovery Provider_, make sure your project depends o
 
 Service discovery implementation consists of three elements:
 
-- `ServiceDiscovery` which is responsible for locating service instances for a single Stork service
+- `ServiceDiscovery` which is responsible for locating service instances for a single Stork service.
 - `ServiceDiscoveryProvider` which creates instances of `ServiceDiscovery` for a given service discovery _type_.
-- `ServiceDiscoveryProviderConfiguration` which is a configuration for the discovery
+- `$typeConfiguration` which is a configuration for the discovery. This class is automatically generated.
 
 A _type_, for example, `acme`, identifies each provider.
 This _type_ is used in the configuration to reference the provider:
@@ -47,7 +48,7 @@ A service discovery provider class should look as follows:
 
 Note, that the `ServiceDiscoveryProvider` interface takes a configuration class as a parameter. This configuration class 
 is generated automatically by the _Configuration Generator_. 
-Its name is created by appending `Configuration` to the name of the provider class.
+Its name is created by appending `Configuration` to the service discovery type, such as `AcmeConfiguration`.
 
 The next step is to implement the `ServiceDiscovery` interface:
 
@@ -72,3 +73,15 @@ stork.my-service.service-discovery.port=1234
 ```
 
 Then, Stork will use your implementation to locate the `my-service` service.
+
+## Using your service discovery using the programmatic API
+
+When building your service discovery project, the configuration generator creates a configuration class.
+This class can be used to configure your service discovery using the Stork programmatic API.
+
+```java
+```java linenums="1"
+--8<-- "docs/snippets/examples/AcmeDiscoveryApiUsage.java"
+```
+
+Remember that attributes, like `host`, are declared using the `@ServiceDiscoveryAttribute` annotation on the `ServiceDiscoveryProvider` implementation.

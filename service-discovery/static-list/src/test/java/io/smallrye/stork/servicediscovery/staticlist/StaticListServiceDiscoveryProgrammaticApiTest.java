@@ -1,0 +1,82 @@
+package io.smallrye.stork.servicediscovery.staticlist;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.Duration;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.NoSuchServiceDefinitionException;
+import io.smallrye.stork.api.ServiceDefinition;
+import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.test.StorkTestUtils;
+import io.smallrye.stork.test.TestConfigProvider;
+
+public class StaticListServiceDiscoveryProgrammaticApiTest {
+
+    Stork stork;
+
+    @BeforeEach
+    void setUp() {
+        TestConfigProvider.clear();
+        stork = StorkTestUtils.getNewStorkInstance();
+        stork
+                .defineIfAbsent("first-service", ServiceDefinition.of(
+                        new StaticConfiguration()
+                                .withAddressList("localhost:8080, localhost:8081")))
+                .defineIfAbsent("second-service", ServiceDefinition.of(
+                        new StaticConfiguration().withAddressList("localhost:8082")
+                                .withSecure("true")))
+                .defineIfAbsent("third-service", ServiceDefinition.of(
+                        new StaticConfiguration().withAddressList("localhost:8083")))
+                .defineIfAbsent("secured-service", ServiceDefinition.of(
+                        new StaticConfiguration().withAddressList("localhost:443, localhost")));
+    }
+
+    @Test
+    void testSecureDetection() {
+        List<ServiceInstance> instances = stork.getService("secured-service").getInstances().await()
+                .atMost(Duration.ofSeconds(5));
+
+        assertThat(instances).hasSize(2);
+        assertThat(instances.get(0).isSecure()).isTrue();
+        assertThat(instances.get(1).isSecure()).isFalse();
+
+        instances = stork.getService("second-service").getInstances().await().atMost(Duration.ofSeconds(5));
+        assertThat(instances).hasSize(1);
+        assertThat(instances.get(0).isSecure()).isTrue();
+    }
+
+    @Test
+    void shouldGetAllServiceInstances() {
+        List<ServiceInstance> serviceInstances = stork.getService("first-service")
+                .getInstances()
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(serviceInstances).hasSize(2);
+        assertThat(serviceInstances.stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("localhost",
+                "localhost");
+        assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
+                8081);
+        assertThat(serviceInstances.stream().map(ServiceInstance::isSecure)).allSatisfy(b -> assertThat(b).isFalse());
+    }
+
+    @Test
+    void shouldFailOnMissingService() {
+        assertThatThrownBy(() -> stork.getService("missing")).isInstanceOf(NoSuchServiceDefinitionException.class);
+        assertThat(stork.getServiceOptional("missing")).isEmpty();
+    }
+
+    @Test
+    void shouldFailOnInvalidFormat() {
+        assertThatThrownBy(() -> stork.defineIfAbsent("broken-service", ServiceDefinition.of(
+                new StaticConfiguration()
+                        .withAddressList("localhost:8080, localhost:8081, , ")))).isInstanceOf(IllegalArgumentException.class)
+                                .hasMessageContaining("Address not parseable");
+    }
+
+}

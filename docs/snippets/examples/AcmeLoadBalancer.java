@@ -12,7 +12,7 @@ public class AcmeLoadBalancer implements LoadBalancer {
 
     private final Random random;
 
-    public AcmeLoadBalancer(AcmeLoadBalancerProviderConfiguration config) {
+    public AcmeLoadBalancer(AcmeLoadBalancerConfiguration config) {
         random = new Random();
     }
 

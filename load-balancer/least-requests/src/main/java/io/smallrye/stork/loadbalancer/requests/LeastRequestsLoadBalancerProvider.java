@@ -7,10 +7,10 @@ import io.smallrye.stork.spi.LoadBalancerProvider;
 
 @LoadBalancerType("least-requests")
 public class LeastRequestsLoadBalancerProvider
-        implements LoadBalancerProvider<LeastRequestsLoadBalancerProviderConfiguration> {
+        implements LoadBalancerProvider<LeastRequestsConfiguration> {
 
     @Override
-    public LoadBalancer createLoadBalancer(LeastRequestsLoadBalancerProviderConfiguration config,
+    public LoadBalancer createLoadBalancer(LeastRequestsConfiguration config,
             ServiceDiscovery serviceDiscovery) {
         return new LeastRequestsLoadBalancer();
     }

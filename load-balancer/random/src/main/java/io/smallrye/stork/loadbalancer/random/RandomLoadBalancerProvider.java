@@ -9,10 +9,10 @@ import io.smallrye.stork.spi.LoadBalancerProvider;
 @LoadBalancerType("random")
 @LoadBalancerAttribute(name = "use-secure-random", defaultValue = "false", description = "Whether the load balancer should use a SecureRandom instead of a Random (default). Check [this page](https://stackoverflow.com/questions/11051205/difference-between-java-util-random-and-java-security-securerandom) to understand the difference")
 public class RandomLoadBalancerProvider
-        implements LoadBalancerProvider<RandomLoadBalancerProviderConfiguration> {
+        implements LoadBalancerProvider<RandomConfiguration> {
 
     @Override
-    public LoadBalancer createLoadBalancer(RandomLoadBalancerProviderConfiguration config,
+    public LoadBalancer createLoadBalancer(RandomConfiguration config,
             ServiceDiscovery serviceDiscovery) {
         return new RandomLoadBalancer(Boolean.parseBoolean(config.getUseSecureRandom()));
     }

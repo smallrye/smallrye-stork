@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.NoSuchServiceDefinitionException;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
@@ -67,7 +68,7 @@ public class StaticListServiceDiscoveryTest {
 
     @Test
     void shouldFailOnMissingService() {
-        assertThatThrownBy(() -> stork.getService("missing")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> stork.getService("missing")).isInstanceOf(NoSuchServiceDefinitionException.class);
 
         assertThat(stork.getServiceOptional("missing")).isEmpty();
     }

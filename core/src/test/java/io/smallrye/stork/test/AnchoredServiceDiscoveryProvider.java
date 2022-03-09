@@ -19,12 +19,12 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 @ServiceDiscoveryType("fake")
 @ServiceDiscoveryAttribute(name = "secure", description = "mark the service secured")
 public class AnchoredServiceDiscoveryProvider
-        implements ServiceDiscoveryProvider<AnchoredServiceDiscoveryProviderConfiguration> {
+        implements ServiceDiscoveryProvider<FakeConfiguration> {
 
     static final List<ServiceInstance> services = new ArrayList<>();
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(AnchoredServiceDiscoveryProviderConfiguration config, String serviceName,
+    public ServiceDiscovery createServiceDiscovery(FakeConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         if ("true".equalsIgnoreCase(config.getSecure())) {
             return () -> Uni.createFrom().item(() -> services.stream().map(si -> {

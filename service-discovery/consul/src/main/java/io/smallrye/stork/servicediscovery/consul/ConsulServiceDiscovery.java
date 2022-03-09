@@ -32,7 +32,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
     private final boolean secure;
     private final boolean passing;
 
-    public ConsulServiceDiscovery(String serviceName, ConsulServiceDiscoveryProviderConfiguration config, Vertx vertx) {
+    public ConsulServiceDiscovery(String serviceName, ConsulConfiguration config, Vertx vertx) {
         super(config.getRefreshPeriod());
         this.serviceName = serviceName;
         this.secure = isSecure(config);
@@ -109,7 +109,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         }
     }
 
-    private boolean isSecure(ConsulServiceDiscoveryProviderConfiguration config) {
+    private boolean isSecure(ConsulConfiguration config) {
         return config.getSecure() != null && Boolean.parseBoolean(config.getSecure());
     }
 }

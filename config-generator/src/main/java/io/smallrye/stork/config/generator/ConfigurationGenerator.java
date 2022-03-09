@@ -94,10 +94,12 @@ public class ConfigurationGenerator extends AbstractProcessor {
                     }
                 }
                 validate(element.toString(), attributes);
-                String configClassName = configWriter.createConfig(element, attributes);
                 ServiceDiscoveryType serviceDiscoveryType = element.getAnnotation(ServiceDiscoveryType.class);
                 // todo validate the ServiceDiscoveryProvider is parameterized by this class
                 String type = serviceDiscoveryType.value();
+
+                String configClassName = configWriter.createConfig(element, type, attributes);
+
                 loaders.add(
                         configWriter.createServiceDiscoveryLoader(element, configClassName, type));
                 if (!types.add(type)) {
@@ -144,12 +146,12 @@ public class ConfigurationGenerator extends AbstractProcessor {
                     }
                 }
                 validate(element.toString(), attributes);
-
-                String configClassName = configWriter.createConfig(element, attributes);
                 LoadBalancerType loadBalancerType = element.getAnnotation(LoadBalancerType.class);
-
                 // todo validate the LoadBalancerProvider is parameterized by this class
                 String type = loadBalancerType.value();
+
+                String configClassName = configWriter.createConfig(element, type, attributes);
+
                 loaders.add(configWriter.createLoadBalancerLoader(element, configClassName, type));
                 if (!types.add(type)) {
                     throw new IllegalArgumentException("Multiple classes found for load balancer type: " + type);

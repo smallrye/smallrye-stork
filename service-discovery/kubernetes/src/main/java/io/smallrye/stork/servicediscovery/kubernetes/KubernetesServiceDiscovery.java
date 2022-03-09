@@ -30,7 +30,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     public static final String METADATA_NAME = "metadata.name";
     private final KubernetesClient client;
-    private String application;
+    private final String application;
     private final boolean allNamespaces;
     private final String namespace;
     private final boolean secure;
@@ -38,7 +38,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
-    public KubernetesServiceDiscovery(String serviceName, KubernetesServiceDiscoveryProviderConfiguration config, Vertx vertx) {
+    public KubernetesServiceDiscovery(String serviceName, KubernetesConfiguration config, Vertx vertx) {
         super(config.getRefreshPeriod());
         Config base = Config.autoConfigure(null);
         String masterUrl = config.getK8sHost() == null ? base.getMasterUrl() : config.getK8sHost();
@@ -159,7 +159,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         return serviceInstances;
     }
 
-    private static boolean isSecure(KubernetesServiceDiscoveryProviderConfiguration config) {
+    private static boolean isSecure(KubernetesConfiguration config) {
         return config.getSecure() != null && Boolean.parseBoolean(config.getSecure());
     }
 
