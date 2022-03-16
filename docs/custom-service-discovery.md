@@ -8,7 +8,7 @@ To implement your _Service Discovery Provider_, make sure your project depends o
 
 ```xml
 <dependency>
-    <groupI>io.smallrye.stork</groupI>
+    <groupId>io.smallrye.stork</groupId>
     <artifactId>stork-core</artifactId>
     <version>{{version.current}}</version>
 </dependency>
