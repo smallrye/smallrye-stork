@@ -8,7 +8,7 @@ To implement your _Load Balancer Provider_, make sure your project depends on Co
 
 ```xml
 <dependency>
-    <groupI>io.smallrye.stork</groupI>
+    <groupId>io.smallrye.stork</groupId>
     <artifactId>stork-core</artifactId>
     <version>{{version.current}}</version>
 </dependency>
