@@ -21,16 +21,13 @@ First, you need to add the Stork Consul Service Discovery provider:
 
 ## Configuration
 
-For each service expected to be registered in Consul, configure the lookup:
+For each service that should get the service instances from Consul, configure the service discovery `type`:
 
 ```properties
-stork.my-service.service-discovery=consul
-stork.my-service.service-discovery.consul-host=localhost
-stork.my-service.service-discovery.consul-port=8500
+stork.my-service.service-discovery.type=consul
 ```
 
-Stork looks for the service with the given name (`my-service` in the previous example). 
 
-Supported attributes are the following:
+Consul service discovery is configured with the following parameters:
 
 --8<-- "service-discovery/consul/target/classes/META-INF/stork-docs/consul-sd-attributes.txt"

@@ -16,7 +16,7 @@ import io.smallrye.stork.utils.ServiceInstanceIds;
 import io.smallrye.stork.utils.StorkAddressUtils;
 
 @ServiceDiscoveryType("static")
-@ServiceDiscoveryAttribute(name = "address-list", description = "A comma-separated list of addresses (host:port). The default port is 80.")
+@ServiceDiscoveryAttribute(name = "address-list", description = "A comma-separated list of addresses (host:port). The default port is 80.", required = true)
 @ServiceDiscoveryAttribute(name = "secure", description = "Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.")
 public class StaticListServiceDiscoveryProvider
         implements ServiceDiscoveryProvider<StaticListServiceDiscoveryProviderConfiguration> {
