@@ -38,8 +38,8 @@
         "code": "java.annotation.added",
         "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
         "new": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
-        "annotation": "@io.smallrye.stork.api.config.ServiceDiscoveryAttributes({@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"address-list\", description = \"A comma-separated list of addresses (host:port). The default port is 80.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.\")})",
-        "justification": "By adding a `ServiceDiscoveryAttribute` annotation, it uses the 'ServiceDiscoveryAttributes' container annotation. Should not impact users."
+        "annotation": "@io.smallrye.stork.api.config.ServiceDiscoveryAttributes({@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"address-list\", description = \"A comma-separated list of addresses (host:port). The default port is 80.\", required = true), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.\")})",
+        "justification": "`address-list` of the static service discovery is now marked as mandatory. It's just a documentation change, in practice it was mandatory before the change"
       }
     ]
   }

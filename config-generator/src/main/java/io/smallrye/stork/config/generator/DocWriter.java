@@ -33,7 +33,6 @@ public class DocWriter {
                         Constants.DEFAULT_VALUE.equals(attribute.defaultValue()) ? "" : '`' + attribute.defaultValue() + '`',
                         attribute.description()));
             }
-            out.println("| `secure` | No | `false` | Whether the communication should use a secure connection (e.g. HTTPS) |");
         }
     }
 

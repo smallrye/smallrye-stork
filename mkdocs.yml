@@ -8,17 +8,18 @@ nav:
   - Javadoc: 'https://javadoc.io/doc/io.smallrye.stork/smallrye-stork-api/latest/index.html'
   - Using Stork with Quarkus: './quarkus.md'
   - Service Discovery:
-    - Consul: 'consul.md'
-    - Kubernetes: 'kubernetes.md'
-    - Eureka: 'eureka.md'
-    - Custom: 'custom-service-discovery.md'
+    - Consul: 'service-discovery/consul.md'
+    - Kubernetes: 'service-discovery/kubernetes.md'
+    - Eureka: 'service-discovery/eureka.md'
+    - Custom: 'service-discovery/custom-service-discovery.md'
+    - Static List: 'service-discovery/static-list.md'
   - Load-Balancing:
-    - Round Robin: 'round-robin.md'
-    - Random: 'random.md'
-    - Least Requests: 'least-requests.md'
-    - Response Time: 'response-time.md'
-    - Power Of Two Choices: 'power-of-two-choices.md'
-    - Custom: 'custom-load-balancer.md'
+    - Round Robin: 'load-balancer/round-robin.md'
+    - Random: 'load-balancer/random.md'
+    - Least Requests: 'load-balancer/least-requests.md'
+    - Response Time: 'load-balancer/response-time.md'
+    - Power Of Two Choices: 'load-balancer/power-of-two-choices.md'
+    - Custom: 'load-balancer/custom-load-balancer.md'
 
 
 copyright: >-
