@@ -77,7 +77,6 @@
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-service-discovery-static-list</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.microprofile.rest.client</groupId>
@@ -107,7 +106,6 @@
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-load-balancer-random</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>

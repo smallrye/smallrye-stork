@@ -13,10 +13,10 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 @ServiceDiscoveryType("composite")
 @ServiceDiscoveryAttribute(name = "services", description = "A comma-separated list of services that this services consists of.", required = true)
 public class CompositeServiceDiscoveryProvider
-        implements ServiceDiscoveryProvider<CompositeServiceDiscoveryProviderConfiguration> {
+        implements ServiceDiscoveryProvider<CompositeConfiguration> {
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(CompositeServiceDiscoveryProviderConfiguration config, String serviceName,
+    public ServiceDiscovery createServiceDiscovery(CompositeConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         // Service names for composite config should be listed as a comma separated list:
         // stork.<service-name>.discovery.services=serviceA,serviceB,serviceC

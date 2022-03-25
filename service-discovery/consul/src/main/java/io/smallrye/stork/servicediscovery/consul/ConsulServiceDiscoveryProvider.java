@@ -15,10 +15,10 @@ import io.vertx.core.Vertx;
 @ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", defaultValue = "5M")
 @ServiceDiscoveryAttribute(name = "secure", description = "whether the connection with the service should be encrypted with TLS.")
 @ServiceDiscoveryType("consul")
-public class ConsulServiceDiscoveryProvider implements ServiceDiscoveryProvider<ConsulServiceDiscoveryProviderConfiguration> {
+public class ConsulServiceDiscoveryProvider implements ServiceDiscoveryProvider<ConsulConfiguration> {
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(ConsulServiceDiscoveryProviderConfiguration config, String serviceName,
+    public ServiceDiscovery createServiceDiscovery(ConsulConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         return new ConsulServiceDiscovery(serviceName, config, storkInfrastructure.get(Vertx.class, Vertx::vertx));
 

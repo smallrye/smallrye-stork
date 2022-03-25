@@ -13,13 +13,14 @@ import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 @ServiceDiscoveryAttribute(name = "port",
         description = "Hort of the service discovery server.", required = false)
 public class AcmeServiceDiscoveryProvider
-        implements ServiceDiscoveryProvider<AcmeServiceDiscoveryProviderConfiguration> {
+        implements ServiceDiscoveryProvider<AcmeConfiguration> {
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(AcmeServiceDiscoveryProviderConfiguration config,
-                                                   String serviceName,
-                                                   ServiceConfig serviceConfig,
-                                                   StorkInfrastructure storkInfrastructure) {
+    public ServiceDiscovery createServiceDiscovery(
+            AcmeConfiguration config,
+            String serviceName,
+            ServiceConfig serviceConfig,
+            StorkInfrastructure storkInfrastructure) {
         return new AcmeServiceDiscovery(config);
     }
 }

@@ -26,7 +26,7 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
     private final Random random;
     private final FastPower powersOfDecliningFactor;
 
-    public LeastResponseTimeLoadBalancer(LeastResponseTimeLoadBalancerProviderConfiguration config) {
+    public LeastResponseTimeLoadBalancer(LeastResponseTimeConfiguration config) {
         long errorPenalty = DurationUtils.parseDuration(config.getErrorPenalty()).toNanos();
         double decliningFactor = Double.parseDouble(config.getDecliningFactor());
         powersOfDecliningFactor = new FastPower(decliningFactor);

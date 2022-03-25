@@ -19,10 +19,10 @@ import io.smallrye.stork.utils.StorkAddressUtils;
 @ServiceDiscoveryAttribute(name = "address-list", description = "A comma-separated list of addresses (host:port). The default port is 80.", required = true)
 @ServiceDiscoveryAttribute(name = "secure", description = "Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.")
 public class StaticListServiceDiscoveryProvider
-        implements ServiceDiscoveryProvider<StaticListServiceDiscoveryProviderConfiguration> {
+        implements ServiceDiscoveryProvider<StaticConfiguration> {
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(StaticListServiceDiscoveryProviderConfiguration config, String serviceName,
+    public ServiceDiscovery createServiceDiscovery(StaticConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         String addresses = config.getAddressList();
         if (addresses == null || addresses.isBlank()) {

@@ -14,12 +14,12 @@ import io.smallrye.stork.spi.LoadBalancerProvider;
  */
 @LoadBalancerType(RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE)
 public class RoundRobinLoadBalancerProvider
-        implements LoadBalancerProvider<io.smallrye.stork.impl.RoundRobinLoadBalancerProviderConfiguration> {
+        implements LoadBalancerProvider<io.smallrye.stork.impl.RoundRobinConfiguration> {
 
     public static final String ROUND_ROBIN_TYPE = "round-robin";
 
     @Override
-    public LoadBalancer createLoadBalancer(io.smallrye.stork.impl.RoundRobinLoadBalancerProviderConfiguration config,
+    public LoadBalancer createLoadBalancer(io.smallrye.stork.impl.RoundRobinConfiguration config,
             ServiceDiscovery serviceDiscovery) {
         return new RoundRobinLoadBalancer();
     }

@@ -6,12 +6,12 @@ import io.smallrye.stork.api.config.LoadBalancerType;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 
 @LoadBalancerType(TestLoadBalancer1Provider.TYPE)
-public class TestLoadBalancer1Provider implements LoadBalancerProvider<TestLoadBalancer1ProviderConfiguration> {
+public class TestLoadBalancer1Provider implements LoadBalancerProvider<TestLb1Configuration> {
 
     public static final String TYPE = "test-lb-1";
 
     @Override
-    public LoadBalancer createLoadBalancer(TestLoadBalancer1ProviderConfiguration config, ServiceDiscovery serviceDiscovery) {
+    public LoadBalancer createLoadBalancer(TestLb1Configuration config, ServiceDiscovery serviceDiscovery) {
         return new TestLoadBalancer1(config, serviceDiscovery, TYPE);
     }
 }

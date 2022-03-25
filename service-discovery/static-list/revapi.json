@@ -40,6 +40,45 @@
         "new": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
         "annotation": "@io.smallrye.stork.api.config.ServiceDiscoveryAttributes({@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"address-list\", description = \"A comma-separated list of addresses (host:port). The default port is 80.\", required = true), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.\")})",
         "justification": "`address-list` of the static service discovery is now marked as mandatory. It's just a documentation change, in practice it was mandatory before the change"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter io.smallrye.stork.api.ServiceDiscovery io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider::createServiceDiscovery(===io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProviderConfiguration===, java.lang.String, io.smallrye.stork.api.config.ServiceConfig, io.smallrye.stork.spi.StorkInfrastructure)",
+        "new": "parameter io.smallrye.stork.api.ServiceDiscovery io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider::createServiceDiscovery(===io.smallrye.stork.servicediscovery.staticlist.StaticConfiguration===, java.lang.String, io.smallrye.stork.api.config.ServiceConfig, io.smallrye.stork.spi.StorkInfrastructure)",
+        "parameterIndex": "0",
+        "justification": "The generated StaticListServiceDiscoveryProviderConfiguration has been renamed into StaticConfiguration"
+      },
+      {
+        "ignore": true,
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "interface": "io.smallrye.stork.spi.ServiceDiscoveryProvider<io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProviderConfiguration>",
+        "justification": "The generated StaticListServiceDiscoveryProviderConfiguration has been renamed into StaticConfiguration"
+      },
+      {
+        "ignore": true,
+        "code": "java.class.superTypeTypeParametersChanged",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "oldSuperType": "io.smallrye.stork.spi.ServiceDiscoveryProvider<io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProviderConfiguration>",
+        "newSuperType": "io.smallrye.stork.spi.ServiceDiscoveryProvider<io.smallrye.stork.servicediscovery.staticlist.StaticConfiguration>",
+        "justification": "The generated StaticListServiceDiscoveryProviderConfiguration has been renamed into StaticConfiguration"
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProviderConfiguration",
+        "justification": "The generated StaticListServiceDiscoveryProviderConfiguration has been renamed into StaticConfiguration"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter void io.smallrye.stork.api.ServiceDiscovery::initialize(===java.util.Map<java.lang.String, io.smallrye.stork.api.Service>===) @ io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscovery",
+        "new": "parameter void io.smallrye.stork.api.ServiceDiscovery::initialize(===io.smallrye.stork.api.StorkServiceRegistry===) @ io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscovery",
+        "parameterIndex": "0",
+        "justification": "The initialize method now receives the Stork instance"
       }
     ]
   }

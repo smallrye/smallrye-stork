@@ -1,0 +1,179 @@
+package io.smallrye.stork.loadbalancer.leastresponsetime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
+import java.time.Duration;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.NoServiceInstanceFoundException;
+import io.smallrye.stork.api.Service;
+import io.smallrye.stork.api.ServiceDefinition;
+import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.loadbalancer.requests.LeastRequestsConfiguration;
+import io.smallrye.stork.servicediscovery.staticlist.StaticConfiguration;
+import io.smallrye.stork.test.EmptyServicesConfiguration;
+import io.smallrye.stork.test.StorkTestUtils;
+import io.smallrye.stork.test.TestConfigProvider;
+
+public class LeastRequestsLoadBalancerProgrammaticApiTest {
+    private static final Logger log = LoggerFactory.getLogger(LeastRequestsLoadBalancerProgrammaticApiTest.class);
+
+    public static final String FST_SRVC_1 = "localhost:8080";
+    public static final String FST_SRVC_2 = "localhost:8081";
+    private Stork stork;
+
+    @BeforeEach
+    void setUp() {
+        TestConfigProvider.clear();
+        stork = StorkTestUtils.getNewStorkInstance();
+        String listOfServices = String.format("%s,%s", FST_SRVC_1, FST_SRVC_2);
+        stork
+                .defineIfAbsent("first-service", ServiceDefinition.of(
+                        new StaticConfiguration().withAddressList(listOfServices),
+                        new LeastRequestsConfiguration()))
+                .defineIfAbsent("without-instances", ServiceDefinition.of(
+                        new EmptyServicesConfiguration(),
+                        new LeastRequestsConfiguration()));
+    }
+
+    @Test
+    public void shouldSelectLessLoaded() {
+        Service service = stork.getService("first-service");
+
+        ServiceInstance service1, service2;
+
+        // First selection returns the first service
+        ServiceInstance instance = selectInstanceAndStart(service);
+        assertThat(asString(instance)).isEqualTo(FST_SRVC_1);
+        assertThat(instance.gatherStatistics()).isTrue();
+        service1 = instance;
+
+        // Second selection returns the second service as there is an inflight-call in the first one
+        instance = selectInstanceAndStart(service);
+        assertThat(asString(instance)).isEqualTo(FST_SRVC_2);
+        assertThat(instance.gatherStatistics()).isTrue();
+        service2 = instance;
+
+        // Report termination of the service 2 call
+        service2.recordEnd(null);
+
+        // Next selection still return the second service, as we still have an inflight-call in service 1
+        instance = selectInstanceAndStart(service);
+        assertThat(asString(instance)).isEqualTo(FST_SRVC_2);
+        assertThat(instance.gatherStatistics()).isTrue();
+
+        service1.recordEnd(null);
+        // Now select 1 as they have the same amount of inflight
+        instance = selectInstanceAndStart(service);
+        assertThat(asString(instance)).isEqualTo(FST_SRVC_1);
+        assertThat(instance.gatherStatistics()).isTrue();
+    }
+
+    @Test
+    public void shouldSelectLessLoadedWhenBothLoaded() {
+        Service service = stork.getService("first-service");
+
+        ServiceInstance service1, service2;
+
+        // First selection returns the first service
+        ServiceInstance instance = selectInstanceAndStart(service);
+        assertThat(asString(instance)).isEqualTo(FST_SRVC_1);
+        assertThat(instance.gatherStatistics()).isTrue();
+        service1 = instance;
+
+        // Second selection returns the second service as there is an inflight-call in the first one
+        instance = selectInstanceAndStart(service);
+        assertThat(asString(instance)).isEqualTo(FST_SRVC_2);
+        assertThat(instance.gatherStatistics()).isTrue();
+        service2 = instance;
+
+        ServiceInstance last = service2;
+        for (int i = 0; i < 100; i++) {
+            ServiceInstance selected = selectInstanceAndStart(service);
+            assertThat(asString(selected)).isNotEqualTo(asString(last));
+            last = selected;
+        }
+
+        Random random = new Random();
+
+        last = service1;
+        // Start reporting
+        for (int i = 0; i < 100; i++) {
+            if (random.nextInt(10) > 7) {
+                // Simulate failures
+                last.recordEnd(new Exception("boom"));
+            } else {
+                last.recordEnd(null);
+            }
+
+            ServiceInstance selected = selectInstanceAndStart(service);
+            assertThat(asString(selected)).isEqualTo(asString(last));
+            last = selected == service1 ? service2 : service1;
+        }
+    }
+
+    @Test
+    void shouldPickBothService() {
+        Service service = stork.getService("first-service");
+
+        Set<String> instances = new HashSet<>();
+
+        for (int i = 0; i < 100; i++) {
+            instances.add(asString(selectInstanceAndStart(service)));
+        }
+
+        assertThat(instances).hasSize(2).contains(FST_SRVC_1, FST_SRVC_2);
+    }
+
+    @Test
+    void shouldThrowNoServiceInstanceOnNoInstances() throws ExecutionException, InterruptedException {
+        Service service = stork.getService("without-instances");
+
+        CompletableFuture<Throwable> result = new CompletableFuture<>();
+
+        service.selectInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
+                result::complete);
+
+        await().atMost(Duration.ofSeconds(10)).until(result::isDone);
+        assertThat(result.get()).isInstanceOf(NoServiceInstanceFoundException.class);
+    }
+
+    @Test
+    void shouldAlwaysPickFirstWhenTheCallReturnsImmediately() {
+        Service service = stork.getService("first-service");
+
+        Set<String> instances = new HashSet<>();
+
+        for (int i = 0; i < 100; i++) {
+            ServiceInstance instance = selectInstanceAndStart(service);
+            instance.recordEnd(null);
+            instances.add(asString(instance));
+        }
+
+        assertThat(instances).hasSize(1).contains(FST_SRVC_1);
+    }
+
+    private ServiceInstance selectInstanceAndStart(Service service) {
+        return service.selectInstanceAndRecordStart(true).await().atMost(Duration.ofSeconds(5));
+    }
+
+    private String asString(ServiceInstance serviceInstance) {
+        try {
+            return String.format("%s:%s", serviceInstance.getHost(), serviceInstance.getPort());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}

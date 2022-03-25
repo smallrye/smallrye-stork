@@ -1,5 +1,6 @@
 package io.smallrye.stork;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +14,12 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.stork.api.LoadBalancer;
+import io.smallrye.stork.api.NoSuchServiceDefinitionException;
 import io.smallrye.stork.api.Service;
+import io.smallrye.stork.api.ServiceDefinition;
+import io.smallrye.stork.api.StorkServiceRegistry;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.impl.RoundRobinLoadBalancer;
 import io.smallrye.stork.impl.RoundRobinLoadBalancerProvider;
@@ -32,7 +37,7 @@ import io.smallrye.stork.spi.internal.ServiceDiscoveryLoader;
  * Use `Stork.getInstance()` to get a hold of a configured instance, and retrieve `ServiceDiscovery` and/or `LoadBalancer`
  * from it.
  */
-public final class Stork {
+public final class Stork implements StorkServiceRegistry {
     // TODO replace all the exceptions here with dedicated ones?
 
     public static final String STORK = "stork";
@@ -40,18 +45,49 @@ public final class Stork {
     private static final Logger LOGGER = LoggerFactory.getLogger(Stork.class);
 
     private final Map<String, Service> services = new ConcurrentHashMap<>();
+    private final StorkInfrastructure infrastructure;
 
+    @Override
     public Service getService(String serviceName) {
         Service service = services.get(serviceName);
         if (service == null) {
-            throw new IllegalArgumentException("No service defined for name " + serviceName);
+            throw new NoSuchServiceDefinitionException(serviceName);
         }
         return service;
     }
 
+    @Override
     public Optional<Service> getServiceOptional(String serviceName) {
         Service service = services.get(serviceName);
         return Optional.ofNullable(service);
+    }
+
+    @Override
+    public Map<String, Service> getServices() {
+        return Collections.unmodifiableMap(services);
+    }
+
+    @Override
+    public Stork defineIfAbsent(String name, ServiceDefinition definition) {
+        ParameterValidation.nonNull(name, "name");
+        ParameterValidation.nonNull(definition, "definition");
+
+        ServiceConfig config = toServiceConfig(name, definition);
+        Service service = createService(config);
+        services.putIfAbsent(name, service);
+        service.getServiceDiscovery().initialize(this);
+        return this;
+    }
+
+    private ServiceConfig toServiceConfig(String name, ServiceDefinition definition) {
+        if (definition.getServiceDiscovery() == null) {
+            throw new IllegalStateException("Service discovery configuration not set.");
+        }
+
+        return new SimpleServiceConfig.Builder().setServiceName(name)
+                .setLoadBalancer(definition.getLoadBalancer())
+                .setServiceDiscovery(definition.getServiceDiscovery())
+                .build();
     }
 
     /**
@@ -60,6 +96,7 @@ public final class Stork {
      */
     @Deprecated
     public Stork(StorkInfrastructure storkInfrastructure) {
+        this.infrastructure = storkInfrastructure;
         Map<String, LoadBalancerLoader> loadBalancerProviders = getAll(LoadBalancerLoader.class);
         Map<String, ServiceDiscoveryLoader> serviceDiscoveryProviders = getAll(ServiceDiscoveryLoader.class);
 
@@ -68,63 +105,74 @@ public final class Stork {
                 .map(ServiceLoader.Provider::get)
                 .max(Comparator.comparingInt(ConfigProvider::priority));
 
-        ConfigProvider configProvider = highestPrioConfigProvider.orElseThrow(
-                () -> new IllegalStateException("No SmallRye Stork ConfigProvider found"));
+        ConfigProvider configProvider = highestPrioConfigProvider.orElse(null);
+        if (configProvider != null) {
+            for (ServiceConfig serviceConfig : configProvider.getConfigs()) {
+                Service service = createService(loadBalancerProviders, serviceDiscoveryProviders, serviceConfig);
 
-        for (ServiceConfig serviceConfig : configProvider.getConfigs()) {
-            var serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
-            if (serviceDiscoveryConfig == null) {
-                throw new IllegalArgumentException(
-                        "No service discovery defined for service " + serviceConfig.serviceName());
+                services.put(serviceConfig.serviceName(), service);
             }
-            String serviceDiscoveryType = serviceDiscoveryConfig.type();
-            if (serviceDiscoveryType == null) {
-                throw new IllegalArgumentException(
-                        "Service discovery type not defined for service " + serviceConfig.serviceName());
+            for (Service service : services.values()) {
+                service.getServiceDiscovery().initialize(this);
             }
-
-            final var serviceDiscoveryProvider = serviceDiscoveryProviders.get(serviceDiscoveryType);
-            if (serviceDiscoveryProvider == null) {
-                throw new IllegalArgumentException("ServiceDiscoveryProvider not found for type " + serviceDiscoveryType);
-            }
-
-            if (serviceConfig.secure()) {
-                // Backward compatibility
-                LOGGER.warn("The 'secure' attribute is deprecated, use the 'secure' service discovery attribute instead");
-                // We do not know if we can add to the parameters, such create a new SimpleServiceDiscoveryConfig
-                Map<String, String> newConfig = new HashMap<>(serviceDiscoveryConfig.parameters());
-                newConfig.put("secure", "true");
-                serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
-            }
-
-            final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
-                    serviceConfig.serviceName(), serviceConfig, storkInfrastructure);
-
-            final var loadBalancerConfig = serviceConfig.loadBalancer();
-            final LoadBalancer loadBalancer;
-            if (loadBalancerConfig == null) {
-                // no load balancer, use round-robin
-                LOGGER.debug("No load balancer configured for type {}, using {}", serviceDiscoveryType,
-                        RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE);
-                loadBalancer = new RoundRobinLoadBalancer();
-            } else {
-                String loadBalancerType = loadBalancerConfig.type();
-                final var loadBalancerProvider = loadBalancerProviders.get(loadBalancerType);
-                if (loadBalancerProvider == null) {
-                    throw new IllegalArgumentException("No LoadBalancerProvider for type " + loadBalancerType);
-                }
-
-                loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
-            }
-
-            services.put(serviceConfig.serviceName(),
-                    new Service(serviceConfig.serviceName(), loadBalancer, serviceDiscovery,
-                            loadBalancer.requiresStrictRecording()));
-        }
-        for (Service service : services.values()) {
-            service.getServiceDiscovery().initialize(this.services);
         }
 
+    }
+
+    private Service createService(ServiceConfig serviceConfig) {
+        return createService(getAll(LoadBalancerLoader.class), getAll(ServiceDiscoveryLoader.class), serviceConfig);
+    }
+
+    private Service createService(Map<String, LoadBalancerLoader> loadBalancerProviders,
+            Map<String, ServiceDiscoveryLoader> serviceDiscoveryProviders,
+            ServiceConfig serviceConfig) {
+        var serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
+        if (serviceDiscoveryConfig == null) {
+            throw new IllegalArgumentException(
+                    "No service discovery defined for service " + serviceConfig.serviceName());
+        }
+        String serviceDiscoveryType = serviceDiscoveryConfig.type();
+        if (serviceDiscoveryType == null) {
+            throw new IllegalArgumentException(
+                    "Service discovery type not defined for service " + serviceConfig.serviceName());
+        }
+
+        final var serviceDiscoveryProvider = serviceDiscoveryProviders.get(serviceDiscoveryType);
+        if (serviceDiscoveryProvider == null) {
+            throw new IllegalArgumentException("ServiceDiscoveryProvider not found for type " + serviceDiscoveryType);
+        }
+
+        if (serviceConfig.secure()) {
+            // Backward compatibility
+            LOGGER.warn("The 'secure' attribute is deprecated, use the 'secure' service discovery attribute instead");
+            // We do not know if we can add to the parameters, such create a new SimpleServiceDiscoveryConfig
+            Map<String, String> newConfig = new HashMap<>(serviceDiscoveryConfig.parameters());
+            newConfig.put("secure", "true");
+            serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
+        }
+
+        final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
+                serviceConfig.serviceName(), serviceConfig, infrastructure);
+
+        final var loadBalancerConfig = serviceConfig.loadBalancer();
+        final LoadBalancer loadBalancer;
+        if (loadBalancerConfig == null) {
+            // no load balancer, use round-robin
+            LOGGER.debug("No load balancer configured for type {}, using {}", serviceDiscoveryType,
+                    RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE);
+            loadBalancer = new RoundRobinLoadBalancer();
+        } else {
+            String loadBalancerType = loadBalancerConfig.type();
+            final var loadBalancerProvider = loadBalancerProviders.get(loadBalancerType);
+            if (loadBalancerProvider == null) {
+                throw new IllegalArgumentException("No LoadBalancerProvider for type " + loadBalancerType);
+            }
+
+            loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
+        }
+
+        return new Service(serviceConfig.serviceName(), loadBalancer, serviceDiscovery,
+                loadBalancer.requiresStrictRecording());
     }
 
     private <T extends ElementWithType> Map<String, T> getAll(Class<T> providerClass) {

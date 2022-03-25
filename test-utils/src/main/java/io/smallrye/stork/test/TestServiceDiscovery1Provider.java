@@ -10,12 +10,12 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 @ServiceDiscoveryAttribute(name = "one", description = "no description")
 @ServiceDiscoveryAttribute(name = "two", description = "no description")
 @ServiceDiscoveryType(TestServiceDiscovery1Provider.TYPE)
-public class TestServiceDiscovery1Provider implements ServiceDiscoveryProvider<TestServiceDiscovery1ProviderConfiguration> {
+public class TestServiceDiscovery1Provider implements ServiceDiscoveryProvider<TestSd1Configuration> {
 
     public static final String TYPE = "test-sd-1";
 
     @Override
-    public ServiceDiscovery createServiceDiscovery(TestServiceDiscovery1ProviderConfiguration config, String serviceName,
+    public ServiceDiscovery createServiceDiscovery(TestSd1Configuration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         return new TestServiceDiscovery(config, TYPE);
     }

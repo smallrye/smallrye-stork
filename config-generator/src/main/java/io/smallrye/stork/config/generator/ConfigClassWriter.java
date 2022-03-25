@@ -4,9 +4,11 @@ import static java.lang.String.format;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -36,14 +38,16 @@ public class ConfigClassWriter {
         this.environment = environment;
     }
 
-    public String createConfig(Element element, LoadBalancerAttribute[] attributes) throws IOException {
-        return createConfig(element, format(" * Configuration for the {@code %s} LoadBalancer.", element.getSimpleName()),
-                out -> writeLoadBalancerAttributes(attributes, out));
+    public String createConfig(Element element, String type, LoadBalancerAttribute[] attributes) throws IOException {
+        return createConfig(element, true, type,
+                format(" Configuration for the {@code %s} LoadBalancer.", element.getSimpleName()),
+                (out, cn) -> writeLoadBalancerAttributes(cn, attributes, out));
     }
 
-    public String createConfig(Element element, ServiceDiscoveryAttribute[] attributes) throws IOException {
-        return createConfig(element, format(" * Configuration for the {@code %s} ServiceDiscovery.", element.getSimpleName()),
-                out -> writeServiceDiscoveryAttributes(attributes, out));
+    public String createConfig(Element element, String type, ServiceDiscoveryAttribute[] attributes) throws IOException {
+        return createConfig(element, false, type,
+                format(" Configuration for the {@code %s} ServiceDiscovery.", element.getSimpleName()),
+                (out, cn) -> writeServiceDiscoveryAttributes(cn, attributes, out));
     }
 
     public String createLoadBalancerLoader(Element element, String configClassName, String type) throws IOException {
@@ -101,7 +105,7 @@ public class ConfigClassWriter {
             out.println(format("import %s;", StorkInfrastructure.class.getName()));
 
             writeClassDeclaration(format("%s implements %s", simpleClassName, ServiceDiscoveryLoader.class.getName()),
-                    "ServiceDiscoveryLoader for " + providerClassName, out);
+                    "ServiceDiscoveryLoader for {@link " + providerClassName + "}", out);
 
             out.println(format("   private final %s provider = new %s();", providerClassName, providerClassName));
             out.println("   @Override");
@@ -121,50 +125,70 @@ public class ConfigClassWriter {
         return className;
     }
 
-    private void writeServiceDiscoveryAttributes(ServiceDiscoveryAttribute[] attributes, PrintWriter out) {
+    private void writeServiceDiscoveryAttributes(String simpleClassName, ServiceDiscoveryAttribute[] attributes,
+            PrintWriter out) {
         for (ServiceDiscoveryAttribute attribute : attributes) {
-            writeAttribute(out, attribute.name(), attribute.description(), attribute.defaultValue());
+            writeAttribute(out, simpleClassName, attribute.name(), attribute.description(), attribute.defaultValue());
         }
     }
 
-    private void writeLoadBalancerAttributes(LoadBalancerAttribute[] attributes, PrintWriter out) {
+    private void writeLoadBalancerAttributes(String simpleClassName, LoadBalancerAttribute[] attributes, PrintWriter out) {
         for (LoadBalancerAttribute attribute : attributes) {
-            writeAttribute(out, attribute.name(), attribute.description(), attribute.defaultValue());
+            writeAttribute(out, simpleClassName, attribute.name(), attribute.description(), attribute.defaultValue());
         }
     }
 
-    public String createConfig(Element element, String comment, Consumer<PrintWriter> attributesWriter) throws IOException {
-        String className = element.toString() + "Configuration";
+    public String createConfig(Element element, boolean isLoadBalancer, String type, String comment,
+            BiConsumer<PrintWriter, String> attributesWriter)
+            throws IOException {
+        String sanitized = toCamelCase(type);
         String classPackage = getPackage(element);
-        String simpleClassName = element.getSimpleName() + "Configuration";
+        String simpleClassName = sanitized + "Configuration";
+        String className = classPackage + "." + simpleClassName;
 
         JavaFileObject file = environment.getFiler().createSourceFile(className);
         file.delete();
         try (PrintWriter out = new PrintWriter(file.openWriter())) {
             writePackageDeclaration(classPackage, out);
 
+            out.println("import " + Collections.class.getName() + ";");
+            out.println("import " + HashMap.class.getName() + ";");
             out.println("import " + Map.class.getName() + ";");
-            writeClassDeclaration(simpleClassName, comment, out);
+            if (isLoadBalancer) {
+                out.println("import " + LoadBalancerConfig.class.getName() + ";");
+            } else {
+                out.println("import " + ServiceDiscoveryConfig.class.getName() + ";");
+            }
+
+            writeClassDeclaration(simpleClassName, isLoadBalancer, comment, out);
 
             writeConfigMapRelatedStuff(simpleClassName, out);
-            attributesWriter.accept(out);
+            out.println();
+            writeTypeMethod(type, out);
+            out.println();
+            writeParametersMethod(out);
+            out.println();
+            writeExtendMethod(simpleClassName, out);
+
+            attributesWriter.accept(out, simpleClassName);
 
             out.println('}');
         }
         return className;
     }
 
-    private void writeAttribute(PrintWriter out, String name, String description, String defaultValue) {
+    private void writeAttribute(PrintWriter out, String simpleClassName, String name, String description, String defaultValue) {
         if (defaultValue.equals(Constants.DEFAULT_VALUE)) {
             defaultValue = null;
         }
-        out.println("/**");
+        out.println();
+        out.println("   /**");
         if (defaultValue != null) {
-            out.println(format(" * %s By default: %s", description, defaultValue));
+            out.println(format("    * %s By default: %s", description, defaultValue));
         } else {
-            out.println(format(" * %s", description));
+            out.println(format("    * %s", description));
         }
-        out.println(" */");
+        out.println("    */");
         out.println(format("   public String get%s() {", toCamelCase(name)));
         if (defaultValue != null) {
             out.println(format("      String result = parameters.get(\"%s\");", name));
@@ -173,12 +197,51 @@ public class ConfigClassWriter {
             out.println(format("      return parameters.get(\"%s\");", name));
         }
         out.println("   }");
+
+        out.println();
+        out.println("   /**");
+        if (defaultValue != null) {
+            out.println(format("    * Set the '%s' attribute. Default is %s.", name, defaultValue));
+        } else {
+            out.println(format("    * Set the '%s' attribute.", name));
+        }
+        out.println("    */");
+        out.println(format("   public %s with%s(String value) {", simpleClassName, toCamelCase(name)));
+        out.println(format("      return extend(\"%s\", value);", name));
+        out.println("   }");
     }
 
     private void writeConfigMapRelatedStuff(String simpleClassName, PrintWriter out) {
         out.println("   private final Map<String, String> parameters;");
         out.println(format("   public %s(Map<String, String> params) {", simpleClassName));
-        out.println("      parameters = params;");
+        out.println("      parameters = Collections.unmodifiableMap(params);");
+        out.println("   }");
+
+        out.println();
+        out.println(format("   public %s() {", simpleClassName));
+        out.println("      parameters = Collections.emptyMap();");
+        out.println("   }");
+    }
+
+    private void writeExtendMethod(String simpleClassName, PrintWriter out) {
+        out.println(format("   private %s extend(String key, String value) {", simpleClassName));
+        out.println("      Map<String, String> copy = new HashMap<>(parameters);");
+        out.println("      copy.put(key, value);");
+        out.println(format("      return new %s(copy);", simpleClassName));
+        out.println("   }");
+    }
+
+    private void writeTypeMethod(String type, PrintWriter out) {
+        out.println("   @Override");
+        out.println("   public String type() {");
+        out.println("      return \"" + type + "\";");
+        out.println("   }");
+    }
+
+    private void writeParametersMethod(PrintWriter out) {
+        out.println("   @Override");
+        out.println("   public Map<String, String> parameters() {");
+        out.println("      return parameters;");
         out.println("   }");
     }
 
@@ -206,10 +269,19 @@ public class ConfigClassWriter {
         }
     }
 
+    private void writeClassDeclaration(String simpleName, boolean isLoadBalancer, String comment, PrintWriter out) {
+        out.println();
+        out.println("/**");
+        out.println(" * " + comment);
+        out.println(" */");
+        out.println(format(" public class %s implements %s{", simpleName,
+                isLoadBalancer ? LoadBalancerConfig.class.getName() : ServiceDiscoveryConfig.class.getName()));
+    }
+
     private void writeClassDeclaration(String simpleName, String comment, PrintWriter out) {
         out.println();
         out.println("/**");
-        out.println(comment);
+        out.println(" * " + comment);
         out.println(" */");
         out.println(format(" public class %s {", simpleName));
     }

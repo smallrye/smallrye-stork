@@ -35,7 +35,7 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<String> instance;
 
-    public EurekaServiceDiscovery(EurekaServiceDiscoveryProviderConfiguration config, String serviceName,
+    public EurekaServiceDiscovery(EurekaConfiguration config, String serviceName,
             StorkInfrastructure infrastructure) {
         super(config.getRefreshPeriod());
         this.secure = isSecure(config);
@@ -143,7 +143,7 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
         }
     }
 
-    private boolean isSecure(EurekaServiceDiscoveryProviderConfiguration config) {
+    private boolean isSecure(EurekaConfiguration config) {
         return config.getSecure() != null && Boolean.parseBoolean(config.getSecure());
     }
 }

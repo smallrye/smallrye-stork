@@ -7,11 +7,11 @@ import io.smallrye.stork.api.config.ServiceDiscoveryType;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 import io.smallrye.stork.spi.StorkInfrastructure;
 
-@ServiceDiscoveryType("these-arent-the-droids-youre-looing-for")
+@ServiceDiscoveryType("these-arent-the-droids-you-are-looking-for")
 public class WeirdTypedServiceDiscoveryProvider
-        implements ServiceDiscoveryProvider<WeirdTypedServiceDiscoveryProviderConfiguration> {
+        implements ServiceDiscoveryProvider<TheseArentTheDroidsYouAreLookingForConfiguration> {
     @Override
-    public ServiceDiscovery createServiceDiscovery(WeirdTypedServiceDiscoveryProviderConfiguration config, String serviceName,
+    public ServiceDiscovery createServiceDiscovery(TheseArentTheDroidsYouAreLookingForConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         return () -> Uni.createFrom().item(() -> AnchoredServiceDiscoveryProvider.services);
     }

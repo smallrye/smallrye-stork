@@ -8,10 +8,10 @@ import io.smallrye.stork.api.ServiceInstance;
 
 public class TestServiceDiscovery implements ServiceDiscovery {
 
-    private final TestServiceDiscovery1ProviderConfiguration config;
+    private final TestSd1Configuration config;
     private final String type;
 
-    public TestServiceDiscovery(TestServiceDiscovery1ProviderConfiguration config, String type) {
+    public TestServiceDiscovery(TestSd1Configuration config, String type) {
         this.config = config;
         this.type = type;
     }
@@ -21,7 +21,7 @@ public class TestServiceDiscovery implements ServiceDiscovery {
         return null;
     }
 
-    public TestServiceDiscovery1ProviderConfiguration getConfig() {
+    public TestSd1Configuration getConfig() {
         return config;
     }
 

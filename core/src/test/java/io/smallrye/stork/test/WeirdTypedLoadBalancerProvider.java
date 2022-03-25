@@ -7,10 +7,11 @@ import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.config.LoadBalancerType;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 
-@LoadBalancerType("these-arent-the-droids-youre-looking-for")
-public class WeirdTypedLoadBalancerProvider implements LoadBalancerProvider<WeirdTypedLoadBalancerProviderConfiguration> {
+@LoadBalancerType("these-arent-the-droids-youre-looking-for-selector")
+public class WeirdTypedLoadBalancerProvider
+        implements LoadBalancerProvider<TheseArentTheDroidsYoureLookingForSelectorConfiguration> {
     @Override
-    public LoadBalancer createLoadBalancer(WeirdTypedLoadBalancerProviderConfiguration config,
+    public LoadBalancer createLoadBalancer(TheseArentTheDroidsYoureLookingForSelectorConfiguration config,
             ServiceDiscovery serviceDiscovery) {
         return mock(LoadBalancer.class);
     }

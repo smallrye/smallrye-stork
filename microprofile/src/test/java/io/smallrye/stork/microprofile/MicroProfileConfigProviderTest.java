@@ -21,9 +21,9 @@ import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 import io.smallrye.stork.test.TestLoadBalancer1;
 import io.smallrye.stork.test.TestLoadBalancer2;
+import io.smallrye.stork.test.TestSd2Configuration;
 import io.smallrye.stork.test.TestServiceDiscovery;
 import io.smallrye.stork.test.TestServiceDiscovery2;
-import io.smallrye.stork.test.TestServiceDiscovery2ProviderConfiguration;
 
 public class MicroProfileConfigProviderTest {
 
@@ -100,7 +100,7 @@ public class MicroProfileConfigProviderTest {
         TestServiceDiscovery2 sd = (TestServiceDiscovery2) serviceDiscovery;
         assertThat(sd.getType()).isEqualTo("test-sd-2");
 
-        TestServiceDiscovery2ProviderConfiguration sdConfig = sd.getConfig();
+        TestSd2Configuration sdConfig = sd.getConfig();
         assertThat(sdConfig.getThree()).isEqualTo("http://localhost:8082");
 
         LoadBalancer loadBalancer = stork.getService(SECOND_SERVICE).getLoadBalancer();
@@ -134,7 +134,7 @@ public class MicroProfileConfigProviderTest {
         TestServiceDiscovery2 sd = (TestServiceDiscovery2) serviceDiscovery;
         assertThat(sd.getType()).isEqualTo("test-sd-2");
 
-        TestServiceDiscovery2ProviderConfiguration sdConfig = sd.getConfig();
+        TestSd2Configuration sdConfig = sd.getConfig();
         assertThat(sdConfig.getThree()).isEqualTo("http://localhost:8082");
 
         LoadBalancer loadBalancer = stork.getService(SECOND_SERVICE).getLoadBalancer();
@@ -179,7 +179,7 @@ public class MicroProfileConfigProviderTest {
         TestServiceDiscovery2 sd = (TestServiceDiscovery2) serviceDiscovery;
         assertThat(sd.getType()).isEqualTo("test-sd-2");
 
-        TestServiceDiscovery2ProviderConfiguration sdConfig = sd.getConfig();
+        TestSd2Configuration sdConfig = sd.getConfig();
         assertThat(sdConfig.getThree()).isEqualTo("http://localhost:8082");
 
         LoadBalancer loadBalancer = stork.getService(serviceName).getLoadBalancer();
