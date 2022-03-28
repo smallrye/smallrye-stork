@@ -20,6 +20,7 @@ nav:
     - Least Requests: 'load-balancer/least-requests.md'
     - Response Time: 'load-balancer/response-time.md'
     - Power Of Two Choices: 'load-balancer/power-of-two-choices.md'
+    - Sticky: 'load-balancer/sticky.md'
     - Custom: 'load-balancer/custom-load-balancer.md'
 
 
