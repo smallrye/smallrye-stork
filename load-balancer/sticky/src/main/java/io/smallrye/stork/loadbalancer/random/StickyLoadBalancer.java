@@ -17,7 +17,7 @@ import io.smallrye.stork.spi.CallStatisticsCollector;
 /**
  * Select a single instance and use it until it fails.
  * On failure, store the time of failure in `failedInstances` map.
- * <p/>
+ *
  * When new instance selection is needed:
  * <ul>
  * <li>if there's an instance for which we don't have a failure recorded, use it</li>
