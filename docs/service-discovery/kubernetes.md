@@ -17,9 +17,61 @@ First, you need to add the Stork Kubernetes Service Discovery provider:
 </dependency>
 ```
 
-####A few words about server authentication. 
-Stork uses Fabric8 Kubernetes Client to access the Kubernetes resources, concretely the `DefaultKubernetesClient` implementation. It will try to read the ~/.kube/config file in your home directory and load information required for authenticating with the Kubernetes API server. If you are using DefaultKubernetesClient from inside a Pod, it will load ~/.kube/config from the ServiceAccount volume mounted inside the Pod. You can override this configuration if you want a more complex configuration.
+#### A few words about server authentication. 
+Stork uses [Fabric8 Kubernetes Client](https://github.com/fabric8io/kubernetes-client#readme) to access the Kubernetes resources, concretely the `DefaultKubernetesClient` implementation. 
 
+Stork uses Fabric8 Kubernetes Client to access the Kubernetes resources, concretely the `DefaultKubernetesClient` implementation.
+
+It will try to read the `~/.kube/config` file from your local machine and load the token for authenticating with the Kubernetes API server.
+
+If you are using the Stork Kubernetes discovery provider from inside a _Pod_, it load `~/.kube/config` from the container file system.
+
+This file is automatically mounted inside the Pod.
+
+The level of access (Roles) depends on the configured `ServiceAccount`.
+
+You can override this configuration if you want fine-grain control.
+
+##### Role-based access control (RBAC)
+If you're using a Kubernetes cluster with Role-Based Access Control (RBAC) enabled, the default permissions for a ServiceAccount don't allow it to list or modify any resources. 
+A `ServiceAccount`, a `Role` and a `RoleBinding` are needed in order to allow Stork to list the available service instances from the cluster or the namespace. 
+
+An example that allows listing all endpoints could look something like this:
+
+```yaml
+------
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: <appname>
+  namespace: <namespace>
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: <appname>
+  namespace: <namespace>
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["endpoints"] # stork queries service endpoints
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: <appname>
+  namespace: <namespace>
+subjects:
+  - kind: ServiceAccount
+    # Reference to upper's `metadata.name`
+    name: <appname>
+    # Reference to upper's `metadata.namespace`
+    namespace: <namespace>
+roleRef:
+  kind: Role
+  name: <appname>
+  apiGroup: rbac.authorization.k8s.io
+```
 
 ## Configuration
 
