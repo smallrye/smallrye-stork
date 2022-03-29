@@ -310,6 +310,7 @@
         <module>load-balancer/random</module>
         <module>load-balancer/least-requests</module>
         <module>load-balancer/power-of-two-choices</module>
+        <module>load-balancer/sticky</module>
         <module>test-utils</module>
         <module>docs</module>
         <module>config-generator</module>
