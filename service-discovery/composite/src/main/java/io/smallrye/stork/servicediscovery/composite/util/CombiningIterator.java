@@ -3,22 +3,19 @@ package io.smallrye.stork.servicediscovery.composite.util;
 import java.util.Iterator;
 import java.util.List;
 
-public class CombiningIterator<T> implements Iterator<T> {
-
-    private final List<List<T>> contents;
+class CombiningIterator<T> implements Iterator<T> {
 
     // iterator of a list that contains the next element, or null:
     private Iterator<T> nextNonEmptyIterator;
 
-    private Iterator<List<T>> listOfListsIteator;
+    private final Iterator<List<T>> listOfListsIterator;
 
-    public CombiningIterator(List<List<T>> contents) {
-        this.contents = contents;
-        listOfListsIteator = contents.iterator();
-        nextNonEmptyIterator = nextNonEmptyIterartor(listOfListsIteator);
+    CombiningIterator(List<List<T>> contents) {
+        listOfListsIterator = contents.iterator();
+        nextNonEmptyIterator = nextNonEmptyIterator(listOfListsIterator);
     }
 
-    private Iterator<T> nextNonEmptyIterartor(Iterator<List<T>> listIterator) {
+    private Iterator<T> nextNonEmptyIterator(Iterator<List<T>> listIterator) {
         while (listIterator.hasNext()) {
             List<T> currentList = listIterator.next();
             if (!currentList.isEmpty()) {
@@ -37,7 +34,7 @@ public class CombiningIterator<T> implements Iterator<T> {
     public T next() {
         T result = nextNonEmptyIterator.next();
         if (!nextNonEmptyIterator.hasNext()) { // the end of the current list
-            nextNonEmptyIterator = nextNonEmptyIterartor(listOfListsIteator);
+            nextNonEmptyIterator = nextNonEmptyIterator(listOfListsIterator);
         }
         return result;
     }

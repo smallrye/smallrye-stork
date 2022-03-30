@@ -31,7 +31,17 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.field.visibilityReduced",
+        "old": "field io.smallrye.stork.utils.DurationUtils.DIGITS",
+        "new": "field io.smallrye.stork.utils.DurationUtils.DIGITS",
+        "oldVisibility": "public",
+        "newVisibility": "private",
+        "justification": "This constant should not have been exposed in the API."
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

@@ -24,6 +24,9 @@ import io.vertx.ext.consul.Service;
 import io.vertx.ext.consul.ServiceEntry;
 import io.vertx.ext.consul.ServiceEntryList;
 
+/**
+ * A service discovery implementation retrieving services from Consul.
+ */
 public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
     private final ConsulClient client;
@@ -32,7 +35,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
     private final boolean secure;
     private final boolean passing;
 
-    public ConsulServiceDiscovery(String serviceName, ConsulConfiguration config, Vertx vertx) {
+    ConsulServiceDiscovery(String serviceName, ConsulConfiguration config, Vertx vertx) {
         super(config.getRefreshPeriod());
         this.serviceName = serviceName;
         this.secure = isSecure(config);

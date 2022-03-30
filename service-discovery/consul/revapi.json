@@ -88,6 +88,15 @@
         "new": "parameter void io.smallrye.stork.api.ServiceDiscovery::initialize(===io.smallrye.stork.api.StorkServiceRegistry===) @ io.smallrye.stork.servicediscovery.consul.ConsulServiceDiscovery",
         "parameterIndex": "0",
         "justification": "The initialize method now receives the Stork instance"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.visibilityReduced",
+        "old": "method void io.smallrye.stork.servicediscovery.consul.ConsulServiceDiscovery::<init>(java.lang.String, io.smallrye.stork.servicediscovery.consul.ConsulServiceDiscoveryProviderConfiguration, io.vertx.core.Vertx, boolean)",
+        "new": "method void io.smallrye.stork.servicediscovery.consul.ConsulServiceDiscovery::<init>(java.lang.String, io.smallrye.stork.servicediscovery.consul.ConsulConfiguration, io.vertx.core.Vertx)",
+        "oldVisibility": "public",
+        "newVisibility": "package",
+        "justification": "Reduce the visibility of this internal method, instances should be created using the ServiceDiscoveryProvider"
       }
     ]
   }

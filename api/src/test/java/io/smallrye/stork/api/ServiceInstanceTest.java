@@ -1,7 +1,5 @@
 package io.smallrye.stork.api;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;

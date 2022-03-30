@@ -17,6 +17,9 @@ import io.smallrye.stork.loadbalancer.leastresponsetime.impl.CallStatistics;
 import io.smallrye.stork.loadbalancer.leastresponsetime.impl.util.FastPower;
 import io.smallrye.stork.utils.DurationUtils;
 
+/**
+ * A load balancer implementation that keeps track of response time and failures to adjust the service selection.
+ */
 public class LeastResponseTimeLoadBalancer implements LoadBalancer {
 
     private static final Logger log = LoggerFactory.getLogger(LeastResponseTimeLoadBalancer.class);
@@ -26,6 +29,11 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
     private final Random random;
     private final FastPower powersOfDecliningFactor;
 
+    /**
+     * Creates a new LeastResponseTimeLoadBalancer.
+     *
+     * @param config the configuration, must not be {@code null}
+     */
     public LeastResponseTimeLoadBalancer(LeastResponseTimeConfiguration config) {
         long errorPenalty = DurationUtils.parseDuration(config.getErrorPenalty()).toNanos();
         double decliningFactor = Double.parseDouble(config.getDecliningFactor());

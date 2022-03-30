@@ -17,7 +17,7 @@ import io.smallrye.stork.spi.CallStatisticsCollector;
 /**
  * Select a single instance and use it until it fails.
  * On failure, store the time of failure in `failedInstances` map.
- *
+ * <p>
  * When new instance selection is needed:
  * <ul>
  * <li>if there's an instance for which we don't have a failure recorded, use it</li>
@@ -36,12 +36,25 @@ public class StickyLoadBalancer implements LoadBalancer, CallStatisticsCollector
     private final LinkedHashMap<Long, Long> failedInstances = new LinkedHashMap<>();
     private volatile ServiceInstanceWithStatGathering lastSelected;
 
+    /**
+     * Creates a new Sticky load balancer
+     *
+     * @param failureBackOff the failure backoff
+     */
     public StickyLoadBalancer(Duration failureBackOff) {
         this.failureBackOffNs = failureBackOff.toNanos();
     }
 
     // TODO start randomly, maybe sort the collection by service instance ids
     // TODO: flow chart for how it works alongside the text
+
+    /**
+     * Selects the service instance
+     * 
+     * @param serviceInstances instances to choose from
+     *
+     * @return the selected instance
+     */
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
         if (serviceInstances.isEmpty()) {
@@ -103,7 +116,8 @@ public class StickyLoadBalancer implements LoadBalancer, CallStatisticsCollector
         }
     }
 
-    @Deprecated // for tests only
+    @Deprecated
+    // for tests only
     LinkedHashMap<Long, Long> getFailedInstances() {
         return new LinkedHashMap<>(failedInstances);
     }

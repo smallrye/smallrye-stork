@@ -68,6 +68,12 @@
           "new": "parameter void io.smallrye.stork.servicediscovery.composite.CompositeServiceDiscovery::initialize(===io.smallrye.stork.api.StorkServiceRegistry===)",
           "parameterIndex": "0",
           "justification": "The initialize method now receives the Stork instance"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.stork.servicediscovery.composite.util.CombiningIterator<T>",
+          "justification": "The class was not removed, the visibility got reduced as it should not be used by the user."
         }
       ]
     }

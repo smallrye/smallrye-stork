@@ -5,6 +5,11 @@ package io.smallrye.stork.api;
  */
 public class NoSuchServiceDefinitionException extends RuntimeException {
 
+    /**
+     * Creates a new instance of NoSuchServiceDefinitionException.
+     *
+     * @param serviceName the service name
+     */
     public NoSuchServiceDefinitionException(String serviceName) {
         super("No service defined for name " + serviceName);
     }

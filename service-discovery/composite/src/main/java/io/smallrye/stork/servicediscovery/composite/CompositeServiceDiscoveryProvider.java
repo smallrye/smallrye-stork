@@ -10,6 +10,9 @@ import io.smallrye.stork.api.config.ServiceDiscoveryType;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 import io.smallrye.stork.spi.StorkInfrastructure;
 
+/**
+ * A service discovery provider creating {@link CompositeServiceDiscovery} instances.
+ */
 @ServiceDiscoveryType("composite")
 @ServiceDiscoveryAttribute(name = "services", description = "A comma-separated list of services that this services consists of.", required = true)
 public class CompositeServiceDiscoveryProvider

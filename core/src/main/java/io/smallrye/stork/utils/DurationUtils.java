@@ -3,9 +3,12 @@ package io.smallrye.stork.utils;
 import java.time.Duration;
 import java.util.regex.Pattern;
 
+/**
+ * A set of utility methods around durations.
+ */
 public class DurationUtils {
 
-    public static final Pattern DIGITS = Pattern.compile("^[-+]?\\d+$");
+    private static final Pattern DIGITS = Pattern.compile("^[-+]?\\d+$");
 
     private DurationUtils() {
         // Avoid direct instantiation

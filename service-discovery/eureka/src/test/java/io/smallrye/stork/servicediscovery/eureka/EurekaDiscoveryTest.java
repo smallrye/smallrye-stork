@@ -1,6 +1,9 @@
 package io.smallrye.stork.servicediscovery.eureka;
 
-import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.*;
+import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.EUREKA_HOST;
+import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.EUREKA_PORT;
+import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.registerApplicationInstance;
+import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.updateApplicationInstanceStatus;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 

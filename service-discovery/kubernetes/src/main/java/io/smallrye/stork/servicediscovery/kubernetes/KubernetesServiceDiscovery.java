@@ -2,7 +2,12 @@ package io.smallrye.stork.servicediscovery.kubernetes;
 
 import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -26,9 +31,14 @@ import io.smallrye.stork.utils.ServiceInstanceIds;
 import io.smallrye.stork.utils.ServiceInstanceUtils;
 import io.vertx.core.Vertx;
 
+/**
+ * An implementation of service discovery for Kubernetes.
+ * This implementation locates a Kubernetes service and retrieves the <em>endpoints</em> (the address of the pods
+ * backing the service).
+ */
 public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
-    public static final String METADATA_NAME = "metadata.name";
+    static final String METADATA_NAME = "metadata.name";
     private final KubernetesClient client;
     private final String application;
     private final boolean allNamespaces;
@@ -38,6 +48,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
+    /**
+     * Creates a new KubernetesServiceDiscovery.
+     *
+     * @param serviceName the service name
+     * @param config the configuration
+     * @param vertx the vert.x instance
+     */
     public KubernetesServiceDiscovery(String serviceName, KubernetesConfiguration config, Vertx vertx) {
         super(config.getRefreshPeriod());
         Config base = Config.autoConfigure(null);

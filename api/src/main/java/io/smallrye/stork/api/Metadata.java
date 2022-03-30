@@ -6,13 +6,14 @@ import java.util.Map;
 
 /**
  * Service Instance metadata.
+ *
  * <p>
  * This class stores service instance metadata that can be used by the load balancer to select the service instance to use.
+ * </p>
  * <p>
  * Instances of this class are <strong>immutable</strong>. Modification operations return new instances.
- * <p>
- * You can creates new instances using the {@link #of(Class)}, {@link #of(Class, Map)} and {@link #with(Enum, Object)}methods.
- * <p>
+ * </p>
+ * You can create new instances using the {@link #of(Class)}, {@link #of(Class, Map)} and {@link #with(Enum, Object)}methods.
  */
 public class Metadata<T extends Enum<T>> {
 
@@ -42,8 +43,10 @@ public class Metadata<T extends Enum<T>> {
     /**
      * Returns an instance of {@link Metadata} containing metadata values.
      *
+     * @param key the class of the key, must not be {@code null}
      * @param metadata the metadata, must not be {@code null}, must not contain {@code null},
      *        must not contain multiple objects of the same class
+     * @param <K> the key type
      * @return the new metadata
      */
     public static <K extends Enum<K> & MetadataKey> Metadata<K> of(Class<K> key, Map<K, Object> metadata) {
@@ -57,6 +60,7 @@ public class Metadata<T extends Enum<T>> {
      * Returns an instance of {@link Metadata} containing an empty set of values.
      *
      * @param key the type of metadata, must not be {@code null}
+     * @param <K> the type key type
      * @return the new metadata
      */
     public static <K extends Enum<K> & MetadataKey> Metadata<K> of(Class<K> key) {
@@ -71,6 +75,7 @@ public class Metadata<T extends Enum<T>> {
      * If the current set of metadata contains already an instance of the class of {@code item}, the value is replaced
      * in the returned {@link Metadata}.
      *
+     * @param key the key, must not be {@code null}
      * @param item the metadata to be added, must not be {@code null}.
      * @return the new instance of {@link Metadata}
      */
@@ -86,11 +91,20 @@ public class Metadata<T extends Enum<T>> {
         return new Metadata<>(this.clazz, copy);
     }
 
+    /**
+     * @return the metadata
+     */
     public EnumMap<T, Object> getMetadata() {
         return metadata;
     }
 
+    /**
+     * The default metadata key.
+     */
     public enum DefaultMetadataKey implements MetadataKey {
+        /**
+         * The key.
+         */
         GENERIC_METADATA_KEY("generic");
 
         private final String name;

@@ -7,6 +7,9 @@ import io.smallrye.stork.api.config.ServiceDiscoveryType;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 import io.smallrye.stork.spi.StorkInfrastructure;
 
+/**
+ * Service Discovery provider creating instances of {@link EurekaServiceDiscovery}.
+ */
 @ServiceDiscoveryType("eureka")
 @ServiceDiscoveryAttribute(name = "eureka-host", description = "The Eureka server host.", required = true)
 @ServiceDiscoveryAttribute(name = "eureka-port", description = "The Eureka server port.", defaultValue = "8761")

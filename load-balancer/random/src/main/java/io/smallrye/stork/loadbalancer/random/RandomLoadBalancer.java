@@ -10,10 +10,19 @@ import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.ServiceInstance;
 
+/**
+ * A load balancer implementation randomly choosing an instance.
+ */
 public class RandomLoadBalancer implements LoadBalancer {
 
     private final Random random;
 
+    /**
+     * Creates a new random load balancer.
+     *
+     * @param useSecureRandom {@code true} if the load balancer should use a {@link SecureRandom} instance instead of
+     *        a {@link Random}
+     */
     protected RandomLoadBalancer(boolean useSecureRandom) {
         random = useSecureRandom ? new SecureRandom() : new Random();
     }
