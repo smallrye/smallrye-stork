@@ -20,8 +20,6 @@ First, you need to add the Stork Kubernetes Service Discovery provider:
 #### A few words about server authentication. 
 Stork uses [Fabric8 Kubernetes Client](https://github.com/fabric8io/kubernetes-client#readme) to access the Kubernetes resources, concretely the `DefaultKubernetesClient` implementation. 
 
-Stork uses Fabric8 Kubernetes Client to access the Kubernetes resources, concretely the `DefaultKubernetesClient` implementation.
-
 It will try to read the `~/.kube/config` file from your local machine and load the token for authenticating with the Kubernetes API server.
 
 If you are using the Stork Kubernetes discovery provider from inside a _Pod_, it loads `~/.kube/config` from the container file system.
