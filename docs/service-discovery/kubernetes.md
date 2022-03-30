@@ -24,7 +24,7 @@ Stork uses Fabric8 Kubernetes Client to access the Kubernetes resources, concret
 
 It will try to read the `~/.kube/config` file from your local machine and load the token for authenticating with the Kubernetes API server.
 
-If you are using the Stork Kubernetes discovery provider from inside a _Pod_, it load `~/.kube/config` from the container file system.
+If you are using the Stork Kubernetes discovery provider from inside a _Pod_, it loads `~/.kube/config` from the container file system.
 
 This file is automatically mounted inside the Pod.
 
