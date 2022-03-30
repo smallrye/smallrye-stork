@@ -26,7 +26,7 @@ jobs:
         java: [
           { 'version': '11', opts: '' },
           { 'version': '16', 'opts': '' },
-          { 'version': '17', 'opts': '' }
+          { 'version': '17', 'opts': 'javadoc:javadoc' }
         ]
     name: build with jdk ${{matrix.java.version}}
 
@@ -42,7 +42,7 @@ jobs:
           cache: maven
 
       - name: build with maven
-        run: mvn -B formatter:validate verify --file pom.xml
+        run: mvn -B formatter:validate verify --file pom.xml ${{matrix.java.opts}}
 
   build-windows:
     runs-on: windows-latest

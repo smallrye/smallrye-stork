@@ -51,7 +51,7 @@ public interface ServiceInstance {
     }
 
     /**
-     * <h3>Warning</h3> Usually should not be called directly.
+     * <b>Warning</b> Usually should not be called directly.
      * Most client libraries should use {@link Service#selectInstanceAndRecordStart(Collection, boolean)} and
      * {@link Service#selectInstanceAndRecordStart(boolean)}
      * to select services. These methods invoke this method automatically

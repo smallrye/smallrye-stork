@@ -58,7 +58,7 @@ public class ServiceInstanceWithStatGathering implements ServiceInstance {
     }
 
     /**
-     * <h1>Do not use for production code</h1>
+     * <b>Do not use for production code</b>
      *
      * mock recording time for tests
      *
