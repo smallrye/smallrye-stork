@@ -18,6 +18,14 @@ public class Service {
     private final ServiceDiscovery serviceDiscovery;
     private final String serviceName;
 
+    /**
+     * Creates a new Service.
+     *
+     * @param serviceName the name, must not be {@code null}, must not be blank
+     * @param loadBalancer the load balancer, can be {@code null}
+     * @param serviceDiscovery the service discovery, must not be {@code null}
+     * @param requiresStrictRecording whether strict recording must be enabled
+     */
     public Service(String serviceName, LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery,
             boolean requiresStrictRecording) {
         this.loadBalancer = loadBalancer;

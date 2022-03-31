@@ -8,6 +8,9 @@ import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 import io.smallrye.stork.spi.StorkInfrastructure;
 import io.vertx.core.Vertx;
 
+/**
+ * Service discovery provider for Kubernetes.
+ */
 @ServiceDiscoveryType("kubernetes")
 @ServiceDiscoveryAttribute(name = "k8s-host", description = "The Kubernetes API host.")
 @ServiceDiscoveryAttribute(name = "k8s-namespace", description = "The namespace of the service. Use all to discover all namespaces.")

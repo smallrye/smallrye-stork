@@ -22,7 +22,7 @@ import io.vertx.mutiny.ext.web.client.WebClient;
 
 /**
  * Handle service discovery using a Eureka server.
- *
+ * <p>
  * It does not use the Eureka client which brings lots of dependencies on the classpath.
  * Eureka exposes a REST API, which can be used easily.
  * The REST API is described on https://github.com/Netflix/eureka/wiki/Eureka-REST-operations.
@@ -35,6 +35,13 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<String> instance;
 
+    /**
+     * Creates a new EurekaServiceDiscovery
+     *
+     * @param config the configuration
+     * @param serviceName the service name
+     * @param infrastructure the infrastructure
+     */
     public EurekaServiceDiscovery(EurekaConfiguration config, String serviceName,
             StorkInfrastructure infrastructure) {
         super(config.getRefreshPeriod());

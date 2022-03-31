@@ -8,15 +8,20 @@ import java.util.ListIterator;
 
 /**
  * An immutable list that is backed by multiple.
- *
+ * <p>
  * The list assumes that the underlying lists are immutable
  *
- * @param <T>
+ * @param <T> the type of element
  */
 public class CombiningList<T> implements List<T> {
     private final List<List<T>> contents;
     private final int size;
 
+    /**
+     * Creates a new CombiningList
+     *
+     * @param listOfLists the list of list
+     */
     public CombiningList(List<List<T>> listOfLists) {
         this.contents = listOfLists;
         int size = 0;

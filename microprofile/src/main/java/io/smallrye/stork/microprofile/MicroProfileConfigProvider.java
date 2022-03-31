@@ -16,6 +16,9 @@ import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
 import io.smallrye.stork.spi.config.SimpleServiceConfig;
 
+/**
+ * Implementation of {@link ConfigProvider} using MicroProfile Config.
+ */
 public class MicroProfileConfigProvider implements ConfigProvider {
 
     private static final Logger log = Logger.getLogger(MicroProfileConfigProvider.class);
@@ -23,14 +26,29 @@ public class MicroProfileConfigProvider implements ConfigProvider {
     private static final String CONFIG_PROPERTY_PART_EXPRESSION = "\".*\"|[^.]+";
     private static final Pattern CONFIG_PROP_PART = Pattern.compile(CONFIG_PROPERTY_PART_EXPRESSION);
 
+    /**
+     * The load-balancer segment used in the configuration key.
+     */
     public static final String LOAD_BALANCER = "load-balancer";
+    /**
+     * The load balancer type configuration key.
+     */
     public static final String LOAD_BALANCER_EMBEDDED = "load-balancer.type";
 
+    /**
+     * The service-discovery segment used in the configuration key.
+     */
     public static final String SERVICE_DISCOVERY = "service-discovery";
+    /**
+     * The service discovery type configuration key.
+     */
     public static final String SERVICE_DISCOVERY_EMBEDDED = "service-discovery.type";
 
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
 
+    /**
+     * Creates a new instance of MicroProfileConfigProvider.
+     */
     public MicroProfileConfigProvider() {
         Config config = org.eclipse.microprofile.config.ConfigProvider.getConfig();
 

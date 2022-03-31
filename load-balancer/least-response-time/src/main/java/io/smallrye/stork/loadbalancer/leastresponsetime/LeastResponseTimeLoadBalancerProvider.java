@@ -6,6 +6,9 @@ import io.smallrye.stork.api.config.LoadBalancerAttribute;
 import io.smallrye.stork.api.config.LoadBalancerType;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 
+/**
+ * A load balancer provider following response times and failures.
+ */
 @LoadBalancerType("least-response-time")
 @LoadBalancerAttribute(name = "declining-factor", defaultValue = "0.9", description = "How much *score* should decline in time, see Score calculation in the docs for details.")
 @LoadBalancerAttribute(name = "error-penalty", defaultValue = "60s", description = "This load balancer treats an erroneous response as a response after this time.")

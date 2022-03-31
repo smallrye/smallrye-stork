@@ -7,10 +7,12 @@ import io.smallrye.stork.api.config.LoadBalancerType;
 import io.smallrye.stork.spi.LoadBalancerProvider;
 import io.smallrye.stork.utils.DurationUtils;
 
+/**
+ * A load balancer provider that keep returning the same instance until that instance becomes unavailable or fails.
+ */
 @LoadBalancerType(StickyLoadBalancerProvider.TYPE)
 @LoadBalancerAttribute(name = StickyLoadBalancerProvider.FAILURE_BACKOFF_TIME, defaultValue = "0", description = "After how much time, "
-        +
-        "a service instance that has failed can be reused")
+        + "a service instance that has failed can be reused.")
 public class StickyLoadBalancerProvider
         implements LoadBalancerProvider<StickyConfiguration> {
 

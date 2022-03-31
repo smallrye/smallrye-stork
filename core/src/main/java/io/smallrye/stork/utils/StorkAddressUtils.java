@@ -2,8 +2,19 @@ package io.smallrye.stork.utils;
 
 import static java.lang.String.format;
 
+/**
+ * A set of utility methods around addresses.
+ */
 public final class StorkAddressUtils {
 
+    /**
+     * Creates a new {@link HostAndPort} instance.
+     *
+     * @param serviceAddress the address
+     * @param defaultPort the default port
+     * @param serviceName the service name
+     * @return the new HostAndPort
+     */
     public static HostAndPort parseToHostAndPort(String serviceAddress,
             int defaultPort,
             String serviceName) {

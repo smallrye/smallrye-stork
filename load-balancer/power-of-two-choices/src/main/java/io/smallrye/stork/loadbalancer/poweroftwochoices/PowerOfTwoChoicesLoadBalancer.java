@@ -21,6 +21,11 @@ public class PowerOfTwoChoicesLoadBalancer implements LoadBalancer {
     private final InflightRequestCollector collector = new InflightRequestCollector();
     private final Random random;
 
+    /**
+     * Creates a new instance of PowerOfTwoChoicesLoadBalancer.
+     *
+     * @param useSecureRandom {@code true} to use a {@link SecureRandom} instead of a regular {@link Random}
+     */
     protected PowerOfTwoChoicesLoadBalancer(boolean useSecureRandom) {
         random = useSecureRandom ? new SecureRandom() : new Random();
     }

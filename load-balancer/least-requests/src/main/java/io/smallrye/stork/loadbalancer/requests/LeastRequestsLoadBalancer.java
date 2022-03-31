@@ -8,6 +8,9 @@ import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.impl.ServiceInstanceWithStatGathering;
 
+/**
+ * An implementation of load-balancer that keep tracks of inflight request, and picks the less "used" instance.
+ */
 public class LeastRequestsLoadBalancer implements LoadBalancer {
 
     private final InflightRequestCollector collector = new InflightRequestCollector();

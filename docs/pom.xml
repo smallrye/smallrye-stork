@@ -13,6 +13,7 @@
 
     <properties>
         <sonar.skip>true</sonar.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <build>

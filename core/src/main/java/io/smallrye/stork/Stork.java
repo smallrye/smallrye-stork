@@ -32,7 +32,7 @@ import io.smallrye.stork.spi.internal.LoadBalancerLoader;
 import io.smallrye.stork.spi.internal.ServiceDiscoveryLoader;
 
 /**
- * The entrypoint for SmallRye Stork
+ * The entrypoint for SmallRye Stork.
  * <p>
  * Use `Stork.getInstance()` to get a hold of a configured instance, and retrieve `ServiceDiscovery` and/or `LoadBalancer`
  * from it.
@@ -40,6 +40,9 @@ import io.smallrye.stork.spi.internal.ServiceDiscoveryLoader;
 public final class Stork implements StorkServiceRegistry {
     // TODO replace all the exceptions here with dedicated ones?
 
+    /**
+     * The stork name.
+     */
     public static final String STORK = "stork";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Stork.class);
@@ -93,6 +96,8 @@ public final class Stork implements StorkServiceRegistry {
     /**
      * Exposed for tests.
      * Not to be used in production code
+     *
+     * @param storkInfrastructure the infrastructure, must not be {@code null}
      */
     @Deprecated
     public Stork(StorkInfrastructure storkInfrastructure) {
@@ -183,18 +188,32 @@ public final class Stork implements StorkServiceRegistry {
 
     private static final AtomicReference<Stork> REFERENCE = new AtomicReference<>();
 
+    /**
+     * @return the stork instance.
+     */
     public static Stork getInstance() {
         return REFERENCE.get();
     }
 
+    /**
+     * Closes the stork instance.
+     */
     public static void shutdown() {
         REFERENCE.set(null);
     }
 
+    /**
+     * Initialize the stork instance using the given infrastructure.
+     *
+     * @param infrastructure the infrastructure, must not be {@code null}
+     */
     public static void initialize(StorkInfrastructure infrastructure) {
         REFERENCE.compareAndSet(null, new Stork(infrastructure));
     }
 
+    /**
+     * Initialize the stork instance using the default infrastructure.
+     */
     public static void initialize() {
         initialize(new DefaultStorkInfrastructure());
     }

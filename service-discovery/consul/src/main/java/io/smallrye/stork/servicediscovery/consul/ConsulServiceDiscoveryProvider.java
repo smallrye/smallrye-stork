@@ -8,6 +8,9 @@ import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 import io.smallrye.stork.spi.StorkInfrastructure;
 import io.vertx.core.Vertx;
 
+/**
+ * The consul service discovery provider implementation.
+ */
 @ServiceDiscoveryAttribute(name = "consul-host", description = "The Consul host.", defaultValue = "localhost")
 @ServiceDiscoveryAttribute(name = "consul-port", description = "The Consul port.", defaultValue = "8500")
 @ServiceDiscoveryAttribute(name = "use-health-checks", description = "Whether to use health check.", defaultValue = "true")

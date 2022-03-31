@@ -79,7 +79,6 @@ public interface ServiceInstance {
 
     /**
      * When {@code gatherStatistics} is enabled, reports the end of an operation using this service instance.
-     * <p>
      *
      * @param failure if the operation failed, the throwable depicting the failure, {@code null} otherwise
      */

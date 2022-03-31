@@ -185,8 +185,12 @@ public class ConfigClassWriter {
         out.println("   /**");
         if (defaultValue != null) {
             out.println(format("    * %s By default: %s", description, defaultValue));
+            out.println("    *");
+            out.println("    * @return the configured " + name + ", {@code " + defaultValue + "} if not set");
         } else {
             out.println(format("    * %s", description));
+            out.println("    *");
+            out.println("    * @return the configured " + name + ", @{code null} if not set");
         }
         out.println("    */");
         out.println(format("   public String get%s() {", toCamelCase(name)));
@@ -205,6 +209,9 @@ public class ConfigClassWriter {
         } else {
             out.println(format("    * Set the '%s' attribute.", name));
         }
+        out.println("    * ");
+        out.println("    * @param value the value for " + name);
+        out.println("    * @return the current " + simpleClassName + " to chain calls");
         out.println("    */");
         out.println(format("   public %s with%s(String value) {", simpleClassName, toCamelCase(name)));
         out.println(format("      return extend(\"%s\", value);", name));
@@ -213,11 +220,20 @@ public class ConfigClassWriter {
 
     private void writeConfigMapRelatedStuff(String simpleClassName, PrintWriter out) {
         out.println("   private final Map<String, String> parameters;");
+        out.println();
+        out.println("   /**");
+        out.println("    * Creates a new " + simpleClassName);
+        out.println("    *");
+        out.println("    * @param params the parameters, must not be {@code null}");
+        out.println("    */");
         out.println(format("   public %s(Map<String, String> params) {", simpleClassName));
         out.println("      parameters = Collections.unmodifiableMap(params);");
         out.println("   }");
 
         out.println();
+        out.println("   /**");
+        out.println("    * Creates a new " + simpleClassName);
+        out.println("    */");
         out.println(format("   public %s() {", simpleClassName));
         out.println("      parameters = Collections.emptyMap();");
         out.println("   }");
@@ -232,6 +248,10 @@ public class ConfigClassWriter {
     }
 
     private void writeTypeMethod(String type, PrintWriter out) {
+        out.println();
+        out.println("  /**");
+        out.println("   * @return the type");
+        out.println("   */");
         out.println("   @Override");
         out.println("   public String type() {");
         out.println("      return \"" + type + "\";");
@@ -239,6 +259,10 @@ public class ConfigClassWriter {
     }
 
     private void writeParametersMethod(PrintWriter out) {
+        out.println();
+        out.println("   /**");
+        out.println("    * @return the parameters");
+        out.println("    */");
         out.println("   @Override");
         out.println("   public Map<String, String> parameters() {");
         out.println("      return parameters;");
