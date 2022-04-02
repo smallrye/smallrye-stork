@@ -49,6 +49,34 @@
         "new": "parameter void io.smallrye.stork.api.ServiceDiscovery::initialize(===io.smallrye.stork.api.StorkServiceRegistry===)",
         "parameterIndex": "0",
         "justification": "The method is now receiving the StorkServiceRegistry instance"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeErasureChanged",
+        "old": "method io.smallrye.mutiny.Uni<java.util.List<io.smallrye.stork.api.ServiceInstance>> io.smallrye.stork.api.Service::getInstances()",
+        "new": "method io.smallrye.mutiny.Uni<java.util.List<io.smallrye.stork.api.ServiceInstance>> io.smallrye.stork.api.Service::getInstances()",
+        "justification": "Change in the type erasure, no impact for users"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeErasureChanged",
+        "old": "method io.smallrye.mutiny.Uni<io.smallrye.stork.api.ServiceInstance> io.smallrye.stork.api.Service::selectInstance()",
+        "new": "method io.smallrye.mutiny.Uni<io.smallrye.stork.api.ServiceInstance> io.smallrye.stork.api.Service::selectInstance()",
+        "justification": "Change in the type erasure, no impact for users"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeErasureChanged",
+        "old": "method io.smallrye.mutiny.Uni<io.smallrye.stork.api.ServiceInstance> io.smallrye.stork.api.Service::selectInstanceAndRecordStart(boolean)",
+        "new": "method io.smallrye.mutiny.Uni<io.smallrye.stork.api.ServiceInstance> io.smallrye.stork.api.Service::selectInstanceAndRecordStart(boolean)",
+        "justification": "Change in the type erasure, no impact for users"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeErasureChanged",
+        "old": "method io.smallrye.mutiny.Uni<java.util.List<io.smallrye.stork.api.ServiceInstance>> io.smallrye.stork.api.ServiceDiscovery::getServiceInstances()",
+        "new": "method io.smallrye.mutiny.Uni<java.util.List<io.smallrye.stork.api.ServiceInstance>> io.smallrye.stork.api.ServiceDiscovery::getServiceInstances()",
+        "justification": "Change in the type erasure, no impact for users"
       }
     ]
   }
