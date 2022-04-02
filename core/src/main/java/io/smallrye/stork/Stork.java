@@ -74,6 +74,8 @@ public final class Stork implements StorkServiceRegistry {
     public Stork defineIfAbsent(String name, ServiceDefinition definition) {
         ParameterValidation.nonNull(name, "name");
         ParameterValidation.nonNull(definition, "definition");
+        // The service definition has already been validated during its construction
+        // (so the discovery is not null)
 
         ServiceConfig config = toServiceConfig(name, definition);
         Service service = createService(config);
@@ -83,10 +85,6 @@ public final class Stork implements StorkServiceRegistry {
     }
 
     private ServiceConfig toServiceConfig(String name, ServiceDefinition definition) {
-        if (definition.getServiceDiscovery() == null) {
-            throw new IllegalStateException("Service discovery configuration not set.");
-        }
-
         return new SimpleServiceConfig.Builder().setServiceName(name)
                 .setLoadBalancer(definition.getLoadBalancer())
                 .setServiceDiscovery(definition.getServiceDiscovery())

@@ -34,6 +34,8 @@ public class ConfigClassWriter {
 
     private final ProcessingEnvironment environment;
 
+    private static final String IMPORT_STATEMENT = "import %s;";
+
     public ConfigClassWriter(ProcessingEnvironment environment) {
         this.environment = environment;
     }
@@ -61,11 +63,11 @@ public class ConfigClassWriter {
 
         try (PrintWriter out = new PrintWriter(javaFile.openWriter())) {
             writePackageDeclaration(classPackage, out);
-            out.println(format("import %s;", configClassName));
-            out.println(format("import %s;", providerClassName));
-            out.println(format("import %s;", LoadBalancer.class.getName()));
-            out.println(format("import %s;", LoadBalancerConfig.class.getName()));
-            out.println(format("import %s;", ServiceDiscovery.class.getName()));
+            writeImportStatement(configClassName, out);
+            writeImportStatement(providerClassName, out);
+            writeImportStatement(LoadBalancer.class, out);
+            writeImportStatement(LoadBalancerConfig.class, out);
+            writeImportStatement(ServiceDiscovery.class, out);
             writeClassDeclaration(format("%s implements %s", simpleClassName, LoadBalancerLoader.class.getName()),
                     "LoadBalancerLoader for " + providerClassName, out);
 
@@ -76,10 +78,8 @@ public class ConfigClassWriter {
             out.println(format("      %s typedConfig = new %s(config.parameters());", configClassName, configClassName));
             out.println("      return provider.createLoadBalancer(typedConfig, serviceDiscovery);");
             out.println("   }");
-            out.println("   @Override");
-            out.println("   public String type() {");
-            out.println(String.format("      return \"%s\";", type));
-            out.println("   }");
+
+            writeTypeMethod(type, out);
 
             out.println("}");
         }
@@ -97,12 +97,12 @@ public class ConfigClassWriter {
 
         try (PrintWriter out = new PrintWriter(javaFile.openWriter())) {
             writePackageDeclaration(classPackage, out);
-            out.println(format("import %s;", configClassName));
-            out.println(format("import %s;", providerClassName));
-            out.println(format("import %s;", ServiceDiscovery.class.getName()));
-            out.println(format("import %s;", ServiceDiscoveryConfig.class.getName()));
-            out.println(format("import %s;", ServiceConfig.class.getName()));
-            out.println(format("import %s;", StorkInfrastructure.class.getName()));
+            writeImportStatement(configClassName, out);
+            writeImportStatement(providerClassName, out);
+            writeImportStatement(ServiceDiscovery.class, out);
+            writeImportStatement(ServiceDiscoveryConfig.class, out);
+            writeImportStatement(ServiceConfig.class, out);
+            writeImportStatement(StorkInfrastructure.class, out);
 
             writeClassDeclaration(format("%s implements %s", simpleClassName, ServiceDiscoveryLoader.class.getName()),
                     "ServiceDiscoveryLoader for {@link " + providerClassName + "}", out);
@@ -115,10 +115,8 @@ public class ConfigClassWriter {
             out.println(
                     "      return provider.createServiceDiscovery(typedConfig, serviceName, serviceConfig, storkInfrastructure);");
             out.println("   }");
-            out.println("   @Override");
-            out.println("   public String type() {");
-            out.println(String.format("      return \"%s\";", type));
-            out.println("   }");
+
+            writeTypeMethod(type, out);
 
             out.println("}");
         }
@@ -150,14 +148,13 @@ public class ConfigClassWriter {
         file.delete();
         try (PrintWriter out = new PrintWriter(file.openWriter())) {
             writePackageDeclaration(classPackage, out);
-
-            out.println("import " + Collections.class.getName() + ";");
-            out.println("import " + HashMap.class.getName() + ";");
-            out.println("import " + Map.class.getName() + ";");
+            writeImportStatement(Collections.class, out);
+            writeImportStatement(HashMap.class, out);
+            writeImportStatement(Map.class, out);
             if (isLoadBalancer) {
-                out.println("import " + LoadBalancerConfig.class.getName() + ";");
+                writeImportStatement(LoadBalancerConfig.class, out);
             } else {
-                out.println("import " + ServiceDiscoveryConfig.class.getName() + ";");
+                writeImportStatement(ServiceDiscoveryConfig.class, out);
             }
 
             writeClassDeclaration(simpleClassName, isLoadBalancer, comment, out);
@@ -339,4 +336,13 @@ public class ConfigClassWriter {
             }
         }
     }
+
+    private void writeImportStatement(String className, PrintWriter out) {
+        out.println(format(IMPORT_STATEMENT, className));
+    }
+
+    private void writeImportStatement(Class<?> clazz, PrintWriter out) {
+        writeImportStatement(clazz.getName(), out);
+    }
+
 }

@@ -52,6 +52,8 @@ public class ProgrammaticApiTest {
         assertThat(i1.isSecure()).isTrue();
         assertThat(i2.isSecure()).isTrue();
         assertThat(i1).isNotSameAs(i2);
+
+        assertThat(Stork.getInstance().getServices()).hasSize(1);
     }
 
     @Test
@@ -72,7 +74,9 @@ public class ProgrammaticApiTest {
         ServiceInstance i2 = service.selectInstance().await().indefinitely();
         assertThat(i1.isSecure()).isTrue();
         assertThat(i2.isSecure()).isTrue();
-        assertThat(i1).isSameAs(i1);
+        assertThat(i1).isSameAs(i2);
+
+        assertThat(Stork.getInstance().getServices()).hasSize(1);
     }
 
     @Test

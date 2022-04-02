@@ -83,6 +83,11 @@
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-load-balancer-power-of-two-choices</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-load-balancer-sticky</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
