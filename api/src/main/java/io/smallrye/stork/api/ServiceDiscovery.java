@@ -25,4 +25,8 @@ public interface ServiceDiscovery {
      */
     default void initialize(StorkServiceRegistry stork) {
     }
+
+    default Uni<Void> registerServiceInstances(String serviceName, String... ipAdresses) {
+        return Uni.createFrom().nullItem();
+    }
 }
