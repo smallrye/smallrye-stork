@@ -12,6 +12,7 @@ nav:
     - Consul: 'service-discovery/consul.md'
     - Kubernetes: 'service-discovery/kubernetes.md'
     - Eureka: 'service-discovery/eureka.md'
+    - Composite: 'service-discovery/composite.md'
     - Custom: 'service-discovery/custom-service-discovery.md'
     - Static List: 'service-discovery/static-list.md'
   - Load-Balancing:
