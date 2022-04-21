@@ -2,11 +2,13 @@ package io.smallrye.stork.microprofile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +17,9 @@ import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.LoadBalancer;
+import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.ServiceDiscovery;
+import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.impl.RoundRobinLoadBalancer;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
@@ -24,9 +28,12 @@ import io.smallrye.stork.test.TestLoadBalancer2;
 import io.smallrye.stork.test.TestSd2Configuration;
 import io.smallrye.stork.test.TestServiceDiscovery;
 import io.smallrye.stork.test.TestServiceDiscovery2;
+import io.smallrye.stork.test.TestServiceRegistrarProvider;
+import io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata;
 
 public class MicroProfileConfigProviderTest {
 
+    public static final String MY_REGISTRAR = "my-registrar";
     public static final String FIRST_SERVICE = "first-service";
     public static final String SECOND_SERVICE = "second-service";
     public static final String THIRD_SERVICE = "third-service";
@@ -42,6 +49,40 @@ public class MicroProfileConfigProviderTest {
     @AfterAll
     public static void tearDown() {
         TestConfigProvider.setPriority(initialPriority);
+    }
+
+    @AfterEach
+    void cleanUp() {
+        TestServiceRegistrarProvider.clear();
+    }
+
+    @Test
+    void shouldConfigureServiceRegistrar() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("stork-registrar." + MY_REGISTRAR + ".type", TestServiceRegistrarProvider.TYPE);
+        properties.put("stork-registrar." + MY_REGISTRAR + ".param1", "http://localhost:8080");
+        properties.put("stork-registrar." + MY_REGISTRAR + ".param2", "param2-value");
+
+        Stork stork = storkForConfig(properties);
+
+        ServiceRegistrar<TestMetadata> serviceRegistrar = stork.getServiceRegistrar(MY_REGISTRAR);
+        assertThat(serviceRegistrar).isInstanceOf(TestServiceRegistrarProvider.TestServiceRegistrar.class);
+
+        serviceRegistrar.registerServiceInstance("foo", Metadata.of(TestMetadata.class)
+                .with(TestMetadata.FIRST, "1st"), "1.1.1.1")
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(TestServiceRegistrarProvider.getRegistrations()).hasSize(1);
+        TestServiceRegistrarProvider.Registration registration = TestServiceRegistrarProvider.getRegistrations().get(0);
+
+        assertThat(registration.serviceRegistrarName).isEqualTo(MY_REGISTRAR);
+        assertThat(registration.config.type()).isEqualTo(TestServiceRegistrarProvider.TYPE);
+        assertThat(registration.config.parameters()).containsEntry("param1", "http://localhost:8080")
+                .containsEntry("param2", "param2-value");
+        assertThat(registration.metadata.getMetadata().get(TestMetadata.FIRST)).isEqualTo("1st");
+        assertThat(registration.serviceRegistrarName).isEqualTo(MY_REGISTRAR);
+        assertThat(registration.serviceName).isEqualTo("foo");
+        assertThat(registration.ipAddress).isEqualTo("1.1.1.1");
     }
 
     @Test

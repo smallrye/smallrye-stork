@@ -56,38 +56,6 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
-    void shouldRegisterServiceInstancesInDefaultNamespace() throws InterruptedException {
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace));
-        Stork stork = StorkTestUtils.getNewStorkInstance();
-
-        String serviceName = "svc";
-        String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
-
-        AtomicReference<Integer> registered = new AtomicReference<>();
-
-        Service service = stork.getService(serviceName);
-        //        service.getServiceDiscovery().registerServiceInstances(serviceName, ips)
-        //                .onFailure().invoke(th -> fail("Failed to register service instances in Kubernetes", th))
-        //                .subscribe();
-
-        await().untilAsserted(() -> service.getServiceDiscovery().registerServiceInstances(serviceName, ips));
-
-        //        Thread.sleep(10000);
-
-        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
-
-        service.getServiceDiscovery().getServiceInstances()
-                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
-                .subscribe().with(instances::set);
-
-        await().atMost(Duration.ofSeconds(5))
-                .until(() -> instances.get() != null);
-
-        assertThat(instances.get()).hasSize(3);
-    }
-
-    @Test
     void shouldGetServiceFromK8sDefaultNamespace() {
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace));
