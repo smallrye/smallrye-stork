@@ -45,7 +45,7 @@ public class KubernetesServiceRegistrar implements ServiceRegistrar<KubernetesMe
             future.complete();
         }, result -> {
             if (result.succeeded()) {
-                log.info("Instances of service {} has been resgistered ", serviceName);
+                log.info("Instances of service {} has been registered ", serviceName);
             } else {
                 log.error("Unable to register instances of service {}", serviceName,
                         result.cause());
