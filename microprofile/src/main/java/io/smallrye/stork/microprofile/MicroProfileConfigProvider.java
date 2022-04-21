@@ -1,6 +1,7 @@
 package io.smallrye.stork.microprofile;
 
 import static io.smallrye.stork.Stork.STORK;
+import static io.smallrye.stork.Stork.STORK_REGISTRAR;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +14,9 @@ import org.eclipse.microprofile.config.Config;
 import org.jboss.logging.Logger;
 
 import io.smallrye.stork.api.config.ServiceConfig;
+import io.smallrye.stork.api.config.ServiceRegistrarConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
+import io.smallrye.stork.spi.config.SimpleRegistrarConfig;
 import io.smallrye.stork.spi.config.SimpleServiceConfig;
 
 /**
@@ -45,6 +48,7 @@ public class MicroProfileConfigProvider implements ConfigProvider {
     public static final String SERVICE_DISCOVERY_EMBEDDED = "service-discovery.type";
 
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
+    private final List<ServiceRegistrarConfig> registrarConfigs = new ArrayList<>();
 
     /**
      * Creates a new instance of MicroProfileConfigProvider.
@@ -53,71 +57,106 @@ public class MicroProfileConfigProvider implements ConfigProvider {
         Config config = org.eclipse.microprofile.config.ConfigProvider.getConfig();
 
         Map<String, Map<String, String>> propertiesByServiceName = new HashMap<>();
+        Map<String, Map<String, String>> propertiesByRegistrarName = new HashMap<>();
 
         for (String propertyName : config.getPropertyNames()) {
 
             Matcher matcher = CONFIG_PROP_PART.matcher(propertyName);
 
-            if (!matcher.find() || !STORK.equals(matcher.group())) {
+            if (!matcher.find()) {
                 continue;
             }
+            if (STORK.equals(matcher.group())) {
 
-            // all properties are now of form
-            // stork.<service-name>.(load-balancer|service-discovery)...
-            // or stork."<service-name>".(load-balancer|service-discovery)...
-            if (!matcher.find()) {
-                log.warn("Potentially invalid property for SmallRye Stork: " + propertyName);
+                // all registry and load balancing properties are of form
+                // stork.<service-name>.(load-balancer|service-discovery)...
+                // or stork."<service-name>".(load-balancer|service-discovery)...
+                if (!matcher.find()) {
+                    log.warn("Potentially invalid property for SmallRye Stork: " + propertyName);
+                }
+                String serviceName = unwrapFromQuotes(matcher.group());
+
+                int serviceNameEndIdx = matcher.end();
+
+                if (!matcher.find()) {
+                    log.warn("Potentially invalid property for SmallRye Stork: " + propertyName);
+                }
+
+                // serviceName can be in double quotes
+                Map<String, String> serviceProperties = propertiesByServiceName.computeIfAbsent(serviceName,
+                        ignored -> new HashMap<>());
+
+                String serviceProperty = propertyKey(propertyName.substring(serviceNameEndIdx));
+                serviceProperties.put(serviceProperty,
+                        config.getValue(propertyName, String.class));
+            } else if (STORK_REGISTRAR.equals(matcher.group())) {
+                // all registration properties are of form
+                // stork-registrar.<service-registrar-name>....
+                // or stork-registrar."<service-registrar-name>"....
+                if (!matcher.find()) {
+                    log.warn("Potentially invalid property for SmallRye Stork: " + propertyName);
+                }
+                String registrarName = unwrapFromQuotes(matcher.group());
+                int registrarNameEndIdx = matcher.end();
+                Map<String, String> properties = propertiesByRegistrarName.computeIfAbsent(registrarName,
+                        ignored -> new HashMap<>());
+                String property = propertyKey(propertyName.substring(registrarNameEndIdx));
+                properties.put(property, config.getValue(propertyName, String.class));
             }
-            String serviceName = unwrapFromQuotes(matcher.group());
-
-            int serviceNameEndIdx = matcher.end();
-
-            if (!matcher.find()) {
-                log.warn("Potentially invalid property for SmallRye Stork: " + propertyName);
-            }
-
-            // serviceName can be in double quotes
-            Map<String, String> serviceProperties = propertiesByServiceName.computeIfAbsent(serviceName,
-                    ignored -> new HashMap<>());
-
-            String serviceProperty = servicePropertyKey(propertyName.substring(serviceNameEndIdx));
-            serviceProperties.put(serviceProperty,
-                    config.getValue(propertyName, String.class));
         }
 
         for (Map.Entry<String, Map<String, String>> serviceEntry : propertiesByServiceName.entrySet()) {
-            SimpleServiceConfig.Builder builder = new SimpleServiceConfig.Builder();
-
-            Map<String, String> properties = serviceEntry.getValue();
-
-            String serviceName = serviceEntry.getKey();
-
-            String loadBalancerType = properties.get(LOAD_BALANCER);
-            if (loadBalancerType == null) {
-                loadBalancerType = properties.get(LOAD_BALANCER_EMBEDDED);
-            }
-            builder.setServiceName(serviceName);
-            if (loadBalancerType != null) {
-                SimpleServiceConfig.SimpleLoadBalancerConfig loadBalancerConfig = new SimpleServiceConfig.SimpleLoadBalancerConfig(
-                        loadBalancerType, propertiesForPrefix(LOAD_BALANCER, properties));
-
-                builder = builder.setLoadBalancer(loadBalancerConfig);
-            }
-
-            String serviceDiscoveryType = properties.get(SERVICE_DISCOVERY);
-            // for yaml it is more convenient to have stork.my-service.service-discovery.type, so let's support it too:
-            if (serviceDiscoveryType == null) {
-                serviceDiscoveryType = properties.get(SERVICE_DISCOVERY_EMBEDDED);
-            }
-            if (serviceDiscoveryType != null) {
-                SimpleServiceConfig.SimpleServiceDiscoveryConfig serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(
-                        serviceDiscoveryType, propertiesForPrefix(SERVICE_DISCOVERY, properties));
-
-                builder = builder.setServiceDiscovery(serviceDiscoveryConfig);
-            }
-
-            serviceConfigs.add(builder.build());
+            SimpleServiceConfig serviceConfig = buildServiceConfig(serviceEntry);
+            serviceConfigs.add(serviceConfig);
         }
+        for (Map.Entry<String, Map<String, String>> serviceEntry : propertiesByRegistrarName.entrySet()) {
+            SimpleRegistrarConfig serviceConfig = buildRegistrarConfig(serviceEntry);
+            registrarConfigs.add(serviceConfig);
+        }
+    }
+
+    private SimpleRegistrarConfig buildRegistrarConfig(Map.Entry<String, Map<String, String>> serviceEntry) {
+        String registrarName = serviceEntry.getKey();
+        Map<String, String> parameters = serviceEntry.getValue();
+        String registrarType = parameters.get("type");
+        if (registrarType == null) {
+            throw new IllegalArgumentException("no type defined for service registrar " + registrarName);
+        }
+        return new SimpleRegistrarConfig(registrarType, registrarName, parameters);
+    }
+
+    private SimpleServiceConfig buildServiceConfig(Map.Entry<String, Map<String, String>> serviceEntry) {
+        SimpleServiceConfig.Builder builder = new SimpleServiceConfig.Builder();
+
+        Map<String, String> properties = serviceEntry.getValue();
+
+        String serviceName = serviceEntry.getKey();
+
+        String loadBalancerType = properties.get(LOAD_BALANCER);
+        if (loadBalancerType == null) {
+            loadBalancerType = properties.get(LOAD_BALANCER_EMBEDDED);
+        }
+        builder.setServiceName(serviceName);
+        if (loadBalancerType != null) {
+            SimpleServiceConfig.SimpleLoadBalancerConfig loadBalancerConfig = new SimpleServiceConfig.SimpleLoadBalancerConfig(
+                    loadBalancerType, propertiesForPrefix(LOAD_BALANCER, properties));
+
+            builder = builder.setLoadBalancer(loadBalancerConfig);
+        }
+
+        String serviceDiscoveryType = properties.get(SERVICE_DISCOVERY);
+        // for yaml it is more convenient to have stork.my-service.service-discovery.type, so let's support it too:
+        if (serviceDiscoveryType == null) {
+            serviceDiscoveryType = properties.get(SERVICE_DISCOVERY_EMBEDDED);
+        }
+        if (serviceDiscoveryType != null) {
+            SimpleServiceConfig.SimpleConfigWithType ConfigWithType = new SimpleServiceConfig.SimpleConfigWithType(
+                    serviceDiscoveryType, propertiesForPrefix(SERVICE_DISCOVERY, properties));
+
+            builder = builder.setServiceDiscovery(ConfigWithType);
+        }
+
+        return builder.build();
     }
 
     private String unwrapFromQuotes(String text) {
@@ -131,7 +170,7 @@ public class MicroProfileConfigProvider implements ConfigProvider {
         }
     }
 
-    private String servicePropertyKey(String text) {
+    private String propertyKey(String text) {
         if (!text.isEmpty() && text.charAt(0) == '.') {
             return text.substring(1);
         }
@@ -156,6 +195,11 @@ public class MicroProfileConfigProvider implements ConfigProvider {
     @Override
     public List<ServiceConfig> getConfigs() {
         return serviceConfigs;
+    }
+
+    @Override
+    public List<ServiceRegistrarConfig> getRegistrarConfigs() {
+        return registrarConfigs;
     }
 
     @Override
