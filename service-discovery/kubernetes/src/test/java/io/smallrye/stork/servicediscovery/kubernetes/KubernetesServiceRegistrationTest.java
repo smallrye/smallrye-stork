@@ -42,7 +42,6 @@ public class KubernetesServiceRegistrationTest {
     }
 
     @Test
-//    @Disabled("doesn't work yet")
     // TODO: fails with conflict on the second IP!
     void shouldRegisterServiceInstancesInDefaultNamespace() throws InterruptedException {
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
