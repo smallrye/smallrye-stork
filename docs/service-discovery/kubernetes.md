@@ -51,7 +51,7 @@ metadata:
   namespace: <namespace>
 rules:
   - apiGroups: [""] # "" indicates the core API group
-    resources: ["endpoints"] # stork queries service endpoints
+    resources: ["endpoints", "pods"] # stork queries service endpoints and pods
     verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
