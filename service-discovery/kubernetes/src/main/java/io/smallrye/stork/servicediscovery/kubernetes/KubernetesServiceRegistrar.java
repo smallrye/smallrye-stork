@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointAddressBuilder;
 import io.fabric8.kubernetes.api.model.EndpointPortBuilder;
+import io.fabric8.kubernetes.api.model.EndpointSubset;
 import io.fabric8.kubernetes.api.model.EndpointSubsetBuilder;
 import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.api.model.EndpointsBuilder;
@@ -44,7 +45,7 @@ public class KubernetesServiceRegistrar implements ServiceRegistrar<KubernetesMe
             future.complete();
         }, result -> {
             if (result.succeeded()) {
-                log.error("Instances of service {} has been resgistered ", serviceName);
+                log.info("Instances of service {} has been resgistered ", serviceName);
             } else {
                 log.error("Unable to register instances of service {}", serviceName,
                         result.cause());
@@ -80,14 +81,23 @@ public class KubernetesServiceRegistrar implements ServiceRegistrar<KubernetesMe
                     application + "-" + ipAsSuffix(ipAddress), namespace, null, UUID.randomUUID().toString());
             EndpointAddress endpointAddress = new EndpointAddressBuilder().withIp(ipAddress).withTargetRef(targetRef)
                     .build();
-            Endpoints endpoint = new EndpointsBuilder()
-                    .withNewMetadata().withName(application).withLabels(serviceLabels).endMetadata()
-                    .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddress)
-                            .addToPorts(new EndpointPortBuilder().withPort(8080).build())
-                            .build())
+            EndpointSubset endpointSubset = new EndpointSubsetBuilder().withAddresses(endpointAddress)
+                    .addToPorts(new EndpointPortBuilder().withPort(8080).build())
                     .build();
-
-            client.endpoints().inNamespace(namespace).withName(application).create(endpoint);
+            // check if an endpoints already exists otherwise we will have a conflict error trying to create a new one with the same name
+            Endpoints endpoints = client.endpoints().inNamespace(namespace).withName(application).get();
+            if (endpoints != null) {
+                Endpoints endpoint = new EndpointsBuilder(endpoints).addToSubsets(endpointSubset).build();
+                client.endpoints().inNamespace(namespace).withName(application).patch(endpoint);
+            } else {
+                Endpoints newEndpoint = new EndpointsBuilder()
+                        .withNewMetadata().withName(application).withLabels(serviceLabels).endMetadata()
+                        .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddress)
+                                .addToPorts(new EndpointPortBuilder().withPort(8080).build())
+                                .build())
+                        .build();
+                client.endpoints().inNamespace(namespace).withName(application).create(newEndpoint);
+            }
         }
     }
 
@@ -95,6 +105,7 @@ public class KubernetesServiceRegistrar implements ServiceRegistrar<KubernetesMe
             KubernetesClient client) {
         Map<String, String> podLabels = new HashMap<>(labels);
         podLabels.put("ui", "ui-" + ipAsSuffix(ipAdress));
+        //TO DO create the pod with a container? Should we actually create the backendPod?
         Pod backendPod = new PodBuilder().withNewMetadata().withName(name + "-" + ipAsSuffix(ipAdress))
                 .withLabels(podLabels)
                 .endMetadata()
