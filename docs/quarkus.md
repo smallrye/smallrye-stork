@@ -35,17 +35,17 @@ The load balancer picks a single `ServiceInstance` for a call.
 ### Dependencies
 To use the service discovery and the load balancer of your choosing, you need to add the appropriate dependencies to your application. 
 For example, if you wish to use Consul and load-balance the calls with round-robin, add the following to your `pom.xml`:
+
 ```xml
     <dependency>
         <groupId>io.smallrye.stork</groupId>
         <artifactId>stork-service-discovery-consul</artifactId>
-        <version>{{version.current}}</version>
     </dependency>
 ```
 
-
 !!! note
-No need to add a dependency for the round-robin load-balancer. This strategy is built-in.
+    No need to add a dependency for the round-robin load-balancer. This strategy is built-in.
+    Also, no need to specify the stork version, Quarkus imports the Stork _BOM_.
 
 
 When using Eureka, Kubernetes, or any other service discovery mechanism, or a different load balancer, replace the dependencies above with the ones you need.
@@ -56,9 +56,9 @@ The last piece of the puzzle is the actual service configuration.
 If your Consul instance is running on `localhost` on port `8500`, service discovery configuration should look as follows:
 
 ```properties
-stork.hello-service.service-discovery=consul
-stork.hello-service.service-discovery.consul-host=localhost
-stork.hello-service.service-discovery.consul-port=8500
+quarkus.stork.hello-service.service-discovery=consul
+quarkus.stork.hello-service.service-discovery.consul-host=localhost
+quarkus.stork.hello-service.service-discovery.consul-port=8500
 ```
 
 !!! note

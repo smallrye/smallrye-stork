@@ -33,9 +33,16 @@ Load balancer implementation consists of three elements:
 A _type_, for example `acme-load-balancer`, identifies each provider.
 This _type_ is used in the configuration to reference the provider:
 
-```properties
-stork.my-service.load-balancer=acme-load-balancer
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.load-balancer=acme-load-balancer
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.load-balancer=acme-load-balancer 
+    ```
+
 
 A `LoadBalancerProvider` implementation needs to be annotated with `@LoadBalancerType` that defines the _type_.
 Any configuration properties that the provider expects should be defined with `@LoadBalancerAttribute` annotations placed on the provider.
@@ -71,10 +78,17 @@ If this is not the case for your implementation, override the `requiresStrictRec
 In the project using it, don't forget to add the dependency on the module providing your implementation.
 Then, in the configuration, just add:
 
-```properties
-stork.my-service.service-discovery=...
-stork.my-service.load-balancer=acme-load-balancer
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery=...
+    stork.my-service.load-balancer=acme-load-balancer\
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery=...
+    quarkus.stork.my-service.load-balancer=acme-load-balancer
+    ```
 
 Then, Stork will use your implementation to select the `my-service` service instance.
 

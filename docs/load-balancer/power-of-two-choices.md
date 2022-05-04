@@ -27,11 +27,21 @@ First, you need to add the random load-balancer to your project:
 
 For each service expected to use a random service selection, configure the `load-balancer` to be `power-of-two-choices`:
 
-```properties
-stork.my-service.service-discovery=...
-stork.my-service.service-discovery...=...
-stork.my-service.load-balancer=power-of-two-choices
-```
+
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery=...
+    stork.my-service.service-discovery...=...
+    stork.my-service.load-balancer=power-of-two-choices
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery=...
+    quarkus.stork.my-service.service-discovery...=...
+    quarkus.stork.my-service.load-balancer=power-of-two-choices
+    ```
+
 Supported attributes are the following:
 
 --8<-- "load-balancer/power-of-two-choices/target/classes/META-INF/stork-docs/power-of-two-choices-lb-attributes.txt"

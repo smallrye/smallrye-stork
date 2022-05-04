@@ -75,10 +75,18 @@ roleRef:
 
 For each service expected to be exposed as _Kubernetes Service_, configure the lookup:
 
-```properties
-stork.my-service.service-discovery=kubernetes
-stork.my-service.service-discovery.k8s-namespace=my-namespace
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery=kubernetes
+    stork.my-service.service-discovery.k8s-namespace=my-namespace
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery=kubernetes
+    quarkus.stork.my-service.service-discovery.k8s-namespace=my-namespace
+    ```
+
 
 Stork looks for the _Kubernetes Service_ with the given name (`my-service` in the previous example) in the specified namespace.
 

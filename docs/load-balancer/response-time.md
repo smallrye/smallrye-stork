@@ -30,11 +30,20 @@ To use this load balancer, start with adding the least-response-time load-balanc
 
 For each service expected to use a least-response-time selection, configure the `load-balancer` to be `least-response-time`:
 
-```properties
-stork.my-service.service-discovery=...
-stork.my-service.service-discovery...=...
-stork.my-service.load-balancer=least-response-time
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery=...
+    stork.my-service.service-discovery...=...
+    stork.my-service.load-balancer=least-response-time
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery=...
+    quarkus.stork.my-service.service-discovery...=...
+    quarkus.stork.my-service.load-balancer=least-response-time
+    ```
+
 
 The following attributes are supported:
 
