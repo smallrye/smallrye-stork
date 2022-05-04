@@ -20,16 +20,16 @@ For each service expected to use a random service selection, configure the `load
 
 === "stork standalone"
     ```properties
-    stork.my-service.service-discovery=...
+    stork.my-service.service-discovery.type=...
     stork.my-service.service-discovery...=...
-    stork.my-service.load-balancer=random
+    stork.my-service.load-balancer.type=random
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.service-discovery=...
+    quarkus.stork.my-service.service-discovery.type=...
     quarkus.stork.my-service.service-discovery...=...
-    quarkus.stork.my-service.load-balancer=random
+    quarkus.stork.my-service.load-balancer.type=random
     ```
 
 Supported attributes are the following:

@@ -22,14 +22,14 @@ For each application instance expected to be registered in Eureka, configure the
 
 === "stork standalone"
     ```properties
-    stork.my-service.service-discovery=eureka
+    stork.my-service.service-discovery.type=eureka
     stork.my-service.service-discovery.eureka-host=localhost
     stork.my-service.service-discovery.eureka-port=8761
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.service-discovery=eureka
+    quarkus.stork.my-service.service-discovery.type=eureka
     quarkus.stork.my-service.service-discovery.eureka-host=localhost
     quarkus.stork.my-service.service-discovery.eureka-port=8761
     ```

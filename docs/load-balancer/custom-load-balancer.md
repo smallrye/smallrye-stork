@@ -35,12 +35,12 @@ This _type_ is used in the configuration to reference the provider:
 
 === "stork standalone"
     ```properties
-    stork.my-service.load-balancer=acme-load-balancer
+    stork.my-service.load-balancer.type=acme-load-balancer
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.load-balancer=acme-load-balancer 
+    quarkus.stork.my-service.load-balancer.type=acme-load-balancer 
     ```
 
 
@@ -80,14 +80,14 @@ Then, in the configuration, just add:
 
 === "stork standalone"
     ```properties
-    stork.my-service.service-discovery=...
-    stork.my-service.load-balancer=acme-load-balancer\
+    stork.my-service.service-discovery.type=...
+    stork.my-service.load-balancer.type=acme-load-balancer\
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.service-discovery=...
-    quarkus.stork.my-service.load-balancer=acme-load-balancer
+    quarkus.stork.my-service.service-discovery.type=...
+    quarkus.stork.my-service.load-balancer.type=acme-load-balancer
     ```
 
 Then, Stork will use your implementation to select the `my-service` service instance.

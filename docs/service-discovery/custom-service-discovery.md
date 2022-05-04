@@ -35,12 +35,12 @@ This _type_ is used in the configuration to reference the provider:
 
 === "stork standalone"
     ```properties
-    stork.my-service.service-discovery=acme
+    stork.my-service.service-discovery.type=acme
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.service-discovery=acme
+    quarkus.stork.my-service.service-discovery.type=acme
     ```
 
 A `ServiceDiscoveryProvider` implementation needs to be annotated with `@ServiceDiscoveryType` that defines the _type_.
@@ -74,14 +74,14 @@ Then, in the configuration, just add:
 
 === "stork standalone"
     ```properties
-    stork.my-service.service-discovery=acme
+    stork.my-service.service-discovery.type=acme
     stork.my-service.service-discovery.host=localhost
     stork.my-service.service-discovery.port=1234
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.service-discovery=acme
+    quarkus.stork.my-service.service-discovery.type=acme
     quarkus.stork.my-service.service-discovery.host=localhost
     quarkus.stork.my-service.service-discovery.port=1234
     ```

@@ -56,7 +56,7 @@ The last piece of the puzzle is the actual service configuration.
 If your Consul instance is running on `localhost` on port `8500`, service discovery configuration should look as follows:
 
 ```properties
-quarkus.stork.hello-service.service-discovery=consul
+quarkus.stork.hello-service.service-discovery.type=consul
 quarkus.stork.hello-service.service-discovery.consul-host=localhost
 quarkus.stork.hello-service.service-discovery.consul-port=8500
 ```

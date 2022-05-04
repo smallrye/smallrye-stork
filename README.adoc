@@ -43,8 +43,8 @@ When integrated into the framework, all these steps can be omitted, and you only
 
 [source, properties]
 ----
-stork.my-service.service-discovery=consul            # <1>
-stork.my-service.load-balancer=least-response-time   # <2>
+stork.my-service.service-discovery.type=consul            # <1>
+stork.my-service.load-balancer.type=least-response-time   # <2>
 
 hello/mp-rest/url=stork://my-service/hello           # <3>
 ----

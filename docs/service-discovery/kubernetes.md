@@ -77,13 +77,13 @@ For each service expected to be exposed as _Kubernetes Service_, configure the l
 
 === "stork standalone"
     ```properties
-    stork.my-service.service-discovery=kubernetes
+    stork.my-service.service-discovery.type=kubernetes
     stork.my-service.service-discovery.k8s-namespace=my-namespace
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.service-discovery=kubernetes
+    quarkus.stork.my-service.service-discovery.type=kubernetes
     quarkus.stork.my-service.service-discovery.k8s-namespace=my-namespace
     ```
 
