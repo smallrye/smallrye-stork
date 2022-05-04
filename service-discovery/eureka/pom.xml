@@ -29,7 +29,7 @@
     <name>SmallRye Stork Service Discovery : Eureka</name>
 
     <properties>
-        <spring-cloud.version>2021.0.1</spring-cloud.version>
+        <spring-cloud.version>2021.0.2</spring-cloud.version>
         <revapi.skip>false</revapi.skip>
     </properties>
 
