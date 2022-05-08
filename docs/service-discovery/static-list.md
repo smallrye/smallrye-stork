@@ -19,11 +19,17 @@ To use the `static` service discovery, first add the appropriate Service Discove
 
 For each service that should use the static list of service instances configure the service discovery `type`:
 
-```properties
-stork.my-service.service-discovery.type=static
-stork.my-service.service-discovery.address-list=localhost:8080,localhost:8081
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=static
+    stork.my-service.service-discovery.address-list=localhost:8080,localhost:8081
+    ```
 
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=static
+    quarkus.stork.my-service.service-discovery.address-list=localhost:8080,localhost:8081
+    ```
 
 These are all the static service discovery parameters:
 

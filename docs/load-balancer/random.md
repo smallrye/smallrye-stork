@@ -18,11 +18,19 @@ First, you need to add the random load-balancer to your project:
 
 For each service expected to use a random service selection, configure the `load-balancer` to be `random`:
 
-```properties
-stork.my-service.service-discovery=...
-stork.my-service.service-discovery...=...
-stork.my-service.load-balancer=random
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=...
+    stork.my-service.service-discovery...=...
+    stork.my-service.load-balancer.type=random
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=...
+    quarkus.stork.my-service.service-discovery...=...
+    quarkus.stork.my-service.load-balancer.type=random
+    ```
 
 Supported attributes are the following:
 

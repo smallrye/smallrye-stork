@@ -23,12 +23,19 @@ First, you need to add the `least-requests` load-balancer to your project:
 
 For each service expected to use a least-response-time selection, configure the `load-balancer` to be `least-requests`:
 
-```properties
-stork.my-service.service-discovery=...
-stork.my-service.service-discovery...=...
-stork.my-service.load-balancer=least-requests
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=...
+    stork.my-service.service-discovery...=...
+    stork.my-service.load-balancer.type=least-requests
+    ```
 
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=...
+    quarkus.stork.my-service.service-discovery...=...
+    quarkus.stork.my-service.load-balancer.type=least-requests
+    ```
 
 [//]: # (Supported attributes are the following:)
 

@@ -23,10 +23,15 @@ First, you need to add the Stork Consul Service Discovery provider:
 
 For each service that should get the service instances from Consul, configure the service discovery `type`:
 
-```properties
-stork.my-service.service-discovery.type=consul
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=consul
+    ```
 
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=consul
+    ```
 
 Consul service discovery is configured with the following parameters:
 

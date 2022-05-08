@@ -33,9 +33,15 @@ Service discovery implementation consists of three elements:
 A _type_, for example, `acme`, identifies each provider.
 This _type_ is used in the configuration to reference the provider:
 
-```properties
-stork.my-service.service-discovery=acme
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=acme
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=acme
+    ```
 
 A `ServiceDiscoveryProvider` implementation needs to be annotated with `@ServiceDiscoveryType` that defines the _type_.
 Any configuration properties that the provider expects should be defined with `@ServiceDiscoveryAttribute` annotations placed on the provider.
@@ -66,11 +72,20 @@ Most of the time, the lookup is a remote operation.
 In the project using it, don't forget to add the dependency on the module providing your implementation.
 Then, in the configuration, just add:
 
-```properties
-stork.my-service.service-discovery=acme
-stork.my-service.service-discovery.host=localhost
-stork.my-service.service-discovery.port=1234
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=acme
+    stork.my-service.service-discovery.host=localhost
+    stork.my-service.service-discovery.port=1234
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=acme
+    quarkus.stork.my-service.service-discovery.host=localhost
+    quarkus.stork.my-service.service-discovery.port=1234
+    ```
+
 
 Then, Stork will use your implementation to locate the `my-service` service.
 

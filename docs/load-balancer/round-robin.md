@@ -13,8 +13,16 @@ Stork automatically uses this strategy when none are configured.
 
 However, you can also configure it explicitly as follows:
 
-```properties
-stork.my-service.service-discovery=...
-stork.my-service.service-discovery...=...
-stork.my-service.load-balancer=round-robin
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=...
+    stork.my-service.service-discovery...=...
+    stork.my-service.load-balancer.type=round-robin
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=...
+    quarkus.stork.my-service.service-discovery...=...
+    quarkus.stork.my-service.load-balancer.type=round-robin
+    ```

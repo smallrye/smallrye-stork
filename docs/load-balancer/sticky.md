@@ -18,11 +18,19 @@ Precisely, the load balancer works as follows:
 
 To use the `sticky` load service selection strategy, set the load balancer type to `sticky`:
 
-```properties
-stork.my-service.service-discovery=...
-stork.my-service.service-discovery...=...
-stork.my-service.load-balancer.type=sticky
-```
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=...
+    stork.my-service.service-discovery...=...
+    stork.my-service.load-balancer.type=sticky
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=...
+    quarkus.stork.my-service.service-discovery...=...
+    quarkus.stork.my-service.load-balancer.type=sticky
+    ```
 
 
 The following attributes are supported:
