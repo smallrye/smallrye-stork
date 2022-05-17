@@ -15,11 +15,6 @@
         based on configuration annotations
     </description>
 
-    <properties>
-        <!-- disable javadoc, the API of this annotation processor is not intended to be used by the user directly -->
-        <maven.javadoc.skip>true</maven.javadoc.skip>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
