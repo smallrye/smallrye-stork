@@ -13,7 +13,6 @@
 
     <properties>
         <revapi.skip>false</revapi.skip>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <name>SmallRye Stork : Test Utilities</name>
