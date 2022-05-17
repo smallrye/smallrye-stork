@@ -1,0 +1,4 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `host` | Yes |  | Host name of the service discovery server. |
+| `port` | No |  | Hort of the service discovery server. |

@@ -1,0 +1,3 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `use-secure-random` | No | `false` | Whether the load balancer should use a SecureRandom instead of a Random (default). Check [this page](https://stackoverflow.com/questions/11051205/difference-between-java-util-random-and-java-security-securerandom) to understand the difference |
