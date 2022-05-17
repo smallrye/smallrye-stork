@@ -14,6 +14,7 @@
     <properties>
         <sonar.skip>true</sonar.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
+        <skipStaging>true</skipStaging>
     </properties>
 
     <build>
@@ -54,17 +55,6 @@
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <outputAbsoluteArtifactFilename>false</outputAbsoluteArtifactFilename>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <executions>
-                    <!-- disable standard deploy -->
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>
