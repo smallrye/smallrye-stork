@@ -1,0 +1,5 @@
+ | Attribute            | Mandatory  | Default Value      | Description  |
+ |----------------------|------------|--------------------|--------------|
+| `declining-factor` | No | `0.9` | How much *score* should decline in time, see Score calculation in the docs for details. |
+| `error-penalty` | No | `60s` | This load balancer treats an erroneous response as a response after this time. |
+| `use-secure-random` | No | `false` | Whether the load balancer should use a SecureRandom instead of a Random (default). Check [this page](https://stackoverflow.com/questions/11051205/difference-between-java-util-random-and-java-security-securerandom) to understand the difference |
