@@ -24,47 +24,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.method.parameterTypeChanged",
-        "old": "parameter void io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancer::<init>(===io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProviderConfiguration===)",
-        "new": "parameter void io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancer::<init>(===io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeConfiguration===)",
-        "parameterIndex": "0",
-        "justification": "The generated LeastResponseTimeLoadBalancerProviderConfiguration has been renamed to LeastResponseTimeConfiguration"
-      },
-      {
-        "ignore": true,
-        "code": "java.method.parameterTypeChanged",
-        "old": "parameter io.smallrye.stork.api.LoadBalancer io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider::createLoadBalancer(===io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProviderConfiguration===, io.smallrye.stork.api.ServiceDiscovery)",
-        "new": "parameter io.smallrye.stork.api.LoadBalancer io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider::createLoadBalancer(===io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeConfiguration===, io.smallrye.stork.api.ServiceDiscovery)",
-        "parameterIndex": "0",
-        "justification": "The generated LeastResponseTimeLoadBalancerProviderConfiguration has been renamed to LeastResponseTimeConfiguration"
-      },
-      {
-        "ignore": true,
-        "code": "java.class.noLongerImplementsInterface",
-        "old": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider",
-        "new": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider",
-        "interface": "io.smallrye.stork.spi.LoadBalancerProvider<io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProviderConfiguration>",
-        "justification": "The generated LeastResponseTimeLoadBalancerProviderConfiguration has been renamed to LeastResponseTimeConfiguration"
-      },
-      {
-        "ignore": true,
-        "code": "java.class.superTypeTypeParametersChanged",
-        "old": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider",
-        "new": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider",
-        "oldSuperType": "io.smallrye.stork.spi.LoadBalancerProvider<io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProviderConfiguration>",
-        "newSuperType": "io.smallrye.stork.spi.LoadBalancerProvider<io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeConfiguration>",
-        "justification": "The generated LeastResponseTimeLoadBalancerProviderConfiguration has been renamed to LeastResponseTimeConfiguration"
-      },
-      {
-        "ignore": true,
-        "code": "java.class.removed",
-        "old": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProviderConfiguration",
-        "justification": "The generated LeastResponseTimeLoadBalancerProviderConfiguration has been renamed to LeastResponseTimeConfiguration"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",
