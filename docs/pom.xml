@@ -7,13 +7,12 @@
         <artifactId>stork-parent</artifactId>
         <version>1.1.1-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-doc</artifactId>
+    <artifactId>stork-doc</artifactId>
 
     <name>SmallRye Stork : Doc</name>
 
     <properties>
         <sonar.skip>true</sonar.skip>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <build>
@@ -56,20 +55,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <configuration>
-                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-                </configuration>
             </plugin>
         </plugins>
     </build>
