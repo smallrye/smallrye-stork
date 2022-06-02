@@ -35,7 +35,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
-        <version.assertj>3.22.0</version.assertj>
+        <version.assertj>3.23.1</version.assertj>
         <version.microprofile-config-api>2.0</version.microprofile-config-api>
         <version.mutiny>1.5.0</version.mutiny>
         <version.smallrye-config>2.10.0</version.smallrye-config>
