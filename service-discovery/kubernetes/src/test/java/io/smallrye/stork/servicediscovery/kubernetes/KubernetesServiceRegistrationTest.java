@@ -8,7 +8,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -58,9 +57,6 @@ public class KubernetesServiceRegistrationTest {
             kubeRegistrar.registerServiceInstance(serviceName, Metadata.of(KubernetesMetadataKey.class)
                     .with(KubernetesMetadataKey.META_K8S_NAMESPACE, defaultNamespace), ip).subscribe()
                     .with(success -> registrationLatch.countDown(), failure -> fail(""));
-        }
-        if (!registrationLatch.await(10, TimeUnit.SECONDS)) {
-            fail("Failed to register kubernetes services on time. Check the log above for details");
         }
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
