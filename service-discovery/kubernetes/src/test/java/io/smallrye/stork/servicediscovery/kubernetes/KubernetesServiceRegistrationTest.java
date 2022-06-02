@@ -42,7 +42,6 @@ public class KubernetesServiceRegistrationTest {
     }
 
     @Test
-    // TODO: fails with conflict on the second IP!
     void shouldRegisterServiceInstancesInDefaultNamespace() throws InterruptedException {
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace));
