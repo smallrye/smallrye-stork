@@ -14,7 +14,8 @@ import java.lang.annotation.Target;
  * use the following to set the value:
  * {@code stork-registrar.<my-registrar>.my-attribute}
  *
- * In the configuration class generated for the service registrar, this attribute will be exposed through {@code getMyAttribute()}
+ * In the configuration class generated for the service registrar, this attribute will be exposed through
+ * {@code getMyAttribute()}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(TYPE)
