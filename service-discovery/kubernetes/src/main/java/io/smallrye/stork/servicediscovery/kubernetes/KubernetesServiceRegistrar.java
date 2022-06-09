@@ -42,7 +42,7 @@ public class KubernetesServiceRegistrar implements ServiceRegistrar<KubernetesMe
     public Uni<Void> registerServiceInstance(String serviceName, Metadata<KubernetesMetadataKey> metadata, String ipAddress,
             int port) {
         return Uni.createFrom().emitter(em -> vertx.executeBlocking(future -> {
-            registerKubernetesService(serviceName, metadata, ipAddress);
+            registerKubernetesService(serviceName, metadata, ipAddress, port);
             future.complete();
         }, result -> {
             if (result.succeeded()) {
@@ -54,7 +54,8 @@ public class KubernetesServiceRegistrar implements ServiceRegistrar<KubernetesMe
         }));
     }
 
-    private void registerKubernetesService(String application, Metadata<KubernetesMetadataKey> metadata, String ipAddress) {
+    private void registerKubernetesService(String application, Metadata<KubernetesMetadataKey> metadata, String ipAddress,
+            int port) {
         Config base = Config.autoConfigure(null);
         String masterUrl = config.getK8sHost() == null ? base.getMasterUrl() : config.getK8sHost();
 
@@ -83,7 +84,7 @@ public class KubernetesServiceRegistrar implements ServiceRegistrar<KubernetesMe
             EndpointAddress endpointAddress = new EndpointAddressBuilder().withIp(ipAddress).withTargetRef(targetRef)
                     .build();
             EndpointSubset endpointSubset = new EndpointSubsetBuilder().withAddresses(endpointAddress)
-                    .addToPorts(new EndpointPortBuilder().withPort(8080).build())
+                    .addToPorts(new EndpointPortBuilder().withPort(port).build())
                     .build();
             // check if an endpoints already exists otherwise we will have a conflict error trying to create a new one with the same name
             Endpoints endpoints = client.endpoints().inNamespace(namespace).withName(application).get();
@@ -94,7 +95,7 @@ public class KubernetesServiceRegistrar implements ServiceRegistrar<KubernetesMe
                 Endpoints newEndpoint = new EndpointsBuilder()
                         .withNewMetadata().withName(application).withLabels(serviceLabels).endMetadata()
                         .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddress)
-                                .addToPorts(new EndpointPortBuilder().withPort(8080).build())
+                                .addToPorts(new EndpointPortBuilder().withPort(port).build())
                                 .build())
                         .build();
                 client.endpoints().inNamespace(namespace).withName(application).create(newEndpoint);
