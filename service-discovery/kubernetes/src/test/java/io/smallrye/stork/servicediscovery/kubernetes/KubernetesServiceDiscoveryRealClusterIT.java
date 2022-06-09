@@ -99,7 +99,7 @@ public class KubernetesServiceDiscoveryRealClusterIT {
         CountDownLatch registrationLatch = new CountDownLatch(ips.length);
         for (String ip : ips) {
             kubeRegistrar.registerServiceInstance(serviceName, Metadata.of(KubernetesMetadataKey.class)
-                    .with(KubernetesMetadataKey.META_K8S_NAMESPACE, "stork"), ip).subscribe()
+                    .with(KubernetesMetadataKey.META_K8S_NAMESPACE, "stork"), ip, 8080).subscribe()
                     .with(success -> registrationLatch.countDown(), failure -> fail(""));
         }
         if (!registrationLatch.await(60, TimeUnit.SECONDS)) {

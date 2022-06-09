@@ -69,7 +69,7 @@ public class MicroProfileConfigProviderTest {
         assertThat(serviceRegistrar).isInstanceOf(TestServiceRegistrarProvider.TestServiceRegistrar.class);
 
         serviceRegistrar.registerServiceInstance("foo", Metadata.of(TestMetadata.class)
-                .with(TestMetadata.FIRST, "1st"), "1.1.1.1")
+                .with(TestMetadata.FIRST, "1st"), "1.1.1.1", 8080)
                 .await().atMost(Duration.ofSeconds(5));
 
         assertThat(TestServiceRegistrarProvider.getRegistrations()).hasSize(1);

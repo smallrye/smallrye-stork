@@ -39,7 +39,8 @@ public class KubernetesServiceRegistrar implements ServiceRegistrar<KubernetesMe
     }
 
     @Override
-    public Uni<Void> registerServiceInstance(String serviceName, Metadata<KubernetesMetadataKey> metadata, String ipAddress) {
+    public Uni<Void> registerServiceInstance(String serviceName, Metadata<KubernetesMetadataKey> metadata, String ipAddress,
+            int port) {
         return Uni.createFrom().emitter(em -> vertx.executeBlocking(future -> {
             registerKubernetesService(serviceName, metadata, ipAddress);
             future.complete();
