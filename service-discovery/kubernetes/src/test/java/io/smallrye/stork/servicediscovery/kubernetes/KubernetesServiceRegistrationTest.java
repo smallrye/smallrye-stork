@@ -55,7 +55,7 @@ public class KubernetesServiceRegistrationTest {
         CountDownLatch registrationLatch = new CountDownLatch(ips.length);
         for (String ip : ips) {
             kubeRegistrar.registerServiceInstance(serviceName, Metadata.of(KubernetesMetadataKey.class)
-                    .with(KubernetesMetadataKey.META_K8S_NAMESPACE, defaultNamespace), ip).subscribe()
+                    .with(KubernetesMetadataKey.META_K8S_NAMESPACE, defaultNamespace), ip, 8080).subscribe()
                     .with(success -> registrationLatch.countDown(), failure -> fail(""));
         }
 

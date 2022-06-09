@@ -40,15 +40,17 @@ public class TestServiceRegistrarProvider
         public final TestSrRegistrarConfiguration config;
         public final Metadata<TestMetadata> metadata;
         public final String ipAddress;
+        public final int port;
         public final String serviceName;
 
         public Registration(String serviceRegistrarName, TestSrRegistrarConfiguration config, Metadata<TestMetadata> metadata,
-                String serviceName, String ipAddress) {
+                String serviceName, String ipAddress, int port) {
             this.serviceRegistrarName = serviceRegistrarName;
             this.config = config;
             this.metadata = metadata;
             this.ipAddress = ipAddress;
             this.serviceName = serviceName;
+            this.port = port;
         }
     }
 
@@ -63,8 +65,9 @@ public class TestServiceRegistrarProvider
         }
 
         @Override
-        public Uni<Void> registerServiceInstance(String serviceName, Metadata<TestMetadata> metadata, String ipAddress) {
-            registrations.add(new Registration(serviceRegistrarName, config, metadata, serviceName, ipAddress));
+        public Uni<Void> registerServiceInstance(String serviceName, Metadata<TestMetadata> metadata, String ipAddress,
+                int port) {
+            registrations.add(new Registration(serviceRegistrarName, config, metadata, serviceName, ipAddress, port));
             return Uni.createFrom().voidItem();
         }
     }
