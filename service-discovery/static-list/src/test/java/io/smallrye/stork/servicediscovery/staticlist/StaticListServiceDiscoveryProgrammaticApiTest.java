@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,10 @@ public class StaticListServiceDiscoveryProgrammaticApiTest {
                 .defineIfAbsent("third-service", ServiceDefinition.of(
                         new StaticConfiguration().withAddressList("localhost:8083")))
                 .defineIfAbsent("secured-service", ServiceDefinition.of(
-                        new StaticConfiguration().withAddressList("localhost:443, localhost")));
+                        new StaticConfiguration().withAddressList("localhost:443, localhost")))
+                .defineIfAbsent("shuffle-service", ServiceDefinition.of(
+                        new StaticConfiguration()
+                                .withAddressList("localhost:8080, localhost:8081").withShuffle("true")));
     }
 
     @Test
@@ -58,6 +62,27 @@ public class StaticListServiceDiscoveryProgrammaticApiTest {
                 .await().atMost(Duration.ofSeconds(5));
 
         assertThat(serviceInstances).hasSize(2);
+
+        List<String> list = serviceInstances.stream().map(si -> si.getHost() + ":" + si.getPort()).collect(Collectors.toList());
+        assertThat(list).containsExactly("localhost:8080", "localhost:8081");
+
+        assertThat(serviceInstances.stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("localhost",
+                "localhost");
+        assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactly(8080, 8081);
+        assertThat(serviceInstances.stream().map(ServiceInstance::isSecure)).allSatisfy(b -> assertThat(b).isFalse());
+    }
+
+    @Test
+    void shouldGetAllServiceInstancesWithShuffle() {
+        List<ServiceInstance> serviceInstances = stork.getService("shuffle-service")
+                .getInstances()
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(serviceInstances).hasSize(2);
+
+        List<String> list = serviceInstances.stream().map(si -> si.getHost() + ":" + si.getPort()).collect(Collectors.toList());
+        assertThat(list).containsExactlyInAnyOrder("localhost:8080", "localhost:8081");
+
         assertThat(serviceInstances.stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("localhost",
                 "localhost");
         assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,

@@ -24,7 +24,19 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.annotation.attributeValueChanged",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProvider",
+        "annotationType": "io.smallrye.stork.api.config.ServiceDiscoveryAttributes",
+        "attribute": "value",
+        "oldValue": "{@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"address-list\", description = \"A comma-separated list of addresses (host:port). The default port is 80.\", required = true), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.\")}",
+        "newValue": "{@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"address-list\", description = \"A comma-separated list of addresses (host:port). The default port is 80.\", required = true), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"shuffle\", description = \"Whether the list of address must be shuffled to avoid using the first address on every startup.\", defaultValue = \"false\")}",
+        "justification": "Added the `shuffle` attribute"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",
