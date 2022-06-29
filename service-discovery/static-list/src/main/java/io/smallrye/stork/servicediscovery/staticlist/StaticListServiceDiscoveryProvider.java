@@ -2,6 +2,7 @@ package io.smallrye.stork.servicediscovery.staticlist;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.smallrye.stork.api.ServiceDiscovery;
@@ -21,6 +22,7 @@ import io.smallrye.stork.utils.StorkAddressUtils;
 @ServiceDiscoveryType("static")
 @ServiceDiscoveryAttribute(name = "address-list", description = "A comma-separated list of addresses (host:port). The default port is 80.", required = true)
 @ServiceDiscoveryAttribute(name = "secure", description = "Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.")
+@ServiceDiscoveryAttribute(name = "shuffle", description = "Whether the list of address must be shuffled to avoid using the first address on every startup.", defaultValue = "false")
 public class StaticListServiceDiscoveryProvider
         implements ServiceDiscoveryProvider<StaticConfiguration> {
 
@@ -44,6 +46,10 @@ public class StaticListServiceDiscoveryProvider
                 throw new IllegalArgumentException(
                         "Address not parseable to URL: " + url + " for service " + serviceName);
             }
+        }
+
+        if (Boolean.parseBoolean(config.getShuffle())) {
+            Collections.shuffle(addressList);
         }
 
         return new StaticListServiceDiscovery(addressList);
