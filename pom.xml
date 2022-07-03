@@ -42,6 +42,8 @@
 
         <vertx.version>4.2.2</vertx.version>
         <version.vertx-mutiny-bindings>2.22.0</version.vertx-mutiny-bindings>
+        <!-- override the testcontainers version with the newest one -->
+        <version.testcontainers>1.17.3</version.testcontainers>
 
         <kubernetes-client.version>5.12.2</kubernetes-client.version>
         <version.slf4j>1.7.36</version.slf4j>
@@ -311,6 +313,7 @@
         <module>microprofile</module>
         <module>service-discovery/static-list</module>
         <module>service-discovery/consul</module>
+        <module>service-discovery/dns</module>
         <module>service-discovery/kubernetes</module>
         <module>service-discovery/eureka</module>
         <module>service-discovery/composite</module>

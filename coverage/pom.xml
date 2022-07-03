@@ -56,6 +56,11 @@
 
         <dependency>
             <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-service-discovery-dns</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-service-discovery-kubernetes</artifactId>
         </dependency>
 

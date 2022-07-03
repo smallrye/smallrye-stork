@@ -10,6 +10,7 @@ nav:
   - Using Stork with Quarkus: './quarkus.md'
   - Service Discovery:
     - Consul: 'service-discovery/consul.md'
+    - DNS: 'service-discovery/dns.md'
     - Kubernetes: 'service-discovery/kubernetes.md'
     - Eureka: 'service-discovery/eureka.md'
     - Composite: 'service-discovery/composite.md'

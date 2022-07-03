@@ -22,6 +22,6 @@ public class StickyLoadBalancerProvider
     @Override
     public LoadBalancer createLoadBalancer(StickyConfiguration config,
             ServiceDiscovery serviceDiscovery) {
-        return new StickyLoadBalancer(DurationUtils.parseDuration(config.getFailureBackoffTime()));
+        return new StickyLoadBalancer(DurationUtils.parseDuration(config.getFailureBackoffTime(), FAILURE_BACKOFF_TIME));
     }
 }

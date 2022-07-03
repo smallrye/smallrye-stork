@@ -1,5 +1,7 @@
 package io.smallrye.stork.loadbalancer.leastresponsetime;
 
+import static io.smallrye.stork.impl.CachingServiceDiscovery.REFRESH_PERIOD;
+
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,7 +37,7 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
      * @param config the configuration, must not be {@code null}
      */
     public LeastResponseTimeLoadBalancer(LeastResponseTimeConfiguration config) {
-        long errorPenalty = DurationUtils.parseDuration(config.getErrorPenalty()).toNanos();
+        long errorPenalty = DurationUtils.parseDuration(config.getErrorPenalty(), REFRESH_PERIOD).toNanos();
         double decliningFactor = Double.parseDouble(config.getDecliningFactor());
         powersOfDecliningFactor = new FastPower(decliningFactor);
         callStatistics = new CallStatistics(errorPenalty, powersOfDecliningFactor);

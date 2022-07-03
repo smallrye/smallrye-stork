@@ -24,9 +24,9 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>stork-service-discovery-consul</artifactId>
+    <artifactId>stork-service-discovery-dns</artifactId>
 
-    <name>SmallRye Stork Service Discovery : Consul</name>
+    <name>SmallRye Stork Service Discovery : DNS</name>
 
     <properties>
         <revapi.skip>false</revapi.skip>
@@ -43,7 +43,12 @@
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
             <artifactId>vertx-consul-client</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
