@@ -54,7 +54,7 @@
         <revapi-reporter-text.version>0.14.6</revapi-reporter-text.version>
         <revapi.skip>true</revapi.skip>
 
-        <jandex-maven-plugin.version>1.2.2</jandex-maven-plugin.version>
+        <jandex-maven-plugin.version>1.2.3</jandex-maven-plugin.version>
 
         <plugin.version.failsafe>3.0.0-M7</plugin.version.failsafe>
 
