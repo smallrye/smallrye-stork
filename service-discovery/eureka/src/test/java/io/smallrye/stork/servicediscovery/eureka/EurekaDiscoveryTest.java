@@ -332,11 +332,11 @@ public class EurekaDiscoveryTest {
         });
     }
 
-    private Stork configureAndGetStork(String serviceName) {
+    protected static Stork configureAndGetStork(String serviceName) {
         return configureAndGetStork(serviceName, false, null);
     }
 
-    private Stork configureAndGetStork(String serviceName, boolean secure, String instance) {
+    private static Stork configureAndGetStork(String serviceName, boolean secure, String instance) {
         Stork stork = StorkTestUtils.getNewStorkInstance();
         EurekaConfiguration configuration = new EurekaConfiguration()
                 .withEurekaHost(EUREKA_HOST)
