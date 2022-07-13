@@ -24,7 +24,24 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class io.smallrye.stork.servicediscovery.composite.CompositeConfiguration",
+        "new": "class io.smallrye.stork.servicediscovery.composite.CompositeConfiguration",
+        "interface": "io.smallrye.stork.api.config.ServiceDiscoveryConfig",
+        "justification": "The name of the implemented interface has changed."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter io.smallrye.stork.api.ServiceDiscovery io.smallrye.stork.servicediscovery.composite.CompositeServiceDiscoveryProviderLoader::createServiceDiscovery(===io.smallrye.stork.api.config.ServiceDiscoveryConfig===, java.lang.String, io.smallrye.stork.api.config.ServiceConfig, io.smallrye.stork.spi.StorkInfrastructure)",
+        "new": "parameter io.smallrye.stork.api.ServiceDiscovery io.smallrye.stork.servicediscovery.composite.CompositeServiceDiscoveryProviderLoader::createServiceDiscovery(===io.smallrye.stork.api.config.ConfigWithType===, java.lang.String, io.smallrye.stork.api.config.ServiceConfig, io.smallrye.stork.spi.StorkInfrastructure)",
+        "parameterIndex": "0",
+        "justification": "The name of the parameter type has changed."
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

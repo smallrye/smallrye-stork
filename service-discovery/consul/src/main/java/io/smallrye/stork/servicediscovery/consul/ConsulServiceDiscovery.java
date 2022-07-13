@@ -103,7 +103,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         return consulMetadata;
     }
 
-    private static Integer getPort(String name, String value) {
+    protected static Integer getPort(String name, String value) {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
