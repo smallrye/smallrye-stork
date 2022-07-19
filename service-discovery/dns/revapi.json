@@ -13,15 +13,8 @@
     "elements" : {
       "include" : [ {
         "matcher" : "java-package",
-        "match" : "/io\\.smallrye\\.stork/"
-      }, {
-        "matcher" : "java-package",
-        "match" : "/io\\.smallrye\\.stork\\.integration(\\..*)?/"
-      }, {
-        "matcher" : "java-package",
-        "match" : "/io\\.smallrye\\.stork\\.utils(\\..*)?/"
-      } ],
-      "exclude" : [ "class io\\.smallrye\\.stork\\.impl\\..*" ]
+        "match" : "/io\\.smallrye\\.stork\\.servicediscovery\\.dns(\\..*)?/"
+      } ]
     }
   }
 }, {
@@ -31,15 +24,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method java.time.Duration io.smallrye.stork.utils.DurationUtils::parseDuration(java.lang.String)",
-        "new": "method java.time.Duration io.smallrye.stork.utils.DurationUtils::parseDuration(java.lang.String, java.lang.String)",
-        "justification": "Parameter name added to the `parseDuration` method. The old version assumed the parsing is done for refresh-period which is not always true"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",

@@ -8,25 +8,25 @@ import static java.lang.String.format;
 public final class StorkAddressUtils {
 
     /**
-     * Creates a new {@link HostAndPort} instance.
+     * Creates a new {@link HostAndPort} instance from an address.
      *
-     * @param serviceAddress the address
-     * @param defaultPort the default port
-     * @param serviceName the service name
+     * @param address the address, either {@code host:port} or just {@code host}
+     * @param defaultPort the default port, used when the address doesn't provide the port
+     * @param configPlace the location of the address in the configuration, for logging purposes
      * @return the new HostAndPort
      */
-    public static HostAndPort parseToHostAndPort(String serviceAddress,
+    public static HostAndPort parseToHostAndPort(String address,
             int defaultPort,
-            String serviceName) {
-        if (serviceAddress == null || serviceAddress.isBlank()) {
-            throw new IllegalArgumentException("Blank or null address: '" + serviceAddress + "'");
+            String configPlace) {
+        if (address == null || address.isBlank()) {
+            throw new IllegalArgumentException("Blank or null address: '" + address + "'");
         }
-        if (serviceAddress.charAt(0) == '[') {
-            return parseIpV6AddressWithSquareBracket(serviceAddress, defaultPort, serviceName);
-        } else if (countColons(serviceAddress) > 1) {
-            return new HostAndPort(serviceAddress, defaultPort);
+        if (address.charAt(0) == '[') {
+            return parseIpV6AddressWithSquareBracket(address, defaultPort, configPlace);
+        } else if (countColons(address) > 1) {
+            return new HostAndPort(address, defaultPort);
         } else {
-            return parseNonIpv6Adress(serviceAddress, defaultPort, serviceName);
+            return parseNonIpv6Adress(address, defaultPort, configPlace);
         }
     }
 
@@ -67,14 +67,14 @@ public final class StorkAddressUtils {
         if (!done) {
             throw new IllegalArgumentException(
                     format("IPv6 Address with a square bracket '[' does not have a matching closing square bracket ']' " +
-                            "in address '%s' for service: '%s'", serviceAddress, serviceName));
+                            "in address '%s' for: '%s'", serviceAddress, serviceName));
         }
 
         if (++i == serviceAddress.length()) {
             return new HostAndPort(host.toString(), defaultPort);
         } else if (serviceAddress.charAt(i) != ':') {
             throw new IllegalArgumentException(
-                    format("Unexpected character '%c' at character %d in address '%s' for service: '%s'",
+                    format("Unexpected character '%c' at character %d in address '%s' for: '%s'",
                             serviceAddress.charAt(i), i, serviceAddress, serviceName));
         } else {
             int port = 0;
@@ -86,7 +86,7 @@ public final class StorkAddressUtils {
                 } else {
                     throw new IllegalArgumentException(
                             format("Unexpected character '%c' while parsing port number in " +
-                                    "address '%s' for service '%s', at character %d, expected a digit", c, serviceName,
+                                    "address '%s' for '%s', at character %d, expected a digit", c, serviceName,
                                     serviceAddress, i));
                 }
             }

@@ -22,8 +22,10 @@ import io.smallrye.stork.utils.DurationUtils;
 public abstract class CachingServiceDiscovery implements ServiceDiscovery {
 
     private static final Logger log = LoggerFactory.getLogger(CachingServiceDiscovery.class);
+    public static final String REFRESH_PERIOD = "refresh-period";
 
     public final Duration refreshPeriod;
+
     public static final String DEFAULT_REFRESH_INTERVAL = "5M";
 
     private volatile List<ServiceInstance> lastResults;
@@ -33,9 +35,9 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
     public CachingServiceDiscovery(String refreshPeriod) {
         try {
             // TODO: document it
-            this.refreshPeriod = DurationUtils.parseDuration(refreshPeriod);
+            this.refreshPeriod = DurationUtils.parseDuration(refreshPeriod, REFRESH_PERIOD);
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("refresh-period for service discovery should be a number, got: " +
+            throw new IllegalArgumentException(REFRESH_PERIOD + " for service discovery should be a number, got: " +
                     refreshPeriod,
                     e);
         }

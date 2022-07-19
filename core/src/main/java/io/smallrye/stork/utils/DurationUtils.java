@@ -20,11 +20,12 @@ public class DurationUtils {
      * Otherwise, tries to convert the value assuming that it is in the accepted ISO-8601 duration format.
      *
      * @param duration duration as String
+     * @param parameter the parameter for which we parse the value to duration
      * @return {@link Duration}
      */
-    public static Duration parseDuration(String duration) {
+    public static Duration parseDuration(String duration, String parameter) {
         if (duration.startsWith("-")) {
-            throw new IllegalArgumentException("Negative refresh-period specified for service discovery: " + duration);
+            throw new IllegalArgumentException("Negative " + parameter + " specified for service discovery: " + duration);
         }
         if (DIGITS.asPredicate().test(duration)) {
             return Duration.ofSeconds(Long.parseLong(duration));
