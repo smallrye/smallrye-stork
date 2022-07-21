@@ -34,7 +34,6 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
 
     public CachingServiceDiscovery(String refreshPeriod) {
         try {
-            // TODO: document it
             this.refreshPeriod = DurationUtils.parseDuration(refreshPeriod, REFRESH_PERIOD);
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(REFRESH_PERIOD + " for service discovery should be a number, got: " +

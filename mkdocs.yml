@@ -15,7 +15,7 @@ nav:
     - Eureka: 'service-discovery/eureka.md'
     - Composite: 'service-discovery/composite.md'
     - Static List: 'service-discovery/static-list.md'
-    - Custom: 'service-discovery/custom-service-discovery.md'
+    - Custom Service Discovery: 'service-discovery/custom-service-discovery.md'
   - Load-Balancing:
     - Round Robin: 'load-balancer/round-robin.md'
     - Random: 'load-balancer/random.md'
@@ -23,7 +23,7 @@ nav:
     - Response Time: 'load-balancer/response-time.md'
     - Power Of Two Choices: 'load-balancer/power-of-two-choices.md'
     - Sticky: 'load-balancer/sticky.md'
-    - Custom: 'load-balancer/custom-load-balancer.md'
+    - Custom Load Balancer: 'load-balancer/custom-load-balancer.md'
 
 
 copyright: >-
@@ -44,6 +44,7 @@ theme:
   features:
     - navigation.sections
     - content.tabs.link
+    - content.code.annotate
 
 extra_css:
   - extra.css

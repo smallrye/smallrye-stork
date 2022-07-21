@@ -5,7 +5,7 @@ Stork is extensible, and you can implement your own service discovery mechanism.
 ## Dependencies
 
 To implement your _Service Discovery Provider_, make sure your project depends on Core and Configuration Generator. 
-The former brings classes necessary to implement custom discovery, the latter contains an annotation processor that generates classes needed by Stork.
+The former brings classes necessary to implement custom discovery, the latter contains an [annotation processor](https://docs.oracle.com/en/java/javase/11/docs/api/java.compiler/javax/annotation/processing/Processor.html) that generates classes needed by Stork.
 
 ```xml
 <dependency>
@@ -28,7 +28,7 @@ Service discovery implementation consists of three elements:
 
 - `ServiceDiscovery` which is responsible for locating service instances for a single Stork service.
 - `ServiceDiscoveryProvider` which creates instances of `ServiceDiscovery` for a given service discovery _type_.
-- `$typeConfiguration` which is a configuration for the discovery. This class is automatically generated.
+- `$typeConfiguration` which is a configuration for the discovery. This class is automatically generated during the compilation (using an annotation processor).
 
 A _type_, for example, `acme`, identifies each provider.
 This _type_ is used in the configuration to reference the provider:
@@ -67,6 +67,8 @@ Typically, instead of creating a service instance with values from the configura
 That's why the method returns a `Uni`.
 Most of the time, the lookup is a remote operation.
 
+As you can see, the `AcmeConfiguration` class gives access to the configuration attribute.
+
 ## Using your service discovery
 
 In the project using it, don't forget to add the dependency on the module providing your implementation.
@@ -100,3 +102,36 @@ This class can be used to configure your service discovery using the Stork progr
 ```
 
 Remember that attributes, like `host`, are declared using the `@ServiceDiscoveryAttribute` annotation on the `ServiceDiscoveryProvider` implementation.
+
+## Caching the service instances
+
+Your `ServiceDiscovery` implementation can extend `io.smallrye.stork.impl.CachingServiceDiscovery` to automatically _cache_ the service instance.
+In this case, the retrieved set of `ServiceInstance` is cached and only updated after some time.
+This duration is an additional configuration attribute.
+For homogeneity, we recommend the following attribute:
+
+```java
+@ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", 
+        defaultValue = CachingServiceDiscovery.DEFAULT_REFRESH_INTERVAL)
+```
+
+The following snippet extends the _acme_ service discovery with the `refresh-period` attribute:
+
+```java linenums="1"
+--8<-- "docs/snippets/examples/CachedAcmeServiceDiscoveryProvider.java"
+```
+
+Extending `io.smallrye.stork.impl.CachingServiceDiscovery` changes the structure of the service discovery implementation:
+
+```java linenums="1"
+--8<-- "docs/snippets/examples/CachedAcmeServiceDiscovery.java"
+```
+
+1. Call the `super` constructor with the `refresh-period` value
+2. Implement `fetchNewServiceInstances` instead of `getServiceInstances`.
+   The method is called periodically, and the retrieved instances are cached.
+   This implementation is simplistic.
+
+If the retrieval fails, the error is reported, and Stork keeps the previously retrieved list of instances.
+
+
