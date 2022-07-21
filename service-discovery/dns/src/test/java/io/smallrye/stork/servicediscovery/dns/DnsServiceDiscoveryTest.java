@@ -25,6 +25,7 @@ import org.junit.jupiter.api.condition.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -66,7 +67,8 @@ public class DnsServiceDiscoveryTest {
                 portBindings.bind(TCP_8500, Ports.Binding.empty());
                 hostConfig.withPortBindings(portBindings);
                 cmd.withHostConfig(hostConfig);
-            });
+            })
+            .waitingFor(Wait.forListeningPort());
 
     Stork stork;
     int consulPort;
