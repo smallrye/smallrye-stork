@@ -1,27 +1,20 @@
 @startuml
-skinparam class {
-    BackgroundColor AliceBlue
-    ArrowColor DarkGrey
-    BorderColor DarkGrey
-}
+!include diagrams/includes/themes/light.puml
 hide members
-class Stork <<entry-point>> #line.bold;line:CornflowerBlue
+class Stork <<entry-point>>
 interface ServiceDiscovery
-interface ServiceInstance #line.bold;line:CornflowerBlue
+interface ServiceInstance
 interface LoadBalancer
-interface ConfigProvider <<SPI>>
-class Service <<named>> #line.bold;line:CornflowerBlue
+class Service <<named>>
 
-Stork --[dotted] ConfigProvider
 Stork -- "*" Service
 Service -- ServiceDiscovery
-Service -- "0..1" LoadBalancer
+Service -- LoadBalancer
 
 Service --[dotted] ServiceInstance: selectServiceInstance
 
 class Kubernetes implements ServiceDiscovery
 class Consul implements ServiceDiscovery
-class Static implements ServiceDiscovery
 class "Custom Service Discovery" implements ServiceDiscovery
 
 class RoundRobin<<default>> implements LoadBalancer

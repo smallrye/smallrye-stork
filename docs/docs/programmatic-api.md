@@ -13,7 +13,7 @@ Retrieve the ServiceInstance, which will provide the metadata to access the actu
 If your framework does not already provide a configured `Stork` instance, you need to do:
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/InitializationExample.java"
+--8<-- "snippets/examples/InitializationExample.java"
 ```
 
 ## Adding service dynamically
@@ -21,7 +21,7 @@ If your framework does not already provide a configured `Stork` instance, you ne
 To register a new `ServiceDefinition`, use the `defineIfAbsent` method:
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/DefinitionExample.java"
+--8<-- "snippets/examples/DefinitionExample.java"
 ```
 
 The `ServiceDefinition` instances can be created from:
@@ -36,7 +36,7 @@ Attributes from the service discovery and load balancer can be configured from t
 To list the service instances for a given service, or to select an instance according to the load balancer strategy, use the following code:
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/LookupExample.java"
+--8<-- "snippets/examples/LookupExample.java"
 ```
 
 The lookup and selection methods are returning Uni as these processes are asynchronous.
@@ -46,5 +46,5 @@ The lookup and selection methods are returning Uni as these processes are asynch
 The following snippet provides an _all in one_ example of the Stork programmatic API:
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/StorkApiExample.java"
+--8<-- "snippets/examples/StorkApiExample.java"
 ```

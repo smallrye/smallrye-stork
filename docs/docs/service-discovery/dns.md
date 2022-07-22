@@ -16,7 +16,9 @@ They contain a _weight_, a _target_ and a _port_ for a service instance.
 The _target_ returned in an _SRV_ record needs to be resolved further by an _A_ or an _AAAA_ record.
 
 In short, it works as follows:
-![SRV resolution](../target/srv_sequence.png)
+
+![DNS service discovery](../target/srv_sequence.svg#only-light)
+![DNS service discovery](../target/srv_sequence_dark.svg#only-dark)
 
 ## Dependency
 

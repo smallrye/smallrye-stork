@@ -49,7 +49,7 @@ Any configuration properties that the provider expects should be defined with `@
 A service discovery provider class should look as follows:
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/AcmeServiceDiscoveryProvider.java"
+--8<-- "snippets/examples/AcmeServiceDiscoveryProvider.java"
 ```
 
 Note, that the `ServiceDiscoveryProvider` interface takes a configuration class as a parameter. This configuration class 
@@ -59,7 +59,7 @@ Its name is created by appending `Configuration` to the service discovery type, 
 The next step is to implement the `ServiceDiscovery` interface:
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/AcmeServiceDiscovery.java"
+--8<-- "snippets/examples/AcmeServiceDiscovery.java"
 ```
 
 This implementation is simplistic.
@@ -98,7 +98,7 @@ This class can be used to configure your service discovery using the Stork progr
 
 ```java
 ```java linenums="1"
---8<-- "docs/snippets/examples/AcmeDiscoveryApiUsage.java"
+--8<-- "snippets/examples/AcmeDiscoveryApiUsage.java"
 ```
 
 Remember that attributes, like `host`, are declared using the `@ServiceDiscoveryAttribute` annotation on the `ServiceDiscoveryProvider` implementation.

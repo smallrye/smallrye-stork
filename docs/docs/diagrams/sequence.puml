@@ -1,19 +1,7 @@
 @startuml
-skinparam participant {
-    BackgroundColor AliceBlue
-    ArrowColor DarkGrey
-    BorderColor DarkGrey
-}
 
-skinparam roundcorner 20
+!include diagrams/includes/themes/light.puml
 
-skinparam sequence {
-    ArrowColor DarkGrey
-    ActorBorderColor DarkGrey
-    LifeLineBorderColor DarkGrey
-    LifeLineBackgroundColor #A9DCDF
-
-}
 skinparam sequenceMessageAlign center
 autonumber "<b>(0)"
 

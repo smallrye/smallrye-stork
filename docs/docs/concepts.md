@@ -4,7 +4,9 @@ This page presents the concepts used in Stork.
 When using Stork in a _managed_ environment, such as Quarkus, all these concepts are hidden, as you only configure the lookup and selection.
 However, when using the programmatic API, you will use these concepts directly.
 
-![concepts](target/stork.png)
+
+![concepts](target/stork.svg#only-light)
+![concepts](target/stork_dark.svg#only-dark)
 
 ## Process overview
 
@@ -14,7 +16,8 @@ When using the programmatic API of Stork, you can:
 2. Retrieve the `Service` you want to use. Each `Service` is associated with a name.
 3. Retrieve the `ServiceInstance` which will provide the metadata to access the actual service.
 
-![concepts](target/sequence.png)
+![service discovery and selection](target/sequence.svg#only-light)
+![service discovery and selection](target/sequence_dark.svg#only-dark)
 
 Behind the scenes, Stork will handle the service lookup and selection.
 
@@ -30,7 +33,7 @@ The `Stork` instance is a _singleton_.
 It needs to be initialized once (when the application starts) and shutdown when the application stops:
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/StorkEntryPointExample.java"
+--8<-- "snippets/examples/StorkEntryPointExample.java"
 ```
 
 During the initialization, Stork looks for `io.smallrye.stork.config.ConfigProvider` SPI provider and retrieves the list of managed services:
@@ -46,7 +49,7 @@ Services are pre-configured with their name, service discovery, and optionally, 
 You retrieve a `Service` using the `Stork#getService(String name)` method.
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/StorkServiceExample.java"
+--8<-- "snippets/examples/StorkServiceExample.java"
 ```
 
 The `Service` lets you retrieve the list of `ServiceInstance`, or select a single one, when a load-balancer is configured.
@@ -57,7 +60,7 @@ The `io.smallrye.stork.api.ServiceInstance` represents an actual instance of the
 It provides the metadata to configure a _client_ to interact with that specific instance of service.
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/StorkServiceLookupExample.java"
+--8<-- "snippets/examples/StorkServiceLookupExample.java"
 ```
 
 The service selection is a two-steps process:
@@ -66,7 +69,7 @@ The service selection is a two-steps process:
 2. Service selection - using the load balancer
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/StorkServiceSelectionExample.java"
+--8<-- "snippets/examples/StorkServiceSelectionExample.java"
 ```
 
 ## Service Discovery

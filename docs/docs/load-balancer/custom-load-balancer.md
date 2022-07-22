@@ -49,7 +49,7 @@ Any configuration properties that the provider expects should be defined with `@
 
 A load balancer provider class should look as follows:
 ```java linenums="1"
---8<-- "docs/snippets/examples/AcmeLoadBalancerProvider.java"
+--8<-- "snippets/examples/AcmeLoadBalancerProvider.java"
 ```
 
 Note, that the `LoadBalancerProvider` interface takes a configuration class as a parameter. 
@@ -61,7 +61,7 @@ The next step is to implement the `LoadBalancer` interface.
 The essence of load balancers' work happens in the `selectServiceInstance` method. The method returns a single `ServiceInstance` from a collection. 
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/AcmeLoadBalancer.java"
+--8<-- "snippets/examples/AcmeLoadBalancer.java"
 ```
 
 This implementation is simplistic and just picks a random instance from the received list.
@@ -98,7 +98,7 @@ When building your load balancer project, the configuration generator creates a 
 This class can be used to configure your load balancer using the Stork programmatic API. 
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/AcmeSelectorApiUsage.java"
+--8<-- "snippets/examples/AcmeSelectorApiUsage.java"
 ```
 
 Remember that attributes, like `my-attribute`, are declared using the `@LoadBalancerAttribute` annotation on the `LoadBalancerProvider` implementation.

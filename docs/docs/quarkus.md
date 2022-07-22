@@ -24,7 +24,7 @@ To use Stork to determine the actual address, set the scheme of the URI to `stor
 
 For example, the `HelloClient` below will use the Stork service called `hello-service` to determine the address of the destination, and `/hello` as the base path for queries:
 ```java linenums="1"
---8<-- "docs/snippets/examples/HelloClient.java"
+--8<-- "snippets/examples/HelloClient.java"
 ```
 
 ## The service
@@ -62,4 +62,4 @@ quarkus.stork.hello-service.service-discovery.consul-port=8500
 ```
 
 !!! note
-When no load-balancing is configured, Stork uses a round-robin.
+    When no load-balancing is configured, Stork uses a round-robin.
