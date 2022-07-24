@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import io.smallrye.stork.api.config.LoadBalancerConfig;
+import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.api.config.ServiceConfig;
-import io.smallrye.stork.api.config.ServiceDiscoveryConfig;
+import io.smallrye.stork.api.config.ServiceRegistrarConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
 
 /**
@@ -16,6 +16,7 @@ import io.smallrye.stork.spi.config.ConfigProvider;
  */
 public class TestConfigProvider implements ConfigProvider {
     private static final List<ServiceConfig> configs = new ArrayList<>();
+    private static final List<ServiceRegistrarConfig> registrarConfigs = new ArrayList<>();
 
     private static int priority = Integer.MAX_VALUE;
 
@@ -45,8 +46,8 @@ public class TestConfigProvider implements ConfigProvider {
             }
 
             @Override
-            public LoadBalancerConfig loadBalancer() {
-                return loadBalancer == null ? null : new LoadBalancerConfig() {
+            public ConfigWithType loadBalancer() {
+                return loadBalancer == null ? null : new ConfigWithType() {
                     @Override
                     public String type() {
                         return loadBalancer;
@@ -60,8 +61,8 @@ public class TestConfigProvider implements ConfigProvider {
             }
 
             @Override
-            public ServiceDiscoveryConfig serviceDiscovery() {
-                return new ServiceDiscoveryConfig() {
+            public ConfigWithType serviceDiscovery() {
+                return new ConfigWithType() {
                     @Override
                     public String type() {
                         return serviceDiscovery;
@@ -76,13 +77,38 @@ public class TestConfigProvider implements ConfigProvider {
         });
     }
 
+    public static void addServiceRegistrarConfig(String registrarName, String registrarType, Map<String, String> parameters) {
+        registrarConfigs.add(new ServiceRegistrarConfig() {
+            @Override
+            public String name() {
+                return registrarName;
+            }
+
+            @Override
+            public String type() {
+                return registrarType;
+            }
+
+            @Override
+            public Map<String, String> parameters() {
+                return parameters;
+            }
+        });
+    }
+
     public static void clear() {
         configs.clear();
+        registrarConfigs.clear();
     }
 
     @Override
     public List<ServiceConfig> getConfigs() {
         return configs;
+    }
+
+    @Override
+    public List<ServiceRegistrarConfig> getRegistrarConfigs() {
+        return registrarConfigs;
     }
 
     @Override

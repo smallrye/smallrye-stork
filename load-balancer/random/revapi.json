@@ -24,7 +24,24 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class io.smallrye.stork.loadbalancer.random.RandomConfiguration",
+        "new": "class io.smallrye.stork.loadbalancer.random.RandomConfiguration",
+        "interface": "io.smallrye.stork.api.config.LoadBalancerConfig",
+        "justification": "The name of the implemented interface has changed."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter io.smallrye.stork.api.LoadBalancer io.smallrye.stork.loadbalancer.random.RandomLoadBalancerProviderLoader::createLoadBalancer(===io.smallrye.stork.api.config.LoadBalancerConfig===, io.smallrye.stork.api.ServiceDiscovery)",
+        "new": "parameter io.smallrye.stork.api.LoadBalancer io.smallrye.stork.loadbalancer.random.RandomLoadBalancerProviderLoader::createLoadBalancer(===io.smallrye.stork.api.config.ConfigWithType===, io.smallrye.stork.api.ServiceDiscovery)",
+        "parameterIndex": "0",
+        "justification": "The name of the parameter type has changed."
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

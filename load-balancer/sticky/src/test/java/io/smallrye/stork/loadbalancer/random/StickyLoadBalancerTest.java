@@ -19,10 +19,10 @@ import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.NoAcceptableServiceInstanceFoundException;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.ServiceInstance;
-import io.smallrye.stork.api.config.LoadBalancerConfig;
+import io.smallrye.stork.api.config.ConfigWithType;
 
 class StickyLoadBalancerTest {
-    public static final LoadBalancerConfig DEFAULT_LB_CONFIG = new LoadBalancerConfig() {
+    public static final ConfigWithType DEFAULT_LB_CONFIG = new ConfigWithType() {
         @Override
         public String type() {
             return StickyLoadBalancerProvider.TYPE;
@@ -33,7 +33,7 @@ class StickyLoadBalancerTest {
             return Collections.emptyMap();
         }
     };
-    public static final LoadBalancerConfig WITH_FAILURE_BACKOFF_CONFIG = new LoadBalancerConfig() {
+    public static final ConfigWithType WITH_FAILURE_BACKOFF_CONFIG = new ConfigWithType() {
         @Override
         public String type() {
             return StickyLoadBalancerProvider.TYPE;

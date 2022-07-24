@@ -35,6 +35,23 @@
         "oldValue": "{@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"address-list\", description = \"A comma-separated list of addresses (host:port). The default port is 80.\", required = true), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.\")}",
         "newValue": "{@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"address-list\", description = \"A comma-separated list of addresses (host:port). The default port is 80.\", required = true), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"shuffle\", description = \"Whether the list of address must be shuffled to avoid using the first address on every startup.\", defaultValue = \"false\")}",
         "justification": "Added the `shuffle` attribute"
+      },
+      {
+        "ignore": true,
+        "code": "java.class.noLongerImplementsInterface",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticConfiguration",
+        "new": "class io.smallrye.stork.servicediscovery.staticlist.StaticConfiguration",
+        "interface": "io.smallrye.stork.api.config.ServiceDiscoveryConfig",
+        "justification": "The name of the implemented interface has changed."
+
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter io.smallrye.stork.api.ServiceDiscovery io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProviderLoader::createServiceDiscovery(===io.smallrye.stork.api.config.ServiceDiscoveryConfig===, java.lang.String, io.smallrye.stork.api.config.ServiceConfig, io.smallrye.stork.spi.StorkInfrastructure)",
+        "new": "parameter io.smallrye.stork.api.ServiceDiscovery io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscoveryProviderLoader::createServiceDiscovery(===io.smallrye.stork.api.config.ConfigWithType===, java.lang.String, io.smallrye.stork.api.config.ServiceConfig, io.smallrye.stork.spi.StorkInfrastructure)",
+        "parameterIndex": "0",
+        "justification": "The name of the parameter type has changed."
       }
     ]
   }
