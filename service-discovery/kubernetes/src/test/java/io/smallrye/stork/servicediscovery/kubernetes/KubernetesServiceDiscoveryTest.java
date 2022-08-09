@@ -478,7 +478,11 @@ public class KubernetesServiceDiscoveryTest {
                         .build())
                 .build();
 
-        client.endpoints().inNamespace(namespace).withName(serviceName).create(endpoint);
+        if (namespace != null) {
+            client.endpoints().inNamespace(namespace).resource(endpoint).create();
+        } else {
+            client.endpoints().resource(endpoint).create();
+        }
 
     }
 
@@ -491,7 +495,12 @@ public class KubernetesServiceDiscoveryTest {
                     .withLabels(podLabels)
                     .endMetadata()
                     .build();
-            client.pods().inNamespace(namespace).create(backendPod);
+            if (namespace != null) {
+                client.pods().inNamespace(namespace).resource(backendPod).create();
+            } else {
+                client.pods().resource(backendPod).create();
+            }
+
         }
     }
 
