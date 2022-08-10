@@ -74,19 +74,28 @@ The service selection is a two-steps process:
 
 ## Service Discovery
 
-The `io.smallrye.stork.ServiceDiscovery` represents a service discovery mechanism, such as DNS, Consul, or Eureka.
+The `io.smallrye.stork.api.ServiceDiscovery` represents a service discovery mechanism, such as DNS, Consul, or Eureka.
 
-You can implement a custom service discovery for Stork by implementing the `ServiceDiscoveryProvider`
-interface and register it with the Service Provider Interface (SPI) mechanism.
+You can implement a custom service discovery for Stork by implementing the `ServiceDiscoveryProvider` interface.
+The corresponding `ServiceRegistrarProviderLoader` and `RegistrarConfiguration` classes will be automatically generated during compilation time.
 
 Please note that the `ServiceDiscovery` implementation must be non-blocking.
 
 ## Load Balancer
 
-The `io.smallrye.stork.LoadBalancer` represents a load-balancer strategy, such as round-robin.
+The `io.smallrye.stork.api.LoadBalancer` represents a load-balancer strategy, such as round-robin.
 
-To implement a custom load balancer for Stork, implement the `LoadBalancerProvider`
-interface and register it with the Service Provider Interface (SPI) mechanism.
+To implement a custom load balancer for Stork, implement the `LoadBalancerProvider` interface.
+The corresponding `LoadBalancerProviderLoader` and `Configuration` classes will be automatically generated during compilation time.
 
 Please note that the `LoadBalancer` implementation, similarly to `ServiceDiscovery`
 must be non-blocking.
+
+## Service registration
+
+The `io.smallrye.stork.api.ServiceRegistrar` represents a service registration mechanism for Consul and Eureka.
+
+You can implement a custom service registrar for Stork by implementing the `ServiceRegistrarProvider` interface.
+The corresponding `ServiceRegistrarProviderLoader` and `RegistrarConfiguration` classes will be automatically generated during compilation time. 
+
+Please note that the `ServiceRegistrar` implementation must be non-blocking.

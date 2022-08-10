@@ -5,10 +5,13 @@ import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.EUREKA_PORT
 import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.registerApplicationInstance;
 import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.updateApplicationInstanceStatus;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
@@ -21,16 +24,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
 
-public class EurekaDiscoveryTest {
+public class EurekaDiscoveryAndRegistrationTest {
 
     private static Vertx vertx;
     private WebClient client;
@@ -330,6 +335,27 @@ public class EurekaDiscoveryTest {
             assertThat(instance.getHost()).isEqualTo("com.example");
             assertThat(instance.getPort()).isEqualTo(1111);
         });
+    }
+
+    // Registration test done in this class to avoid conflicts with EurekaServer Spring context initialization when all tests run
+    @Test
+    public void testRegistrationServiceInstances(TestInfo info) {
+        TestConfigProvider.addServiceRegistrarConfig("my-eureka-registrar", "eureka",
+                Map.of("eureka-host", EurekaServer.EUREKA_HOST, "eureka-port", String.valueOf(EUREKA_PORT)));
+        String serviceName = "my-service";
+
+        Stork stork = configureAndGetStork(serviceName);
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getServiceRegistrar("my-eureka-registrar");
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)
+                .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), "acme.com", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
     }
 
     protected static Stork configureAndGetStork(String serviceName) {
