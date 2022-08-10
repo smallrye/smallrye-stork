@@ -56,39 +56,42 @@ Wait for a bit, and you're done.
 
 ## Building the documentation
 
-The documentation is built using [MKDoc](https://www.mkdocs.org/). 
+The documentation is built using [MKDoc](https://www.mkdocs.org/) and it stored in the `docs` directory
 
 ### Prerequisites
 
-You need Python 3 installed on your machine, with the following modules:
+You need Python 3 installed on your machine, as well as _pipenv_:
 
 ```shell
-pip3 install mkdocs
-pip3 install mkdocs-material
-pip3 install mkdocs-macros-plugin
-pip3 install mkdocs-build-plantuml-plugin
-pip3 install mike    
+# From the `docs` directory
+pip3 install pipenv # if you don't have it yet
+pipenv install
 ```
 
 ### Structure
 
-The website configuration is in the `mkdocs.yml` file. 
+The website configuration is in the `docs/mkdocs.yml` file. 
 The content is in the `docs` module.
 
 ### Build
 
-You can build the web site using, from the project root:
+You can build the web site using, from the `docs` module:
 
 ```shell
-mkdocs build
+pipenv run mkdocs build
 ```
 
 The website is generated in the `site` directory.
-
-You can also enable the _serve_ mode, which update the web site while you update it:
+You can also enable the _serve_ mode, which update the website while you update it:
 
 ```shell
-mkdocs serve
+pipenv run mkdocs serve
+```
+
+### Upgrade the dependencies
+
+```shell
+pipenv update
 ```
 
 ### Deployment

@@ -1,6 +1,7 @@
 site_name: Smallrye Stork
 repo_url: https://github.com/smallrye/smallrye-stork
 edit_uri: edit/main/docs/
+docs_dir: docs
 
 nav:
   - Overview: 'index.md'
@@ -34,52 +35,94 @@ copyright: >-
 theme:
   name: material
   palette:
-    primary: black
-    accent: grey
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: grey
+      toggle:
+        icon: material/lightbulb-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: orange
+      toggle:
+        icon: material/lightbulb-on
+        name: Switch to light mode
   font:
-    text: Red Hat Text
+    text: Roboto
     code: Ubuntu Mono
+  icon:
+    repo: fontawesome/brands/github
   logo: images/stork-white.png
   favicon: images/stork-white.png
   features:
     - navigation.sections
     - content.tabs.link
     - content.code.annotate
+    - navigation.instant
+    - navigation.indexes
+    - navigation.tracking
+    - navigation.tabs.sticky
 
 extra_css:
   - extra.css
 
 extra_javascript:
-  - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 markdown_extensions:
-  - pymdownx.highlight
-  - pymdownx.superfences
+  - toc:
+      permalink: '#'
+  - admonition
+  - smarty
+  - attr_list
+  - md_in_html
+  - meta
+  - tables
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+      - name: mermaid
+        class: mermaid
+        format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.snippets
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.smartsymbols
+  - pymdownx.betterem
   - pymdownx.tabbed:
       alternate_style: true
-  - admonition
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
 
 plugins:
   - search
   - build_plantuml:
       render: "server"
-      server: "http://www.plantuml.com/plantuml"
-      output_format: "png"
+      server: "https://www.plantuml.com/plantuml"
+      output_format: "svg"
       diagram_root: "docs"
       output_folder: "target"
       input_folder: "diagrams"
       input_extensions: "puml"
+      theme_enabled: true
+      theme_folder: "include/themes"
+      theme_light: "light.puml"
+      theme_dark: "dark.puml"
   - macros
 
 
-
 extra:
+  snippet_dir: snippets
+  javadoc_artifact: io.smallrye.reactive/smallrye-stork
   manifest: manifest.webmanifest
   version:
-    current: !ENV [STORK_VERSION, "SNAPSHOT"]
+    current: !ENV [ STORK_VERSION, "SNAPSHOT" ]
     provider: mike
+
