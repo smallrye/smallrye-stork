@@ -47,7 +47,7 @@
 
         <kubernetes-client.version>6.0.0</kubernetes-client.version>
         <version.slf4j>1.7.36</version.slf4j>
-        <version.mockito>4.6.1</version.mockito>
+        <version.mockito>4.7.0</version.mockito>
         <version.jackson>2.13.3</version.jackson>
 
         <revapi-maven-plugin.version>0.14.7</revapi-maven-plugin.version>
