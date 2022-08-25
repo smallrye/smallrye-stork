@@ -30,7 +30,7 @@ jobs:
           git config --global user.email "smallrye@googlegroups.com"
           cd docs
           sudo snap install yq
-          pip install
+          pipenv install
           cd ..
       - name: Build local artifacts
         run: mvn -B install -DskipTests
