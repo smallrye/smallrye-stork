@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +18,10 @@ import org.junit.jupiter.api.Test;
 
 import io.fabric8.kubernetes.client.Config;
 import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
@@ -75,6 +79,45 @@ public class KubernetesServiceDiscoveryRealClusterIT {
                 .until(() -> instances.get() != null);
 
         assertThat(instances.get()).hasSize(1);
+    }
+
+    @Test
+    @Disabled("doesn't work yet")
+    void shouldRegisterServiceInstancesInDefaultNamespace() throws InterruptedException {
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
+                null, Map.of("k8s-host", "https://127.0.0.1:41711/", "k8s-namespace", "stork"));
+        TestConfigProvider.addServiceRegistrarConfig("my-kube-registrar", "kubernetes",
+                Map.of("k8s-host", "https://127.0.0.1:41711/"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "svc";
+        String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
+        //        String[] ips = { "10.96.96.231" };
+
+        ServiceRegistrar<KubernetesMetadataKey> kubeRegistrar = stork.getServiceRegistrar("my-kube-registrar");
+
+        CountDownLatch registrationLatch = new CountDownLatch(ips.length);
+        for (String ip : ips) {
+            kubeRegistrar.registerServiceInstance(serviceName, Metadata.of(KubernetesMetadataKey.class)
+                    .with(KubernetesMetadataKey.META_K8S_NAMESPACE, "stork"), ip, 8080).subscribe()
+                    .with(success -> registrationLatch.countDown(), failure -> fail(""));
+        }
+        if (!registrationLatch.await(60, TimeUnit.SECONDS)) {
+            fail("Failed to register kubernetes services on time. Check the log above for details");
+        }
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(3);
     }
 
 }

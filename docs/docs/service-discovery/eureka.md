@@ -2,11 +2,11 @@
 
 [Eureka](https://github.com/Netflix/eureka) is a RESTful service that is primarily used in the AWS cloud for the purpose of discovery, load balancing, and failover of middle-tier servers.
 
-This page explains how Stork can use Eureka to handle the service discovery.
+This page explains how Stork can use Eureka to handle the service discovery and service registration.
 
 ## Dependency
 
-First, you need to add the Stork Consul Service Discovery provider:
+First, you need to add the Stork Eureka Service Discovery provider:
 
 ```xml
 <dependency>
@@ -16,7 +16,7 @@ First, you need to add the Stork Consul Service Discovery provider:
 </dependency>
 ```
 
-## Configuration
+### Service discovery configuration
 
 For each application instance expected to be registered in Eureka, configure the lookup:
 
@@ -49,3 +49,29 @@ Using this attribute prevents load-balancing as you will always select a single 
 
 The `secure` attribute indicates if you want the _secure virtual address_ of the application instance.
 If set to `true`, unsecured instances are filtered out from the available instances.
+
+## Service registration
+
+Stork also provides the ability to register services using Eureka as backend.
+
+### Service registration configuration
+
+For each service that should register the service instances in Eureka, configure the service discovery `type`:
+
+=== "stork standalone"
+```properties
+stork.my-service.service-registrar.type=eureka
+stork.my-service.service-registrar.eureka-host=localhost
+stork.my-service.service-registrar.eureka-port=8761
+```
+
+=== "stork in quarkus"
+```properties
+quarkus.stork.my-service.service-registrar.type=eureka
+quarkus.stork.my-service.service-registrar.eureka-host=localhost
+quarkus.stork.my-service.service-registrar.eureka-port=8761
+```
+
+Consul service registrar is configured with the following parameters:
+
+--8<-- "service-discovery/eureka/target/classes/META-INF/stork-docs/eureka-sr-attributes.txt"
