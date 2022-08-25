@@ -1,4 +1,0 @@
- | Attribute            | Mandatory  | Default Value      | Description  |
- |----------------------|------------|--------------------|--------------|
-| `one` | No |  | no description |
-| `two` | No |  | no description |

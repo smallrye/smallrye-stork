@@ -1,4 +1,0 @@
- | Attribute            | Mandatory  | Default Value      | Description  |
- |----------------------|------------|--------------------|--------------|
-| `address-list` | Yes |  | A comma-separated list of addresses (host:port). The default port is 80. |
-| `secure` | No |  | Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443. |
