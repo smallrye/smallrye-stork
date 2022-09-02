@@ -45,7 +45,7 @@
         <!-- override the testcontainers version with the newest one -->
         <version.testcontainers>1.17.3</version.testcontainers>
 
-        <kubernetes-client.version>6.1.0</kubernetes-client.version>
+        <kubernetes-client.version>6.1.1</kubernetes-client.version>
         <version.slf4j>2.0.0</version.slf4j>
         <version.mockito>4.7.0</version.mockito>
         <version.jackson>2.13.3</version.jackson>
