@@ -81,9 +81,9 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:git:git@github.com:smallrye/smallrye-load-balancer.git</connection>
-        <developerConnection>scm:git:git@github.com:smallrye/smallrye-load-balancer.git</developerConnection>
-        <url>https://github.com/smallrye/smallrye-load-balancer/</url>
+        <connection>scm:git:git@github.com:smallrye/smallrye-stork.git</connection>
+        <developerConnection>scm:git:git@github.com:smallrye/smallrye-stork.git</developerConnection>
+        <url>https://github.com/smallrye/smallrye-stork/</url>
         <tag>HEAD</tag>
     </scm>
 
