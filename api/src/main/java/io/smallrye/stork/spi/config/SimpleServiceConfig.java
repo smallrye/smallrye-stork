@@ -138,7 +138,7 @@ public class SimpleServiceConfig implements ServiceConfig {
      * An implementation of {@link ConfigWithType} using an unmodifiable {@link Map} as backend to store
      * the configuration.
      */
-    public static class SimpleConfigWithType implements ConfigWithType {
+    public static class SimpleServiceDiscoveryConfig implements ConfigWithType {
         private final String type;
         private final Map<String, String> parameters;
 
@@ -148,7 +148,7 @@ public class SimpleServiceConfig implements ServiceConfig {
          * @param type the type
          * @param parameters the configuration map
          */
-        public SimpleConfigWithType(String type, Map<String, String> parameters) {
+        public SimpleServiceDiscoveryConfig(String type, Map<String, String> parameters) {
             this.type = type;
             this.parameters = Collections.unmodifiableMap(parameters);
         }

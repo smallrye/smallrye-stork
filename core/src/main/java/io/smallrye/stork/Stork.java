@@ -177,7 +177,7 @@ public final class Stork implements StorkServiceRegistry {
             // We do not know if we can add to the parameters, such create a new SimpleConfigWithType
             Map<String, String> newConfig = new HashMap<>(ConfigWithType.parameters());
             newConfig.put("secure", "true");
-            ConfigWithType = new SimpleServiceConfig.SimpleConfigWithType(serviceDiscoveryType, newConfig);
+            ConfigWithType = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
         }
 
         final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(ConfigWithType,
