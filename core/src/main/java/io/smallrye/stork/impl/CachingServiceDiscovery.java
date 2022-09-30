@@ -42,11 +42,16 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
         }
 
         this.lastResults = Collections.emptyList();
-        this.instances = Uni.createFrom().deferred(() -> fetchNewServiceInstances(this.lastResults)
+        Uni<List<ServiceInstance>> least = Uni.createFrom().deferred(() -> fetchNewServiceInstances(this.lastResults)
                 .invoke(l -> this.lastResults = l)
                 .onFailure().invoke(this::handleFetchError)
-                .onFailure().recoverWithItem(this.lastResults))
-                .memoize().atLeast(this.refreshPeriod);
+                .onFailure().recoverWithItem(this.lastResults));
+        this.instances = cache(least);
+    }
+
+    // Overridable by the provider
+    public Uni<List<ServiceInstance>> cache(Uni<List<ServiceInstance>> uni) {
+        return uni.memoize().atLeast(this.refreshPeriod);
     }
 
     /**
