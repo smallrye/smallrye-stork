@@ -96,7 +96,6 @@ Then, Stork will use your implementation to locate the `my-service` service.
 When building your service discovery project, the configuration generator creates a configuration class.
 This class can be used to configure your service discovery using the Stork programmatic API.
 
-```java
 ```java linenums="1"
 --8<-- "snippets/examples/AcmeDiscoveryApiUsage.java"
 ```
@@ -110,7 +109,7 @@ In this case, the retrieved set of `ServiceInstance` is cached and only updated 
 This duration is an additional configuration attribute.
 For homogeneity, we recommend the following attribute:
 
-```java
+```java 
 @ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", 
         defaultValue = CachingServiceDiscovery.DEFAULT_REFRESH_INTERVAL)
 ```
@@ -118,13 +117,13 @@ For homogeneity, we recommend the following attribute:
 The following snippet extends the _acme_ service discovery with the `refresh-period` attribute:
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/CachedAcmeServiceDiscoveryProvider.java"
+--8<-- "snippets/examples/CachedAcmeServiceDiscoveryProvider.java"
 ```
 
 Extending `io.smallrye.stork.impl.CachingServiceDiscovery` changes the structure of the service discovery implementation:
 
 ```java linenums="1"
---8<-- "docs/snippets/examples/CachedAcmeServiceDiscovery.java"
+--8<-- "snippets/examples/CachedAcmeServiceDiscovery.java"
 ```
 
 1. Call the `super` constructor with the `refresh-period` value
