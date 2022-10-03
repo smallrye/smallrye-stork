@@ -134,9 +134,15 @@ Extending `io.smallrye.stork.impl.CachingServiceDiscovery` changes the structure
 If the retrieval fails, the error is reported, and Stork keeps the previously retrieved list of instances.
 
 
-### Improving the caching strategy
+### Customizing the caching strategy
 
-Sometimes it can be useful to change this behaviour and customize the cache expiration strategy. For example, imagine you are using a backend service discovery where service instances can change very frequently, moreover contacting the backend service discovery can be expensive in terms of computing thus finding a good value for the refreshing time can be mission impossible.
+Sometimes it can be useful to change this behaviour and customize the cache expiration strategy.
+
+For example, imagine you are using a backend service discovery where service instances can change very frequently.
+
+Moreover, contacting the backend service discovery can be expensive in terms of computing,
+thus finding a good value for the refreshing time can be mission impossible.
+
 For these situations, Stork allows to implement a better expiration strategy for the cache. 
 
 If you want to customize the expiration strategy, you need:
