@@ -42,11 +42,22 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
         }
 
         this.lastResults = Collections.emptyList();
-        this.instances = Uni.createFrom().deferred(() -> fetchNewServiceInstances(this.lastResults)
+        Uni<List<ServiceInstance>> retrieval = Uni.createFrom().deferred(() -> fetchNewServiceInstances(this.lastResults)
                 .invoke(l -> this.lastResults = l)
                 .onFailure().invoke(this::handleFetchError)
-                .onFailure().recoverWithItem(this.lastResults))
-                .memoize().atLeast(this.refreshPeriod);
+                .onFailure().recoverWithItem(this.lastResults));
+        this.instances = cache(retrieval);
+    }
+
+    /***
+     * Configures the period to keep service instances in the cache. Elements will be refetched after the given period.
+     * This method can be extended by the provider in order to change the logic for caching service instances.
+     * 
+     * @param uni service instances retrieved from backing discovery source
+     * @return cached list of service instances in form of Uni
+     */
+    public Uni<List<ServiceInstance>> cache(Uni<List<ServiceInstance>> uni) {
+        return uni.memoize().atLeast(this.refreshPeriod);
     }
 
     /**

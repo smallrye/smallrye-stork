@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -22,8 +23,9 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.ServiceInstance;
@@ -50,6 +52,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
+    private AtomicBoolean invalidated = new AtomicBoolean();
+
     /**
      * Creates a new KubernetesServiceDiscovery.
      *
@@ -74,9 +78,39 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         Config k8sConfig = new ConfigBuilder(base)
                 .withMasterUrl(masterUrl)
                 .withNamespace(namespace).build();
-        this.client = new DefaultKubernetesClient(k8sConfig);
+        this.client = new KubernetesClientBuilder().withConfig(k8sConfig).build();
         this.vertx = vertx;
         this.secure = isSecure(config);
+        client.endpoints().inform(new ResourceEventHandler<Endpoints>() {
+            @Override
+            public void onAdd(Endpoints obj) {
+                LOGGER.info("Endpoint added: {}", obj.getMetadata().getName());
+                invalidate();
+            }
+
+            @Override
+            public void onUpdate(Endpoints oldObj, Endpoints newObj) {
+                LOGGER.info("Endpoint updated : {}", newObj.getMetadata().getName());
+                invalidate();
+            }
+
+            @Override
+            public void onDelete(Endpoints obj, boolean deletedFinalStateUnknown) {
+                LOGGER.info("Endpoint deleted: {}", obj.getMetadata().getName());
+                invalidate();
+            }
+
+        });
+
+    }
+
+    @Override
+    public Uni<List<ServiceInstance>> cache(Uni<List<ServiceInstance>> uni) {
+        return uni.memoize().until(() -> invalidated.get());
+    }
+
+    public void invalidate() {
+        invalidated.set(true);
     }
 
     @Override
@@ -129,7 +163,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         }
                     });
                 });
-        return endpointsUni.onItem().transform(endpoints -> toStorkServiceInstances(endpoints, previousInstances));
+        return endpointsUni.onItem().transform(endpoints -> toStorkServiceInstances(endpoints, previousInstances))
+                .invoke(() -> invalidated.set(false));
     }
 
     private List<ServiceInstance> toStorkServiceInstances(Map<Endpoints, List<Pod>> backend,

@@ -104,7 +104,7 @@ Remember that attributes, like `host`, are declared using the `@ServiceDiscovery
 
 ## Caching the service instances
 
-Your `ServiceDiscovery` implementation can extend `io.smallrye.stork.impl.CachingServiceDiscovery` to automatically _cache_ the service instance.
+Your `ServiceDiscovery` implementation can extend `io.smallrye.stork.impl.CachingServiceDiscovery` to automatically _cache_ the service instances.
 In this case, the retrieved set of `ServiceInstance` is cached and only updated after some time.
 This duration is an additional configuration attribute.
 For homogeneity, we recommend the following attribute:
@@ -134,3 +134,19 @@ Extending `io.smallrye.stork.impl.CachingServiceDiscovery` changes the structure
 If the retrieval fails, the error is reported, and Stork keeps the previously retrieved list of instances.
 
 
+### Customizing the caching strategy
+
+Sometimes it can be useful to change this behaviour and customize the cache expiration strategy.
+
+For example, imagine you are using a backend service discovery where service instances can change very frequently.
+
+Moreover, contacting the backend service discovery can be expensive in terms of computing,
+thus finding a good value for the refreshing time can be mission impossible.
+
+For these situations, Stork allows to implement a better expiration strategy for the cache. 
+
+If you want to customize the expiration strategy, you need:
+1. Implement the `cache` method where the expiration strategy should be defined.
+2. Invalidate the cache when expiration condition evaluates to true.
+
+Take a look to the [Kubernetes Service Discovery](kubernetes.md#Caching the service instances) for further details about this feature.
