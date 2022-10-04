@@ -64,7 +64,7 @@
         <sonar.projectKey>smallrye_smallrye-stork</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 
-        <microprofile-rest-client.version>2.0</microprofile-rest-client.version>
+        <microprofile-rest-client.version>3.0.1</microprofile-rest-client.version>
         <auto-service.version>1.0.1</auto-service.version>
     </properties>
 
