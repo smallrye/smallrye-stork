@@ -30,6 +30,7 @@ jobs:
           git config --global user.email "smallrye@googlegroups.com"
           cd docs
           sudo snap install yq
+          pip3 install pipenv
           pipenv install
           cd ..
       - name: Build local artifacts
