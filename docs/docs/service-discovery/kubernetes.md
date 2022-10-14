@@ -95,7 +95,7 @@ Then, it can select the instance.
 
 Supported attributes are the following:
 
---8<-- "service-discovery/kubernetes/target/classes/META-INF/stork-docs/kubernetes-sd-attributes.txt"
+--8<-- "../service-discovery/kubernetes/target/classes/META-INF/stork-docs/kubernetes-sd-attributes.txt"
 
 
 ## Caching the service instances
@@ -104,7 +104,7 @@ Contacting the cluster too much frequently can result in performance problems. I
 Moreover, the caching expiration has been also improved in order to only update the retrieved set of `ServiceInstance` if some of them changes and an event is emitted. 
 This is done by creating an [Informer](https://www.javadoc.io/static/io.fabric8/kubernetes-client-api/6.1.1/io/fabric8/kubernetes/client/informers/SharedIndexInformer.html), similar to a [Watch](https://www.javadoc.io/static/io.fabric8/kubernetes-client-api/6.1.1/io/fabric8/kubernetes/client/Watch.html),  able to observe the events on the service instances resources. 
 
---8<-- "src/main/java/io/smallrye/stork/servicediscovery/kubernetes/KubernetesServiceDiscovery.java"
+--8<-- "../src/main/java/io/smallrye/stork/servicediscovery/kubernetes/KubernetesServiceDiscovery.java"
 
 Note that: 
  - the cache is invalidated when an event is received. 
