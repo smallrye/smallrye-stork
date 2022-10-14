@@ -3,6 +3,7 @@ repo_url: https://github.com/smallrye/smallrye-stork
 edit_uri: edit/main/docs/
 docs_dir: docs
 
+
 nav:
   - Overview: 'index.md'
   - Concepts: 'concepts.md'
@@ -26,14 +27,9 @@ nav:
     - Sticky: 'load-balancer/sticky.md'
     - Custom Load Balancer: 'load-balancer/custom-load-balancer.md'
 
-
-copyright: >-
-  Sponsored by <a href="https://www.redhat.com"><img style="vertical-align: middle; height: 2.5em;" alt="Red Hat" src="./images/redhat_reversed.svg"/></a> <br/>
-  <a href="https://creativecommons.org/licenses/by/3.0/">CC by 3.0</a> |
-  <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
-
 theme:
   name: material
+  custom_dir: mkdocs-customizations/overrides
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
