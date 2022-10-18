@@ -6,5 +6,5 @@ echo $DIR
 
 export STORK_VERSION=$(cat "$DIR/project.yml" | yq eval '.release.current-version' -)
 cd docs
-mike deploy --push --update-aliases $STORK_VERSION latest --branch gh-pages
-mike set-default --push latest
+pipenv run mike deploy --push --update-aliases $STORK_VERSION latest --branch gh-pages
+pipenv run mike set-default --push latest
