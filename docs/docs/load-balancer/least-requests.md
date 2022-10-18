@@ -40,4 +40,4 @@ For each service expected to use a least-response-time selection, configure the 
 [//]: # (Supported attributes are the following:)
 
 [//]: # ()
-[//]: # (--8<-- "load-balancer/least-requests/target/classes/META-INF/stork-docs/least-requests-lb-attributes.txt")
+[//]: # (--8<-- "../load-balancer/least-requests/target/classes/META-INF/stork-docs/least-requests-lb-attributes.txt")

@@ -39,7 +39,7 @@ Stork looks for the service with the given name (`my-service` in the previous ex
 
 Supported attributes are the following:
 
---8<-- "service-discovery/eureka/target/classes/META-INF/stork-docs/eureka-sd-attributes.txt"
+--8<-- "../service-discovery/eureka/target/classes/META-INF/stork-docs/eureka-sd-attributes.txt"
 
 The `application` attribute is optional.
 It uses the Stork service name (`my-service` in the previous configuration) if not set.
@@ -74,4 +74,4 @@ quarkus.stork.my-service.service-registrar.eureka-port=8761
 
 Consul service registrar is configured with the following parameters:
 
---8<-- "service-discovery/eureka/target/classes/META-INF/stork-docs/eureka-sr-attributes.txt"
+--8<-- "../service-discovery/eureka/target/classes/META-INF/stork-docs/eureka-sr-attributes.txt"

@@ -34,4 +34,4 @@ For each service expected to use a random service selection, configure the `load
 
 Supported attributes are the following:
 
---8<-- "load-balancer/random/target/classes/META-INF/stork-docs/random-lb-attributes.txt"
+--8<-- "../load-balancer/random/target/classes/META-INF/stork-docs/random-lb-attributes.txt"

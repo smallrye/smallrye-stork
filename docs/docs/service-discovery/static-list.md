@@ -33,4 +33,4 @@ For each service that should use the static list of service instances configure 
 
 These are all the static service discovery parameters:
 
---8<-- "service-discovery/static-list/target/classes/META-INF/stork-docs/static-sd-attributes.txt"
+--8<-- "../service-discovery/static-list/target/classes/META-INF/stork-docs/static-sd-attributes.txt"

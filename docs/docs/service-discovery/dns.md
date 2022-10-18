@@ -55,4 +55,4 @@ All in all, your configuration could look as follows:
 
 All the available parameters are as follows:
 
---8<-- "service-discovery/dns/target/classes/META-INF/stork-docs/dns-sd-attributes.txt"
+--8<-- "../service-discovery/dns/target/classes/META-INF/stork-docs/dns-sd-attributes.txt"

@@ -35,4 +35,4 @@ To use the `sticky` load service selection strategy, set the load balancer type 
 
 The following attributes are supported:
 
---8<-- "load-balancer/sticky/target/classes/META-INF/stork-docs/sticky-lb-attributes.txt"
+--8<-- "../load-balancer/sticky/target/classes/META-INF/stork-docs/sticky-lb-attributes.txt"
