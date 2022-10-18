@@ -1,0 +1,18 @@
+@startuml
+!include diagrams/includes/themes/light.puml
+
+skinparam sequenceMessageAlign center
+
+
+participant Application
+participant Stork
+participant "DNS Server"
+
+Application -> Stork : get service instances
+Stork -> "DNS Server" : get SRV records for hostname
+"DNS Server" -> Stork : list of SRV records
+Stork -> "DNS Server" : get A/AAAA records for each SRV record target
+"DNS Server" -> Stork : list of A/AAAA
+Stork -> Application : list of ServiceInstances
+
+@enduml
