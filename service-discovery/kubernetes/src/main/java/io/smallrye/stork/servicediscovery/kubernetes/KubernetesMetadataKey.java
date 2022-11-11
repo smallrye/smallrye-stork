@@ -14,7 +14,12 @@ public enum KubernetesMetadataKey implements MetadataKey {
     /**
      * The key to access the kubernates namespace
      */
-    META_K8S_NAMESPACE("k8s-namespace");
+    META_K8S_NAMESPACE("k8s-namespace"),
+
+    /**
+     * The key to access the port protocol
+     */
+    META_K8S_PORT_PROTOCOL("k8s-port-protocol");
 
     private final String name;
 
