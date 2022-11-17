@@ -43,7 +43,7 @@
         <vertx.version>4.3.3</vertx.version>
         <version.vertx-mutiny-bindings>2.27.0</version.vertx-mutiny-bindings>
         <!-- override the testcontainers version with the newest one -->
-        <version.testcontainers>1.17.5</version.testcontainers>
+        <version.testcontainers>1.17.6</version.testcontainers>
 
         <kubernetes-client.version>6.2.0</kubernetes-client.version>
         <version.slf4j>2.0.3</version.slf4j>
