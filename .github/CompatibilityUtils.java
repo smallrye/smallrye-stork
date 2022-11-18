@@ -1,22 +1,25 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $? # (1)
 //DEPS io.vertx:vertx-core:3.9.4
-//DEPS info.picocli:picocli:4.5.0
+//DEPS info.picocli:picocli:4.6.3
 
-
-import java.io.*;
-import java.util.*;
-import java.util.stream.*;
-import java.nio.charset.*;
-import java.nio.file.*;
-
-import io.vertx.core.json.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.*;
 import java.util.concurrent.Callable;
-
-import com.fasterxml.jackson.annotation.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Command(name = "compatibility", mixinStandardHelpOptions = true, version = "0.1",
         description = "Mutiny Compatibility Utils")
@@ -25,6 +28,20 @@ class CompatibilityUtils implements Callable<Integer> {
     @Parameters(index = "0", description = "Command among 'extract' and 'clear'")
     private String command;
 
+    @Option(names = "--do-not-clear-version-prefix", description = "Do not clear if the version starts with the prefix (e.g., `1.2`, `1.`, etc)")
+    private String[] clearExcludes = new String[0];
+
+    private final Set<String> preReleaseFragments = Set.of(
+            "-alpha",
+            "-beta",
+            "-milestone",
+            "-rc",
+            "-pre"
+    );
+
+    @Option(names = "--version", description = "The release version")
+    private String version = "";
+
     public static void main(String... args) {
         int exitCode = new CommandLine(new CompatibilityUtils()).execute(args);
         System.exit(exitCode);
@@ -32,10 +49,7 @@ class CompatibilityUtils implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        List<File> files = new ArrayList<>();
-        File root = new File(System.getProperty("user.dir"));
-        getRevapiConfigFiles(root, files);
-
+        List<File> files = getRevapiConfigFiles();
         if (command.equalsIgnoreCase("extract")) {
             List<Difference> differences = new ArrayList<>();
             for (File f : files) {
@@ -46,13 +60,25 @@ class CompatibilityUtils implements Callable<Integer> {
 
             }
             System.out.println("\uD83E\uDDEE " + differences.size() + " difference(s) found");
-            if (! differences.isEmpty()) {
+            if (!differences.isEmpty()) {
                 writeDifferences(differences, new File("target/differences.md"));
             }
             return 0;
         }
 
         if (command.equalsIgnoreCase("clear")) {
+            for (String fragment : preReleaseFragments) {
+                if (version.contains(fragment)) {
+                    System.out.println("Not clearing for version " + version + " (it's a pre-release)");
+                    return 0;
+                }
+            }
+            for (String exclude : clearExcludes) {
+                if (version.startsWith(exclude)) {
+                    System.out.println("Not clearing for version " + version + " (starts with `" + exclude + "`)");
+                    return 0;
+                }
+            }
             for (File f : files) {
                 System.out.println("\uD83D\uDD0E Clearing differences from revapi.json file: " + f.getAbsolutePath());
                 JsonArray json = new JsonArray(read(f));
@@ -65,15 +91,34 @@ class CompatibilityUtils implements Callable<Integer> {
         return 1;
     }
 
+    private String shorten(String s) {
+        if (s != null) {
+            return s.replace("io.smallrye.stork.test.", "")
+                    .replace("io.smallrye.stork.api.config.", "")
+                    .replace("io.smallrye.stork.api.", "")
+                    .replace("io.smallrye.stork.spi.config", "")                    
+                    .replace("io.smallrye.stork.spi.", "")                    
+                    .replace("io.smallrye.stork.", "")                    
+                    .replace("java.util.function.", "")
+                    .replace("java.util.", "")
+                    .replace("java.lang.", "");
+        }
+        return "";
+    }
+
     private void writeDifferences(List<Difference> diff, File file) {
         if (file.isFile()) {
             file.delete();
         }
         StringBuilder buffer = new StringBuilder();
-        buffer.append("### Breaking Changes\n\n");
+        buffer.append("| Change                                 | Justification  |\n"
+                + "| ------------------------------------- |   -------------- |\n");
+
 
         for (Difference difference : diff) {
-            buffer.append("  * ").append(difference.toString()).append("\n");
+            buffer.append("| ")
+                    .append(shorten(difference.change())).append(" | ")
+                    .append(difference.justification).append(" |\n");
         }
         buffer.append("\n");
 
@@ -85,21 +130,23 @@ class CompatibilityUtils implements Callable<Integer> {
         }
     }
 
-    static void getRevapiConfigFiles(File root, List<File> found) {
-        File attempt = new File(root, "revapi.json");
-        if (attempt.isFile()) {
-            found.add(attempt);
+    static List<File> getRevapiConfigFiles() {
+        List<File> matches = new ArrayList<>();
+        File root = new File(System.getProperty("user.dir"));
+        File[] files = root.listFiles();
+        if (files == null) {
+            throw new IllegalStateException("Unable to read the file system");
         } else {
-            File[] files = root.listFiles();
-            if (files == null) {
-                throw new IllegalStateException("Unable to read the file system");
-            }
             for (File f : files) {
                 if (f.isDirectory()) {
-                    getRevapiConfigFiles(f, found);
+                    File maybe = new File(f, "revapi.json");
+                    if (maybe.isFile()) {
+                        matches.add(maybe);
+                    }
                 }
             }
         }
+        return matches;
     }
 
     static List<Difference> extractDifferences(JsonArray array) {
@@ -112,7 +159,7 @@ class CompatibilityUtils implements Callable<Integer> {
 
         return diff
                 .map(objects ->
-                    objects.stream().map(obj -> (JsonObject) obj).map(json -> json.mapTo(Difference.class)).collect(Collectors.toList())
+                        objects.stream().map(obj -> (JsonObject) obj).map(json -> json.mapTo(Difference.class)).collect(Collectors.toList())
                 )
                 .orElse(Collections.emptyList());
     }
@@ -124,7 +171,7 @@ class CompatibilityUtils implements Callable<Integer> {
             if ("revapi.differences".equalsIgnoreCase(json.getString("extension"))) {
                 JsonObject configuration = json.getJsonObject("configuration");
                 JsonArray differences = configuration.getJsonArray("differences");
-                if (differences != null  && ! differences.isEmpty()) {
+                if (differences != null && !differences.isEmpty()) {
                     updated = true;
                     configuration.remove("differences");
                     configuration.put("differences", new JsonArray());
@@ -172,19 +219,32 @@ class CompatibilityUtils implements Callable<Integer> {
 
         public boolean ignore;
 
-        @java.lang.Override
+        public String change() {
+            if (isNotBlank(oldMethod) && isNotBlank(newMethod)) {
+                return "`" + oldMethod + "` updated to `" + newMethod + "`";
+            }
+            if (isNotBlank(oldMethod)) {
+                return "`" + oldMethod + "` has been removed";
+            }
+            if (isNotBlank(newMethod)) {
+                return "`" + newMethod + "` has been introduced";
+            }
+            return code;
+        }
+
+        @Override
         public java.lang.String toString() {
-            if (isNotBlank(oldMethod)  && isNotBlank(newMethod)) {
+            if (isNotBlank(oldMethod) && isNotBlank(newMethod)) {
                 return "`" + oldMethod + "` updated to `" + newMethod + "`: _" + justification + "_";
             }
             if (isNotBlank(oldMethod)) {
-                return "`" + oldMethod + "` has been removed: _" + justification  + "_";
+                return "`" + oldMethod + "` has been removed: _" + justification + "_";
             }
             if (isNotBlank(newMethod)) {
-                return "`" + newMethod + "` has been introduced: _" + justification  + "_";
+                return "`" + newMethod + "` has been introduced: _" + justification + "_";
             }
 
-            return  code + " " + justification;
+            return code + " " + justification;
         }
     }
 
