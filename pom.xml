@@ -142,6 +142,11 @@
             </dependency>
             <dependency>
                 <groupId>io.fabric8</groupId>
+                <artifactId>knative-client</artifactId>
+                <version>${kubernetes-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
                 <artifactId>kubernetes-server-mock</artifactId>
                 <version>${kubernetes-client.version}</version>
                 <scope>test</scope>
@@ -318,6 +323,7 @@
         <module>service-discovery/consul</module>
         <module>service-discovery/dns</module>
         <module>service-discovery/kubernetes</module>
+        <module>service-discovery/knative</module>
         <module>service-discovery/eureka</module>
         <module>service-discovery/composite</module>
         <module>load-balancer/least-response-time</module>
