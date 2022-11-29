@@ -24,17 +24,17 @@ jobs:
         run: mvn -B install -DskipTests  
       - name: Collect breaking changes
         run:  |
-          mkdir -p target
-          jbang .github/CompatibilityUtils.java extract
-      - name: Update release notes
-        env:
-            GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: |
           sudo apt-get update -o Dir::Etc::sourcelist="sources.list" \
             -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
           sudo apt-get install -y gnupg2 gnupg-agent
           curl -s "https://get.sdkman.io" | bash
           source ~/.sdkman/bin/sdkman-init.sh && \
             sdk install jbang  
-          export STORK_VERSION=$(cat "$DIR/project.yml" | yq eval '.release.current-version' -)  
+          mkdir -p target
+          jbang .github/CompatibilityUtils.java extract
+      - name: Update release notes
+        env:
+            GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          export STORK_VERSION=$(cat ".github/project.yml" | yq eval '.release.current-version' -)  
           jbang .github/PublishReleaseNotes.java --release-version=$STORK_VERSION --token=$GITHUB_TOKEN
