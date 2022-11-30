@@ -537,7 +537,7 @@ public class KubernetesServiceDiscoveryTest {
         Endpoints endpoint = new EndpointsBuilder()
                 .withNewMetadata().withName(serviceName).withLabels(serviceLabels).endMetadata()
                 .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddresses)
-                        .addToPorts(new EndpointPortBuilder().withPort(8080).build())
+                        .addToPorts(new EndpointPortBuilder().withPort(8080).withProtocol("TCP").build())
                         .build())
                 .build();
 
