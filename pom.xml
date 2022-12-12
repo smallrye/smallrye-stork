@@ -263,6 +263,7 @@
                 <artifactId>revapi-maven-plugin</artifactId>
                 <configuration>
                     <skip>${revapi.skip}</skip>
+                    <checkDependencies>false</checkDependencies>
                 </configuration>
             </plugin>
             <plugin>
