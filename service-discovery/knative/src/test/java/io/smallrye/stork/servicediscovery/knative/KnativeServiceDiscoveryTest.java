@@ -52,7 +52,8 @@ public class KnativeServiceDiscoveryTest {
 
         String knativeService = "ksvc";
 
-        ServiceStatus serviceStatus = new ServiceStatusBuilder().withUrl("http://hello.kndefault.127.0.0.1.sslip.io").build();
+        ServiceStatus serviceStatus = new ServiceStatusBuilder().withUrl("http://hello.kndefault.127.0.0.1.sslip.io")
+                .withLatestCreatedRevisionName("revisionName").build();
         io.fabric8.knative.serving.v1.Service knSvc = new ServiceBuilder().withNewMetadata().withName(knativeService)
                 .endMetadata().withStatus(serviceStatus)
                 .build();
