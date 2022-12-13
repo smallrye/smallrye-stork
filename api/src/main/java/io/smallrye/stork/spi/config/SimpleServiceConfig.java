@@ -46,7 +46,7 @@ public class SimpleServiceConfig implements ServiceConfig {
     public static class Builder {
         String serviceName;
         ConfigWithType loadBalancerConfig;
-        ConfigWithType ConfigWithType;
+        ConfigWithType configWithType;
         boolean secure;
 
         /**
@@ -67,7 +67,7 @@ public class SimpleServiceConfig implements ServiceConfig {
          * @return the current builder
          */
         public Builder setServiceDiscovery(ConfigWithType serviceDiscovery) {
-            ConfigWithType = serviceDiscovery;
+            configWithType = serviceDiscovery;
             return this;
         }
 
@@ -99,7 +99,7 @@ public class SimpleServiceConfig implements ServiceConfig {
          * @return the built config
          */
         public SimpleServiceConfig build() {
-            return new SimpleServiceConfig(serviceName, loadBalancerConfig, ConfigWithType);
+            return new SimpleServiceConfig(serviceName, loadBalancerConfig, configWithType);
         }
     }
 
