@@ -21,6 +21,11 @@
             <artifactId>stork-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>jakarta.enterprise</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
             <scope>provided</scope>

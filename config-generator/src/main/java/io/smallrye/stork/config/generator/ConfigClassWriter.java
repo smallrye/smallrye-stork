@@ -17,6 +17,9 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
+
 import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.MetadataKey;
 import io.smallrye.stork.api.ServiceDiscovery;
@@ -78,10 +81,13 @@ public class ConfigClassWriter {
             writeImportStatement(LoadBalancer.class, out);
             writeImportStatement(ConfigWithType.class, out);
             writeImportStatement(ServiceDiscovery.class, out);
+            writeImportStatement(CDI.class, out);
+            writeImportStatement(ApplicationScoped.class, out);
             writeClassDeclaration(format("%s implements %s", simpleClassName, LoadBalancerLoader.class.getName()),
                     "LoadBalancerLoader for " + providerClassName, out);
 
-            out.println(format("   private final %s provider = new %s();", providerClassName, providerClassName));
+            generateConstructor(providerClassName, simpleClassName, out);
+
             out.println("   @Override");
             out.println(
                     "   public LoadBalancer createLoadBalancer(ConfigWithType config, ServiceDiscovery serviceDiscovery) {");
@@ -94,6 +100,23 @@ public class ConfigClassWriter {
             out.println("}");
         }
         return className;
+    }
+
+    private static void generateConstructor(String providerClassName, String simpleClassName, PrintWriter out) {
+        out.println(format("   private final %s provider;", providerClassName));
+
+        // Generate a constructor which try to find the provider using CDI if possible, or instantiate it directly
+        out.println("   public " + simpleClassName + "() {");
+        out.println("       " + providerClassName + " actual = null;");
+        out.println("       try {");
+        out.println("          actual = CDI.current().select(" + providerClassName + ".class).get();");
+        out.println("       } catch(Exception e) { ");
+        out.println("          // Use direct instantiation");
+        out.println("          actual = new " + providerClassName + "();");
+        out.println("       } ");
+        out.println("       this.provider = actual;");
+        out.println("   }");
+        out.println("");
     }
 
     public String createServiceDiscoveryLoader(Element element, String configClassName, String type) throws IOException {
@@ -113,11 +136,13 @@ public class ConfigClassWriter {
             writeImportStatement(ConfigWithType.class, out);
             writeImportStatement(ServiceConfig.class, out);
             writeImportStatement(StorkInfrastructure.class, out);
-
+            writeImportStatement(CDI.class, out);
+            writeImportStatement(ApplicationScoped.class, out);
             writeClassDeclaration(format("%s implements %s", simpleClassName, ServiceDiscoveryLoader.class.getName()),
                     "ServiceDiscoveryLoader for {@link " + providerClassName + "}", out);
 
-            out.println(format("   private final %s provider = new %s();", providerClassName, providerClassName));
+            generateConstructor(providerClassName, simpleClassName, out);
+
             out.println("   @Override");
             out.println("   public ServiceDiscovery createServiceDiscovery(ConfigWithType config, String serviceName,");
             out.println("              ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {");
@@ -153,15 +178,17 @@ public class ConfigClassWriter {
             writeImportStatement(ServiceRegistrar.class, out);
             writeImportStatement(ServiceRegistrarConfig.class, out);
             writeImportStatement(StorkInfrastructure.class, out);
+            writeImportStatement(CDI.class, out);
             writeImportStatement(metadataKey, out);
 
             writeImportStatement(MetadataKey.class, out);
-
+            writeImportStatement(ApplicationScoped.class, out);
             writeClassDeclaration(
                     format("%s implements %s<%s>", simpleClassName, ServiceRegistrarLoader.class.getName(), metadataKeyName),
                     "ServiceRegistrarLoader for {@link " + registrarProviderClass + "}", out);
 
-            out.println(format("   private final %s provider = new %s();", registrarProviderClass, registrarProviderClass));
+            generateConstructor(registrarProviderClass, simpleClassName, out);
+
             out.println("   @Override");
             out.println(format(
                     "   public ServiceRegistrar<%s> createServiceRegistrar(ServiceRegistrarConfig config, ",
@@ -327,13 +354,13 @@ public class ConfigClassWriter {
 
     private String toCamelCase(String attribute) {
         StringBuilder result = new StringBuilder();
-        boolean capitize = true;
+        boolean capitalized = true;
         for (char c : attribute.toCharArray()) {
             if (!Character.isJavaIdentifierPart(c)) {
-                capitize = true;
+                capitalized = true;
             } else {
-                result.append(capitize ? Character.toUpperCase(c) : c);
-                capitize = false;
+                result.append(capitalized ? Character.toUpperCase(c) : c);
+                capitalized = false;
             }
         }
 
@@ -362,6 +389,7 @@ public class ConfigClassWriter {
         out.println("/**");
         out.println(" * " + comment);
         out.println(" */");
+        out.println(" @ApplicationScoped");
         out.println(format(" public class %s {", simpleName));
     }
 
