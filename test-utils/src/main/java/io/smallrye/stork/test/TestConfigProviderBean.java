@@ -6,38 +6,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.api.config.ServiceRegistrarConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
 
 /**
- * Stork config provider for tests, allows easily configuring stuff programmatically
+ * Stork config provider for tests, allows easily configuring stuff programmatically.
+ * Unlike {@link TestConfigProvider}, this variant is a CDI bean.
  */
-public class TestConfigProvider implements ConfigProvider {
-    private static final List<ServiceConfig> configs = new ArrayList<>();
-    private static final List<ServiceRegistrarConfig> registrarConfigs = new ArrayList<>();
+@ApplicationScoped
+public class TestConfigProviderBean implements ConfigProvider {
+    private final List<ServiceConfig> configs = new ArrayList<>();
+    private final List<ServiceRegistrarConfig> registrarConfigs = new ArrayList<>();
 
-    private static int priority = Integer.MAX_VALUE - 1;
+    private int priority = Integer.MAX_VALUE;
 
-    public static void setPriority(int priority) {
-        TestConfigProvider.priority = priority;
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 
-    public static int getPriority() {
-        return priority;
-    }
-
-    @Deprecated
-    public static void addServiceConfig(String name, String loadBalancer, String serviceDiscovery,
-            Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams, boolean secure) {
-        if (secure) {
-            serviceDiscoveryParams.put("secure", "true");
-        }
-        addServiceConfig(name, loadBalancer, serviceDiscovery, loadBalancerParams, serviceDiscoveryParams);
-    }
-
-    public static void addServiceConfig(String name, String loadBalancer, String serviceDiscovery,
+    public void addServiceConfig(String name, String loadBalancer, String serviceDiscovery,
             Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams) {
         configs.add(new ServiceConfig() {
             @Override
@@ -77,7 +68,7 @@ public class TestConfigProvider implements ConfigProvider {
         });
     }
 
-    public static void addServiceRegistrarConfig(String registrarName, String registrarType, Map<String, String> parameters) {
+    public void addServiceRegistrarConfig(String registrarName, String registrarType, Map<String, String> parameters) {
         registrarConfigs.add(new ServiceRegistrarConfig() {
             @Override
             public String name() {
@@ -96,7 +87,7 @@ public class TestConfigProvider implements ConfigProvider {
         });
     }
 
-    public static void clear() {
+    public void clear() {
         configs.clear();
         registrarConfigs.clear();
     }

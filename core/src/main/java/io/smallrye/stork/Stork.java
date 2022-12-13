@@ -142,7 +142,7 @@ public final class Stork implements StorkServiceRegistry {
 
     private void extendWithCdiLoaders(Map<String, ServiceDiscoveryLoader> serviceDiscoveryLoaders,
             Map<String, LoadBalancerLoader> loadBalancerLoaders, Map<String, ServiceRegistrarLoader> registrarLoaders) {
-        CDI cdi = null;
+        CDI cdi;
         try {
             cdi = CDI.current();
         } catch (IllegalStateException e) {
@@ -167,7 +167,6 @@ public final class Stork implements StorkServiceRegistry {
             providers.addAll(cdi.select(ConfigProvider.class).stream().collect(Collectors.toList()));
         } catch (IllegalStateException e) {
             // Ignored - no cdi.
-            e.printStackTrace();
         }
         Optional<ConfigProvider> highestPrioConfigProvider = providers.stream()
                 .max(Comparator.comparingInt(ConfigProvider::priority));
