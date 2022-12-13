@@ -69,23 +69,23 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
         this.kn = new DefaultKnativeClient(k8sConfig);
         this.vertx = vertx;
         this.secure = isSecure(config);
-        kn.services().inform(new ResourceEventHandler<Service>() {
+        kn.services().inform(new ResourceEventHandler<>() {
             @Override
             public void onAdd(Service obj) {
-                LOGGER.info("Endpoint added: {}", obj.getMetadata().getName());
-                //                invalidate();
+                LOGGER.info("Service added: {}", obj.getMetadata().getName());
+                invalidate();
             }
 
             @Override
             public void onUpdate(Service oldObj, Service newObj) {
-                LOGGER.info("Endpoint updated : {}", newObj.getMetadata().getName());
-                //                invalidate();
+                LOGGER.info("Service updated : {}", newObj.getMetadata().getName());
+                invalidate();
             }
 
             @Override
             public void onDelete(Service obj, boolean deletedFinalStateUnknown) {
-                LOGGER.info("Endpoint deleted: {}", obj.getMetadata().getName());
-                //                invalidate();
+                LOGGER.info("Service deleted: {}", obj.getMetadata().getName());
+                invalidate();
             }
 
         });
@@ -113,7 +113,9 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
                                     kn.services().inAnyNamespace().withField(METADATA_NAME, application).list().getItems());
                         } else {
                             Service e = kn.services().inNamespace(namespace).withName(application).get();
-                            items.add(e);
+                            if (e != null) {
+                                items.add(e);
+                            }
                         }
                         future.complete(items);
                     }, result -> {

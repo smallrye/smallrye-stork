@@ -465,7 +465,7 @@ public class KubernetesServiceDiscoveryTest {
         // When an expectation in the cluster is configured to throw an Error the next time we try to get the endpoints and
         // When the endpoint is removed (this invalidates the cache)
         // Stork is called to get service instances again
-        // Stork gets the instances from the cache: the error is not thrown because the cluster is not contacted.
+        // Stork gets the instances from the cluster and should fail
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));

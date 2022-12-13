@@ -4,7 +4,7 @@
 
 ## Dependency
 
-First, you need to add the Stork Kubernetes Service Discovery provider:
+First, you need to add the Stork Knative Service Discovery provider:
 
 ```xml
 <dependency>
@@ -15,21 +15,20 @@ First, you need to add the Stork Kubernetes Service Discovery provider:
 ```
 
 #### A few words about server authentication. 
-Stork uses [Fabric8 Kubernetes Client](https://github.com/fabric8io/kubernetes-client#readme) to access the Kubernetes resources, concretely the `DefaultKubernetesClient` implementation. 
+Stork uses Fabric8 Knative Client which is a [Fabric8 Kubernetes Client](https://github.com/fabric8io/kubernetes-client#readme) extension to access the Kubernetes resources, concretely the `DefaultKnativeClient` implementation.
 
-It will try to read the `~/.kube/config` file from your local machine and load the token for authenticating with the Kubernetes API server.
+Since Knative Client is just an extension of Fabric8 Kubernetes Client, it’s also possible to get an instance of KnativeClient from KubernetesClient.
 
-If you are using the Stork Kubernetes discovery provider from inside a _Pod_, it loads `~/.kube/config` from the container file system.
-
-This file is automatically mounted inside the Pod.
+`DefaultKubernetesClient` will try to read the `~/.kube/config` file from your local machine and load the token for authenticating with the Kubernetes API server.
 
 The level of access (Roles) depends on the configured `ServiceAccount`.
 
 You can override this configuration if you want fine-grain control.
 
+
 ##### Role-based access control (RBAC)
-If you're using a Kubernetes cluster with Role-Based Access Control (RBAC) enabled, the default permissions for a ServiceAccount don't allow it to list or modify any resources. 
-A `ServiceAccount`, a `Role` and a `RoleBinding` are needed in order to allow Stork to list the available service instances from the cluster or the namespace. 
+If you're using a Kubernetes cluster with Role-Based Access Control (RBAC) enabled, the default permissions for a ServiceAccount don't allow it to list or modify any resources.
+A `ServiceAccount`, a `Role` and a `RoleBinding` are needed in order to allow Stork to list the available service instances from the cluster or the namespace.
 
 An example that allows listing all endpoints could look something like this:
 
@@ -74,21 +73,20 @@ For each service expected to be exposed as _Kubernetes Service_, configure the l
 
 === "stork standalone"
     ```properties
-    stork.my-service.service-discovery.type=knative
-    stork.my-service.service-discovery.knative-namespace=my-namespace
+    stork.my-knservice.service-discovery.type=knative
+    stork.my-knservice.service-discovery.knative-namespace=my-namespace
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.service-discovery.type=knative
-    quarkus.stork.my-service.service-discovery.knative-namespace=my-namespace
+    quarkus.stork.my-knservice.service-discovery.type=knative
+    quarkus.stork.my-knservice.service-discovery.knative-namespace=my-namespace
     ```
 
 
-Stork looks for the _Knative Service_ with the given name (`my-service` in the previous example) in the specified namespace.
+Stork looks for the _Knative Service_ with the given name (`my-knservice` in the previous example) in the specified namespace.
 
-Instead of using the _Knative Service_ IP directly, and let Kubernetes handle the selection and balancing, Stork inspects the service and retrieves the list of _pods_ providing the service.
-Then, it can select the instance.
+Stork inspects the _Knative Service_ and retrieves the url of the service.
 
 Supported attributes are the following:
 
@@ -97,9 +95,9 @@ Supported attributes are the following:
 
 ## Caching the service instances
 
-Contacting the cluster too much frequently can result in performance problems. It's why Kubernetes Service discovery extends `io.smallrye.stork.impl.CachingServiceDiscovery` to automatically _cache_ the service instances.
+Contacting the cluster too much frequently can result in performance problems. It's why Knative Service discovery extends `io.smallrye.stork.impl.CachingServiceDiscovery` to automatically _cache_ the service instances.
 Moreover, the caching expiration has been also improved in order to only update the retrieved set of `ServiceInstance` if some of them changes and an event is emitted. 
-This is done by creating an [Informer](https://www.javadoc.io/static/io.fabric8/kubernetes-client-api/6.1.1/io/fabric8/kubernetes/client/informers/SharedIndexInformer.html), similar to a [Watch](https://www.javadoc.io/static/io.fabric8/kubernetes-client-api/6.1.1/io/fabric8/kubernetes/client/Watch.html),  able to observe the events on the service instances resources. 
+This is done by creating an [Informer](https://www.javadoc.io/static/io.fabric8/kubernetes-client-api/6.1.1/io/fabric8/kubernetes/client/informers/SharedIndexInformer.html), similar to a [Watch](https://www.javadoc.io/static/io.fabric8/kubernetes-client-api/6.1.1/io/fabric8/kubernetes/client/Watch.html),  able to observe the events on the Knative Service instances resources. 
 
 --8<-- "../src/main/java/io/smallrye/stork/servicediscovery/knative/KnativeServiceDiscovery.java"
 
