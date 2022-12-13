@@ -34,10 +34,11 @@
     "differences" : [
       {
         "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method java.time.Duration io.smallrye.stork.utils.DurationUtils::parseDuration(java.lang.String)",
-        "new": "method java.time.Duration io.smallrye.stork.utils.DurationUtils::parseDuration(java.lang.String, java.lang.String)",
-        "justification": "Parameter name added to the `parseDuration` method. The old version assumed the parsing is done for refresh-period which is not always true"
+        "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.impl.RoundRobinLoadBalancerProviderLoader",
+        "new": "class io.smallrye.stork.impl.RoundRobinLoadBalancerProviderLoader",
+        "annotation": "@jakarta.enterprise.context.ApplicationScoped",
+        "justification": "Load Balancer can now be CDI beans"
       }
     ]
   }
