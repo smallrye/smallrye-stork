@@ -7,7 +7,7 @@ import io.smallrye.stork.spi.ElementWithType;
 import io.smallrye.stork.spi.StorkInfrastructure;
 
 /**
- * Used by stork internals to generate service loader for LoadBalancerProvider.
+ * Used by stork internals to generate service loader for ServiceDiscoveryProvider.
  */
 public interface ServiceDiscoveryLoader extends ElementWithType {
 
