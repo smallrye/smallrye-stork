@@ -27,20 +27,11 @@
     "differences" : [
       {
         "ignore": true,
-        "code": "java.class.noLongerImplementsInterface",
-        "old": "class io.smallrye.stork.servicediscovery.kubernetes.KubernetesConfiguration",
-        "new": "class io.smallrye.stork.servicediscovery.kubernetes.KubernetesConfiguration",
-        "interface": "io.smallrye.stork.api.config.ServiceDiscoveryConfig",
-        "justification": "The name of the implemented interface has changed."
-
-      },
-      {
-        "ignore": true,
-        "code": "java.method.parameterTypeChanged",
-        "old": "parameter io.smallrye.stork.api.ServiceDiscovery io.smallrye.stork.servicediscovery.kubernetes.KubernetesServiceDiscoveryProviderLoader::createServiceDiscovery(===io.smallrye.stork.api.config.ServiceDiscoveryConfig===, java.lang.String, io.smallrye.stork.api.config.ServiceConfig, io.smallrye.stork.spi.StorkInfrastructure)",
-        "new": "parameter io.smallrye.stork.api.ServiceDiscovery io.smallrye.stork.servicediscovery.kubernetes.KubernetesServiceDiscoveryProviderLoader::createServiceDiscovery(===io.smallrye.stork.api.config.ConfigWithType===, java.lang.String, io.smallrye.stork.api.config.ServiceConfig, io.smallrye.stork.spi.StorkInfrastructure)",
-        "parameterIndex": "0",
-        "justification": "The name of the parameter type has changed."
+        "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.servicediscovery.kubernetes.KubernetesServiceDiscoveryProviderLoader",
+        "new": "class io.smallrye.stork.servicediscovery.kubernetes.KubernetesServiceDiscoveryProviderLoader",
+        "annotation": "@jakarta.enterprise.context.ApplicationScoped",
+        "justification": "The loaders are now also exposed as CDI beans"
       }
     ]
   }
