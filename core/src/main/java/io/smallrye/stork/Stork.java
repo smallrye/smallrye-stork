@@ -3,6 +3,7 @@ package io.smallrye.stork;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -10,6 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.spi.CDI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,19 +116,16 @@ public final class Stork implements StorkServiceRegistry {
     @SuppressWarnings("rawtypes")
     public Stork(StorkInfrastructure storkInfrastructure) {
         this.infrastructure = storkInfrastructure;
-        Map<String, LoadBalancerLoader> loadBalancerProviders = getAll(LoadBalancerLoader.class);
-        Map<String, ServiceDiscoveryLoader> serviceDiscoveryProviders = getAll(ServiceDiscoveryLoader.class);
-        Map<String, ServiceRegistrarLoader> registrarLoaders = getAll(ServiceRegistrarLoader.class);
+        Map<String, LoadBalancerLoader> loadBalancerLoaders = loadFromServiceLoader(LoadBalancerLoader.class);
+        Map<String, ServiceDiscoveryLoader> serviceDiscoveryLoaders = loadFromServiceLoader(ServiceDiscoveryLoader.class);
+        Map<String, ServiceRegistrarLoader> registrarLoaders = loadFromServiceLoader(ServiceRegistrarLoader.class);
 
-        ServiceLoader<ConfigProvider> configs = ServiceLoader.load(ConfigProvider.class);
-        Optional<ConfigProvider> highestPrioConfigProvider = configs.stream()
-                .map(ServiceLoader.Provider::get)
-                .max(Comparator.comparingInt(ConfigProvider::priority));
+        extendWithCdiLoaders(serviceDiscoveryLoaders, loadBalancerLoaders, registrarLoaders);
 
-        ConfigProvider configProvider = highestPrioConfigProvider.orElse(null);
+        ConfigProvider configProvider = lookForConfigProvider();
         if (configProvider != null) {
             for (ServiceConfig serviceConfig : configProvider.getConfigs()) {
-                Service service = createService(loadBalancerProviders, serviceDiscoveryProviders, serviceConfig);
+                Service service = createService(loadBalancerLoaders, serviceDiscoveryLoaders, serviceConfig);
 
                 services.put(serviceConfig.serviceName(), service);
             }
@@ -139,6 +140,40 @@ public final class Stork implements StorkServiceRegistry {
 
     }
 
+    private void extendWithCdiLoaders(Map<String, ServiceDiscoveryLoader> serviceDiscoveryLoaders,
+            Map<String, LoadBalancerLoader> loadBalancerLoaders, Map<String, ServiceRegistrarLoader> registrarLoaders) {
+        CDI cdi = null;
+        try {
+            cdi = CDI.current();
+        } catch (IllegalStateException e) {
+            // Not a CDI environment
+            return;
+        }
+
+        Instance<ServiceDiscoveryLoader> sdl = cdi.select(ServiceDiscoveryLoader.class);
+        Instance<LoadBalancerLoader> lbl = cdi.select(LoadBalancerLoader.class);
+        Instance<ServiceRegistrarLoader> srl = cdi.select(ServiceRegistrarLoader.class);
+        sdl.forEach(l -> serviceDiscoveryLoaders.put(l.type(), l));
+        lbl.forEach(l -> loadBalancerLoaders.put(l.type(), l));
+        srl.forEach(l -> registrarLoaders.put(l.type(), l));
+    }
+
+    private static ConfigProvider lookForConfigProvider() {
+        List<ConfigProvider> providers = ServiceLoader.load(ConfigProvider.class)
+                .stream().map(ServiceLoader.Provider::get).collect(Collectors.toList());
+
+        try {
+            var cdi = CDI.current();
+            providers.addAll(cdi.select(ConfigProvider.class).stream().collect(Collectors.toList()));
+        } catch (IllegalStateException e) {
+            // Ignored - no cdi.
+            e.printStackTrace();
+        }
+        Optional<ConfigProvider> highestPrioConfigProvider = providers.stream()
+                .max(Comparator.comparingInt(ConfigProvider::priority));
+        return highestPrioConfigProvider.orElse(null);
+    }
+
     private ServiceRegistrar createServiceRegistrar(ServiceRegistrarConfig registrarConfig,
             Map<String, ServiceRegistrarLoader> registrarLoaders) {
         ServiceRegistrarLoader registrarLoader = registrarLoaders.get(registrarConfig.type());
@@ -149,18 +184,20 @@ public final class Stork implements StorkServiceRegistry {
     }
 
     private Service createService(ServiceConfig serviceConfig) {
-        return createService(getAll(LoadBalancerLoader.class), getAll(ServiceDiscoveryLoader.class), serviceConfig);
+        return createService(loadFromServiceLoader(LoadBalancerLoader.class),
+                loadFromServiceLoader(ServiceDiscoveryLoader.class),
+                serviceConfig);
     }
 
-    private Service createService(Map<String, LoadBalancerLoader> loadBalancerProviders,
+    private Service createService(Map<String, LoadBalancerLoader> loadBalancerLoaders,
             Map<String, ServiceDiscoveryLoader> serviceDiscoveryProviders,
             ServiceConfig serviceConfig) {
-        var ConfigWithType = serviceConfig.serviceDiscovery();
-        if (ConfigWithType == null) {
+        var configWithType = serviceConfig.serviceDiscovery();
+        if (configWithType == null) {
             throw new IllegalArgumentException(
                     "No service discovery defined for service " + serviceConfig.serviceName());
         }
-        String serviceDiscoveryType = ConfigWithType.type();
+        String serviceDiscoveryType = configWithType.type();
         if (serviceDiscoveryType == null) {
             throw new IllegalArgumentException(
                     "Service discovery type not defined for service " + serviceConfig.serviceName());
@@ -175,12 +212,12 @@ public final class Stork implements StorkServiceRegistry {
             // Backward compatibility
             LOGGER.warn("The 'secure' attribute is deprecated, use the 'secure' service discovery attribute instead");
             // We do not know if we can add to the parameters, such create a new SimpleConfigWithType
-            Map<String, String> newConfig = new HashMap<>(ConfigWithType.parameters());
+            Map<String, String> newConfig = new HashMap<>(configWithType.parameters());
             newConfig.put("secure", "true");
-            ConfigWithType = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
+            configWithType = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
         }
 
-        final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(ConfigWithType,
+        final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(configWithType,
                 serviceConfig.serviceName(), serviceConfig, infrastructure);
 
         final var loadBalancerConfig = serviceConfig.loadBalancer();
@@ -192,7 +229,7 @@ public final class Stork implements StorkServiceRegistry {
             loadBalancer = new RoundRobinLoadBalancer();
         } else {
             String loadBalancerType = loadBalancerConfig.type();
-            final var loadBalancerProvider = loadBalancerProviders.get(loadBalancerType);
+            final var loadBalancerProvider = loadBalancerLoaders.get(loadBalancerType);
             if (loadBalancerProvider == null) {
                 throw new IllegalArgumentException("No LoadBalancerProvider for type " + loadBalancerType);
             }
@@ -204,9 +241,9 @@ public final class Stork implements StorkServiceRegistry {
                 loadBalancer.requiresStrictRecording());
     }
 
-    private <T extends ElementWithType> Map<String, T> getAll(Class<T> providerClass) {
-        ServiceLoader<T> providers = ServiceLoader.load(providerClass);
-        return providers.stream().map(ServiceLoader.Provider::get)
+    private <T extends ElementWithType> Map<String, T> loadFromServiceLoader(Class<T> loaderClass) {
+        ServiceLoader<T> loader = ServiceLoader.load(loaderClass);
+        return loader.stream().map(ServiceLoader.Provider::get)
                 .collect(Collectors.toMap(ElementWithType::type, Function.identity()));
     }
 
