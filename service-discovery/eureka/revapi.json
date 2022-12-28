@@ -24,7 +24,24 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ {
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscoveryProvider",
+        "annotation": "@jakarta.enterprise.context.ApplicationScoped",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceRegistrarProvider",
+        "new": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceRegistrarProvider",
+        "annotation": "@jakarta.enterprise.context.ApplicationScoped",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      },
+      {
       "ignore": true,
       "code": "java.annotation.added",
       "old": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceDiscoveryProviderLoader",

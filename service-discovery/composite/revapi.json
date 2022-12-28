@@ -28,6 +28,14 @@
       {
         "ignore": true,
         "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.servicediscovery.composite.CompositeServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.composite.CompositeServiceDiscoveryProvider",
+        "annotation": "@jakarta.enterprise.context.ApplicationScoped",
+        "justification": "The loaders are now also exposed as CDI beans"
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
         "old": "class io.smallrye.stork.servicediscovery.composite.CompositeServiceDiscoveryProviderLoader",
         "new": "class io.smallrye.stork.servicediscovery.composite.CompositeServiceDiscoveryProviderLoader",
         "annotation": "@jakarta.enterprise.context.ApplicationScoped",
