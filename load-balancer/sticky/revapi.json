@@ -33,6 +33,14 @@
         {
           "ignore": true,
           "code": "java.annotation.added",
+          "old": "class io.smallrye.stork.loadbalancer.random.StickyLoadBalancerProvider",
+          "new": "class io.smallrye.stork.loadbalancer.random.StickyLoadBalancerProvider",
+          "annotation": "@jakarta.enterprise.context.ApplicationScoped",
+          "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+        },
+        {
+          "ignore": true,
+          "code": "java.annotation.added",
           "old": "class io.smallrye.stork.loadbalancer.random.StickyLoadBalancerProviderLoader",
           "new": "class io.smallrye.stork.loadbalancer.random.StickyLoadBalancerProviderLoader",
           "annotation": "@jakarta.enterprise.context.ApplicationScoped",
