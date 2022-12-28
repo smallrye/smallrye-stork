@@ -28,6 +28,14 @@
       {
         "ignore": true,
         "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider",
+        "new": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProvider",
+        "annotation": "@jakarta.enterprise.context.ApplicationScoped",
+        "justification": "The loaders are now also exposed as CDI beans"
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
         "old": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProviderLoader",
         "new": "class io.smallrye.stork.loadbalancer.leastresponsetime.LeastResponseTimeLoadBalancerProviderLoader",
         "annotation": "@jakarta.enterprise.context.ApplicationScoped",

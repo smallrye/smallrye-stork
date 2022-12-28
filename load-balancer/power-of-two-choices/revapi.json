@@ -28,6 +28,14 @@
       {
         "ignore": true,
         "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.loadbalancer.poweroftwochoices.PowerOfTwoChoicesLoadBalancerProvider",
+        "new": "class io.smallrye.stork.loadbalancer.poweroftwochoices.PowerOfTwoChoicesLoadBalancerProvider",
+        "annotation": "@jakarta.enterprise.context.ApplicationScoped",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
         "old": "class io.smallrye.stork.loadbalancer.poweroftwochoices.PowerOfTwoChoicesLoadBalancerProviderLoader",
         "new": "class io.smallrye.stork.loadbalancer.poweroftwochoices.PowerOfTwoChoicesLoadBalancerProviderLoader",
         "annotation": "@jakarta.enterprise.context.ApplicationScoped",
