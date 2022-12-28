@@ -1,5 +1,7 @@
 package io.smallrye.stork.loadbalancer.random;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.config.LoadBalancerAttribute;
@@ -13,6 +15,7 @@ import io.smallrye.stork.utils.DurationUtils;
 @LoadBalancerType(StickyLoadBalancerProvider.TYPE)
 @LoadBalancerAttribute(name = StickyLoadBalancerProvider.FAILURE_BACKOFF_TIME, defaultValue = "0", description = "After how much time, "
         + "a service instance that has failed can be reused.")
+@ApplicationScoped
 public class StickyLoadBalancerProvider
         implements LoadBalancerProvider<StickyConfiguration> {
 
