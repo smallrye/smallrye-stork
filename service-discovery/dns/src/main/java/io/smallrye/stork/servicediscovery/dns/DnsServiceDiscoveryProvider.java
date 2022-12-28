@@ -1,5 +1,7 @@
 package io.smallrye.stork.servicediscovery.dns;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
@@ -25,6 +27,7 @@ import io.vertx.core.Vertx;
 @ServiceDiscoveryAttribute(name = "fail-on-error", description = "Whether an error in retrieving service instances " +
         "from one of the DNS servers should cause a failure of the discovery attempt.", defaultValue = "false")
 @ServiceDiscoveryType("dns")
+@ApplicationScoped
 public class DnsServiceDiscoveryProvider implements ServiceDiscoveryProvider<DnsConfiguration> {
 
     @Override

@@ -1,5 +1,7 @@
 package io.smallrye.stork.servicediscovery.eureka;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
@@ -21,6 +23,7 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 @ServiceDiscoveryAttribute(name = "instance", description = "The Eureka application instance Id")
 @ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", defaultValue = CachingServiceDiscovery.DEFAULT_REFRESH_INTERVAL)
 @ServiceDiscoveryAttribute(name = "secure", description = "Whether is should select the secured endpoint of the retrieved services.", defaultValue = "false")
+@ApplicationScoped
 public class EurekaServiceDiscoveryProvider implements ServiceDiscoveryProvider<EurekaConfiguration> {
 
     @Override

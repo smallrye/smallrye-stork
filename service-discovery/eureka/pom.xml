@@ -98,6 +98,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
@@ -106,6 +111,10 @@
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-test-utils</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-junit5</artifactId>
         </dependency>
     </dependencies>
 

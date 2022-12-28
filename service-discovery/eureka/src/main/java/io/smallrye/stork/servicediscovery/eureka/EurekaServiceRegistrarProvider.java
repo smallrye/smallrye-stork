@@ -1,5 +1,7 @@
 package io.smallrye.stork.servicediscovery.eureka;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,7 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 @ServiceRegistrarAttribute(name = "eureka-context-path", description = "The Eureka server root context path.", defaultValue = "/")
 @ServiceRegistrarAttribute(name = "eureka-trust-all", description = "Enable/Disable the TLS certificate verification", defaultValue = "false")
 @ServiceRegistrarAttribute(name = "eureka-tls", description = "Use TLS to connect to the Eureka server", defaultValue = "false")
+@ApplicationScoped
 public class EurekaServiceRegistrarProvider
         implements ServiceRegistrarProvider<EurekaRegistrarConfiguration, EurekaMetadataKey> {
 

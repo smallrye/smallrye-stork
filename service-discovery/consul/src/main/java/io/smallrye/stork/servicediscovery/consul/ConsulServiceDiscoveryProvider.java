@@ -1,5 +1,7 @@
 package io.smallrye.stork.servicediscovery.consul;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
@@ -19,6 +21,7 @@ import io.vertx.core.Vertx;
 @ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", defaultValue = CachingServiceDiscovery.DEFAULT_REFRESH_INTERVAL)
 @ServiceDiscoveryAttribute(name = "secure", description = "whether the connection with the service should be encrypted with TLS.")
 @ServiceDiscoveryType("consul")
+@ApplicationScoped
 public class ConsulServiceDiscoveryProvider implements ServiceDiscoveryProvider<ConsulConfiguration> {
 
     @Override

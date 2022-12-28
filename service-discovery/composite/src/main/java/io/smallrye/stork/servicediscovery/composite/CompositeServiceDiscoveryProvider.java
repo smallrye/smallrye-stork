@@ -3,6 +3,8 @@ package io.smallrye.stork.servicediscovery.composite;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
+
 import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
@@ -15,6 +17,7 @@ import io.smallrye.stork.spi.StorkInfrastructure;
  */
 @ServiceDiscoveryType("composite")
 @ServiceDiscoveryAttribute(name = "services", description = "A comma-separated list of services that this services consists of.", required = true)
+@ApplicationScoped
 public class CompositeServiceDiscoveryProvider
         implements ServiceDiscoveryProvider<CompositeConfiguration> {
 
