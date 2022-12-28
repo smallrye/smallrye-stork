@@ -36,6 +36,15 @@
       {
         "ignore": true,
         "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.servicediscovery.consul.ConsulServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.consul.ConsulServiceDiscoveryProvider",
+        "annotation": "@jakarta.enterprise.context.ApplicationScoped",
+        "justification": "The loaders are now also exposed as CDI beans"
+      },
+
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
         "old": "class io.smallrye.stork.servicediscovery.consul.ConsulServiceRegistrarProviderLoader",
         "new": "class io.smallrye.stork.servicediscovery.consul.ConsulServiceRegistrarProviderLoader",
         "annotation": "@jakarta.enterprise.context.ApplicationScoped",

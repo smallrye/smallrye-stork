@@ -80,6 +80,7 @@ public class StaticListServiceDiscoveryCDITest {
     @Test
     void shouldFailOnMissingService() {
         assertThatThrownBy(() -> stork.getService("missing")).isInstanceOf(NoSuchServiceDefinitionException.class);
+
         assertThat(stork.getServiceOptional("missing")).isEmpty();
     }
 
