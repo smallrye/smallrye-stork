@@ -1,4 +1,4 @@
-package io.smallrye.stork.test;
+package io.smallrye.stork;
 
 import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.ServiceDiscovery;
