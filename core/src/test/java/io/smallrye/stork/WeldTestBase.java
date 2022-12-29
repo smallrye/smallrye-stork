@@ -1,12 +1,12 @@
-package io.smallrye.stork.test;
+package io.smallrye.stork;
 
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 
 public class WeldTestBase {
 
-    Weld weld;
-    WeldContainer container;
+    protected Weld weld;
+    protected WeldContainer container;
 
     public WeldTestBase() {
         weld = new Weld();

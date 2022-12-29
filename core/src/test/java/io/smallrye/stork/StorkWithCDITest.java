@@ -1,4 +1,4 @@
-package io.smallrye.stork.test;
+package io.smallrye.stork;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.NoSuchServiceDefinitionException;
 import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
@@ -425,39 +424,6 @@ public class StorkWithCDITest extends WeldTestBase {
         Assertions.assertEquals(2L, stork.getService("a").selectInstance().await().indefinitely().getId());
         Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
         Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
-    }
-
-    private static class FakeServiceConfig implements ServiceConfig {
-
-        private final String name;
-        private final ConfigWithType lb;
-        private final ConfigWithType sd;
-
-        private FakeServiceConfig(String name, ConfigWithType sd, ConfigWithType lb) {
-            this.name = name;
-            this.lb = lb;
-            this.sd = sd;
-        }
-
-        @Override
-        public String serviceName() {
-            return name;
-        }
-
-        @Override
-        public ConfigWithType loadBalancer() {
-            return lb;
-        }
-
-        @Override
-        public ConfigWithType serviceDiscovery() {
-            return sd;
-        }
-
-        @Override
-        public boolean secure() {
-            return false;
-        }
     }
 
     private static class FakeSecureServiceConfig extends FakeServiceConfig {
