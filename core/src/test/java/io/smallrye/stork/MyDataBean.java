@@ -1,4 +1,4 @@
-package io.smallrye.stork.test;
+package io.smallrye.stork;
 
 import jakarta.enterprise.context.ApplicationScoped;
 

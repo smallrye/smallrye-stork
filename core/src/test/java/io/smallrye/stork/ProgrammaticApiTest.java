@@ -1,6 +1,6 @@
-package io.smallrye.stork.test;
+package io.smallrye.stork;
 
-import static io.smallrye.stork.test.TestEnv.SPI_ROOT;
+import static io.smallrye.stork.TestEnv.SPI_ROOT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
