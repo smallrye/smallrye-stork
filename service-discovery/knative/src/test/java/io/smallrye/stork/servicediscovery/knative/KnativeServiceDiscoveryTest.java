@@ -233,7 +233,7 @@ public class KnativeServiceDiscoveryTest {
         await().atMost(Duration.ofSeconds(5))
                 .until(() -> instances.get() != null);
 
-        assertThat(instances.get()).hasSize(0);
+        await().untilAsserted(() -> assertThat(instances.get()).hasSize(0));
     }
 
     @Test
