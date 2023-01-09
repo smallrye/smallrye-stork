@@ -36,5 +36,9 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
+          sudo apt-get install -y gnupg2 gnupg-agent
+          curl -s "https://get.sdkman.io" | bash
+          source ~/.sdkman/bin/sdkman-init.sh && \
+            sdk install jbang  
           export STORK_VERSION=$(cat ".github/project.yml" | yq eval '.release.current-version' -)  
           jbang .github/PublishReleaseNotes.java --release-version=$STORK_VERSION --token=$GITHUB_TOKEN
