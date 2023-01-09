@@ -362,5 +362,12 @@
                 <module>coverage</module>
             </modules>
         </profile>
+
+        <profile>
+            <id>release</id>
+            <properties>
+                <revapi.skip>true</revapi.skip>
+            </properties>
+        </profile>
     </profiles>
 </project>
