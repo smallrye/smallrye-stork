@@ -1,5 +1,10 @@
 # Knative Service Discovery
 
+Knative is a Kubernetes-based platform for serverless workloads. Knative provides a set of objects as Kubernetes Custom Resource Definitions (CRDs). 
+These resources are used to define and control how your serverless workload behaves on the cluster. 
+The Stork Knative service discovery implementation is very similar to the Kubernetes one. 
+Stork will ask for [Knative services](https://knative.dev/docs/serving/reference/serving-api/#serving.knative.dev/v1.Service) to the cluster instead of vanilla [Kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/#service-resource) used by the Kubernetes implementation. 
+To do so, Stork uses [Fabric 8 Knative Client](https://github.com/fabric8io/kubernetes-client/blob/master/extensions/knative/client/src/main/java/io/fabric8/knative/client/KnativeClient.java) which is just an extension of Fabric8 Kubernetes Client. 
 
 
 ## Dependency
