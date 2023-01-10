@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.fabric8.knative.client.KnativeClient;
@@ -187,8 +188,8 @@ public class KnativeServiceDiscoveryTest {
 
     }
 
-    @Test
-    void shouldFetchInstancesFromTheClusterWhenCacheIsInvalidated() throws InterruptedException {
+    @RepeatedTest(10)
+    void shouldFetchInstancesFromTheClusterWhenCacheIsInvalidated() {
 
         // Given a service with 3 instances registered in the cluster
         // Stork gather the cache from the cluster
@@ -226,14 +227,14 @@ public class KnativeServiceDiscoveryTest {
 
         kn.services().withName(knSvcName).delete();
 
-        service.getServiceDiscovery().getServiceInstances()
-                .onFailure().invoke(th -> fail("Failed to get service instances from the cluster", th))
-                .subscribe().with(instances::set);
-
         await().atMost(Duration.ofSeconds(5))
-                .until(() -> instances.get() != null);
-
-        await().untilAsserted(() -> assertThat(instances.get()).hasSize(0));
+                .until(() -> {
+                    // Need to redo the query until the cache is invalidated.
+                    service.getServiceDiscovery().getServiceInstances()
+                            .onFailure().invoke(th -> fail("Failed to get service instances from the cluster", th))
+                            .subscribe().with(instances::set);
+                    return instances.get() != null  && instances.get().size() == 0;
+                });
     }
 
     @Test
