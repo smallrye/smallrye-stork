@@ -233,7 +233,7 @@ public class KnativeServiceDiscoveryTest {
                     service.getServiceDiscovery().getServiceInstances()
                             .onFailure().invoke(th -> fail("Failed to get service instances from the cluster", th))
                             .subscribe().with(instances::set);
-                    return instances.get() != null  && instances.get().size() == 0;
+                    return instances.get() != null && instances.get().size() == 0;
                 });
     }
 
