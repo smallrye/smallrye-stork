@@ -45,6 +45,7 @@ This _type_ is used in the configuration to reference the provider:
 
 A `ServiceDiscoveryProvider` implementation needs to be annotated with `@ServiceDiscoveryType` that defines the _type_.
 Any configuration properties that the provider expects should be defined with `@ServiceDiscoveryAttribute` annotations placed on the provider.
+Optionally, you can also add `@ApplicationScoped` annotation in order to provide the service discovery implementation as CDI bean.
 
 A service discovery provider class should look as follows:
 

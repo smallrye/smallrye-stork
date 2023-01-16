@@ -46,6 +46,7 @@ This _type_ is used in the configuration to reference the provider:
 
 A `LoadBalancerProvider` implementation needs to be annotated with `@LoadBalancerType` that defines the _type_.
 Any configuration properties that the provider expects should be defined with `@LoadBalancerAttribute` annotations placed on the provider.
+Optionally, you can also add `@ApplicationScoped` annotation in order to provide the load balancer implementation as CDI bean.
 
 A load balancer provider class should look as follows:
 ```java linenums="1"
