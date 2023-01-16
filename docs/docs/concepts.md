@@ -36,7 +36,7 @@ It needs to be initialized once (when the application starts) and shutdown when 
 --8<-- "snippets/examples/StorkEntryPointExample.java"
 ```
 
-During the initialization, Stork looks for `io.smallrye.stork.config.ConfigProvider` SPI provider and retrieves the list of managed services:
+During the initialization, Stork looks for `io.smallrye.stork.config.ConfigProvider` SPI provider and CDI beans (from 2.x version) and retrieves the list of managed services:
 
 * A service is identified by a **name**. 
 * A service has a service discovery configuration indicating how Stork will look for service instances

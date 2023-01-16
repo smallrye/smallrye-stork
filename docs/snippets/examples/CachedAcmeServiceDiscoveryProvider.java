@@ -7,6 +7,7 @@ import io.smallrye.stork.api.config.ServiceDiscoveryType;
 import io.smallrye.stork.impl.CachingServiceDiscovery;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 import io.smallrye.stork.spi.StorkInfrastructure;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ServiceDiscoveryType("cached-acme")
 @ServiceDiscoveryAttribute(name = "host",
@@ -16,6 +17,7 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 @ServiceDiscoveryAttribute(name = "refresh-period",
         description = "Service discovery cache refresh period.",
         defaultValue = CachingServiceDiscovery.DEFAULT_REFRESH_INTERVAL)
+@ApplicationScoped
 public class CachedAcmeServiceDiscoveryProvider
         implements ServiceDiscoveryProvider<CachedAcmeConfiguration> {
 

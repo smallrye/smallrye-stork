@@ -5,10 +5,12 @@ import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.config.LoadBalancerAttribute;
 import io.smallrye.stork.api.config.LoadBalancerType;
 import io.smallrye.stork.spi.LoadBalancerProvider;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @LoadBalancerType("acme-load-balancer")
 @LoadBalancerAttribute(name = "my-attribute",
         description = "Attribute that alters the behavior of the LoadBalancer")
+@ApplicationScoped
 public class AcmeLoadBalancerProvider implements
         LoadBalancerProvider<AcmeLoadBalancerConfiguration> {
 
