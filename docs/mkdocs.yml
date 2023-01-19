@@ -14,6 +14,7 @@ nav:
     - Consul: 'service-discovery/consul.md'
     - DNS: 'service-discovery/dns.md'
     - Kubernetes: 'service-discovery/kubernetes.md'
+    - KNative: 'service-discovery/knative.md'
     - Eureka: 'service-discovery/eureka.md'
     - Composite: 'service-discovery/composite.md'
     - Static List: 'service-discovery/static-list.md'
