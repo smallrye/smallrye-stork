@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '11', opts: '-Drevapi.skip' },
+          { 'version': '11', opts: '-Drevapi.skip -pl \!service-discovery/eureka,!docs' },
           { 'version': '16', 'opts': '-Drevapi.skip' },
           { 'version': '17', 'opts': 'javadoc:javadoc' }
         ]
@@ -49,7 +49,7 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '11', opts: '' },
+          { 'version': '11', opts: '-pl ''!service-discovery/eureka,!docs''' },
           { 'version': '16', 'opts': '' },
           { 'version': '17', 'opts': '' }
         ]
@@ -68,7 +68,7 @@ jobs:
 
       - name: build with maven
 #        Skip integration tests. TestContainers does not support Windows Server 2019: https://github.com/testcontainers/testcontainers-java/issues/2960
-        run: mvn -B formatter:validate test --file pom.xml
+        run: mvn -B formatter:validate test --file pom.xml ${{matrix.java.opts}}
 
   compatibility:
     runs-on: ubuntu-20.04
