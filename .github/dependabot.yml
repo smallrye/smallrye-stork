@@ -20,7 +20,6 @@ updates:
     open-pull-requests-limit: 10
     commit-message:
       prefix: "1.x"
-      include_scope: true
     ignore:
       - dependency-name: "org.springframework:spring-framework-bom"
       - dependency-name: "org.springframework.cloud:spring-cloud-dependencies"
