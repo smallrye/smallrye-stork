@@ -187,7 +187,7 @@
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-spi</artifactId>
-                <version>5.0.SP3</version>
+                <version>5.0.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.weld</groupId>
