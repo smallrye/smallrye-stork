@@ -10,7 +10,7 @@ jobs:
   post-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: Checkout code
         with:
           fetch-depth: 0 # fetch all commits and branches for mike to work properly
