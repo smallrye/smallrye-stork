@@ -29,7 +29,7 @@ updates:
         version: "> 1.9.9"
       - dependency-name: "io.smallrye.reactive:smallrye-mutiny-vertx-web-client"
         version: "> 2.9.9"
-      - dependency-nane: "org.eclipse.microprofile.rest.client:microprofile-rest-client-api"
+      - dependency-name: "org.eclipse.microprofile.rest.client:microprofile-rest-client-api"
         version: "> 2.9.9"
 
   - package-ecosystem: "github-actions"
