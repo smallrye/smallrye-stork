@@ -1,7 +1,39 @@
 version: 2
 updates:
-- package-ecosystem: maven
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
+  #  Main branch
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  #  1.x branch
+  - package-ecosystem: maven
+    directory: "/"
+    target-branch: 1.x
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "org.springframework:spring-framework-bom"
+      - dependency-name: "org.springframework.cloud:spring-cloud-dependencies"
+      - dependency-name: "org.apache.tomcat.embed:tomcat-embed-core"
+      - dependency-name: "org.springframework.cloud:spring-cloud-starter-netflix-eureka-server"
+      - dependency-name: "org.slf4j:slf4j-api"
+        version: "> 1.9.9"
+      - dependency-name: "io.smallrye.reactive:mutiny"
+        version: "> 1.9.9"
+      - dependency-name: "io.smallrye.reactive:smallrye-mutiny-vertx-web-client"
+        version: "> 2.9.9"
+      - dependency-nane: "org.eclipse.microprofile.rest.client:microprofile-rest-client-api"
+        version: "> 2.9.9"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: 1.x
+    schedule:
+      interval: "weekly"

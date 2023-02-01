@@ -4,6 +4,7 @@ on:
   push:
     branches: 
       - main
+      - '1.x'
     paths-ignore:
       - '.gitignore'
       - 'CODEOWNERS'
@@ -11,6 +12,9 @@ on:
       - 'NOTICE'
       - 'README*'
   pull_request:
+    branches:
+      - main
+      - '1.x'
     paths-ignore:
       - '.gitignore'
       - 'CODEOWNERS'
