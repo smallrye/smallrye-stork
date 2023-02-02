@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '11', opts: '-Drevapi.skip -pl \!service-discovery/eureka,!docs' },
+          { 'version': '11', 'opts': '-Drevapi.skip' },
           { 'version': '16', 'opts': '-Drevapi.skip' },
           { 'version': '17', 'opts': 'javadoc:javadoc' }
         ]
@@ -53,7 +53,7 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '11', opts: '-pl ''!service-discovery/eureka,!docs''' },
+          { 'version': '11', 'opts': '' },
           { 'version': '16', 'opts': '' },
           { 'version': '17', 'opts': '' }
         ]

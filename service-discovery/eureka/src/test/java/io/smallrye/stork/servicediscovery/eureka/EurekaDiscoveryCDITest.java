@@ -1,70 +1,78 @@
 package io.smallrye.stork.servicediscovery.eureka;
 
-import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.EUREKA_HOST;
-import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.EUREKA_PORT;
-import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.registerApplicationInstance;
-import static io.smallrye.stork.servicediscovery.eureka.EurekaServer.updateApplicationInstanceStatus;
+import static io.smallrye.stork.servicediscovery.eureka.EurekaDiscoveryTest.registerApplicationInstance;
+import static io.smallrye.stork.servicediscovery.eureka.EurekaDiscoveryTest.unregisterAll;
+import static io.smallrye.stork.servicediscovery.eureka.EurekaDiscoveryTest.updateApplicationInstanceStatus;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.AfterAll;
+import org.jboss.weld.junit5.ExplicitParamInjection;
+import org.jboss.weld.junit5.WeldInitiator;
+import org.jboss.weld.junit5.WeldJunit5Extension;
+import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import io.smallrye.stork.Stork;
-import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
-import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.test.StorkTestUtils;
-import io.smallrye.stork.test.TestConfigProvider;
+import io.smallrye.stork.test.TestConfigProviderBean;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
 
-public class EurekaDiscoveryAndRegistrationTest {
+@Testcontainers
+@DisabledOnOs(OS.WINDOWS)
+@ExtendWith(WeldJunit5Extension.class)
+@ExplicitParamInjection
+public class EurekaDiscoveryCDITest {
 
-    private static Vertx vertx;
+    @WeldSetup
+    public WeldInitiator weld = WeldInitiator.of(TestConfigProviderBean.class,
+            EurekaServiceDiscoveryProviderLoader.class);
+
+    public static final int EUREKA_PORT = 8761;
+
+    @Container
+    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.2"))
+            .withExposedPorts(EUREKA_PORT);
+
+    private static Vertx vertx = Vertx.vertx();;
     private WebClient client;
 
-    @BeforeAll
-    static void startEureka() {
-        vertx = Vertx.vertx();
-        EurekaServer.start();
-    }
-
-    @AfterAll
-    static void stopEureka() {
-        vertx.closeAndAwait();
-        EurekaServer.stop();
-    }
+    public int port;
+    public String host;
 
     @BeforeEach
     public void init() {
         client = WebClient.create(vertx, new WebClientOptions()
-                .setDefaultHost(EurekaServer.EUREKA_HOST)
-                .setDefaultPort(EurekaServer.EUREKA_PORT));
+                .setDefaultHost(eureka.getHost())
+                .setDefaultPort(eureka.getMappedPort(EUREKA_PORT)));
+        port = eureka.getMappedPort(EUREKA_PORT);
+        host = eureka.getHost();
     }
 
     @AfterEach
     public void cleanup() {
-        EurekaServer.unregisterAll(client);
-        TestConfigProvider.clear();
+        unregisterAll(client);
         client.close();
-
     }
 
     @Test
@@ -337,36 +345,15 @@ public class EurekaDiscoveryAndRegistrationTest {
         });
     }
 
-    // Registration test done in this class to avoid conflicts with EurekaServer Spring context initialization when all tests run
-    @Test
-    public void testRegistrationServiceInstances(TestInfo info) {
-        TestConfigProvider.addServiceRegistrarConfig("my-eureka-registrar", "eureka",
-                Map.of("eureka-host", EurekaServer.EUREKA_HOST, "eureka-port", String.valueOf(EUREKA_PORT)));
-        String serviceName = "my-service";
-
-        Stork stork = configureAndGetStork(serviceName);
-
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getServiceRegistrar("my-eureka-registrar");
-
-        CountDownLatch registrationLatch = new CountDownLatch(1);
-        eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)
-                .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), "acme.com", 8406).subscribe()
-                .with(success -> registrationLatch.countDown(), failure -> fail(""));
-
-        await().atMost(Duration.ofSeconds(10))
-                .until(() -> registrationLatch.getCount() == 0L);
-
-    }
-
-    protected static Stork configureAndGetStork(String serviceName) {
+    protected Stork configureAndGetStork(String serviceName) {
         return configureAndGetStork(serviceName, false, null);
     }
 
-    private static Stork configureAndGetStork(String serviceName, boolean secure, String instance) {
+    private Stork configureAndGetStork(String serviceName, boolean secure, String instance) {
         Stork stork = StorkTestUtils.getNewStorkInstance();
         EurekaConfiguration configuration = new EurekaConfiguration()
-                .withEurekaHost(EUREKA_HOST)
-                .withEurekaPort(Integer.toString(EUREKA_PORT))
+                .withEurekaHost(eureka.getHost())
+                .withEurekaPort(Integer.toString(port))
                 .withRefreshPeriod("1S")
                 .withSecure(Boolean.toString(secure));
         if (instance != null) {
