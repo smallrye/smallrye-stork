@@ -1,62 +1,108 @@
 package io.smallrye.stork.servicediscovery.eureka;
 
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
-import io.restassured.RestAssured;
+import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.Metadata;
+import io.smallrye.stork.api.ServiceDefinition;
+import io.smallrye.stork.api.ServiceRegistrar;
+import io.smallrye.stork.test.StorkTestUtils;
+import io.smallrye.stork.test.TestConfigProvider;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.HttpResponse;
 import io.vertx.mutiny.ext.web.client.WebClient;
 
-/**
- * Let's be clear - Starting an Eureka server is not as easy as it should be.
- * The available container image is out of date (https://hub.docker.com/r/springcloud/eureka) and unusable.
- * <p>
- * The easiest way is to start a Spring application.
- * It leads to test classpath pollution as you need to select the versions carefully.
- * <p>
- * This class is responsible for starting and stopping the Eureka server.
- * The spring application reads the `src/test/resources/application.properties` file.
- * <p>
- * This class starts the server and provides helper methods to handle registrations and status updates.
- */
-@SpringBootApplication
-@EnableEurekaServer
-public class EurekaServer {
+@Testcontainers
+@DisabledOnOs(OS.WINDOWS)
+public class EurekaRegistrationTest {
 
-    private static ConfigurableApplicationContext context;
+    @Container
+    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.2"))
+            .withExposedPorts(EUREKA_PORT);
+    private static Vertx vertx = Vertx.vertx();
+    private WebClient client;
 
-    public static final String EUREKA_HOST = "localhost";
     public static final int EUREKA_PORT = 8761;
-    @SuppressWarnings("HttpUrlsUsage")
-    public static final String EUREKA_URL = "http://" + EUREKA_HOST + ":" + EUREKA_PORT;
 
-    public static void start() {
-        context = SpringApplication.run(EurekaServer.class);
-        await()
-                .atMost(Duration.ofSeconds(20))
-                .catchUncaughtExceptions()
-                .until(() -> RestAssured.get(EUREKA_URL).statusCode() == 200);
+    public int port;
+    public String host;
+
+    @BeforeEach
+    public void init() {
+        client = WebClient.create(vertx, new WebClientOptions()
+                .setDefaultHost(eureka.getHost())
+                .setDefaultPort(eureka.getMappedPort(EUREKA_PORT)));
+        port = eureka.getMappedPort(EUREKA_PORT);
+        host = eureka.getHost();
     }
 
-    public static void stop() {
-        if (context != null) {
-            try {
-                context.close();
-            } catch (Exception ignored) {
-                // ignored
-            }
+    @AfterEach
+    public void cleanup() {
+        unregisterAll(client);
+        TestConfigProvider.clear();
+        client.close();
+
+    }
+
+    @Test
+    public void testRegistrationServiceInstances(TestInfo info) {
+        TestConfigProvider.addServiceRegistrarConfig("my-eureka-registrar", "eureka",
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+        String serviceName = "my-service";
+
+        Stork stork = configureAndGetStork(serviceName);
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getServiceRegistrar("my-eureka-registrar");
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)
+                .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), "acme.com", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+    }
+
+    private Stork configureAndGetStork(String serviceName) {
+        return configureAndGetStork(serviceName, false, null);
+    }
+
+    private Stork configureAndGetStork(String serviceName, boolean secure, String instance) {
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+        EurekaConfiguration configuration = new EurekaConfiguration()
+                .withEurekaHost(eureka.getHost())
+                .withEurekaPort(Integer.toString(port))
+                .withRefreshPeriod("1S")
+                .withSecure(Boolean.toString(secure));
+        if (instance != null) {
+            configuration = configuration.withInstance(instance);
         }
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(configuration));
+        return stork;
     }
 
     private static class ApplicationInstance {
@@ -118,7 +164,7 @@ public class EurekaServer {
         instances.add(new ApplicationInstance(applicationId, instanceId));
     }
 
-    static void updateApplicationInstanceStatus(WebClient client, String app, String id, String status, String path) {
+    public static void updateApplicationInstanceStatus(WebClient client, String app, String id, String status, String path) {
         String url = path + "/eureka/apps/" + app + "/" + id + "/status";
         await().untilAsserted(() -> {
             HttpResponse<Buffer> response = client.put(url)
@@ -133,4 +179,5 @@ public class EurekaServer {
         await().untilAsserted(() -> Assertions.assertEquals(200,
                 client.get(path + "/eureka/apps/" + app + "/" + instance).sendAndAwait().statusCode()));
     }
+
 }
