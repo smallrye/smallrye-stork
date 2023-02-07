@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.assertj.core.util.Strings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ public class KnativeServiceDiscoveryTest {
 
         String knSvcName = "my-knservice";
 
-        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null);
+        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null, null);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -77,9 +78,39 @@ public class KnativeServiceDiscoveryTest {
                 entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
     }
 
-    private void registerKnativeServices(String knativeService, String url, String namespace) {
+    @Test
+    void shouldDiscoverNamespacedKnativeServicesWithApp() {
+        TestConfigProvider.addServiceConfig("my-knservice", null, "knative",
+                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "test", "application", "greetingApp"));
 
-        Service knSvc = buildKnService(knativeService, url, namespace);
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String knSvcName = "my-knservice";
+        String applicationName = "greetingApp";
+
+        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null, applicationName);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        io.smallrye.stork.api.Service service = stork.getService(knSvcName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from the cluster", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(1);
+        assertThat(instances.get().get(0).getHost()).isEqualTo("http://hello.test.127.0.0.1.sslip.io");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(8080);
+        Map<String, String> labels = instances.get().get(0).getLabels();
+        assertThat(labels).contains(entry("serving.knative.dev/creator", "kubernetes-admin"),
+                entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
+    }
+
+    private void registerKnativeServices(String knativeService, String url, String namespace, String application) {
+
+        Service knSvc = buildKnService(knativeService, url, namespace, application);
         if (namespace != null) {
             kn.services().inNamespace(namespace).resource(knSvc).create();
         } else {
@@ -87,15 +118,17 @@ public class KnativeServiceDiscoveryTest {
         }
     }
 
-    private static Service buildKnService(String knativeService, String url, String namespace) {
+    private static Service buildKnService(String knativeService, String url, String namespace, String applicationName) {
         Map<String, String> serviceLabels = new HashMap<>();
         serviceLabels.put("serving.knative.dev/creator", "kubernetes-admin");
         serviceLabels.put("serving.knative.dev/lastModifier", "kubernetes-admin");
 
+        String name = Strings.isNullOrEmpty(applicationName) ? knativeService : applicationName;
+
         ServiceStatus serviceStatus = new ServiceStatusBuilder().withUrl(url)
                 .withLatestCreatedRevisionName("revisionName").build();
         Service knSvc = new ServiceBuilder().withNewMetadata().withNamespace(namespace).withLabels(serviceLabels)
-                .withName(knativeService)
+                .withName(name)
                 .endMetadata().withStatus(serviceStatus)
                 .build();
         return knSvc;
@@ -109,8 +142,8 @@ public class KnativeServiceDiscoveryTest {
 
         String knativeService = "my-knservice";
 
-        registerKnativeServices(knativeService, "http://hello.ns1.127.0.0.1.sslip.io", "ns1");
-        registerKnativeServices(knativeService, "http://hello.ns2.127.0.0.1.sslip.io", "ns2");
+        registerKnativeServices(knativeService, "http://hello.ns1.127.0.0.1.sslip.io", "ns1", null);
+        registerKnativeServices(knativeService, "http://hello.ns2.127.0.0.1.sslip.io", "ns2", null);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -135,7 +168,7 @@ public class KnativeServiceDiscoveryTest {
 
         String knativeService = "my-knservice";
 
-        registerKnativeServices(knativeService, "http://hello.test.127.0.0.1.sslip.io", null);
+        registerKnativeServices(knativeService, "http://hello.test.127.0.0.1.sslip.io", null, null);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -165,7 +198,7 @@ public class KnativeServiceDiscoveryTest {
 
         String knSvcName = "my-knservice";
 
-        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null);
+        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null, null);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -204,7 +237,7 @@ public class KnativeServiceDiscoveryTest {
 
         String knSvcName = "my-knservice";
 
-        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null);
+        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null, null);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -252,7 +285,7 @@ public class KnativeServiceDiscoveryTest {
         server.expect().get().withPath("/apis/serving.knative.dev/v1/namespaces/test/services/my-knservice")
                 .andReply(200, r -> {
                     serverHit.incrementAndGet();
-                    return buildKnService(knSvcName, "http://hello.test.127.0.0.1.sslip.io", "test");
+                    return buildKnService(knSvcName, "http://hello.test.127.0.0.1.sslip.io", "test", null);
                 }).always();
 
         TestConfigProvider.addServiceConfig("my-knservice", null, "knative",
