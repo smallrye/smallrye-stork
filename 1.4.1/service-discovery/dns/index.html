@@ -796,6 +796,72 @@ All in all, your configuration could look as follows:</p>
 </div>
 </div>
 <p>All the available parameters are as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dns-servers</code></td>
+<td>No</td>
+<td><code>none</code></td>
+<td>Comma separated list of dns servers. Servers can either be in the <code>server:port</code> or just <code>server</code> form. Use <code>none</code> to use the system resolver.</td>
+</tr>
+<tr>
+<td><code>hostname</code></td>
+<td>No</td>
+<td></td>
+<td>The hostname to look up; if not defined Stork service name will be used.</td>
+</tr>
+<tr>
+<td><code>record-type</code></td>
+<td>No</td>
+<td><code>SRV</code></td>
+<td>Type of the DNS record. A, AAAA and SRV records are supported</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td>No</td>
+<td></td>
+<td>Port of the service instances. Required if the record type is other than SRV.</td>
+</tr>
+<tr>
+<td><code>refresh-period</code></td>
+<td>No</td>
+<td><code>5M</code></td>
+<td>Service discovery cache refresh period.</td>
+</tr>
+<tr>
+<td><code>secure</code></td>
+<td>No</td>
+<td></td>
+<td>Whether the connection with the service should be encrypted with TLS.</td>
+</tr>
+<tr>
+<td><code>recursion-desired</code></td>
+<td>No</td>
+<td><code>true</code></td>
+<td>Whether DNS recursion is desired</td>
+</tr>
+<tr>
+<td><code>dns-timeout</code></td>
+<td>No</td>
+<td><code>5s</code></td>
+<td>Timeout for DNS queries</td>
+</tr>
+<tr>
+<td><code>fail-on-error</code></td>
+<td>No</td>
+<td><code>false</code></td>
+<td>Whether an error in retrieving service instances from one of the DNS servers should cause a failure of the discovery attempt.</td>
+</tr>
+</tbody>
+</table>
 
               
             </article>

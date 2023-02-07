@@ -821,6 +821,72 @@ You are not viewing the latest version.
 </div>
 <p>Stork looks for the service with the given name (<code>my-service</code> in the previous example).</p>
 <p>Supported attributes are the following:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eureka-host</code></td>
+<td>Yes</td>
+<td></td>
+<td>The Eureka server host.</td>
+</tr>
+<tr>
+<td><code>eureka-port</code></td>
+<td>No</td>
+<td><code>8761</code></td>
+<td>The Eureka server port.</td>
+</tr>
+<tr>
+<td><code>eureka-context-path</code></td>
+<td>No</td>
+<td><code>/</code></td>
+<td>The Eureka server root context path.</td>
+</tr>
+<tr>
+<td><code>application</code></td>
+<td>No</td>
+<td></td>
+<td>The Eureka application Id; if not defined Stork service name will be used</td>
+</tr>
+<tr>
+<td><code>eureka-trust-all</code></td>
+<td>No</td>
+<td><code>false</code></td>
+<td>Enable/Disable the TLS certificate verification</td>
+</tr>
+<tr>
+<td><code>eureka-tls</code></td>
+<td>No</td>
+<td><code>false</code></td>
+<td>Use TLS to connect to the Eureka server</td>
+</tr>
+<tr>
+<td><code>instance</code></td>
+<td>No</td>
+<td></td>
+<td>The Eureka application instance Id</td>
+</tr>
+<tr>
+<td><code>refresh-period</code></td>
+<td>No</td>
+<td><code>5M</code></td>
+<td>Service discovery cache refresh period.</td>
+</tr>
+<tr>
+<td><code>secure</code></td>
+<td>No</td>
+<td><code>false</code></td>
+<td>Whether is should select the secured endpoint of the retrieved services.</td>
+</tr>
+</tbody>
+</table>
 <p>The <code>application</code> attribute is optional.
 It uses the Stork service name (<code>my-service</code> in the previous configuration) if not set.</p>
 <p>The <code>instance</code> attribute allows selecting a specific instance.
@@ -850,6 +916,48 @@ If set to <code>true</code>, unsecured instances are filtered out from the avail
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="na">quarkus.stork.my-service.service-registrar.eureka-port</span><span class="o">=</span><span class="s">8761</span><span class="w"></span>
 </code></pre></div>
 <p>Consul service registrar is configured with the following parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eureka-host</code></td>
+<td>No</td>
+<td><code>localhost</code></td>
+<td>The Eureka host.</td>
+</tr>
+<tr>
+<td><code>eureka-port</code></td>
+<td>No</td>
+<td><code>8761</code></td>
+<td>The Eureka port.</td>
+</tr>
+<tr>
+<td><code>eureka-context-path</code></td>
+<td>No</td>
+<td><code>/</code></td>
+<td>The Eureka server root context path.</td>
+</tr>
+<tr>
+<td><code>eureka-trust-all</code></td>
+<td>No</td>
+<td><code>false</code></td>
+<td>Enable/Disable the TLS certificate verification</td>
+</tr>
+<tr>
+<td><code>eureka-tls</code></td>
+<td>No</td>
+<td><code>false</code></td>
+<td>Use TLS to connect to the Eureka server</td>
+</tr>
+</tbody>
+</table>
 
               
             </article>

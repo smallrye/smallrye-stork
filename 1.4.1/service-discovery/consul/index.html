@@ -819,6 +819,54 @@ External services can be registered as well.</p>
 </div>
 </div>
 <p>Consul service discovery is configured with the following parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>consul-host</code></td>
+<td>No</td>
+<td><code>localhost</code></td>
+<td>The Consul host.</td>
+</tr>
+<tr>
+<td><code>consul-port</code></td>
+<td>No</td>
+<td><code>8500</code></td>
+<td>The Consul port.</td>
+</tr>
+<tr>
+<td><code>use-health-checks</code></td>
+<td>No</td>
+<td><code>true</code></td>
+<td>Whether to use health check.</td>
+</tr>
+<tr>
+<td><code>application</code></td>
+<td>No</td>
+<td></td>
+<td>The application name; if not defined Stork service name will be used.</td>
+</tr>
+<tr>
+<td><code>refresh-period</code></td>
+<td>No</td>
+<td><code>5M</code></td>
+<td>Service discovery cache refresh period.</td>
+</tr>
+<tr>
+<td><code>secure</code></td>
+<td>No</td>
+<td></td>
+<td>whether the connection with the service should be encrypted with TLS.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="service-registration">Service registration<a class="headerlink" href="#service-registration" title="Permanent link">#</a></h2>
 <p>Stork also provides the ability to register services using Consul as backend.</p>
 <h3 id="service-registration-configuration">Service registration configuration<a class="headerlink" href="#service-registration-configuration" title="Permanent link">#</a></h3>
@@ -838,6 +886,30 @@ External services can be registered as well.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="na">quarkus.stork.my-service.service-registrar.type</span><span class="o">=</span><span class="s">consul</span><span class="w"></span>
 </code></pre></div>
 <p>Consul service registrar is configured with the following parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>consul-host</code></td>
+<td>No</td>
+<td><code>localhost</code></td>
+<td>The Consul host.</td>
+</tr>
+<tr>
+<td><code>consul-port</code></td>
+<td>No</td>
+<td><code>8500</code></td>
+<td>The Consul port.</td>
+</tr>
+</tbody>
+</table>
 
               
             </article>

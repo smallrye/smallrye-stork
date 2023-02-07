@@ -766,6 +766,36 @@ For this purpose, Stork comes with a <code>static</code> service discovery type.
 </div>
 </div>
 <p>These are all the static service discovery parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>address-list</code></td>
+<td>Yes</td>
+<td></td>
+<td>A comma-separated list of addresses (host:port). The default port is 80.</td>
+</tr>
+<tr>
+<td><code>secure</code></td>
+<td>No</td>
+<td></td>
+<td>Whether the connection with the service should be encrypted with TLS. Default is false, except if the host:port uses the port is 443.</td>
+</tr>
+<tr>
+<td><code>shuffle</code></td>
+<td>No</td>
+<td><code>false</code></td>
+<td>Whether the list of address must be shuffled to avoid using the first address on every startup.</td>
+</tr>
+</tbody>
+</table>
 
               
             </article>

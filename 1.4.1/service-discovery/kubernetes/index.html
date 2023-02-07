@@ -880,6 +880,48 @@ A <code>ServiceAccount</code>, a <code>Role</code> and a <code>RoleBinding</code
 <p>Instead of using the <em>Kubernetes Service</em> IP directly, and let Kubernetes handle the selection and balancing, Stork inspects the service and retrieves the list of <em>pods</em> providing the service.
 Then, it can select the instance.</p>
 <p>Supported attributes are the following:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>k8s-host</code></td>
+<td>No</td>
+<td></td>
+<td>The Kubernetes API host.</td>
+</tr>
+<tr>
+<td><code>k8s-namespace</code></td>
+<td>No</td>
+<td></td>
+<td>The namespace of the service. Use all to discover all namespaces.</td>
+</tr>
+<tr>
+<td><code>application</code></td>
+<td>No</td>
+<td></td>
+<td>The Kubernetes application Id; if not defined Stork service name will be used.</td>
+</tr>
+<tr>
+<td><code>refresh-period</code></td>
+<td>No</td>
+<td><code>5M</code></td>
+<td>Service discovery cache refresh period.</td>
+</tr>
+<tr>
+<td><code>secure</code></td>
+<td>No</td>
+<td></td>
+<td>Whether the connection with the service should be encrypted with TLS.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="caching-the-service-instances">Caching the service instances<a class="headerlink" href="#caching-the-service-instances" title="Permanent link">#</a></h2>
 <p>Contacting the cluster too much frequently can result in performance problems. It&rsquo;s why Kubernetes Service discovery extends <code>io.smallrye.stork.impl.CachingServiceDiscovery</code> to automatically <em>cache</em> the service instances.
 Moreover, the caching expiration has been also improved in order to only update the retrieved set of <code>ServiceInstance</code> if some of them changes and an event is emitted. 

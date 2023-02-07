@@ -790,6 +790,36 @@ You are not viewing the latest version.
 </div>
 </div>
 <p>The following attributes are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Mandatory</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>declining-factor</code></td>
+<td>No</td>
+<td><code>0.9</code></td>
+<td>How much <em>score</em> should decline in time, see Score calculation in the docs for details.</td>
+</tr>
+<tr>
+<td><code>error-penalty</code></td>
+<td>No</td>
+<td><code>60s</code></td>
+<td>This load balancer treats an erroneous response as a response after this time.</td>
+</tr>
+<tr>
+<td><code>use-secure-random</code></td>
+<td>No</td>
+<td><code>false</code></td>
+<td>Whether the load balancer should use a SecureRandom instead of a Random (default). Check <a href="https://stackoverflow.com/questions/11051205/difference-between-java-util-random-and-java-security-securerandom">this page</a> to understand the difference</td>
+</tr>
+</tbody>
+</table>
 <h2 id="score-calculation">Score calculation<a class="headerlink" href="#score-calculation" title="Permanent link">#</a></h2>
 <p>The <em>score</em> of a service instance is calculated by dividing a weighted sum of response times by sum of the weighs. The result is additionally adjusted to account for instances that haven&rsquo;t been used for a long time.</p>
 <p>Let:</p>
