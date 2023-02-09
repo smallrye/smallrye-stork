@@ -99,6 +99,44 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
+    void shouldGetServiceFromK8sWithApplicationNameConfig() {
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "application", "greetingApp"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "svc";
+        String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
+
+        registerKubernetesResources("greetingApp", defaultNamespace, ips);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+        for (ServiceInstance serviceInstance : instances.get()) {
+            Map<String, String> labels = serviceInstance.getLabels();
+            assertThat(labels).contains(entry("app.kubernetes.io/name", "greetingApp"),
+                    entry("app.kubernetes.io/version", "1.0"),
+                    entry("ui", "ui-" + ipAsSuffix(serviceInstance.getHost())));
+        }
+        instances.get().stream().map(ServiceInstance::getMetadata).forEach(metadata -> {
+            Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+            assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+        });
+        assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isFalse());
+    }
+
+    @Test
     void shouldGetServiceFromK8sDefaultNamespaceUsingProgrammaticAPI() {
         Stork stork = StorkTestUtils.getNewStorkInstance();
         stork.defineIfAbsent("svc", ServiceDefinition.of(
@@ -472,23 +510,23 @@ public class KubernetesServiceDiscoveryTest {
         return result;
     }
 
-    private Endpoints buildAndRegisterKubernetesService(String serviceName, String namespace, boolean register,
+    private Endpoints buildAndRegisterKubernetesService(String applicationName, String namespace, boolean register,
             String... ipAdresses) {
 
         Map<String, String> serviceLabels = new HashMap<>();
-        serviceLabels.put("app.kubernetes.io/name", serviceName);
+        serviceLabels.put("app.kubernetes.io/name", applicationName);
         serviceLabels.put("app.kubernetes.io/version", "1.0");
 
         List<EndpointAddress> endpointAddresses = Arrays.stream(ipAdresses)
                 .map(ipAddress -> {
                     ObjectReference targetRef = new ObjectReference(null, null, "Pod",
-                            serviceName + "-" + ipAsSuffix(ipAddress), namespace, null, UUID.randomUUID().toString());
+                            applicationName + "-" + ipAsSuffix(ipAddress), namespace, null, UUID.randomUUID().toString());
                     EndpointAddress endpointAddress = new EndpointAddressBuilder().withIp(ipAddress).withTargetRef(targetRef)
                             .build();
                     return endpointAddress;
                 }).collect(Collectors.toList());
         Endpoints endpoint = new EndpointsBuilder()
-                .withNewMetadata().withName(serviceName).withLabels(serviceLabels).endMetadata()
+                .withNewMetadata().withName(applicationName).withLabels(serviceLabels).endMetadata()
                 .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddresses)
                         .addToPorts(new EndpointPortBuilder().withPort(8080).withProtocol("TCP").build())
                         .build())
