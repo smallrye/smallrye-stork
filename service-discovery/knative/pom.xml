@@ -49,7 +49,6 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>knative-client</artifactId>
-            <!--            <scope>test</scope>-->
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>

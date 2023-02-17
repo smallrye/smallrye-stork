@@ -57,7 +57,7 @@ public class KnativeServiceDiscoveryTest {
 
         String knSvcName = "my-knservice";
 
-        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null);
+        registerKnativeServices(knSvcName, "hello.test.127.0.0.1.sslip.io", null);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -70,8 +70,8 @@ public class KnativeServiceDiscoveryTest {
                 .until(() -> instances.get() != null);
 
         assertThat(instances.get()).hasSize(1);
-        assertThat(instances.get().get(0).getHost()).isEqualTo("http://hello.test.127.0.0.1.sslip.io");
-        assertThat(instances.get().get(0).getPort()).isEqualTo(8080);
+        assertThat(instances.get().get(0).getHost()).isEqualTo("hello.test.127.0.0.1.sslip.io");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(0);
         Map<String, String> labels = instances.get().get(0).getLabels();
         assertThat(labels).contains(entry("serving.knative.dev/creator", "kubernetes-admin"),
                 entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
@@ -109,8 +109,8 @@ public class KnativeServiceDiscoveryTest {
 
         String knativeService = "my-knservice";
 
-        registerKnativeServices(knativeService, "http://hello.ns1.127.0.0.1.sslip.io", "ns1");
-        registerKnativeServices(knativeService, "http://hello.ns2.127.0.0.1.sslip.io", "ns2");
+        registerKnativeServices(knativeService, "hello.ns1.127.0.0.1.sslip.io", "ns1");
+        registerKnativeServices(knativeService, "hello.ns2.127.0.0.1.sslip.io", "ns2");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -124,7 +124,7 @@ public class KnativeServiceDiscoveryTest {
 
         assertThat(instances.get()).hasSize(2);
         assertThat(instances.get().stream().map(ServiceInstance::getHost))
-                .containsExactlyInAnyOrder("http://hello.ns1.127.0.0.1.sslip.io", "http://hello.ns2.127.0.0.1.sslip.io");
+                .containsExactlyInAnyOrder("hello.ns1.127.0.0.1.sslip.io", "hello.ns2.127.0.0.1.sslip.io");
     }
 
     @Test
@@ -135,7 +135,7 @@ public class KnativeServiceDiscoveryTest {
 
         String knativeService = "my-knservice";
 
-        registerKnativeServices(knativeService, "http://hello.test.127.0.0.1.sslip.io", null);
+        registerKnativeServices(knativeService, "hello.test.127.0.0.1.sslip.io", null);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -148,8 +148,8 @@ public class KnativeServiceDiscoveryTest {
                 .until(() -> instances.get() != null);
 
         assertThat(instances.get()).hasSize(1);
-        assertThat(instances.get().get(0).getHost()).isEqualTo("http://hello.test.127.0.0.1.sslip.io");
-        assertThat(instances.get().get(0).getPort()).isEqualTo(8080);
+        assertThat(instances.get().get(0).getHost()).isEqualTo("hello.test.127.0.0.1.sslip.io");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(0);
         Map<String, String> labels = instances.get().get(0).getLabels();
         assertThat(labels).contains(entry("serving.knative.dev/creator", "kubernetes-admin"),
                 entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
@@ -165,7 +165,7 @@ public class KnativeServiceDiscoveryTest {
 
         String knSvcName = "my-knservice";
 
-        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null);
+        registerKnativeServices(knSvcName, "hello.test.127.0.0.1.sslip.io", null);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -178,8 +178,8 @@ public class KnativeServiceDiscoveryTest {
                 .until(() -> instances.get() != null);
 
         assertThat(instances.get()).hasSize(1);
-        assertThat(instances.get().get(0).getHost()).isEqualTo("http://hello.test.127.0.0.1.sslip.io");
-        assertThat(instances.get().get(0).getPort()).isEqualTo(8080);
+        assertThat(instances.get().get(0).getHost()).isEqualTo("hello.test.127.0.0.1.sslip.io");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(0);
         Map<String, String> labels = instances.get().get(0).getLabels();
         assertThat(labels).contains(entry("serving.knative.dev/creator", "kubernetes-admin"),
                 entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
@@ -204,7 +204,7 @@ public class KnativeServiceDiscoveryTest {
 
         String knSvcName = "my-knservice";
 
-        registerKnativeServices(knSvcName, "http://hello.test.127.0.0.1.sslip.io", null);
+        registerKnativeServices(knSvcName, "hello.test.127.0.0.1.sslip.io", null);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -217,8 +217,8 @@ public class KnativeServiceDiscoveryTest {
                 .until(() -> instances.get() != null);
 
         assertThat(instances.get()).hasSize(1);
-        assertThat(instances.get().get(0).getHost()).isEqualTo("http://hello.test.127.0.0.1.sslip.io");
-        assertThat(instances.get().get(0).getPort()).isEqualTo(8080);
+        assertThat(instances.get().get(0).getHost()).isEqualTo("hello.test.127.0.0.1.sslip.io");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(0);
         Map<String, String> labels = instances.get().get(0).getLabels();
         assertThat(labels).contains(entry("serving.knative.dev/creator", "kubernetes-admin"),
                 entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
@@ -252,7 +252,7 @@ public class KnativeServiceDiscoveryTest {
         server.expect().get().withPath("/apis/serving.knative.dev/v1/namespaces/test/services/my-knservice")
                 .andReply(200, r -> {
                     serverHit.incrementAndGet();
-                    return buildKnService(knSvcName, "http://hello.test.127.0.0.1.sslip.io", "test");
+                    return buildKnService(knSvcName, "hello.test.127.0.0.1.sslip.io", "test");
                 }).always();
 
         TestConfigProvider.addServiceConfig("my-knservice", null, "knative",
