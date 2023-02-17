@@ -100,8 +100,9 @@ public class StaticListServiceDiscoveryProgrammaticApiTest {
     void shouldFailOnInvalidFormat() {
         assertThatThrownBy(() -> stork.defineIfAbsent("broken-service", ServiceDefinition.of(
                 new StaticConfiguration()
-                        .withAddressList("localhost:8080, localhost:8081, , ")))).isInstanceOf(IllegalArgumentException.class)
-                                .hasMessageContaining("Address not parseable");
+                        .withAddressList("localhost:8080, localhost:8081, , "))))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Address not parseable");
     }
 
 }

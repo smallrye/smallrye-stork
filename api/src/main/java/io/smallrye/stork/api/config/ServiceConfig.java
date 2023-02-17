@@ -20,14 +20,14 @@ public interface ServiceConfig {
 
     /**
      * ServiceDiscovery configuration for the service
-     * 
+     *
      * @return (required) service discovery configuration
      */
     ConfigWithType serviceDiscovery();
 
     /**
      * Whether the communication should use a secure connection (e.g. HTTPS)
-     * 
+     *
      * @return true if SSL, TLS, etc. should be used for the communication
      * @deprecated Use the service discovery 'secure' attribute instead
      */

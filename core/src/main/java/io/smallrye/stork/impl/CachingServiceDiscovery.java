@@ -52,7 +52,7 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
     /***
      * Configures the period to keep service instances in the cache. Elements will be refetched after the given period.
      * This method can be extended by the provider in order to change the logic for caching service instances.
-     * 
+     *
      * @param uni service instances retrieved from backing discovery source
      * @return cached list of service instances in form of Uni
      */

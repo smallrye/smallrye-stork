@@ -6,7 +6,7 @@ package io.smallrye.stork.spi;
 public interface ElementWithType {
     /**
      * Gets the type.
-     * 
+     *
      * @return the type, must not be {@code null}, must not be blank
      */
     String type();
