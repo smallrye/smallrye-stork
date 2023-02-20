@@ -85,7 +85,7 @@ public class KnativeServiceDiscoveryCDITest {
 
         assertThat(instances.get()).hasSize(1);
         assertThat(instances.get().get(0).getHost()).isEqualTo("hello.test.127.0.0.1.sslip.io");
-        assertThat(instances.get().get(0).getPort()).isEqualTo(0);
+        assertThat(instances.get().get(0).getPort()).isEqualTo(-1);
         Map<String, String> labels = instances.get().get(0).getLabels();
         assertThat(labels).contains(entry("serving.knative.dev/creator", "kubernetes-admin"),
                 entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
@@ -163,7 +163,7 @@ public class KnativeServiceDiscoveryCDITest {
 
         assertThat(instances.get()).hasSize(1);
         assertThat(instances.get().get(0).getHost()).isEqualTo("hello.test.127.0.0.1.sslip.io");
-        assertThat(instances.get().get(0).getPort()).isEqualTo(0);
+        assertThat(instances.get().get(0).getPort()).isEqualTo(-1);
         Map<String, String> labels = instances.get().get(0).getLabels();
         assertThat(labels).contains(entry("serving.knative.dev/creator", "kubernetes-admin"),
                 entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
@@ -193,7 +193,7 @@ public class KnativeServiceDiscoveryCDITest {
 
         assertThat(instances.get()).hasSize(1);
         assertThat(instances.get().get(0).getHost()).isEqualTo("hello.test.127.0.0.1.sslip.io");
-        assertThat(instances.get().get(0).getPort()).isEqualTo(0);
+        assertThat(instances.get().get(0).getPort()).isEqualTo(-1);
         Map<String, String> labels = instances.get().get(0).getLabels();
         assertThat(labels).contains(entry("serving.knative.dev/creator", "kubernetes-admin"),
                 entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
@@ -232,7 +232,7 @@ public class KnativeServiceDiscoveryCDITest {
 
         assertThat(instances.get()).hasSize(1);
         assertThat(instances.get().get(0).getHost()).isEqualTo("hello.test.127.0.0.1.sslip.io");
-        assertThat(instances.get().get(0).getPort()).isEqualTo(0);
+        assertThat(instances.get().get(0).getPort()).isEqualTo(-1);
         Map<String, String> labels = instances.get().get(0).getLabels();
         assertThat(labels).contains(entry("serving.knative.dev/creator", "kubernetes-admin"),
                 entry("serving.knative.dev/lastModifier", "kubernetes-admin"));
