@@ -25,6 +25,7 @@ import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
+@Disabled
 public class KubernetesServiceDiscoveryRealClusterIT {
 
     @BeforeEach
@@ -34,7 +35,6 @@ public class KubernetesServiceDiscoveryRealClusterIT {
     }
 
     @Test
-    @Disabled
     void shouldGetServiceFromK8sDefaultNamespace() {
 
         TestConfigProvider.addServiceConfig("rest-service", null, "kubernetes",
@@ -60,7 +60,6 @@ public class KubernetesServiceDiscoveryRealClusterIT {
     }
 
     @Test
-    @Disabled
     void shouldGetServicesForDefaultNamespaceOnNonSpecified() {
         String serviceName = "pod1";
 
@@ -82,7 +81,6 @@ public class KubernetesServiceDiscoveryRealClusterIT {
     }
 
     @Test
-    @Disabled("doesn't work yet")
     void shouldRegisterServiceInstancesInDefaultNamespace() throws InterruptedException {
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
                 null, Map.of("k8s-host", "https://127.0.0.1:41711/", "k8s-namespace", "stork"));

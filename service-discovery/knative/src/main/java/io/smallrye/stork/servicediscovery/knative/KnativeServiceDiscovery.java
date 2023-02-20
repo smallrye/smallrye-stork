@@ -1,5 +1,6 @@
 package io.smallrye.stork.servicediscovery.knative;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -147,9 +148,21 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
                         : Collections.emptyMap());
 
                 Metadata<KnativeMetadataKey> knativeMetadata = Metadata.of(KnativeMetadataKey.class);
+                String host = knService.getStatus().getUrl();
+                try {
+                    URI uri = new URI(knService.getStatus().getUrl());
+                    if (uri != null && uri.getScheme() != null) {
+                        host = uri.getHost();
+                        if (host == null) { // invalid URI
+                            throw new IllegalArgumentException("Invalid URL used: '" + uri + "'");
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage() + " for service: " + application);
+                }
 
                 serviceInstances
-                        .add(new DefaultServiceInstance(ServiceInstanceIds.next(), knService.getStatus().getUrl(), 8080, secure,
+                        .add(new DefaultServiceInstance(ServiceInstanceIds.next(), host, -1, secure,
                                 labels,
                                 knativeMetadata
                                         .with(KnativeMetadataKey.META_KNATIVE_SERVICE_ID, knService.getFullResourceName())
