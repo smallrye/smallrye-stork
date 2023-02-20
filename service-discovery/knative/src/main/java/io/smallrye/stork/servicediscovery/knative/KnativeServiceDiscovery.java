@@ -158,11 +158,11 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage() + " for service: " + application);
                 }
 
                 serviceInstances
-                        .add(new DefaultServiceInstance(ServiceInstanceIds.next(), host, 0, secure,
+                        .add(new DefaultServiceInstance(ServiceInstanceIds.next(), host, -1, secure,
                                 labels,
                                 knativeMetadata
                                         .with(KnativeMetadataKey.META_KNATIVE_SERVICE_ID, knService.getFullResourceName())
