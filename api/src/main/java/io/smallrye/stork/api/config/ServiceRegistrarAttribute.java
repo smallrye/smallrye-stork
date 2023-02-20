@@ -31,21 +31,21 @@ public @interface ServiceRegistrarAttribute {
 
     /**
      * Default value for the attribute. If not provided and user didn't set the value - null will be passed
-     * 
+     *
      * @return the default value
      */
     String defaultValue() default Constants.DEFAULT_VALUE;
 
     /**
      * Description of the attribute. Works best in the documentation if it starts with a capital letter and ends with period.
-     * 
+     *
      * @return the description
      */
     String description();
 
     /**
      * Whether the attribute is mandatory or optional
-     * 
+     *
      * @return true if the attribute is required, false otherwise
      */
     boolean required() default false;

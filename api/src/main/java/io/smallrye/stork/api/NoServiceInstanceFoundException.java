@@ -8,7 +8,7 @@ public class NoServiceInstanceFoundException extends RuntimeException {
 
     /**
      * Creates a new NoServiceInstanceFoundException.
-     * 
+     *
      * @param message the error message
      */
     public NoServiceInstanceFoundException(String message) {

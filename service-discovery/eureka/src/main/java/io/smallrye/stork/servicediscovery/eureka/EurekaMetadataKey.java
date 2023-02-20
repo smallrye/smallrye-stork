@@ -16,7 +16,7 @@ public enum EurekaMetadataKey implements MetadataKey {
 
     /**
      * Creates a new ConsulMetadataKey
-     * 
+     *
      * @param name the name
      */
     EurekaMetadataKey(String name) {

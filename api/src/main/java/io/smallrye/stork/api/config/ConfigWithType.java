@@ -18,7 +18,7 @@ public interface ConfigWithType {
 
     /**
      * Load Balancer parameters.
-     * 
+     *
      * @return map of parameters of the load balancer
      */
     Map<String, String> parameters();

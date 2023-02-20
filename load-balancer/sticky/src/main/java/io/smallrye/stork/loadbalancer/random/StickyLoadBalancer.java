@@ -50,7 +50,7 @@ public class StickyLoadBalancer implements LoadBalancer, CallStatisticsCollector
 
     /**
      * Selects the service instance
-     * 
+     *
      * @param serviceInstances instances to choose from
      *
      * @return the selected instance

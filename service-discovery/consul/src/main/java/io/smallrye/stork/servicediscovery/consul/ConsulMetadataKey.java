@@ -24,7 +24,7 @@ public enum ConsulMetadataKey implements MetadataKey {
 
     /**
      * Creates a new ConsulMetadataKey
-     * 
+     *
      * @param name the name
      */
     ConsulMetadataKey(String name) {
