@@ -129,7 +129,7 @@ public class CompositeServiceDiscoveryCDITest {
         assertThatThrownBy(() -> stork.getService("third-service")
                 .getInstances()
                 .await().atMost(Duration.ofSeconds(5))).isInstanceOf(NoSuchServiceDefinitionException.class)
-                        .hasMessageContaining("second-service");
+                .hasMessageContaining("second-service");
 
         stork.defineIfAbsent("second-service",
                 ServiceDefinition.of(new StaticConfiguration().withAddressList("localhost:8082")));
