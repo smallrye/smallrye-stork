@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="579px" preserveAspectRatio="none" style="width:2013px;height:579px;background:#00000000;" version="1.1" viewBox="0 0 2013 579" width="2013px" zoomAndPan="magnify"><defs/><g><!--MD5=[08912f3faa3568e3ba61b2ac413d8a7a]
+class Stork--><g id="elem_Stork"><rect codeLine="111" fill="#1A618C" height="95.8438" id="Stork" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="250" x="747" y="7"/><ellipse cx="767" cy="54.9219" fill="#ADD1B2" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M770.4063,47.0313 C768.7656,46.25 767.7031,46.0156 766.1563,46.0156 C761.5313,46.0156 757.9844,49.6719 757.9844,54.4688 L757.9844,56.4531 C757.9844,61.0156 761.7031,64.3438 766.8125,64.3438 C768.9688,64.3438 771.0156,63.7969 772.3281,62.8438 C773.3438,62.125 773.9219,61.3438 773.9219,60.6563 C773.9219,59.8438 773.2344,59.1563 772.4219,59.1563 C772.0313,59.1563 771.6719,59.2969 771.3438,59.625 C770.5313,60.4688 770.5313,60.4688 770.2031,60.6563 C769.4531,61.1094 768.25,61.3438 766.9063,61.3438 C763.2969,61.3438 760.9844,59.3906 760.9844,56.3906 L760.9844,54.4688 C760.9844,51.3281 763.2031,49.0156 766.2656,49.0156 C767.2969,49.0156 768.375,49.2813 769.1875,49.7344 C770.0469,50.2188 770.3438,50.6094 770.5,51.3281 C770.625,52.0469 770.6875,52.25 770.9219,52.4844 C771.1563,52.7344 771.5781,52.9063 771.9688,52.9063 C772.4531,52.9063 772.9063,52.6719 773.2031,52.2813 C773.4063,52.0156 773.4688,51.6875 773.4688,50.9375 L773.4688,48.4063 C773.4688,47.6563 773.4375,47.4219 773.2656,47.1563 C772.9844,46.7031 772.5156,46.4375 771.9688,46.4375 C771.4531,46.4375 771.0938,46.6094 770.7031,47.1563 L770.4063,47.0313 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" font-style="italic" lengthAdjust="spacing" textLength="204" x="788" y="43.8467">«entry-point»</text><text fill="#EEEEEE" font-family="sans-serif" font-size="30" lengthAdjust="spacing" textLength="81" x="849.5" y="86.7686">Stork</text></g><!--MD5=[1a9ec80cef04c371312cab1a51db047f]
+class ServiceDiscovery--><g id="elem_ServiceDiscovery"><rect codeLine="112" fill="#1A618C" height="52.9219" id="ServiceDiscovery" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="308" x="230" y="364"/><ellipse cx="250" cy="390.4609" fill="#B4A7E5" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M252,384.4766 L255.0313,384.4766 C255.7188,384.4766 256.0469,384.4141 256.2969,384.2578 C256.7344,383.9922 257.0156,383.4766 257.0156,382.9766 C257.0156,382.4922 256.7969,382.0391 256.375,381.7422 C256.0781,381.5234 255.8438,381.4766 255.0313,381.4766 L245.9688,381.4766 C245.1875,381.4766 244.9844,381.5078 244.7031,381.6797 C244.2656,381.9453 243.9844,382.4609 243.9844,382.9766 C243.9844,383.4453 244.2344,383.8984 244.625,384.1953 C244.8906,384.4141 245.2188,384.4766 245.9688,384.4766 L249,384.4766 L249,395.9609 L245.9688,395.9609 C245.1875,395.9609 244.9844,395.9922 244.7031,396.1641 C244.2656,396.4453 243.9844,396.9453 243.9844,397.4609 C243.9844,397.9141 244.2344,398.3984 244.625,398.6641 C244.8906,398.8672 245.25,398.9609 245.9688,398.9609 L255.0313,398.9609 C256.3438,398.9609 257.0156,398.4453 257.0156,397.4609 C257.0156,396.9766 256.7969,396.5234 256.375,396.2266 C256.0781,396.0234 255.8438,395.9609 255.0313,395.9609 L252,395.9609 L252,384.4766 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" font-style="italic" lengthAdjust="spacing" textLength="258" x="273" y="400.8467">ServiceDiscovery</text></g><!--MD5=[1110ab708215ad3d0653bba57f9f502b]
+class ServiceInstance--><g id="elem_ServiceInstance"><rect codeLine="113" fill="#1A618C" height="52.9219" id="ServiceInstance" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="288" x="728" y="364"/><ellipse cx="748" cy="390.4609" fill="#B4A7E5" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M750,384.4766 L753.0313,384.4766 C753.7188,384.4766 754.0469,384.4141 754.2969,384.2578 C754.7344,383.9922 755.0156,383.4766 755.0156,382.9766 C755.0156,382.4922 754.7969,382.0391 754.375,381.7422 C754.0781,381.5234 753.8438,381.4766 753.0313,381.4766 L743.9688,381.4766 C743.1875,381.4766 742.9844,381.5078 742.7031,381.6797 C742.2656,381.9453 741.9844,382.4609 741.9844,382.9766 C741.9844,383.4453 742.2344,383.8984 742.625,384.1953 C742.8906,384.4141 743.2188,384.4766 743.9688,384.4766 L747,384.4766 L747,395.9609 L743.9688,395.9609 C743.1875,395.9609 742.9844,395.9922 742.7031,396.1641 C742.2656,396.4453 741.9844,396.9453 741.9844,397.4609 C741.9844,397.9141 742.2344,398.3984 742.625,398.6641 C742.8906,398.8672 743.25,398.9609 743.9688,398.9609 L753.0313,398.9609 C754.3438,398.9609 755.0156,398.4453 755.0156,397.4609 C755.0156,396.9766 754.7969,396.5234 754.375,396.2266 C754.0781,396.0234 753.8438,395.9609 753.0313,395.9609 L750,395.9609 L750,384.4766 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" font-style="italic" lengthAdjust="spacing" textLength="238" x="771" y="400.8467">ServiceInstance</text></g><!--MD5=[87de7d89f37f14f7628c77e29837f294]
+class LoadBalancer--><g id="elem_LoadBalancer"><rect codeLine="114" fill="#1A618C" height="52.9219" id="LoadBalancer" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="253" x="1250.5" y="364"/><ellipse cx="1270.5" cy="390.4609" fill="#B4A7E5" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M1272.5,384.4766 L1275.5313,384.4766 C1276.2188,384.4766 1276.5469,384.4141 1276.7969,384.2578 C1277.2344,383.9922 1277.5156,383.4766 1277.5156,382.9766 C1277.5156,382.4922 1277.2969,382.0391 1276.875,381.7422 C1276.5781,381.5234 1276.3438,381.4766 1275.5313,381.4766 L1266.4688,381.4766 C1265.6875,381.4766 1265.4844,381.5078 1265.2031,381.6797 C1264.7656,381.9453 1264.4844,382.4609 1264.4844,382.9766 C1264.4844,383.4453 1264.7344,383.8984 1265.125,384.1953 C1265.3906,384.4141 1265.7188,384.4766 1266.4688,384.4766 L1269.5,384.4766 L1269.5,395.9609 L1266.4688,395.9609 C1265.6875,395.9609 1265.4844,395.9922 1265.2031,396.1641 C1264.7656,396.4453 1264.4844,396.9453 1264.4844,397.4609 C1264.4844,397.9141 1264.7344,398.3984 1265.125,398.6641 C1265.3906,398.8672 1265.75,398.9609 1266.4688,398.9609 L1275.5313,398.9609 C1276.8438,398.9609 1277.5156,398.4453 1277.5156,397.4609 C1277.5156,396.9766 1277.2969,396.5234 1276.875,396.2266 C1276.5781,396.0234 1276.3438,395.9609 1275.5313,395.9609 L1272.5,395.9609 L1272.5,384.4766 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" font-style="italic" lengthAdjust="spacing" textLength="203" x="1293.5" y="400.8467">LoadBalancer</text></g><!--MD5=[dbb8b4f13c7b21394f9d757e58732f45]
+class Service--><g id="elem_Service"><rect codeLine="115" fill="#1A618C" height="95.8438" id="Service" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="187" x="778.5" y="164"/><ellipse cx="798.5" cy="211.9219" fill="#ADD1B2" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M801.9063,204.0313 C800.2656,203.25 799.2031,203.0156 797.6563,203.0156 C793.0313,203.0156 789.4844,206.6719 789.4844,211.4688 L789.4844,213.4531 C789.4844,218.0156 793.2031,221.3438 798.3125,221.3438 C800.4688,221.3438 802.5156,220.7969 803.8281,219.8438 C804.8438,219.125 805.4219,218.3438 805.4219,217.6563 C805.4219,216.8438 804.7344,216.1563 803.9219,216.1563 C803.5313,216.1563 803.1719,216.2969 802.8438,216.625 C802.0313,217.4688 802.0313,217.4688 801.7031,217.6563 C800.9531,218.1094 799.75,218.3438 798.4063,218.3438 C794.7969,218.3438 792.4844,216.3906 792.4844,213.3906 L792.4844,211.4688 C792.4844,208.3281 794.7031,206.0156 797.7656,206.0156 C798.7969,206.0156 799.875,206.2813 800.6875,206.7344 C801.5469,207.2188 801.8438,207.6094 802,208.3281 C802.125,209.0469 802.1875,209.25 802.4219,209.4844 C802.6563,209.7344 803.0781,209.9063 803.4688,209.9063 C803.9531,209.9063 804.4063,209.6719 804.7031,209.2813 C804.9063,209.0156 804.9688,208.6875 804.9688,207.9375 L804.9688,205.4063 C804.9688,204.6563 804.9375,204.4219 804.7656,204.1563 C804.4844,203.7031 804.0156,203.4375 803.4688,203.4375 C802.9531,203.4375 802.5938,203.6094 802.2031,204.1563 L801.9063,204.0313 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" font-style="italic" lengthAdjust="spacing" textLength="141" x="819.5" y="200.8467">«named»</text><text fill="#EEEEEE" font-family="sans-serif" font-size="30" lengthAdjust="spacing" textLength="114" x="833" y="243.7686">Service</text></g><!--MD5=[6d9e1fa7315c0f7774179d45bf3158fb]
+class Kubernetes--><g id="elem_Kubernetes"><rect codeLine="123" fill="#1A618C" height="52.9219" id="Kubernetes" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="226" x="7" y="499.5"/><ellipse cx="27" cy="525.9609" fill="#ADD1B2" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M30.4063,518.0703 C28.7656,517.2891 27.7031,517.0547 26.1563,517.0547 C21.5313,517.0547 17.9844,520.7109 17.9844,525.5078 L17.9844,527.4922 C17.9844,532.0547 21.7031,535.3828 26.8125,535.3828 C28.9688,535.3828 31.0156,534.8359 32.3281,533.8828 C33.3438,533.1641 33.9219,532.3828 33.9219,531.6953 C33.9219,530.8828 33.2344,530.1953 32.4219,530.1953 C32.0313,530.1953 31.6719,530.3359 31.3438,530.6641 C30.5313,531.5078 30.5313,531.5078 30.2031,531.6953 C29.4531,532.1484 28.25,532.3828 26.9063,532.3828 C23.2969,532.3828 20.9844,530.4297 20.9844,527.4297 L20.9844,525.5078 C20.9844,522.3672 23.2031,520.0547 26.2656,520.0547 C27.2969,520.0547 28.375,520.3203 29.1875,520.7734 C30.0469,521.2578 30.3438,521.6484 30.5,522.3672 C30.625,523.0859 30.6875,523.2891 30.9219,523.5234 C31.1563,523.7734 31.5781,523.9453 31.9688,523.9453 C32.4531,523.9453 32.9063,523.7109 33.2031,523.3203 C33.4063,523.0547 33.4688,522.7266 33.4688,521.9766 L33.4688,519.4453 C33.4688,518.6953 33.4375,518.4609 33.2656,518.1953 C32.9844,517.7422 32.5156,517.4766 31.9688,517.4766 C31.4531,517.4766 31.0938,517.6484 30.7031,518.1953 L30.4063,518.0703 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" lengthAdjust="spacing" textLength="176" x="50" y="536.3467">Kubernetes</text></g><!--MD5=[e1eb694a88d75949561ef0fb5fe202ac]
+class Consul--><g id="elem_Consul"><rect codeLine="124" fill="#1A618C" height="52.9219" id="Consul" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="154" x="268" y="499.5"/><ellipse cx="288" cy="525.9609" fill="#ADD1B2" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M291.4063,518.0703 C289.7656,517.2891 288.7031,517.0547 287.1563,517.0547 C282.5313,517.0547 278.9844,520.7109 278.9844,525.5078 L278.9844,527.4922 C278.9844,532.0547 282.7031,535.3828 287.8125,535.3828 C289.9688,535.3828 292.0156,534.8359 293.3281,533.8828 C294.3438,533.1641 294.9219,532.3828 294.9219,531.6953 C294.9219,530.8828 294.2344,530.1953 293.4219,530.1953 C293.0313,530.1953 292.6719,530.3359 292.3438,530.6641 C291.5313,531.5078 291.5313,531.5078 291.2031,531.6953 C290.4531,532.1484 289.25,532.3828 287.9063,532.3828 C284.2969,532.3828 281.9844,530.4297 281.9844,527.4297 L281.9844,525.5078 C281.9844,522.3672 284.2031,520.0547 287.2656,520.0547 C288.2969,520.0547 289.375,520.3203 290.1875,520.7734 C291.0469,521.2578 291.3438,521.6484 291.5,522.3672 C291.625,523.0859 291.6875,523.2891 291.9219,523.5234 C292.1563,523.7734 292.5781,523.9453 292.9688,523.9453 C293.4531,523.9453 293.9063,523.7109 294.2031,523.3203 C294.4063,523.0547 294.4688,522.7266 294.4688,521.9766 L294.4688,519.4453 C294.4688,518.6953 294.4375,518.4609 294.2656,518.1953 C293.9844,517.7422 293.5156,517.4766 292.9688,517.4766 C292.4531,517.4766 292.0938,517.6484 291.7031,518.1953 L291.4063,518.0703 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" lengthAdjust="spacing" textLength="104" x="311" y="536.3467">Consul</text></g><!--MD5=[ab4cea1885c04b9a4f307b1ab19ecf58]
+class Custom Service Discovery--><g id="elem_Custom Service Discovery"><rect codeLine="125" fill="#1A618C" height="52.9219" id="Custom Service Discovery" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="453" x="457.5" y="499.5"/><ellipse cx="477.5" cy="525.9609" fill="#ADD1B2" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M480.9063,518.0703 C479.2656,517.2891 478.2031,517.0547 476.6563,517.0547 C472.0313,517.0547 468.4844,520.7109 468.4844,525.5078 L468.4844,527.4922 C468.4844,532.0547 472.2031,535.3828 477.3125,535.3828 C479.4688,535.3828 481.5156,534.8359 482.8281,533.8828 C483.8438,533.1641 484.4219,532.3828 484.4219,531.6953 C484.4219,530.8828 483.7344,530.1953 482.9219,530.1953 C482.5313,530.1953 482.1719,530.3359 481.8438,530.6641 C481.0313,531.5078 481.0313,531.5078 480.7031,531.6953 C479.9531,532.1484 478.75,532.3828 477.4063,532.3828 C473.7969,532.3828 471.4844,530.4297 471.4844,527.4297 L471.4844,525.5078 C471.4844,522.3672 473.7031,520.0547 476.7656,520.0547 C477.7969,520.0547 478.875,520.3203 479.6875,520.7734 C480.5469,521.2578 480.8438,521.6484 481,522.3672 C481.125,523.0859 481.1875,523.2891 481.4219,523.5234 C481.6563,523.7734 482.0781,523.9453 482.4688,523.9453 C482.9531,523.9453 483.4063,523.7109 483.7031,523.3203 C483.9063,523.0547 483.9688,522.7266 483.9688,521.9766 L483.9688,519.4453 C483.9688,518.6953 483.9375,518.4609 483.7656,518.1953 C483.4844,517.7422 483.0156,517.4766 482.4688,517.4766 C481.9531,517.4766 481.5938,517.6484 481.2031,518.1953 L480.9063,518.0703 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" lengthAdjust="spacing" textLength="403" x="500.5" y="536.3467">Custom Service Discovery</text></g><!--MD5=[c740de495f5c6718507821521567e00c]
+class RoundRobin--><g id="elem_RoundRobin"><rect codeLine="127" fill="#1A618C" height="95.8438" id="RoundRobin" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="236" x="946" y="478"/><ellipse cx="966" cy="525.9219" fill="#ADD1B2" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M969.4063,518.0313 C967.7656,517.25 966.7031,517.0156 965.1563,517.0156 C960.5313,517.0156 956.9844,520.6719 956.9844,525.4688 L956.9844,527.4531 C956.9844,532.0156 960.7031,535.3438 965.8125,535.3438 C967.9688,535.3438 970.0156,534.7969 971.3281,533.8438 C972.3438,533.125 972.9219,532.3438 972.9219,531.6563 C972.9219,530.8438 972.2344,530.1563 971.4219,530.1563 C971.0313,530.1563 970.6719,530.2969 970.3438,530.625 C969.5313,531.4688 969.5313,531.4688 969.2031,531.6563 C968.4531,532.1094 967.25,532.3438 965.9063,532.3438 C962.2969,532.3438 959.9844,530.3906 959.9844,527.3906 L959.9844,525.4688 C959.9844,522.3281 962.2031,520.0156 965.2656,520.0156 C966.2969,520.0156 967.375,520.2813 968.1875,520.7344 C969.0469,521.2188 969.3438,521.6094 969.5,522.3281 C969.625,523.0469 969.6875,523.25 969.9219,523.4844 C970.1563,523.7344 970.5781,523.9063 970.9688,523.9063 C971.4531,523.9063 971.9063,523.6719 972.2031,523.2813 C972.4063,523.0156 972.4688,522.6875 972.4688,521.9375 L972.4688,519.4063 C972.4688,518.6563 972.4375,518.4219 972.2656,518.1563 C971.9844,517.7031 971.5156,517.4375 970.9688,517.4375 C970.4531,517.4375 970.0938,517.6094 969.7031,518.1563 L969.4063,518.0313 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" font-style="italic" lengthAdjust="spacing" textLength="143" x="1010.5" y="514.8467">«default»</text><text fill="#EEEEEE" font-family="sans-serif" font-size="30" lengthAdjust="spacing" textLength="186" x="989" y="557.7686">RoundRobin</text></g><!--MD5=[a68ec3ee6dab44c2e41bb931208c1b35]
+class LeastResponseTime--><g id="elem_LeastResponseTime"><rect codeLine="128" fill="#1A618C" height="52.9219" id="LeastResponseTime" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="357" x="1217.5" y="499.5"/><ellipse cx="1237.5" cy="525.9609" fill="#ADD1B2" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M1240.9063,518.0703 C1239.2656,517.2891 1238.2031,517.0547 1236.6563,517.0547 C1232.0313,517.0547 1228.4844,520.7109 1228.4844,525.5078 L1228.4844,527.4922 C1228.4844,532.0547 1232.2031,535.3828 1237.3125,535.3828 C1239.4688,535.3828 1241.5156,534.8359 1242.8281,533.8828 C1243.8438,533.1641 1244.4219,532.3828 1244.4219,531.6953 C1244.4219,530.8828 1243.7344,530.1953 1242.9219,530.1953 C1242.5313,530.1953 1242.1719,530.3359 1241.8438,530.6641 C1241.0313,531.5078 1241.0313,531.5078 1240.7031,531.6953 C1239.9531,532.1484 1238.75,532.3828 1237.4063,532.3828 C1233.7969,532.3828 1231.4844,530.4297 1231.4844,527.4297 L1231.4844,525.5078 C1231.4844,522.3672 1233.7031,520.0547 1236.7656,520.0547 C1237.7969,520.0547 1238.875,520.3203 1239.6875,520.7734 C1240.5469,521.2578 1240.8438,521.6484 1241,522.3672 C1241.125,523.0859 1241.1875,523.2891 1241.4219,523.5234 C1241.6563,523.7734 1242.0781,523.9453 1242.4688,523.9453 C1242.9531,523.9453 1243.4063,523.7109 1243.7031,523.3203 C1243.9063,523.0547 1243.9688,522.7266 1243.9688,521.9766 L1243.9688,519.4453 C1243.9688,518.6953 1243.9375,518.4609 1243.7656,518.1953 C1243.4844,517.7422 1243.0156,517.4766 1242.4688,517.4766 C1241.9531,517.4766 1241.5938,517.6484 1241.2031,518.1953 L1240.9063,518.0703 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" lengthAdjust="spacing" textLength="307" x="1260.5" y="536.3467">LeastResponseTime</text></g><!--MD5=[7e78773a4adcb48243b0e841ed1863cc]
+class Custom Load Balancer--><g id="elem_Custom Load Balancer"><rect codeLine="129" fill="#1A618C" height="52.9219" id="Custom Load Balancer" rx="2" ry="2" style="stroke:#EEEEEE;stroke-width:0.5;" width="397" x="1609.5" y="499.5"/><ellipse cx="1629.5" cy="525.9609" fill="#ADD1B2" rx="16" ry="16" style="stroke:#181818;stroke-width:1.0;"/><path d="M1632.9063,518.0703 C1631.2656,517.2891 1630.2031,517.0547 1628.6563,517.0547 C1624.0313,517.0547 1620.4844,520.7109 1620.4844,525.5078 L1620.4844,527.4922 C1620.4844,532.0547 1624.2031,535.3828 1629.3125,535.3828 C1631.4688,535.3828 1633.5156,534.8359 1634.8281,533.8828 C1635.8438,533.1641 1636.4219,532.3828 1636.4219,531.6953 C1636.4219,530.8828 1635.7344,530.1953 1634.9219,530.1953 C1634.5313,530.1953 1634.1719,530.3359 1633.8438,530.6641 C1633.0313,531.5078 1633.0313,531.5078 1632.7031,531.6953 C1631.9531,532.1484 1630.75,532.3828 1629.4063,532.3828 C1625.7969,532.3828 1623.4844,530.4297 1623.4844,527.4297 L1623.4844,525.5078 C1623.4844,522.3672 1625.7031,520.0547 1628.7656,520.0547 C1629.7969,520.0547 1630.875,520.3203 1631.6875,520.7734 C1632.5469,521.2578 1632.8438,521.6484 1633,522.3672 C1633.125,523.0859 1633.1875,523.2891 1633.4219,523.5234 C1633.6563,523.7734 1634.0781,523.9453 1634.4688,523.9453 C1634.9531,523.9453 1635.4063,523.7109 1635.7031,523.3203 C1635.9063,523.0547 1635.9688,522.7266 1635.9688,521.9766 L1635.9688,519.4453 C1635.9688,518.6953 1635.9375,518.4609 1635.7656,518.1953 C1635.4844,517.7422 1635.0156,517.4766 1634.4688,517.4766 C1633.9531,517.4766 1633.5938,517.6484 1633.2031,518.1953 L1632.9063,518.0703 Z " fill="#EEEEEE"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" lengthAdjust="spacing" textLength="347" x="1652.5" y="536.3467">Custom Load Balancer</text></g><!--MD5=[35c7745d161bf86e72828f5cd041365e]
+link Stork to Service--><g id="link_Stork_Service"><path codeLine="117" d="M872,103.347 C872,122.578 872,144.742 872,163.943 " fill="none" id="Stork-Service" style="stroke:#EEEEEE;stroke-width:3.0;"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" font-weight="bold" lengthAdjust="spacing" textLength="16" x="850.4625" y="145.0108">*</text></g><!--MD5=[116628b75ec3bb0f1be3ad6618a391bf]
+link Service to ServiceDiscovery--><g id="link_Service_ServiceDiscovery"><path codeLine="118" d="M778.486,246.822 C683.974,281.005 540.041,333.063 454.66,363.944 " fill="none" id="Service-ServiceDiscovery" style="stroke:#EEEEEE;stroke-width:3.0;"/></g><!--MD5=[b43e8335dacf4cf79678f30c23f26856]
+link Service to LoadBalancer--><g id="link_Service_LoadBalancer"><path codeLine="119" d="M965.893,217.651 C1048.18,224.864 1169.13,243.238 1264,290 C1300.34,307.913 1334.1,340.61 1355.08,363.622 " fill="none" id="Service-LoadBalancer" style="stroke:#EEEEEE;stroke-width:3.0;"/></g><!--MD5=[41d072ddda7d914277f75dd913121e04]
+link Service to ServiceInstance--><g id="link_Service_ServiceInstance"><path codeLine="121" d="M872,260.299 C872,293.587 872,336.865 872,363.915 " fill="none" id="Service-ServiceInstance" style="stroke:#EEEEEE;stroke-width:3.0;stroke-dasharray:1.0,3.0;"/><text fill="#EEEEEE" font-family="sans-serif" font-size="30" font-weight="bold" lengthAdjust="spacing" textLength="374" x="877" y="322.8467">selectServiceInstance</text></g><!--MD5=[2b4b665a9c2bd0403922569b8fa99091]
+reverse link ServiceDiscovery to Kubernetes--><g id="link_ServiceDiscovery_Kubernetes"><path d="M315.538,426.12 C270.306,448.993 212.001,478.4765 170.868,499.2772 " fill="none" id="ServiceDiscovery-backto-Kubernetes" style="stroke:#EEEEEE;stroke-width:3.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="312.404,419.861,333.411,417.082,318.722,432.354,312.404,419.861" style="stroke:#EEEEEE;stroke-width:3.0;"/></g><!--MD5=[510b8dfadd0f609259f5c9d5ebfd0c1b]
+reverse link ServiceDiscovery to Consul--><g id="link_ServiceDiscovery_Consul"><path d="M370.79,436.72 C364.69,457.6 357.671,481.6278 352.497,499.3389 " fill="none" id="ServiceDiscovery-backto-Consul" style="stroke:#EEEEEE;stroke-width:3.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="364.153,434.475,376.48,417.24,377.591,438.401,364.153,434.475" style="stroke:#EEEEEE;stroke-width:3.0;"/></g><!--MD5=[2ce3eac3225fb74814d654d9522faa28]
+reverse link ServiceDiscovery to Custom Service Discovery--><g id="link_ServiceDiscovery_Custom Service Discovery"><path d="M459.78,425.222 C511.547,448.259 579.082,478.3113 626.451,499.3908 " fill="none" id="ServiceDiscovery-backto-Custom Service Discovery" style="stroke:#EEEEEE;stroke-width:3.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="456.915,431.609,441.488,417.082,462.606,418.818,456.915,431.609" style="stroke:#EEEEEE;stroke-width:3.0;"/></g><!--MD5=[38040e2f3f4c209d8c6c615974228244]
+reverse link LoadBalancer to RoundRobin--><g id="link_LoadBalancer_RoundRobin"><path d="M1298.48,424.992 C1260.95,440.996 1215.4,460.425 1174.46,477.887 " fill="none" id="LoadBalancer-backto-RoundRobin" style="stroke:#EEEEEE;stroke-width:3.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="1295.88,418.49,1317.02,417.082,1301.37,431.367,1295.88,418.49" style="stroke:#EEEEEE;stroke-width:3.0;"/></g><!--MD5=[961dd332e563f681c3a8a49f3333235e]
+reverse link LoadBalancer to LeastResponseTime--><g id="link_LoadBalancer_LeastResponseTime"><path d="M1383.48,437.047 C1386.44,457.85 1389.84,481.72 1392.35,499.3389 " fill="none" id="LoadBalancer-backto-LeastResponseTime" style="stroke:#EEEEEE;stroke-width:3.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="1376.55,438.027,1380.66,417.24,1390.41,436.054,1376.55,438.027" style="stroke:#EEEEEE;stroke-width:3.0;"/></g><!--MD5=[a246b15550f28914ab1d15d13102bac0]
+reverse link LoadBalancer to Custom Load Balancer--><g id="link_LoadBalancer_Custom Load Balancer"><path d="M1478.86,423.05 C1554.15,446.371 1655.36,477.7218 1725.59,499.4737 " fill="none" id="LoadBalancer-backto-Custom Load Balancer" style="stroke:#EEEEEE;stroke-width:3.0;stroke-dasharray:7.0,7.0;"/><polygon fill="none" points="1476.37,429.608,1459.34,417.003,1480.51,416.234,1476.37,429.608" style="stroke:#EEEEEE;stroke-width:3.0;"/></g><!--MD5=[eed61a4d403f6b43f48258904c241d4e]
+@startuml
+!define BG_MAIN_COLOR      #1A618C
+!define BG_SECONDARY_COLOR #616768
+!define BG_PACKAGE_COLOR   #7a209f
+!define BORDER_COLOR       #EEEEEE
+!define FONT_COLOR         #EEEEEE
+!define ARROW_COLOR        #EEEEEE
+
+' include the general skinparams for both, light and dark
+' to overwrite with the given settings
+!define BORDER_THICKNESS 3
+skinparam backgroundColor transparent
+
+skinparam classFontSize 30
+
+skinparam Padding 4
+skinparam RoundCorner 4
+skinparam Shadowing false
+
+skinparam Default {
+FontColor FONT_COLOR
+FontSize 30
+}
+
+skinparam class {
+BackgroundColor BG_MAIN_COLOR
+ArrowColor FONT_COLOR
+BorderColor FONT_COLOR
+FontSize 30
+}
+
+skinparam Arrow {
+Color FONT_COLOR
+FontColor FONT_COLOR
+FontStyle Bold
+FontSize 30
+}
+
+skinparam package {
+FontColor FONT_COLOR
+BackgroundColor BG_MAIN_COLOR
+BorderColor BORDER_COLOR
+}
+skinparam node {
+FontColor FONT_COLOR
+BackgroundColor BG_PACKAGE_COLOR
+BorderColor BORDER_COLOR
+}
+skinparam component {
+BackgroundColor BG_MAIN_COLOR
+BorderColor BORDER_COLOR
+FontColor FONT_COLOR
+Style uml2
+}
+
+skinparam database {
+BackgroundColor BG_MAIN_COLOR
+BorderColor BORDER_COLOR
+FontColor FONT_COLOR
+}
+
+skinparam cloud {
+BackgroundColor BG_MAIN_COLOR
+BorderColor BORDER_COLOR
+FontColor FONT_COLOR
+}
+
+skinparam collections {
+BackgroundColor BG_MAIN_COLOR
+BorderColor BORDER_COLOR
+FontColor FONT_COLOR
+}
+skinparam Control {
+BackgroundColor BG_MAIN_COLOR
+BorderColor BORDER_COLOR
+FontColor FONT_COLOR
+}
+skinparam Boundary {
+BackgroundColor BG_MAIN_COLOR
+BorderColor BORDER_COLOR
+FontColor FONT_COLOR
+}
+skinparam Entity {
+BackgroundColor BG_MAIN_COLOR
+BorderColor BORDER_COLOR
+FontColor FONT_COLOR
+}
+skinparam interface {
+BackgroundColor BG_MAIN_COLOR
+BorderColor BORDER_COLOR
+FontColor FONT_COLOR
+}
+skinparam SequenceParticipantBorderThickness 3
+skinparam sequence {
+ParticipantBackgroundColor BG_MAIN_COLOR
+ParticipantBorderColor BORDER_COLOR
+ParticipantFontStyle normal
+ParticipantFontColor FONT_COLOR
+LifeLineBorderColor BORDER_COLOR
+LifeLineBackgroundColor BG_MAIN_COLOR
+ArrowColor FONT_COLOR
+ArrowBorderColor BORDER_COLOR
+ArrowFontColor FONT_COLOR
+ArrowThickness 3
+ActorBackgroundColor BG_MAIN_COLOR
+ActorBorderColor BORDER_COLOR
+ActorFontColor FONT_COLOR
+}
+
+
+hide members
+class Stork <<entry-point>>
+interface ServiceDiscovery
+interface ServiceInstance
+interface LoadBalancer
+class Service <<named>>
+
+Stork - - "*" Service
+Service - - ServiceDiscovery
+Service - - LoadBalancer
+
+Service - -[dotted] ServiceInstance: selectServiceInstance
+
+class Kubernetes implements ServiceDiscovery
+class Consul implements ServiceDiscovery
+class "Custom Service Discovery" implements ServiceDiscovery
+
+class RoundRobin<<default>> implements LoadBalancer
+class LeastResponseTime implements LoadBalancer
+class "Custom Load Balancer" implements LoadBalancer
+@enduml
+
+@startuml
+
+skinparam backgroundColor transparent
+
+skinparam classFontSize 30
+
+skinparam Padding 4
+skinparam RoundCorner 4
+skinparam Shadowing false
+
+skinparam Default {
+FontColor #EEEEEE
+FontSize 30
+}
+
+skinparam class {
+BackgroundColor #1A618C
+ArrowColor #EEEEEE
+BorderColor #EEEEEE
+FontSize 30
+}
+
+skinparam Arrow {
+Color #EEEEEE
+FontColor #EEEEEE
+FontStyle Bold
+FontSize 30
+}
+
+skinparam package {
+FontColor #EEEEEE
+BackgroundColor #1A618C
+BorderColor #EEEEEE
+}
+skinparam node {
+FontColor #EEEEEE
+BackgroundColor #7a209f
+BorderColor #EEEEEE
+}
+skinparam component {
+BackgroundColor #1A618C
+BorderColor #EEEEEE
+FontColor #EEEEEE
+Style uml2
+}
+
+skinparam database {
+BackgroundColor #1A618C
+BorderColor #EEEEEE
+FontColor #EEEEEE
+}
+
+skinparam cloud {
+BackgroundColor #1A618C
+BorderColor #EEEEEE
+FontColor #EEEEEE
+}
+
+skinparam collections {
+BackgroundColor #1A618C
+BorderColor #EEEEEE
+FontColor #EEEEEE
+}
+skinparam Control {
+BackgroundColor #1A618C
+BorderColor #EEEEEE
+FontColor #EEEEEE
+}
+skinparam Boundary {
+BackgroundColor #1A618C
+BorderColor #EEEEEE
+FontColor #EEEEEE
+}
+skinparam Entity {
+BackgroundColor #1A618C
+BorderColor #EEEEEE
+FontColor #EEEEEE
+}
+skinparam interface {
+BackgroundColor #1A618C
+BorderColor #EEEEEE
+FontColor #EEEEEE
+}
+skinparam SequenceParticipantBorderThickness 3
+skinparam sequence {
+ParticipantBackgroundColor #1A618C
+ParticipantBorderColor #EEEEEE
+ParticipantFontStyle normal
+ParticipantFontColor #EEEEEE
+LifeLineBorderColor #EEEEEE
+LifeLineBackgroundColor #1A618C
+ArrowColor #EEEEEE
+ArrowBorderColor #EEEEEE
+ArrowFontColor #EEEEEE
+ArrowThickness 3
+ActorBackgroundColor #1A618C
+ActorBorderColor #EEEEEE
+ActorFontColor #EEEEEE
+}
+
+
+hide members
+class Stork <<entry-point>>
+interface ServiceDiscovery
+interface ServiceInstance
+interface LoadBalancer
+class Service <<named>>
+
+Stork - - "*" Service
+Service - - ServiceDiscovery
+Service - - LoadBalancer
+
+Service - -[dotted] ServiceInstance: selectServiceInstance
+
+class Kubernetes implements ServiceDiscovery
+class Consul implements ServiceDiscovery
+class "Custom Service Discovery" implements ServiceDiscovery
+
+class RoundRobin<<default>> implements LoadBalancer
+class LeastResponseTime implements LoadBalancer
+class "Custom Load Balancer" implements LoadBalancer
+@enduml
+
+PlantUML version 1.2022.7beta11(Unknown compile time)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
