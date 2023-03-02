@@ -34,6 +34,6 @@ jobs:
           pipenv install
           cd ..
       - name: Build local artifacts
-        run: mvn -B install -DskipTests
+        run: mvn -B install -DskipTests -Drevapi.skip=true
       - name: Render docs and publish
         run: .github/render-documentation.sh
