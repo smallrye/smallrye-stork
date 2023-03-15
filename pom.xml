@@ -59,7 +59,7 @@
 
         <jandex-maven-plugin.version>1.2.3</jandex-maven-plugin.version>
 
-        <plugin.version.failsafe>3.0.0-M9</plugin.version.failsafe>
+        <plugin.version.failsafe>3.0.0</plugin.version.failsafe>
 
         <sonar.projectName>SmallRye Stork</sonar.projectName>
         <sonar.projectKey>smallrye_smallrye-stork</sonar.projectKey>
