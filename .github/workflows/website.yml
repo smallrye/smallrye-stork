@@ -15,9 +15,9 @@ jobs:
         with:
           fetch-depth: 0 # fetch all commits and branches for mike to work properly
       - uses: actions/setup-java@v3
-        name: Set up Java 11
+        name: Set up Java 17
         with:
-          java-version: 11
+          java-version: 17
           distribution: temurin
           cache: maven
       - uses: actions/setup-python@v4
@@ -34,6 +34,6 @@ jobs:
           pipenv install
           cd ..
       - name: Build local artifacts
-        run: mvn -B install -DskipTests
+        run: mvn -B install -DskipTests -Prelease
       - name: Render docs and publish
         run: .github/render-documentation.sh
