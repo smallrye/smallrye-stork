@@ -403,9 +403,17 @@
 
         <profile>
             <id>release</id>
-            <properties>
-                <revapi.skip>true</revapi.skip>
-            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.revapi</groupId>
+                        <artifactId>revapi-maven-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
