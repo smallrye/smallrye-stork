@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -162,7 +163,7 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
                 }
 
                 serviceInstances
-                        .add(new DefaultServiceInstance(ServiceInstanceIds.next(), host, -1, secure,
+                        .add(new DefaultServiceInstance(ServiceInstanceIds.next(), host, -1, Optional.empty(), secure,
                                 labels,
                                 knativeMetadata
                                         .with(KnativeMetadataKey.META_KNATIVE_SERVICE_ID, knService.getFullResourceName())

@@ -1,5 +1,7 @@
 package io.smallrye.stork.impl;
 
+import java.util.Optional;
+
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.spi.CallStatisticsCollector;
 
@@ -32,6 +34,11 @@ public class ServiceInstanceWithStatGathering implements ServiceInstance {
     @Override
     public int getPort() {
         return delegate.getPort();
+    }
+
+    @Override
+    public Optional<String> getPath() {
+        return delegate.getPath();
     }
 
     @Override

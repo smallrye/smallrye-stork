@@ -76,7 +76,6 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
             if (address == null) {
                 throw new IllegalArgumentException("Got null address for service " + serviceName);
             }
-
             ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, address, port);
             if (matching != null) {
                 serviceInstances.add(matching);

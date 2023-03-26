@@ -24,22 +24,36 @@ public final class StorkAddressUtils {
         if (address.charAt(0) == '[') {
             return parseIpV6AddressWithSquareBracket(address, defaultPort, configPlace);
         } else if (countColons(address) > 1) {
+            // IPv6.
             return new HostAndPort(address, defaultPort);
         } else {
-            return parseNonIpv6Adress(address, defaultPort, configPlace);
+            return parseNonIpv6Address(address, defaultPort, configPlace);
         }
     }
 
-    private static HostAndPort parseNonIpv6Adress(String serviceAddress, int defaultPort, String serviceName) {
+    private static HostAndPort parseNonIpv6Address(String serviceAddress, int defaultPort, String serviceName) {
         String[] hostAndMaybePort = serviceAddress.split(":");
 
         switch (hostAndMaybePort.length) {
-            case 1:
-                return new HostAndPort(serviceAddress, defaultPort);
+            case 1: {
+                int idx = serviceAddress.indexOf("/");
+                if (idx == -1) {
+                    return new HostAndPort(serviceAddress, defaultPort);
+                } else {
+                    return new HostAndPort(serviceAddress.substring(0, idx), defaultPort,
+                            serviceAddress.substring(idx));
+                }
+            }
             case 2:
                 try {
-                    int port = Integer.parseInt(hostAndMaybePort[1]);
-                    return new HostAndPort(hostAndMaybePort[0], port);
+                    int idx = hostAndMaybePort[1].indexOf("/");
+                    if (idx == -1) {
+                        int port = Integer.parseInt(hostAndMaybePort[1]);
+                        return new HostAndPort(hostAndMaybePort[0], port);
+                    } else {
+                        int port = Integer.parseInt(hostAndMaybePort[1].substring(0, idx));
+                        return new HostAndPort(hostAndMaybePort[0], port, hostAndMaybePort[1].substring(idx));
+                    }
                 } catch (NumberFormatException nfe) {
                     throw new IllegalArgumentException(format("Invalid port '%s' in address '%s' for service '%s'",
                             hostAndMaybePort[1], serviceAddress, serviceName), nfe);

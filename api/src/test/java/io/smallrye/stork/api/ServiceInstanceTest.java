@@ -1,6 +1,7 @@
 package io.smallrye.stork.api;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,11 @@ class ServiceInstanceTest {
         @Override
         public int getPort() {
             return 0;
+        }
+
+        @Override
+        public Optional<String> getPath() {
+            return Optional.empty();
         }
 
         @Override

@@ -42,6 +42,8 @@ public class StaticListServiceDiscoveryCDITest {
                 null, Map.of("address-list", "localhost:8082", "secure", "true"));
         config.addServiceConfig("third-service", null, "static",
                 null, Map.of("address-list", "localhost:8083"));
+        config.addServiceConfig("fourth-service", null, "static",
+                null, Map.of("address-list", "localhost:8083/foo, localhost:8083/bar"));
         config.addServiceConfig("secured-service", null, "static",
                 null, Map.of("address-list", "localhost:443, localhost"));
 
@@ -74,6 +76,23 @@ public class StaticListServiceDiscoveryCDITest {
                 "localhost");
         assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
                 8081);
+        assertThat(serviceInstances.stream().map(ServiceInstance::isSecure)).allSatisfy(b -> assertThat(b).isFalse());
+    }
+
+    @Test
+    void shouldParsePath() {
+        List<ServiceInstance> serviceInstances = stork.getService("fourth-service")
+                .getInstances()
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(serviceInstances).hasSize(2);
+        assertThat(serviceInstances.stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("localhost",
+                "localhost");
+        assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8083,
+                8083);
+        assertThat(serviceInstances.stream().map(ServiceInstance::getPath).map(s -> s.orElse(null))).containsExactlyInAnyOrder(
+                "/foo",
+                "/bar");
         assertThat(serviceInstances.stream().map(ServiceInstance::isSecure)).allSatisfy(b -> assertThat(b).isFalse());
     }
 
