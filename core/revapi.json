@@ -34,11 +34,9 @@
     "differences" : [
       {
         "ignore": true,
-        "code": "java.annotation.added",
-        "old": "class io.smallrye.stork.impl.RoundRobinLoadBalancerProviderLoader",
-        "new": "class io.smallrye.stork.impl.RoundRobinLoadBalancerProviderLoader",
-        "annotation": "@jakarta.enterprise.context.ApplicationScoped",
-        "justification": "Load Balancer can now be CDI beans"
+        "code": "java.method.addedToInterface",
+        "new": "method java.util.Optional<java.lang.String> io.smallrye.stork.api.ServiceInstance::getPath()",
+        "justification": "New method to handle API gateways"
       }
     ]
   }

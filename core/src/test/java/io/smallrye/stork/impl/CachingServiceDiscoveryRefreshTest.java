@@ -7,6 +7,7 @@ import static org.awaitility.Awaitility.await;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,8 +43,9 @@ class CachingServiceDiscoveryRefreshTest {
             public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
                 refreshCount.incrementAndGet();
                 return Uni.createFrom().emitter(e -> {
-                    List<ServiceInstance> results = asList(new DefaultServiceInstance(1, "localhost", 8406, false),
-                            new DefaultServiceInstance(2, "localhost", 8407, false));
+                    List<ServiceInstance> results = asList(
+                            new DefaultServiceInstance(1, "localhost", 8406, Optional.empty(), false),
+                            new DefaultServiceInstance(2, "localhost", 8407, Optional.empty(), false));
                     vertx.setTimer(2000, ignored -> e.complete(results));
                 });
             }

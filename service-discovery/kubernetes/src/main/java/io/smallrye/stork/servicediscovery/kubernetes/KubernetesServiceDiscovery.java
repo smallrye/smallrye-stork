@@ -209,10 +209,11 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         }
                         //TODO add some useful metadata?
                         Metadata<KubernetesMetadataKey> k8sMetadata = Metadata.of(KubernetesMetadataKey.class);
-                        serviceInstances.add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, secure,
-                                labels,
-                                k8sMetadata.with(META_K8S_SERVICE_ID, hostname).with(META_K8S_NAMESPACE, podNamespace)
-                                        .with(META_K8S_PORT_PROTOCOL, protocol)));
+                        serviceInstances.add(
+                                new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, Optional.empty(), secure,
+                                        labels,
+                                        k8sMetadata.with(META_K8S_SERVICE_ID, hostname).with(META_K8S_NAMESPACE, podNamespace)
+                                                .with(META_K8S_PORT_PROTOCOL, protocol)));
                     }
                 }
             }

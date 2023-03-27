@@ -113,7 +113,6 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
                         virtualAddress = instance.vipAddress;
                         port = instance.port.port;
                     }
-
                     ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, virtualAddress, port);
                     return matching == null
                             ? new DefaultServiceInstance(ServiceInstanceIds.next(), virtualAddress, port, secure)

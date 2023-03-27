@@ -259,7 +259,7 @@ public class DnsServiceDiscovery extends CachingServiceDiscovery {
         ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, target, port);
         if (matching == null) {
             return new DefaultServiceInstance(ServiceInstanceIds.next(),
-                    target, port, secure, Collections.emptyMap(), dnsMetadata);
+                    target, port, secure, dnsMetadata);
         } else {
             return matching;
         }

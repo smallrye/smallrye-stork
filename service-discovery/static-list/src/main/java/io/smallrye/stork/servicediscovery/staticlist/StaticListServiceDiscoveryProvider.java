@@ -1,6 +1,5 @@
 package io.smallrye.stork.servicediscovery.staticlist;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,16 +37,15 @@ public class StaticListServiceDiscoveryProvider
         }
         List<DefaultServiceInstance> addressList = new ArrayList<>();
         for (String address : addresses.split(",")) {
-            URL url = null;
             address = address.trim();
             try {
                 HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(address, 80, "service '" + serviceName + "'");
                 addressList
                         .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostAndPort.host, hostAndPort.port,
-                                isSecure(config.getSecure(), hostAndPort.port)));
+                                hostAndPort.path, isSecure(config.getSecure(), hostAndPort.port)));
             } catch (Exception e) {
                 throw new IllegalArgumentException(
-                        "Address not parseable to URL: " + url + " for service " + serviceName);
+                        "Address not parseable to URL: " + address + " for service " + serviceName);
             }
         }
 

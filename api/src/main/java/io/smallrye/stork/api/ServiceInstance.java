@@ -3,6 +3,7 @@ package io.smallrye.stork.api;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Represents an instance of service.
@@ -23,6 +24,14 @@ public interface ServiceInstance {
      * @return the port of the service.
      */
     int getPort();
+
+    /**
+     * For service behind an API gateway or a proxy, this method return the path.
+     * When set, the final location of the service is composed of {@code $host:$port/$path}.
+     *
+     * @return the path if any.
+     */
+    Optional<String> getPath();
 
     /**
      * @return whether the communication should happen over a secure connection
@@ -58,7 +67,7 @@ public interface ServiceInstance {
      *
      * <br>
      * When {@code gatherStatistics} is enabled, reports the start of an operation using this service instance.
-     *
+     * <p>
      * The load balancers that keep track of inflight operations should increase the counter on this method.
      * The load balancer that collect times of operations should only take into account operations that have
      * {@code measureTime} set to {@code true}
@@ -70,7 +79,7 @@ public interface ServiceInstance {
 
     /**
      * When {@code gatherStatistics} is enabled, reports a reply for an operation using this service instance.
-     *
+     * <p>
      * Should be called if and only if {@code recordStart(true)} has been called earlier
      */
     default void recordReply() {
