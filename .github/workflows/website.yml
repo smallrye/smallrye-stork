@@ -37,6 +37,6 @@ jobs:
           pipenv install
           cd ..
       - name: Build local artifacts
-        run: mvn -B install -DskipTests -Prelease
+        run: mvn -B install -DskipTests -Prelease -s maven-settings.xml
       - name: Render docs and publish
         run: .github/render-documentation.sh
