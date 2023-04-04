@@ -48,7 +48,7 @@
         <kubernetes-client.version>6.5.1</kubernetes-client.version>
         <!-- we cannot update to 2.x as jboss-logging does not support SLF4J 2 for now -->
         <version.slf4j>1.7.36</version.slf4j>
-        <version.mockito>5.1.1</version.mockito>
+        <version.mockito>5.2.0</version.mockito>
         <version.jackson>2.14.2</version.jackson>
 
         <revapi-maven-plugin.version>0.15.0</revapi-maven-plugin.version>
