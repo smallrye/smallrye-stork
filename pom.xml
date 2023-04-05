@@ -43,7 +43,7 @@
         <vertx.version>4.4.1</vertx.version>
         <version.vertx-mutiny-bindings>3.3.0</version.vertx-mutiny-bindings>
         <!-- override the testcontainers version with the newest one -->
-        <version.testcontainers>1.17.6</version.testcontainers>
+        <version.testcontainers>1.18.0</version.testcontainers>
 
         <kubernetes-client.version>6.4.1</kubernetes-client.version>
         <!-- we cannot update to 2.x as jboss-logging does not support SLF4J 2 for now -->
