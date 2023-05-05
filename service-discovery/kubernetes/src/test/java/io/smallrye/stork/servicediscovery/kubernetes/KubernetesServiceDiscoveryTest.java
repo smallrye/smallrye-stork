@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointAddressBuilder;
+import io.fabric8.kubernetes.api.model.EndpointPort;
 import io.fabric8.kubernetes.api.model.EndpointPortBuilder;
 import io.fabric8.kubernetes.api.model.EndpointSubsetBuilder;
 import io.fabric8.kubernetes.api.model.Endpoints;
@@ -290,6 +291,96 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
+    void shouldGetServiceUsingFirstPortWhenMultiplePortsFromSpecificNamespace() {
+        String serviceName = "svc";
+        String specificNs = "ns1";
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes",
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String[] ips = new String[] { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
+        EndpointPort[] ports = new EndpointPort[] {
+                new EndpointPortBuilder().withName("http1").withPort(8080).withProtocol("TCP").build(),
+                new EndpointPortBuilder().withName("http2").withPort(8081).withProtocol("TCP").build() };
+        buildAndRegisterKubernetesService(serviceName, specificNs, true, ports, ips);
+        Arrays.stream(ips).forEach(ip -> buildAndRegisterBackendPod(serviceName, specificNs, true, ip));
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+        instances.get().stream().map(ServiceInstance::getLabels)
+                .forEach(serviceInstanceLabels -> assertThat(serviceInstanceLabels)
+                        .contains(entry("app.kubernetes.io/name", "svc"), entry("app.kubernetes.io/version", "1.0")));
+        instances.get().stream().map(ServiceInstance::getMetadata).forEach(metadata -> {
+            Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+            assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+        });
+        for (ServiceInstance serviceInstance : instances.get()) {
+            Map<String, String> labels = serviceInstance.getLabels();
+            assertThat(labels).contains(entry("app.kubernetes.io/name", "svc"),
+                    entry("app.kubernetes.io/version", "1.0"),
+                    entry("ui", "ui-" + ipAsSuffix(serviceInstance.getHost())));
+        }
+    }
+
+    @Test
+    void shouldGetServiceUsingSelectedPortNameWhenMultiplePortsFromSpecificNamespace() {
+        String serviceName = "svc";
+        String specificNs = "ns1";
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes",
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1", "port-name", "http1"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String[] ips = new String[] { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
+        EndpointPort[] ports = new EndpointPort[] {
+                new EndpointPortBuilder().withName("http1").withPort(8080).withProtocol("TCP").build(),
+                new EndpointPortBuilder().withName("http2").withPort(8081).withProtocol("TCP").build() };
+        buildAndRegisterKubernetesService(serviceName, specificNs, true, ports, ips);
+        Arrays.stream(ips).forEach(ip -> buildAndRegisterBackendPod(serviceName, specificNs, true, ip));
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+        instances.get().stream().map(ServiceInstance::getLabels)
+                .forEach(serviceInstanceLabels -> assertThat(serviceInstanceLabels)
+                        .contains(entry("app.kubernetes.io/name", "svc"), entry("app.kubernetes.io/version", "1.0")));
+        instances.get().stream().map(ServiceInstance::getMetadata).forEach(metadata -> {
+            Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+            assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+        });
+        for (ServiceInstance serviceInstance : instances.get()) {
+            Map<String, String> labels = serviceInstance.getLabels();
+            assertThat(labels).contains(entry("app.kubernetes.io/name", "svc"),
+                    entry("app.kubernetes.io/version", "1.0"),
+                    entry("ui", "ui-" + ipAsSuffix(serviceInstance.getHost())));
+        }
+    }
+
+    @Test
     void shouldGetServiceFromAllNamespace() {
 
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
@@ -499,7 +590,7 @@ public class KubernetesServiceDiscoveryTest {
     private void registerKubernetesResources(String serviceName, String namespace, String... ips) {
         Assert.checkNotNullParam("ips", ips);
         buildAndRegisterKubernetesService(serviceName, namespace, true, ips);
-        Arrays.stream(ips).map(ip -> buildAndRegisterBackendPod(serviceName, namespace, true, ip)).collect(Collectors.toList());
+        Arrays.stream(ips).forEach(ip -> buildAndRegisterBackendPod(serviceName, namespace, true, ip));
     }
 
     private Map<String, Long> mapHostnameToIds(List<ServiceInstance> serviceInstances) {
@@ -512,6 +603,12 @@ public class KubernetesServiceDiscoveryTest {
 
     private Endpoints buildAndRegisterKubernetesService(String applicationName, String namespace, boolean register,
             String... ipAdresses) {
+        EndpointPort[] ports = new EndpointPort[] { new EndpointPortBuilder().withPort(8080).withProtocol("TCP").build() };
+        return buildAndRegisterKubernetesService(applicationName, namespace, register, ports, ipAdresses);
+    }
+
+    private Endpoints buildAndRegisterKubernetesService(String applicationName, String namespace, boolean register,
+            EndpointPort[] ports, String... ipAdresses) {
 
         Map<String, String> serviceLabels = new HashMap<>();
         serviceLabels.put("app.kubernetes.io/name", applicationName);
@@ -528,7 +625,7 @@ public class KubernetesServiceDiscoveryTest {
         Endpoints endpoint = new EndpointsBuilder()
                 .withNewMetadata().withName(applicationName).withLabels(serviceLabels).endMetadata()
                 .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddresses)
-                        .addToPorts(new EndpointPortBuilder().withPort(8080).withProtocol("TCP").build())
+                        .addToPorts(ports)
                         .build())
                 .build();
 

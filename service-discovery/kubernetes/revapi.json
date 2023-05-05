@@ -25,7 +25,17 @@
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
     "differences" : [
-
+      {
+        "ignore": true,
+        "code": "java.annotation.attributeValueChanged",
+        "old": "class io.smallrye.stork.servicediscovery.kubernetes.KubernetesServiceDiscoveryProvider",
+        "new": "class io.smallrye.stork.servicediscovery.kubernetes.KubernetesServiceDiscoveryProvider",
+        "annotationType": "io.smallrye.stork.api.config.ServiceDiscoveryAttributes",
+        "attribute": "value",
+        "oldValue": "{@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"k8s-host\", description = \"The Kubernetes API host.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"k8s-namespace\", description = \"The namespace of the service. Use all to discover all namespaces.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"application\", description = \"The Kubernetes application Id; if not defined Stork service name will be used.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"refresh-period\", description = \"Service discovery cache refresh period.\", defaultValue = \"5M\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS.\")}",
+        "newValue": "{@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"k8s-host\", description = \"The Kubernetes API host.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"k8s-namespace\", description = \"The namespace of the service. Use all to discover all namespaces.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"application\", description = \"The Kubernetes application Id; if not defined Stork service name will be used.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"port-name\", description = \"The Kubernetes application port name. If not defined, when exposing multiple ports, Stork will use the first one.\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"refresh-period\", description = \"Service discovery cache refresh period.\", defaultValue = \"5M\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"secure\", description = \"Whether the connection with the service should be encrypted with TLS.\")}",
+        "justification": "Added the 'port-name' attribute. Should not impact users."
+      }
     ]
   }
 }, {
