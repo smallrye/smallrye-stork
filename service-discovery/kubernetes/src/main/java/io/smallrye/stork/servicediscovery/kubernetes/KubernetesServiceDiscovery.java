@@ -46,6 +46,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     static final String METADATA_NAME = "metadata.name";
     private final KubernetesClient client;
     private final String application;
+    private final String portName;
     private final boolean allNamespaces;
     private final String namespace;
     private final boolean secure;
@@ -68,6 +69,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         String masterUrl = config.getK8sHost() == null ? base.getMasterUrl() : config.getK8sHost();
         this.application = config.getApplication() == null ? serviceName : config.getApplication();
         this.namespace = config.getK8sNamespace() == null ? base.getNamespace() : config.getK8sNamespace();
+        this.portName = config.getPortName();
 
         allNamespaces = namespace != null && namespace.equalsIgnoreCase("all");
 
@@ -187,6 +189,15 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     if (endpointPorts.size() == 1) {
                         port = endpointPorts.get(0).getPort();
                         protocol = endpointPorts.get(0).getProtocol();
+                    } else {
+                        for (EndpointPort endpointPort : endpointPorts) {
+                            // return first endpoint port or the matching one with the provided port name.
+                            if (portName == null || portName.equals(endpointPort.getName())) {
+                                port = endpointPort.getPort();
+                                protocol = endpointPort.getProtocol();
+                                break;
+                            }
+                        }
                     }
 
                     ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, hostname, port);
@@ -200,7 +211,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                                 .findFirst();
                         String podNamespace = namespace;
                         if (maybePod.isPresent()) {
-                            ObjectMeta metadata = maybePod.get().getMetadata();
+                            Pod pod = maybePod.get();
+                            ObjectMeta metadata = pod.getMetadata();
                             podNamespace = metadata.getNamespace();
                             Map<String, String> podLabels = metadata.getLabels();
                             for (Map.Entry<String, String> label : podLabels.entrySet()) {
