@@ -47,6 +47,7 @@ public class DnsServiceDiscovery extends CachingServiceDiscovery {
     private final boolean failOnError;
     private final long dnsTimeoutMs;
     private final boolean recursionDesired;
+    private final boolean resolveSrv;
 
     // we'll use one resolver to resolve DNS server addresses and create another resolver backed up by them
     final Map<String, DnsClient> dnsClients = new HashMap<>();
@@ -58,6 +59,7 @@ public class DnsServiceDiscovery extends CachingServiceDiscovery {
         this.recordType = recordType(config.getRecordType());
         this.failOnError = Boolean.parseBoolean(config.getFailOnError());
         this.recursionDesired = Boolean.parseBoolean(config.getRecursionDesired());
+        this.resolveSrv = Boolean.parseBoolean(config.getResolveSrv());
         this.dnsTimeoutMs = DurationUtils.parseDuration(config.getDnsTimeout(), "DNS timeout")
                 .toMillis();
 
@@ -185,7 +187,17 @@ public class DnsServiceDiscovery extends CachingServiceDiscovery {
                                 });
                     }
                 });
-        // but it's not okay when SRV target is resolved to ip
+
+        if (!resolveSrv) {
+            Multi<ServiceInstance> targets = records.onItem().transformToUni(
+                    record -> {
+                        String target = record.getItem2().target();
+                        return Uni.createFrom().item(toStorkServiceInstance(target, record.getItem2().port(),
+                                record.getItem2().weight(), previousInstances));
+                    }).concatenate();
+            return collectResults(successRecorded, targets);
+        }
+
         Multi<ServiceInstance> instances = records.onItem().transformToUni(
                 record -> {
                     String target = record.getItem2().target();

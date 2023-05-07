@@ -8,8 +8,7 @@ This page explains how Stork can use DNS to handle the service discovery.
 
 ## DNS records
 
-DNS supports a [variety of record types](https://en.wikipedia.org/wiki/List_of_DNS_record_types). Stork can resolve hostnames to addresses based on [_SRV_](https://en.wikipedia.org/wiki/SRV_record), A and AAAA records. 
-All these types of records may return multiple addresses for a single hostname.
+DNS supports a [variety of record types](https://en.wikipedia.org/wiki/List_of_DNS_record_types). Stork can resolve hostnames to addresses based on [_SRV_](https://en.wikipedia.org/wiki/SRV_record), A and AAAA records. All these types of records may return multiple addresses for a single hostname. You may choose to not resolve target hostnames.
 
 While _A_ and _AAAA_ records are quite similar, they just carry an IP (_v4_ for _A_ and _v6_ for _AAAA_), the _SRV_ records are different.
 They contain a _weight_, a _target_ and a _port_ for a service instance.
