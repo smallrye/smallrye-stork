@@ -1,16 +1,11 @@
 package io.smallrye.stork.servicediscovery.dns;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -94,10 +89,30 @@ public class DnsServiceDiscoveryCDITest {
     @BeforeEach
     void setUp() {
         config.clear();
-        Map<ExposedPort, Ports.Binding[]> portBindings = consul.getContainerInfo().getNetworkSettings().getPorts()
-                .getBindings();
-        consulPort = Integer.parseInt(portBindings.get(TCP_8500)[0].getHostPortSpec());
-        dnsPort = Integer.parseInt(portBindings.get(UDP_8600)[0].getHostPortSpec());
+        // Starting and wiring the container can take a bit of time.
+        // So, let's be defensive.
+        await().until(() -> consul.getContainerInfo() != null && consul.getContainerInfo().getNetworkSettings() != null
+                && consul.getContainerInfo().getNetworkSettings().getPorts() != null
+                && consul.getContainerInfo().getNetworkSettings().getPorts().getBindings() != null);
+        consulPort = await()
+                .until(() -> {
+                    Map<ExposedPort, Ports.Binding[]> bindings = consul.getContainerInfo().getNetworkSettings().getPorts()
+                            .getBindings();
+                    if (bindings.get(TCP_8500) == null || bindings.get(TCP_8500)[0] == null) {
+                        return null;
+                    }
+                    return Integer.parseInt(bindings.get(TCP_8500)[0].getHostPortSpec());
+                }, notNullValue());
+        dnsPort = await()
+                .until(() -> {
+                    Map<ExposedPort, Ports.Binding[]> bindings = consul.getContainerInfo().getNetworkSettings().getPorts()
+                            .getBindings();
+                    if (bindings.get(UDP_8600) == null || bindings.get(UDP_8600)[0] == null) {
+                        return null;
+                    }
+                    return Integer.parseInt(bindings.get(UDP_8600)[0].getHostPortSpec());
+                }, notNullValue());
+
         client = ConsulClient.create(Vertx.vertx(),
                 new ConsulClientOptions().setHost("localhost").setPort(consulPort));
         stork = StorkTestUtils.getNewStorkInstance();
@@ -142,6 +157,24 @@ public class DnsServiceDiscoveryCDITest {
         List<ServiceInstance> instances = getServiceInstances(serviceName, 20);
         assertThat(instances).isNotEmpty();
         assertThat(instances.get(0).getHost()).isEqualTo("127.0.0.5");
+    }
+
+    @Test
+    void shouldGetServiceInstanceIdsFromDnsWithoutResolving() throws InterruptedException {
+        //Given a service `my-service` registered in consul (available via DNS) and a refresh-period of 5 minutes
+        String serviceName = "my-service";
+
+        DnsConfiguration config = new DnsConfiguration().withDnsServers(getDnsIp() + ":" + dnsPort)
+                .withHostname("my-service.service.dc1.consul").withRefreshPeriod("5M")
+                .withPort("8111")
+                .withResolveSrv("false");
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config));
+
+        registerService(serviceName, "7f000005.addr.dc1.consul:8406");
+
+        List<ServiceInstance> instances = getServiceInstances(serviceName, 20);
+        assertThat(instances).isNotEmpty();
+        assertThat(instances.get(0).getHost()).isEqualTo("7f000005.addr.dc1.consul");
     }
 
     @Test

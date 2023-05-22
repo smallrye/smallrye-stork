@@ -23,6 +23,7 @@ import io.vertx.core.Vertx;
 @ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", defaultValue = CachingServiceDiscovery.DEFAULT_REFRESH_INTERVAL)
 @ServiceDiscoveryAttribute(name = "secure", description = "Whether the connection with the service should be encrypted with TLS.")
 @ServiceDiscoveryAttribute(name = "recursion-desired", description = "Whether DNS recursion is desired", defaultValue = "true")
+@ServiceDiscoveryAttribute(name = "resolve-srv", description = "Whether DNS resolution for SRV records is desired", defaultValue = "true")
 @ServiceDiscoveryAttribute(name = "dns-timeout", description = "Timeout for DNS queries", defaultValue = "5s")
 @ServiceDiscoveryAttribute(name = "fail-on-error", description = "Whether an error in retrieving service instances " +
         "from one of the DNS servers should cause a failure of the discovery attempt.", defaultValue = "false")
