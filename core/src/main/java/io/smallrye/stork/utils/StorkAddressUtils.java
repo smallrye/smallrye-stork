@@ -1,11 +1,16 @@
 package io.smallrye.stork.utils;
 
+import java.net.InetAddress;
+
 import static java.lang.String.format;
 
 /**
  * A set of utility methods around addresses.
  */
 public final class StorkAddressUtils {
+
+    public static final String HTTP_PREFIX = "http://";
+    public static final String HTTPS_PREFIX = "https://";
 
     /**
      * Creates a new {@link HostAndPort} instance from an address.
@@ -23,10 +28,13 @@ public final class StorkAddressUtils {
         }
         if (address.charAt(0) == '[') {
             return parseIpV6AddressWithSquareBracket(address, defaultPort, configPlace);
-        } else if (countColons(address) > 1) {
+        } else if (countColons(address) > 2) {
             // IPv6.
             return new HostAndPort(address, defaultPort);
         } else {
+            if (address.startsWith(HTTP_PREFIX) || address.startsWith(HTTPS_PREFIX)) {
+                address = address.replaceFirst("^https?://", "");
+            }
             return parseNonIpv6Address(address, defaultPort, configPlace);
         }
     }

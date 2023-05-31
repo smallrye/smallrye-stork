@@ -51,6 +51,25 @@ public class StorkAddressUtilsTest {
     }
 
     @Test
+    void shouldParseIpV4WithoutPortButWithScheme() {
+        String ipV4WithoutPort = "127.0.0.1";
+
+        String ipV4WithoutPortWithScheme = "http://" + ipV4WithoutPort;
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(ipV4WithoutPortWithScheme, 8383,
+                "serviceUsingIPv4AdressWithoutPortButScheme");
+        assertThat(result.host).isEqualTo(ipV4WithoutPort);
+        assertThat(result.port).isEqualTo(8383);
+        assertThat(result.path).isEmpty();
+
+        String ipV4WithoutPortWithSecureScheme = "https://" + ipV4WithoutPort;
+        result = StorkAddressUtils.parseToHostAndPort(ipV4WithoutPortWithSecureScheme, 8383,
+                "serviceUsingIPv4AdressWithoutPortButScheme");
+        assertThat(result.host).isEqualTo(ipV4WithoutPort);
+        assertThat(result.port).isEqualTo(8383);
+        assertThat(result.path).isEmpty();
+    }
+
+    @Test
     void shouldParseIpV4WithPort() {
         String address = "127.0.0.1";
         String addressWithPort = address + ":8787";
@@ -61,13 +80,52 @@ public class StorkAddressUtilsTest {
     }
 
     @Test
+    void shouldParseIpV4WithPortAndScheme() {
+        String address = "127.0.0.1";
+        String addressWithPortAndScheme = "http://" + address + ":8787";
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithPortAndScheme, 8383,
+                "serviceUsingIPv4AddressWithPortAndSheme");
+        assertThat(result.host).isEqualTo(address);
+        assertThat(result.port).isEqualTo(8787);
+        assertThat(result.path).isEmpty();
+
+        String addressWithPortAndSecureScheme = "https://" + address + ":8787";
+        result = StorkAddressUtils.parseToHostAndPort(addressWithPortAndSecureScheme, 8383,
+                "serviceUsingIPv4AddressWithPortAndSheme");
+        assertThat(result.host).isEqualTo(address);
+        assertThat(result.port).isEqualTo(8787);
+        assertThat(result.path).isEmpty();
+    }
+
+    @Test
     void shouldParseIpV4WithPortAndPath() {
         String address = "127.0.0.1";
-        String addressWithPort = address + ":8787/test";
-        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithPort, 8383, "serviceUsingIPv4AddressWithPort");
+        String addressWithPortAndPath = address + ":8787/test";
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithPortAndPath, 8383,
+                "serviceUsingIPv4AddressWithPort");
         assertThat(result.host).isEqualTo(address);
         assertThat(result.port).isEqualTo(8787);
         assertThat(result.path).contains("/test");
+
+    }
+
+    @Test
+    void shouldParseIpV4WithPortAndPathAndScheme() {
+        String address = "127.0.0.1";
+        String addressWithPortAndPathAndScheme = "http://" + address + ":8787/test";
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithPortAndPathAndScheme, 8383,
+                "serviceUsingIPv4AddressWithPortAndPathAndScheme");
+        assertThat(result.host).isEqualTo(address);
+        assertThat(result.port).isEqualTo(8787);
+        assertThat(result.path).contains("/test");
+
+        String addressWithPortAndPathAndSecureScheme = "https://" + address + ":8787/test";
+        result = StorkAddressUtils.parseToHostAndPort(addressWithPortAndPathAndSecureScheme, 8383,
+                "serviceUsingIPv4AddressWithPortAndPathAndScheme");
+        assertThat(result.host).isEqualTo(address);
+        assertThat(result.port).isEqualTo(8787);
+        assertThat(result.path).contains("/test");
+
     }
 
     @Test
@@ -76,12 +134,49 @@ public class StorkAddressUtilsTest {
         HostAndPort result = StorkAddressUtils.parseToHostAndPort(address, 8383, "serviceUsingHostnameWithoutPort");
         assertThat(result.host).isEqualTo(address);
         assertThat(result.port).isEqualTo(8383);
+        assertThat(result.path).isEmpty();
+    }
+
+    @Test
+    void shouldParseHostnameWithoutPortButScheme() {
+        String address = "my-host.com.pl";
+        String addressWithScheme = "http://" + address;
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithScheme, 8383,
+                "serviceUsingHostnameWithoutPortButScheme");
+        assertThat(result.host).isEqualTo(address);
+        assertThat(result.port).isEqualTo(8383);
+        assertThat(result.path).isEmpty();
+
+        String addressWithSecureScheme = "https://" + address;
+        result = StorkAddressUtils.parseToHostAndPort(addressWithSecureScheme, 8383,
+                "serviceUsingHostnameWithoutPortButScheme");
+        assertThat(result.host).isEqualTo(address);
+        assertThat(result.port).isEqualTo(8383);
+        assertThat(result.path).isEmpty();
     }
 
     @Test
     void shouldParseHostnameWithoutPortButWithPath() {
         String address = "my-host.com.pl/foo/bar";
-        HostAndPort result = StorkAddressUtils.parseToHostAndPort(address, 8383, "serviceUsingHostnameWithoutPort");
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(address, 8383, "serviceUsingHostnameWithoutPortButWithPath");
+        assertThat(result.host).isEqualTo("my-host.com.pl");
+        assertThat(result.port).isEqualTo(8383);
+        assertThat(result.path).contains("/foo/bar");
+    }
+
+    @Test
+    void shouldParseHostnameWithoutPortButWithPathAndSchema() {
+        String address = "my-host.com.pl/foo/bar";
+        String addressWithScheme = "http://" + address;
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithScheme, 8383,
+                "serviceUsingHostnameWithoutPortButWithPathAndSchema");
+        assertThat(result.host).isEqualTo("my-host.com.pl");
+        assertThat(result.port).isEqualTo(8383);
+        assertThat(result.path).contains("/foo/bar");
+
+        String addressWithSecureScheme = "https://" + address;
+        result = StorkAddressUtils.parseToHostAndPort(addressWithSecureScheme, 8383,
+                "serviceUsingHostnameWithoutPortButWithPathAndSchema");
         assertThat(result.host).isEqualTo("my-host.com.pl");
         assertThat(result.port).isEqualTo(8383);
         assertThat(result.path).contains("/foo/bar");
@@ -98,9 +193,45 @@ public class StorkAddressUtilsTest {
     }
 
     @Test
+    void shouldParseHostnameWithPortAndScheme() {
+        String address = "my-host.com.pl";
+        String addressWithPortAndScheme = "http://" + address + ":8989";
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithPortAndScheme, 8383,
+                "serviceUsingHostnameWithPortAndScheme");
+        assertThat(result.host).isEqualTo(address);
+        assertThat(result.port).isEqualTo(8989);
+        assertThat(result.path).isEmpty();
+
+        String addressWithPortAndSecureScheme = "https://" + address + ":8989";
+        result = StorkAddressUtils.parseToHostAndPort(addressWithPortAndSecureScheme, 8383,
+                "serviceUsingHostnameWithPortAndScheme");
+        assertThat(result.host).isEqualTo(address);
+        assertThat(result.port).isEqualTo(8989);
+        assertThat(result.path).isEmpty();
+    }
+
+    @Test
     void shouldParseHostnameWithPortWithPath() {
         String addressWithPort = "my-host.com.pl:8989/test/123";
-        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithPort, 8383, "serviceUsingHostnameWithPort");
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithPort, 8383, "serviceUsingHostnameWithPortAndPath");
+        assertThat(result.host).isEqualTo("my-host.com.pl");
+        assertThat(result.port).isEqualTo(8989);
+        assertThat(result.path).contains("/test/123");
+    }
+
+    @Test
+    void shouldParseHostnameWithPortWithPathAndScheme() {
+        String addressWithPort = "my-host.com.pl:8989/test/123";
+        String addressWithPortAndScheme = "http://" + addressWithPort;
+        HostAndPort result = StorkAddressUtils.parseToHostAndPort(addressWithPortAndScheme, 8383,
+                "serviceUsingHostnameWithPortAndPathAndScheme");
+        assertThat(result.host).isEqualTo("my-host.com.pl");
+        assertThat(result.port).isEqualTo(8989);
+        assertThat(result.path).contains("/test/123");
+
+        String addressWithPortAndSecureScheme = "https://" + addressWithPort;
+        result = StorkAddressUtils.parseToHostAndPort(addressWithPortAndSecureScheme, 8383,
+                "serviceUsingHostnameWithPortAndPathAndScheme");
         assertThat(result.host).isEqualTo("my-host.com.pl");
         assertThat(result.port).isEqualTo(8989);
         assertThat(result.path).contains("/test/123");
