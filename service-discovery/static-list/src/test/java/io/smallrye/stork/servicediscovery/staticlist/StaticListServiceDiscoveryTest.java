@@ -35,6 +35,9 @@ public class StaticListServiceDiscoveryTest {
         TestConfigProvider.addServiceConfig("secured-service", null, "static",
                 null, Map.of("address-list", "localhost:443, localhost"));
 
+        TestConfigProvider.addServiceConfig("scheme-service", null, "static",
+                null, Map.of("address-list", "http://localhost:8080, https://localhost:8081"));
+
         stork = StorkTestUtils.getNewStorkInstance();
     }
 
@@ -50,6 +53,18 @@ public class StaticListServiceDiscoveryTest {
         instances = stork.getService("second-service").getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1);
         assertThat(instances.get(0).isSecure()).isTrue();
+    }
+
+    @Test
+    void testSchemeDetection() {
+        List<ServiceInstance> instances = stork.getService("scheme-service").getInstances().await()
+                .atMost(Duration.ofSeconds(5));
+
+        assertThat(instances).hasSize(2);
+        assertThat(instances.stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("localhost",
+                "localhost");
+        assertThat(instances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
+                8081);
     }
 
     @Test
