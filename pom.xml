@@ -41,7 +41,7 @@
         <version.smallrye-config>3.2.1</version.smallrye-config>
 
         <vertx.version>4.4.1</vertx.version>
-        <version.vertx-mutiny-bindings>3.4.1</version.vertx-mutiny-bindings>
+        <version.vertx-mutiny-bindings>3.4.2</version.vertx-mutiny-bindings>
         <!-- override the testcontainers version with the newest one -->
         <version.testcontainers>1.18.3</version.testcontainers>
 
