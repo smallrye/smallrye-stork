@@ -50,8 +50,8 @@ public class KnativeServiceDiscoveryTest {
 
     @Test
     void shouldDiscoverNamespacedKnativeServices() {
-        TestConfigProvider.addServiceConfig("my-knservice", null, "knative",
-                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "test"));
+        TestConfigProvider.addServiceConfig("my-knservice", null, "knative", null,
+                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "test"), null);
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
@@ -103,8 +103,8 @@ public class KnativeServiceDiscoveryTest {
 
     @Test
     void shouldDiscoverKnativeServicesInAllNs() {
-        TestConfigProvider.addServiceConfig("my-knservice", null, "knative",
-                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "all"));
+        TestConfigProvider.addServiceConfig("my-knservice", null, "knative", null,
+                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "all"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String knativeService = "my-knservice";
@@ -158,8 +158,8 @@ public class KnativeServiceDiscoveryTest {
     @Test
     void shouldHandleSecureAttribute() {
 
-        TestConfigProvider.addServiceConfig("my-knservice", null, "knative",
-                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "test", "secure", "true"));
+        TestConfigProvider.addServiceConfig("my-knservice", null, "knative", null,
+                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "test", "secure", "true"), null);
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
@@ -197,8 +197,8 @@ public class KnativeServiceDiscoveryTest {
         // Stork is called to get service instances again
         // Stork contacts the cluster to get the instances : it gets 0 of them
 
-        TestConfigProvider.addServiceConfig("my-knservice", null, "knative",
-                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "test", "secure", "true"));
+        TestConfigProvider.addServiceConfig("my-knservice", null, "knative", null,
+                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "test", "secure", "true"), null);
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
@@ -255,8 +255,8 @@ public class KnativeServiceDiscoveryTest {
                     return buildKnService(knSvcName, "hello.test.127.0.0.1.sslip.io", "test");
                 }).always();
 
-        TestConfigProvider.addServiceConfig("my-knservice", null, "knative",
-                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "test", "secure", "true"));
+        TestConfigProvider.addServiceConfig("my-knservice", null, "knative", null,
+                null, Map.of("knative-host", k8sMasterUrl, "knative-namespace", "test", "secure", "true"), null);
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 

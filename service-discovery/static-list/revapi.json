@@ -25,6 +25,13 @@
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
     "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscovery::<init>(java.util.List<io.smallrye.stork.impl.DefaultServiceInstance>)",
+        "new": "method void io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscovery::<init>(java.lang.String, java.util.List<io.smallrye.stork.impl.DefaultServiceInstance>)",
+        "justification": "Static Service Discovery needs now the service name to locate the corresponding instances"
+      }
 
     ]
   }

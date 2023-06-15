@@ -54,15 +54,13 @@ public class ConsulServiceRegistrationTest {
 
     @Test
     void shouldRegisterServiceInstancesInConsul() throws InterruptedException {
-        TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
-        TestConfigProvider.addServiceRegistrarConfig("my-consul-registrar", "consul",
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, "consul", "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
                 Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        String serviceName = "my-service";
-
-        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getServiceRegistrar("my-consul-registrar");
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
         consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class)

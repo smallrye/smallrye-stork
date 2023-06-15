@@ -2,6 +2,7 @@ package io.smallrye.stork.impl;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import io.smallrye.stork.api.Metadata;
@@ -95,5 +96,20 @@ public class DefaultServiceInstance implements ServiceInstance {
     @Override
     public Map<String, String> getLabels() {
         return labels;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof DefaultServiceInstance))
+            return false;
+        DefaultServiceInstance that = (DefaultServiceInstance) o;
+        return getPort() == that.getPort() && getHost().equals(that.getHost());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getHost(), getPort());
     }
 }

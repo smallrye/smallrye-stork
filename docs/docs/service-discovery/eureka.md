@@ -56,7 +56,7 @@ Stork also provides the ability to register services using Eureka as backend.
 
 ### Service registration configuration
 
-For each service that should register the service instances in Eureka, configure the service discovery `type`:
+For each service that should register the service instances in Eureka, configure the service registrar `type`:
 
 === "stork standalone"
 ```properties

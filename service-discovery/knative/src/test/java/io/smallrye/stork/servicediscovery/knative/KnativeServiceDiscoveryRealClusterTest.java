@@ -35,9 +35,10 @@ public class KnativeServiceDiscoveryRealClusterTest {
     void shouldDiscoverHeroesKnative() {
         String svc = "hero-service";
 
-        TestConfigProvider.addServiceConfig(svc, null, "knative",
+        TestConfigProvider.addServiceConfig(svc, null, "knative", null,
                 null, Map.of("knative-host", "https://api.sandbox-m2.ll9k.p1.openshiftapps.com:6443", "knative-namespace",
-                        "amunozhe-dev", "application", "rest-heroes"));
+                        "amunozhe-dev", "application", "rest-heroes"),
+                null);
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
@@ -67,8 +68,8 @@ public class KnativeServiceDiscoveryRealClusterTest {
     void shouldDiscoverNamespacedKnativeServicesWithApp() {
         String svc = "my-service";
 
-        TestConfigProvider.addServiceConfig("my-service", null, "knative",
-                null, Map.of("knative-namespace", "default", "application", "helloworld-go"));
+        TestConfigProvider.addServiceConfig("my-service", null, "knative", null,
+                null, Map.of("knative-namespace", "default", "application", "helloworld-go"), null);
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 

@@ -14,7 +14,7 @@ import io.smallrye.stork.spi.ServiceRegistrarProvider;
  * <p>
  * The type is used to determine service registrar.
  * <p>
- * Use {@code stork.service-registration.my-registration=my-service-registrar} to use the
+ * Use {@code stork.my-registration.service-registrar.type=my-service-registrar} to use the
  * {@link ServiceRegistrarProvider} annotated with {@code @ServiceRegistrar("my-service-registrar")}
  */
 @Retention(RetentionPolicy.RUNTIME)

@@ -34,11 +34,10 @@ public class LeastRequestsLoadBalancerTest {
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
-        TestConfigProvider.addServiceConfig("first-service", "least-requests", "static",
-                null,
-                Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
+        TestConfigProvider.addServiceConfig("first-service", "least-requests", "static", null,
+                null, Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)), null);
         TestConfigProvider.addServiceConfig("without-instances", "least-requests",
-                "empty-services", null, Collections.emptyMap());
+                "empty-services", null, null, Collections.emptyMap(), null);
 
         stork = StorkTestUtils.getNewStorkInstance();
     }

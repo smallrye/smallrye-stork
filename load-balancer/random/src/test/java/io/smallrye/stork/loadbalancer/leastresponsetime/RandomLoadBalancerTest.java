@@ -33,16 +33,15 @@ public class RandomLoadBalancerTest {
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
-        TestConfigProvider.addServiceConfig("first-service", "random", "static",
-                null,
-                Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
-        TestConfigProvider.addServiceConfig("first-service-secure-random", "random", "static",
-                Map.of("use-secure-random", "true"),
-                Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
-        TestConfigProvider.addServiceConfig("singleton-service", "random", "static",
-                null, Map.of("address-list", FST_SRVC_1));
+        TestConfigProvider.addServiceConfig("first-service", "random", "static", null,
+                null, Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)), null);
+        TestConfigProvider.addServiceConfig("first-service-secure-random", "random", "static", null,
+                Map.of("use-secure-random", "true"), Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)),
+                null);
+        TestConfigProvider.addServiceConfig("singleton-service", "random", "static", null,
+                null, Map.of("address-list", FST_SRVC_1), null);
         TestConfigProvider.addServiceConfig("without-instances", "random",
-                "empty-services", null, Collections.emptyMap());
+                "empty-services", null, null, Collections.emptyMap(), null);
 
         stork = StorkTestUtils.getNewStorkInstance();
     }

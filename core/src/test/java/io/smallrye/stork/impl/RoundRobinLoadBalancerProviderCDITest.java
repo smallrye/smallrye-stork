@@ -61,7 +61,7 @@ class RoundRobinLoadBalancerProviderCDITest extends WeldTestBase {
 
     @BeforeEach
     public void init() {
-        configurations.add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LB_CONFIG));
+        configurations.add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LB_CONFIG, null));
         weld.addBeanClass(MyLbConfigProvider.class);
         weld.addBeanClass(RoundRobinLoadBalancerProvider.class);
         run();

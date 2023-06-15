@@ -23,20 +23,20 @@ public class StaticListServiceDiscoveryTest {
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
-        TestConfigProvider.addServiceConfig("first-service", null, "static",
-                null, Map.of("address-list", "localhost:8080, localhost:8081"));
+        TestConfigProvider.addServiceConfig("first-service", null, "static", null,
+                null, Map.of("address-list", "localhost:8080, localhost:8081"), null);
 
-        TestConfigProvider.addServiceConfig("second-service", null, "static",
-                null, Map.of("address-list", "localhost:8082", "secure", "true"));
+        TestConfigProvider.addServiceConfig("second-service", null, "static", null,
+                null, Map.of("address-list", "localhost:8082", "secure", "true"), null);
 
-        TestConfigProvider.addServiceConfig("third-service", null, "static",
-                null, Map.of("address-list", "localhost:8083"));
+        TestConfigProvider.addServiceConfig("third-service", null, "static", null,
+                null, Map.of("address-list", "localhost:8083"), null);
 
-        TestConfigProvider.addServiceConfig("secured-service", null, "static",
-                null, Map.of("address-list", "localhost:443, localhost"));
+        TestConfigProvider.addServiceConfig("secured-service", null, "static", null,
+                null, Map.of("address-list", "localhost:443, localhost"), null);
 
-        TestConfigProvider.addServiceConfig("scheme-service", null, "static",
-                null, Map.of("address-list", "http://localhost:8080, https://localhost:8081"));
+        TestConfigProvider.addServiceConfig("scheme-service", null, "static", null,
+                null, Map.of("address-list", "http://localhost:8080, https://localhost:8081"), null);
 
         stork = StorkTestUtils.getNewStorkInstance();
     }
@@ -91,8 +91,8 @@ public class StaticListServiceDiscoveryTest {
     @Test
     void shouldFailOnInvalidFormat() {
         TestConfigProvider.clear();
-        TestConfigProvider.addServiceConfig("broken-service", null, "static",
-                null, Map.of("address-list", "localhost:8080, localhost:8081, , "));
+        TestConfigProvider.addServiceConfig("broken-service", null, "static", null,
+                null, Map.of("address-list", "localhost:8080, localhost:8081, , "), null);
         assertThatThrownBy(StorkTestUtils::getNewStorkInstance).isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Address not parseable");
     }

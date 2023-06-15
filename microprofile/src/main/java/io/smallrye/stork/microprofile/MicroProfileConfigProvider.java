@@ -1,7 +1,6 @@
 package io.smallrye.stork.microprofile;
 
 import static io.smallrye.stork.Stork.STORK;
-import static io.smallrye.stork.Stork.STORK_REGISTRAR;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,9 +13,7 @@ import org.eclipse.microprofile.config.Config;
 import org.jboss.logging.Logger;
 
 import io.smallrye.stork.api.config.ServiceConfig;
-import io.smallrye.stork.api.config.ServiceRegistrarConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
-import io.smallrye.stork.spi.config.SimpleRegistrarConfig;
 import io.smallrye.stork.spi.config.SimpleServiceConfig;
 
 /**
@@ -47,8 +44,16 @@ public class MicroProfileConfigProvider implements ConfigProvider {
      */
     public static final String SERVICE_DISCOVERY_EMBEDDED = "service-discovery.type";
 
+    /**
+     * The service-registrar segment used in the configuration key.
+     */
+    public static final String SERVICE_REGISTRAR = "service-registrar";
+    /**
+     * The service discovery type configuration key.
+     */
+    public static final String SERVICE_REGISTRAR_EMBEDDED = "service-registrar.type";
+
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
-    private final List<ServiceRegistrarConfig> registrarConfigs = new ArrayList<>();
 
     /**
      * Creates a new instance of MicroProfileConfigProvider.
@@ -89,19 +94,6 @@ public class MicroProfileConfigProvider implements ConfigProvider {
                 String serviceProperty = propertyKey(propertyName.substring(serviceNameEndIdx));
                 serviceProperties.put(serviceProperty,
                         config.getValue(propertyName, String.class));
-            } else if (STORK_REGISTRAR.equals(matcher.group())) {
-                // all registration properties are of form
-                // stork-registrar.<service-registrar-name>....
-                // or stork-registrar."<service-registrar-name>"....
-                if (!matcher.find()) {
-                    log.warn("Potentially invalid property for SmallRye Stork: " + propertyName);
-                }
-                String registrarName = unwrapFromQuotes(matcher.group());
-                int registrarNameEndIdx = matcher.end();
-                Map<String, String> properties = propertiesByRegistrarName.computeIfAbsent(registrarName,
-                        ignored -> new HashMap<>());
-                String property = propertyKey(propertyName.substring(registrarNameEndIdx));
-                properties.put(property, config.getValue(propertyName, String.class));
             }
         }
 
@@ -109,20 +101,6 @@ public class MicroProfileConfigProvider implements ConfigProvider {
             SimpleServiceConfig serviceConfig = buildServiceConfig(serviceEntry);
             serviceConfigs.add(serviceConfig);
         }
-        for (Map.Entry<String, Map<String, String>> serviceEntry : propertiesByRegistrarName.entrySet()) {
-            SimpleRegistrarConfig serviceConfig = buildRegistrarConfig(serviceEntry);
-            registrarConfigs.add(serviceConfig);
-        }
-    }
-
-    private SimpleRegistrarConfig buildRegistrarConfig(Map.Entry<String, Map<String, String>> serviceEntry) {
-        String registrarName = serviceEntry.getKey();
-        Map<String, String> parameters = serviceEntry.getValue();
-        String registrarType = parameters.get("type");
-        if (registrarType == null) {
-            throw new IllegalArgumentException("no type defined for service registrar " + registrarName);
-        }
-        return new SimpleRegistrarConfig(registrarType, registrarName, parameters);
     }
 
     private SimpleServiceConfig buildServiceConfig(Map.Entry<String, Map<String, String>> serviceEntry) {
@@ -150,12 +128,22 @@ public class MicroProfileConfigProvider implements ConfigProvider {
             serviceDiscoveryType = properties.get(SERVICE_DISCOVERY_EMBEDDED);
         }
         if (serviceDiscoveryType != null) {
-            SimpleServiceConfig.SimpleServiceDiscoveryConfig ConfigWithType = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(
+            SimpleServiceConfig.SimpleServiceDiscoveryConfig serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(
                     serviceDiscoveryType, propertiesForPrefix(SERVICE_DISCOVERY, properties));
 
-            builder = builder.setServiceDiscovery(ConfigWithType);
+            builder = builder.setServiceDiscovery(serviceDiscoveryConfig);
         }
 
+        String serviceRegistrarType = properties.get(SERVICE_REGISTRAR);
+        if (serviceRegistrarType == null) {
+            serviceRegistrarType = properties.get(SERVICE_REGISTRAR_EMBEDDED);
+        }
+        if (serviceRegistrarType != null) {
+            SimpleServiceConfig.SimpleServiceRegistrarConfig serviceRegistrarConfig = new SimpleServiceConfig.SimpleServiceRegistrarConfig(
+                    serviceRegistrarType, propertiesForPrefix(SERVICE_REGISTRAR, properties));
+
+            builder = builder.setServiceRegistrar(serviceRegistrarConfig);
+        }
         return builder.build();
     }
 
@@ -195,11 +183,6 @@ public class MicroProfileConfigProvider implements ConfigProvider {
     @Override
     public List<ServiceConfig> getConfigs() {
         return serviceConfigs;
-    }
-
-    @Override
-    public List<ServiceRegistrarConfig> getRegistrarConfigs() {
-        return registrarConfigs;
     }
 
     @Override

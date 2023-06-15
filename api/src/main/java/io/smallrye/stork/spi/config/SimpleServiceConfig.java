@@ -15,14 +15,17 @@ public class SimpleServiceConfig implements ServiceConfig {
     private final String serviceName;
 
     private final ConfigWithType loadBalancerConfig;
-    private final ConfigWithType ConfigWithType;
+    private final ConfigWithType serviceDiscoveryConfig;
+
+    private final ConfigWithType serviceRegistrarConfig;
 
     private SimpleServiceConfig(String serviceName,
             ConfigWithType loadBalancerConfig,
-            ConfigWithType ConfigWithType) {
+            ConfigWithType serviceDiscoveryConfig, ConfigWithType serviceRegistrarConfig) {
         this.serviceName = serviceName;
         this.loadBalancerConfig = loadBalancerConfig;
-        this.ConfigWithType = ConfigWithType;
+        this.serviceDiscoveryConfig = serviceDiscoveryConfig;
+        this.serviceRegistrarConfig = serviceRegistrarConfig;
     }
 
     @Override
@@ -37,7 +40,12 @@ public class SimpleServiceConfig implements ServiceConfig {
 
     @Override
     public ConfigWithType serviceDiscovery() {
-        return ConfigWithType;
+        return serviceDiscoveryConfig;
+    }
+
+    @Override
+    public ConfigWithType serviceRegistrar() {
+        return serviceRegistrarConfig;
     }
 
     /**
@@ -46,7 +54,9 @@ public class SimpleServiceConfig implements ServiceConfig {
     public static class Builder {
         String serviceName;
         ConfigWithType loadBalancerConfig;
-        ConfigWithType configWithType;
+        ConfigWithType serviceDiscoveryConfig;
+
+        ConfigWithType serviceRegistrarConfig;
         boolean secure;
 
         /**
@@ -63,11 +73,22 @@ public class SimpleServiceConfig implements ServiceConfig {
         /**
          * Sets the service discovery config.
          *
-         * @param serviceDiscovery the service discovery config
+         * @param serviceDiscoveryConfig the service discovery config
          * @return the current builder
          */
-        public Builder setServiceDiscovery(ConfigWithType serviceDiscovery) {
-            configWithType = serviceDiscovery;
+        public Builder setServiceDiscovery(ConfigWithType serviceDiscoveryConfig) {
+            this.serviceDiscoveryConfig = serviceDiscoveryConfig;
+            return this;
+        }
+
+        /**
+         * Sets the service registrar config.
+         *
+         * @param serviceRegistrarConfig the service registrar config
+         * @return the current builder
+         */
+        public Builder setServiceRegistrar(ConfigWithType serviceRegistrarConfig) {
+            this.serviceRegistrarConfig = serviceRegistrarConfig;
             return this;
         }
 
@@ -99,7 +120,7 @@ public class SimpleServiceConfig implements ServiceConfig {
          * @return the built config
          */
         public SimpleServiceConfig build() {
-            return new SimpleServiceConfig(serviceName, loadBalancerConfig, configWithType);
+            return new SimpleServiceConfig(serviceName, loadBalancerConfig, serviceDiscoveryConfig, serviceRegistrarConfig);
         }
     }
 
@@ -151,6 +172,36 @@ public class SimpleServiceConfig implements ServiceConfig {
         public SimpleServiceDiscoveryConfig(String type, Map<String, String> parameters) {
             this.type = type;
             this.parameters = Collections.unmodifiableMap(parameters);
+        }
+
+        @Override
+        public String type() {
+            return type;
+        }
+
+        @Override
+        public Map<String, String> parameters() {
+            return parameters;
+        }
+    }
+
+    /**
+     * An implementation of {@link ConfigWithType} using an unmodifiable {@link Map} as backend to store
+     * the configuration.
+     */
+    public static class SimpleServiceRegistrarConfig implements ConfigWithType {
+        private final String type;
+        private final Map<String, String> parameters;
+
+        /**
+         * Creates a new SimpleServiceRegistrarConfig.
+         *
+         * @param type the type
+         * @param parameters the configuration map
+         */
+        public SimpleServiceRegistrarConfig(String type, Map<String, String> parameters) {
+            this.type = type;
+            this.parameters = parameters;
         }
 
         @Override

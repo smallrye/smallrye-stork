@@ -63,8 +63,8 @@ public class KubernetesServiceDiscoveryTest {
 
     @Test
     void shouldGetServiceFromK8sDefaultNamespace() {
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -101,8 +101,8 @@ public class KubernetesServiceDiscoveryTest {
 
     @Test
     void shouldGetServiceFromK8sWithApplicationNameConfig() {
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "application", "greetingApp"));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "application", "greetingApp"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -178,8 +178,8 @@ public class KubernetesServiceDiscoveryTest {
     @Test
     void shouldHandleSecureAttribute() {
 
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "secure", "true"));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "secure", "true"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -217,8 +217,8 @@ public class KubernetesServiceDiscoveryTest {
     @Test
     void shouldDiscoverServiceWithSpecificName() {
 
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "application", "rest-service"));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "application", "rest-service"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -252,8 +252,8 @@ public class KubernetesServiceDiscoveryTest {
     @Test
     void shouldGetServiceFromSpecificNamespace() {
 
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1"));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -295,8 +295,8 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String specificNs = "ns1";
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1"));
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String[] ips = new String[] { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
@@ -340,8 +340,8 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String specificNs = "ns1";
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1", "port-name", "http1"));
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "ns1", "port-name", "http1"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String[] ips = new String[] { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
@@ -383,8 +383,8 @@ public class KubernetesServiceDiscoveryTest {
     @Test
     void shouldGetServiceFromAllNamespace() {
 
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "all"));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "all"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
         String serviceName = "svc";
 
@@ -423,8 +423,8 @@ public class KubernetesServiceDiscoveryTest {
     @Test
     void shouldPreserveIdsOnRefetch() throws InterruptedException {
 
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -501,8 +501,8 @@ public class KubernetesServiceDiscoveryTest {
         // Stork is called to get service instances again
         // Stork contacts the cluster to get the instances : it gets 0 of them
 
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
@@ -560,8 +560,8 @@ public class KubernetesServiceDiscoveryTest {
                     return endpoints;
                 }).always();
 
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();

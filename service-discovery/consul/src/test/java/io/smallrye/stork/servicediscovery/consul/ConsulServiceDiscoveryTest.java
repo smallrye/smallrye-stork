@@ -62,8 +62,9 @@ public class ConsulServiceDiscoveryTest {
     void shouldNotFetchWhenRefreshPeriodNotReached() throws InterruptedException {
         //Given a service `my-service` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service";
-        TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5M"));
+        TestConfigProvider.addServiceConfig("my-service", null, "consul", null,
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5M"),
+                null);
         stork = StorkTestUtils.getNewStorkInstance();
         List<String> tags = List.of("primary");
         registerService(serviceName, 8406, tags, "example.com");
@@ -108,8 +109,9 @@ public class ConsulServiceDiscoveryTest {
     void shouldRefetchWhenRefreshPeriodReached() throws InterruptedException {
         //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
         String serviceName = "my-service";
-        TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
+        TestConfigProvider.addServiceConfig("my-service", null, "consul", null,
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                null);
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
         List<String> tags = List.of("primary");
@@ -164,9 +166,10 @@ public class ConsulServiceDiscoveryTest {
     void shouldDiscoverServiceWithSpecificName() throws InterruptedException {
         //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
         String serviceName = "my-consul-service";
-        TestConfigProvider.addServiceConfig("my-consul-service", null, "consul",
+        TestConfigProvider.addServiceConfig("my-consul-service", null, "consul", null,
                 null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5",
-                        "application", "my-consul-service"));
+                        "application", "my-consul-service"),
+                null);
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
         registerService("my-consul-service", 8406, null, "consul.com");
@@ -193,9 +196,10 @@ public class ConsulServiceDiscoveryTest {
     void shouldHandleTheSecureAttribute() throws InterruptedException {
         //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
         String serviceName = "my-consul-service";
-        TestConfigProvider.addServiceConfig("my-consul-service", null, "consul",
+        TestConfigProvider.addServiceConfig("my-consul-service", null, "consul", null,
                 null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5",
-                        "application", "my-consul-service", "secure", "true"));
+                        "application", "my-consul-service", "secure", "true"),
+                null);
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
         registerService("my-consul-service", 8406, null, "consul.com");
@@ -222,8 +226,9 @@ public class ConsulServiceDiscoveryTest {
     void shouldPreserveIdsOnRefetch() throws InterruptedException {
         //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
         String serviceName = "my-service";
-        TestConfigProvider.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
+        TestConfigProvider.addServiceConfig("my-service", null, "consul", null,
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                null);
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
         List<String> tags = List.of("primary");

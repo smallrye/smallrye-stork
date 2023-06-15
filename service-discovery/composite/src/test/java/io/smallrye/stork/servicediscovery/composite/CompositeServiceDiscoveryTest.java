@@ -50,8 +50,8 @@ public class CompositeServiceDiscoveryTest {
     @Test
     void shouldFailForLackOfServicesList() {
         TestConfigProvider.clear();
-        TestConfigProvider.addServiceConfig("composite-service", null, "composite",
-                null, Collections.emptyMap());
+        TestConfigProvider.addServiceConfig("composite-service", null, "composite", null,
+                null, Collections.emptyMap(), null);
 
         assertThatThrownBy(StorkTestUtils::getNewStorkInstance).isInstanceOf(IllegalArgumentException.class);
     }
@@ -59,14 +59,14 @@ public class CompositeServiceDiscoveryTest {
     @Test
     void shouldFailOnEmptyServiceName() {
         TestConfigProvider.clear();
-        TestConfigProvider.addServiceConfig("first-service", null, "static",
-                null, Map.of("1", "localhost:8080", "2", "localhost:8081"));
+        TestConfigProvider.addServiceConfig("first-service", null, "static", null,
+                null, Map.of("1", "localhost:8080", "2", "localhost:8081"), null);
 
-        TestConfigProvider.addServiceConfig("second-service", null, "static",
-                null, Map.of("3", "localhost:8082"));
+        TestConfigProvider.addServiceConfig("second-service", null, "static", null,
+                null, Map.of("3", "localhost:8082"), null);
 
-        TestConfigProvider.addServiceConfig("third-service", null, "composite",
-                null, Map.of("services", "first-service,,second-service"));
+        TestConfigProvider.addServiceConfig("third-service", null, "composite", null,
+                null, Map.of("services", "first-service,,second-service"), null);
 
         assertThatThrownBy(StorkTestUtils::getNewStorkInstance).isInstanceOf(IllegalArgumentException.class);
     }

@@ -9,10 +9,12 @@ import io.smallrye.stork.api.config.ConfigWithType;
 public class ServiceDefinition {
     private final ConfigWithType loadBalancer;
     private final ConfigWithType serviceDiscovery;
+    private final ConfigWithType serviceRegistrar;
 
-    private ServiceDefinition(ConfigWithType sd, ConfigWithType lb) {
+    private ServiceDefinition(ConfigWithType sd, ConfigWithType lb, ConfigWithType sr) {
         serviceDiscovery = ParameterValidation.nonNull(sd, "service discovery config");
         loadBalancer = lb;
+        serviceRegistrar = sr;
     }
 
     /**
@@ -30,10 +32,22 @@ public class ServiceDefinition {
      *
      * @param sd the service discovery config, must not be {@code null}
      * @param lb the load balancer config, if {@code null}, round-robin is used.
+     * @param sr the service registrar config, must not be {@code null}
+     * @return the created service definition
+     */
+    public static ServiceDefinition of(ConfigWithType sd, ConfigWithType lb, ConfigWithType sr) {
+        return new ServiceDefinition(sd, lb, sr);
+    }
+
+    /**
+     * Creates a new {@link ServiceDefinition} using the given {@link ConfigWithType} .
+     *
+     * @param sd the service discovery config, must not be {@code null}
+     * @param lb the load balancer config, if {@code null}, round-robin is used.
      * @return the created service definition
      */
     public static ServiceDefinition of(ConfigWithType sd, ConfigWithType lb) {
-        return new ServiceDefinition(sd, lb);
+        return new ServiceDefinition(sd, lb, null);
     }
 
     /**
@@ -48,5 +62,12 @@ public class ServiceDefinition {
      */
     public ConfigWithType getServiceDiscovery() {
         return serviceDiscovery;
+    }
+
+    /**
+     * @return the configured service discovery config.
+     */
+    public ConfigWithType getServiceRegistrar() {
+        return serviceRegistrar;
     }
 }

@@ -49,8 +49,7 @@ public class RandomLoadBalancerCDITest {
     void setUp() {
         config.clear();
         config.addServiceConfig("first-service", "random", "static",
-                null,
-                Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
+                null, Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
         config.addServiceConfig("first-service-secure-random", "random", "static",
                 Map.of("use-secure-random", "true"),
                 Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
