@@ -72,6 +72,58 @@
         "new": "class io.smallrye.stork.test.TestServiceRegistrarProviderLoader",
         "annotation": "@jakarta.enterprise.context.ApplicationScoped",
         "justification": "The loaders are now also exposed as CDI beans"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.stork.test.TestConfigProvider::addServiceConfig(java.lang.String, java.lang.String, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.util.Map<java.lang.String, java.lang.String>)",
+        "new": "method void io.smallrye.stork.test.TestConfigProvider::addServiceConfig(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.util.Map<java.lang.String, java.lang.String>, boolean)",
+        "justification": "Registrars are now part of configs"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.stork.test.TestConfigProvider::addServiceConfig(java.lang.String, java.lang.String, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.util.Map<java.lang.String, java.lang.String>, boolean)",
+        "new": "method void io.smallrye.stork.test.TestConfigProvider::addServiceConfig(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.util.Map<java.lang.String, java.lang.String>, java.util.Map<java.lang.String, java.lang.String>)",
+        "justification": "Registrars are now part of configs"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method void io.smallrye.stork.test.TestConfigProvider::addServiceRegistrarConfig(java.lang.String, java.lang.String, java.util.Map<java.lang.String, java.lang.String>)",
+        "justification": "Registrar config is now part of service config."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method java.util.List<io.smallrye.stork.api.config.ServiceRegistrarConfig> io.smallrye.stork.test.TestConfigProvider::getRegistrarConfigs()",
+        "justification": "Registrars are now part of configs"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.stork.test.TestConfigProviderBean::addServiceConfig(java.lang.String, java.lang.String, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.util.Map<java.lang.String, java.lang.String>)",
+        "new": "method void io.smallrye.stork.test.TestConfigProviderBean::addServiceConfig(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.util.Map<java.lang.String, java.lang.String>, java.util.Map<java.lang.String, java.lang.String>)",
+        "justification": "Registrars are now part of configs"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method void io.smallrye.stork.test.TestConfigProviderBean::addServiceRegistrarConfig(java.lang.String, java.lang.String, java.util.Map<java.lang.String, java.lang.String>)",
+        "justification": "Registrar config is now part of service config."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method java.util.List<io.smallrye.stork.api.config.ServiceRegistrarConfig> io.smallrye.stork.test.TestConfigProviderBean::getRegistrarConfigs()",
+        "justification": "Registrar config is now part of service config."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method io.smallrye.stork.api.ServiceRegistrar<io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata> io.smallrye.stork.test.TestServiceRegistrarProviderLoader::createServiceRegistrar(io.smallrye.stork.api.config.ServiceRegistrarConfig, io.smallrye.stork.spi.StorkInfrastructure)",
+        "new": "method io.smallrye.stork.api.ServiceRegistrar<io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata> io.smallrye.stork.test.TestServiceRegistrarProviderLoader::createServiceRegistrar(io.smallrye.stork.api.config.ConfigWithType, java.lang.String, io.smallrye.stork.spi.StorkInfrastructure)",
+        "justification": "Registrars are now part of service config."
       }
     ]
   }

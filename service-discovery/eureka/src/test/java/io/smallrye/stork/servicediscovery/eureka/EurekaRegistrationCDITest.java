@@ -79,13 +79,14 @@ public class EurekaRegistrationCDITest {
 
     @Test
     public void testRegistrationServiceInstances(TestInfo info) {
-        config.addServiceRegistrarConfig("my-eureka-registrar", "eureka",
-                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
         String serviceName = "my-service";
+        config.addServiceConfig(serviceName, null, "eureka", "eureka", null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)),
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
 
         Stork stork = configureAndGetStork(serviceName);
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getServiceRegistrar("my-eureka-registrar");
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
         eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)

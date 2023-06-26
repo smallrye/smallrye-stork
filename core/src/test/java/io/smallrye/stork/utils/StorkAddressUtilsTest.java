@@ -51,6 +51,22 @@ public class StorkAddressUtilsTest {
     }
 
     @Test
+    void shouldParseHostAndPort() {
+        HostAndPort hostAndPort = new HostAndPort("localhost", 8080);
+        String hostAndPortString = StorkAddressUtils.parseToString(hostAndPort);
+        assertThat(hostAndPortString).isEqualTo("localhost:8080");
+
+    }
+
+    @Test
+    void shouldParseHostPortAndPath() {
+        HostAndPort hostAndPort = new HostAndPort("localhost", 8080, "hello");
+        String hostAndPortString = StorkAddressUtils.parseToString(hostAndPort);
+        assertThat(hostAndPortString).isEqualTo("localhost:8080/hello");
+
+    }
+
+    @Test
     void shouldParseIpV4WithoutPortButWithScheme() {
         String ipV4WithoutPort = "127.0.0.1";
 

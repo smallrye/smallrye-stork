@@ -28,7 +28,6 @@ import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.api.StorkServiceRegistry;
 import io.smallrye.stork.api.config.ServiceConfig;
-import io.smallrye.stork.api.config.ServiceRegistrarConfig;
 import io.smallrye.stork.impl.RoundRobinLoadBalancer;
 import io.smallrye.stork.impl.RoundRobinLoadBalancerProvider;
 import io.smallrye.stork.integration.DefaultStorkInfrastructure;
@@ -125,16 +124,12 @@ public final class Stork implements StorkServiceRegistry {
         ConfigProvider configProvider = lookForConfigProvider();
         if (configProvider != null) {
             for (ServiceConfig serviceConfig : configProvider.getConfigs()) {
-                Service service = createService(loadBalancerLoaders, serviceDiscoveryLoaders, serviceConfig);
+                Service service = createService(loadBalancerLoaders, serviceDiscoveryLoaders, registrarLoaders, serviceConfig);
 
                 services.put(serviceConfig.serviceName(), service);
             }
             for (Service service : services.values()) {
                 service.getServiceDiscovery().initialize(this);
-            }
-
-            for (ServiceRegistrarConfig registrarConfig : configProvider.getRegistrarConfigs()) {
-                serviceRegistrars.put(registrarConfig.name(), createServiceRegistrar(registrarConfig, registrarLoaders));
             }
         }
 
@@ -173,30 +168,21 @@ public final class Stork implements StorkServiceRegistry {
         return highestPrioConfigProvider.orElse(null);
     }
 
-    private ServiceRegistrar createServiceRegistrar(ServiceRegistrarConfig registrarConfig,
-            Map<String, ServiceRegistrarLoader> registrarLoaders) {
-        ServiceRegistrarLoader registrarLoader = registrarLoaders.get(registrarConfig.type());
-        if (registrarLoader == null) {
-            throw new IllegalArgumentException("No service registrar found for type " + registrarConfig.type());
-        }
-        return registrarLoader.createServiceRegistrar(registrarConfig, infrastructure);
-    }
-
     private Service createService(ServiceConfig serviceConfig) {
         return createService(loadFromServiceLoader(LoadBalancerLoader.class),
                 loadFromServiceLoader(ServiceDiscoveryLoader.class),
-                serviceConfig);
+                loadFromServiceLoader(ServiceRegistrarLoader.class), serviceConfig);
     }
 
     private Service createService(Map<String, LoadBalancerLoader> loadBalancerLoaders,
             Map<String, ServiceDiscoveryLoader> serviceDiscoveryProviders,
-            ServiceConfig serviceConfig) {
-        var configWithType = serviceConfig.serviceDiscovery();
-        if (configWithType == null) {
+            Map<String, ServiceRegistrarLoader> serviceRegistrarLoaders, ServiceConfig serviceConfig) {
+        var serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
+        if (serviceDiscoveryConfig == null) {
             throw new IllegalArgumentException(
                     "No service discovery defined for service " + serviceConfig.serviceName());
         }
-        String serviceDiscoveryType = configWithType.type();
+        String serviceDiscoveryType = serviceDiscoveryConfig.type();
         if (serviceDiscoveryType == null) {
             throw new IllegalArgumentException(
                     "Service discovery type not defined for service " + serviceConfig.serviceName());
@@ -211,12 +197,12 @@ public final class Stork implements StorkServiceRegistry {
             // Backward compatibility
             LOGGER.warn("The 'secure' attribute is deprecated, use the 'secure' service discovery attribute instead");
             // We do not know if we can add to the parameters, such create a new SimpleConfigWithType
-            Map<String, String> newConfig = new HashMap<>(configWithType.parameters());
+            Map<String, String> newConfig = new HashMap<>(serviceDiscoveryConfig.parameters());
             newConfig.put("secure", "true");
-            configWithType = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
+            serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
         }
 
-        final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(configWithType,
+        final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
                 serviceConfig.serviceName(), serviceConfig, infrastructure);
 
         final var loadBalancerConfig = serviceConfig.loadBalancer();
@@ -236,7 +222,22 @@ public final class Stork implements StorkServiceRegistry {
             loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
         }
 
-        return new Service(serviceConfig.serviceName(), loadBalancer, serviceDiscovery,
+        final var serviceRegistrarConfig = serviceConfig.serviceRegistrar();
+        ServiceRegistrar serviceRegistrar = null;
+        if (serviceRegistrarConfig == null) {
+            LOGGER.debug("No service registrar configured for service {}", serviceConfig.serviceName());
+        } else {
+            String serviceRegistrarType = serviceRegistrarConfig.type();
+            final var serviceRegistrarLoader = serviceRegistrarLoaders.get(serviceRegistrarType);
+            if (serviceRegistrarLoader == null) {
+                throw new IllegalArgumentException("No ServiceRegistrarLoader for type " + serviceRegistrarType);
+            }
+
+            serviceRegistrar = serviceRegistrarLoader.createServiceRegistrar(serviceRegistrarConfig,
+                    serviceConfig.serviceName(), infrastructure);
+        }
+
+        return new Service(serviceConfig.serviceName(), loadBalancer, serviceDiscovery, serviceRegistrar,
                 loadBalancer.requiresStrictRecording());
     }
 
@@ -278,8 +279,14 @@ public final class Stork implements StorkServiceRegistry {
         initialize(new DefaultStorkInfrastructure());
     }
 
-    //mstodo: configuration should rather be separate, metadata key might not be the best thing to re use
     @SuppressWarnings("unchecked")
+    /**
+     * Whether the communication should use a secure connection (e.g. HTTPS)
+     *
+     * @return true if SSL, TLS, etc. should be used for the communication
+     * @deprecated Use stork.getService("my-service").getServiceRegistrar() method instead
+     */
+    @Deprecated
     public <MetadataKeyType extends Enum<MetadataKeyType> & MetadataKey> ServiceRegistrar<MetadataKeyType> getServiceRegistrar(
             String registrarName) {
         ServiceRegistrar registrar = serviceRegistrars.get(registrarName);

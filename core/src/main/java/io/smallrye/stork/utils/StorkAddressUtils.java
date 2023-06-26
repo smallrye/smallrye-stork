@@ -1,7 +1,5 @@
 package io.smallrye.stork.utils;
 
-import java.net.InetAddress;
-
 import static java.lang.String.format;
 
 /**
@@ -37,6 +35,31 @@ public final class StorkAddressUtils {
             }
             return parseNonIpv6Address(address, defaultPort, configPlace);
         }
+    }
+
+    /**
+     * Creates a new {@link String} instance containing either {@code host:port} or just {@code host}.
+     *
+     * @param hostAndPort {@link HostAndPort} instance from an address.
+     * @return the String containing either {@code host:port} or just {@code host}
+     */
+    public static String parseToString(HostAndPort hostAndPort) {
+        if (hostAndPort == null) {
+            return "";
+        }
+        String hostAndPortString = hostAndPort.host;
+        if (hostAndPort.port != 0) {
+            hostAndPortString += ":" + hostAndPort.port;
+        }
+        if (hostAndPort.path.isPresent()) {
+            if (hostAndPort.path.get().startsWith("/")) {
+                hostAndPortString += hostAndPort.path.get();
+            } else {
+                hostAndPortString += "/" + hostAndPort.path.get();
+            }
+        }
+
+        return hostAndPortString;
     }
 
     private static HostAndPort parseNonIpv6Address(String serviceAddress, int defaultPort, String serviceName) {

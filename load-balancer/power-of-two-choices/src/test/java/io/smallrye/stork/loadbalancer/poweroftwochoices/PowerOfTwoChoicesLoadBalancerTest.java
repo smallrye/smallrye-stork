@@ -39,17 +39,17 @@ public class PowerOfTwoChoicesLoadBalancerTest {
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
-        TestConfigProvider.addServiceConfig("first-service", "power-of-two-choices", "static",
-                null,
-                Map.of("address-list", String.format("%s,%s,%s,%s", FST_SRVC_1, FST_SRVC_2, FST_SRVC_3, FST_SRVC_4)));
-        TestConfigProvider.addServiceConfig("first-service-secure-random", "power-of-two-choices", "static",
+        TestConfigProvider.addServiceConfig("first-service", "power-of-two-choices", "static", null,
+                null, Map.of("address-list", String.format("%s,%s,%s,%s", FST_SRVC_1, FST_SRVC_2, FST_SRVC_3, FST_SRVC_4)),
+                null);
+        TestConfigProvider.addServiceConfig("first-service-secure-random", "power-of-two-choices", "static", null,
                 Map.of("use-secure-random", "true"),
-                Map.of("address-list", String.format("%s,%s,%s,%s", FST_SRVC_1, FST_SRVC_2, FST_SRVC_3, FST_SRVC_4)));
+                Map.of("address-list", String.format("%s,%s,%s,%s", FST_SRVC_1, FST_SRVC_2, FST_SRVC_3, FST_SRVC_4)), null);
         TestConfigProvider.addServiceConfig("singleton-service", "power-of-two-choices",
                 "static", null,
-                Map.of("address-list", FST_SRVC_1));
+                null, Map.of("address-list", FST_SRVC_1), null);
         TestConfigProvider.addServiceConfig("without-instances", "power-of-two-choices",
-                "empty-services", null, Collections.emptyMap());
+                "empty-services", null, null, Collections.emptyMap(), null);
 
         stork = StorkTestUtils.getNewStorkInstance();
     }

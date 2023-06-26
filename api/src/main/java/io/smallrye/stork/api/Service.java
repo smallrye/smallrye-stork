@@ -16,6 +16,7 @@ public class Service {
     private final Semaphore instanceSelectionLock;
     private final LoadBalancer loadBalancer;
     private final ServiceDiscovery serviceDiscovery;
+    private final ServiceRegistrar serviceRegistrar;
     private final String serviceName;
 
     /**
@@ -24,12 +25,14 @@ public class Service {
      * @param serviceName the name, must not be {@code null}, must not be blank
      * @param loadBalancer the load balancer, can be {@code null}
      * @param serviceDiscovery the service discovery, must not be {@code null}
+     * @param serviceRegistrar the service registrar, can be {@code null}
      * @param requiresStrictRecording whether strict recording must be enabled
      */
     public Service(String serviceName, LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery,
-            boolean requiresStrictRecording) {
+            ServiceRegistrar serviceRegistrar, boolean requiresStrictRecording) {
         this.loadBalancer = loadBalancer;
         this.serviceDiscovery = serviceDiscovery;
+        this.serviceRegistrar = serviceRegistrar;
         this.serviceName = serviceName;
         this.instanceSelectionLock = requiresStrictRecording ? new Semaphore(1) : null;
     }
@@ -144,6 +147,15 @@ public class Service {
      */
     public ServiceDiscovery getServiceDiscovery() {
         return serviceDiscovery;
+    }
+
+    /**
+     * Get the underlying service registrar
+     *
+     * @return service registrar
+     */
+    public ServiceRegistrar getServiceRegistrar() {
+        return serviceRegistrar;
     }
 
     /**

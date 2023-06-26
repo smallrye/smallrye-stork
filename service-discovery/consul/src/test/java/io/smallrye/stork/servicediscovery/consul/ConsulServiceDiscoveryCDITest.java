@@ -78,7 +78,8 @@ public class ConsulServiceDiscoveryCDITest {
         //Given a service `my-service` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service";
         config.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5M"));
+                null,
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5M"));
         stork = StorkTestUtils.getNewStorkInstance();
         List<String> tags = List.of("primary");
         registerService(serviceName, 8406, tags, "example.com");
@@ -124,7 +125,8 @@ public class ConsulServiceDiscoveryCDITest {
         //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
         String serviceName = "my-service";
         config.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
+                null,
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
         List<String> tags = List.of("primary");
@@ -179,8 +181,8 @@ public class ConsulServiceDiscoveryCDITest {
     void shouldDiscoverServiceWithSpecificName() throws InterruptedException {
         //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
         String serviceName = "my-consul-service";
-        config.addServiceConfig("my-consul-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5",
+        config.addServiceConfig("my-consul-service", null, "consul", null,
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5",
                         "application", "my-consul-service"));
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
@@ -238,7 +240,8 @@ public class ConsulServiceDiscoveryCDITest {
         //Given a service `my-service` registered in consul and a refresh-period of 5 seconds
         String serviceName = "my-service";
         config.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
+                null,
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
         List<String> tags = List.of("primary");

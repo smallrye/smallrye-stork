@@ -5,6 +5,7 @@ import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.loadbalancer.random.RandomConfiguration;
 import io.smallrye.stork.servicediscovery.staticlist.StaticConfiguration;
+import io.smallrye.stork.servicediscovery.staticlist.StaticRegistrarConfiguration;
 
 import java.time.Duration;
 
@@ -29,5 +30,10 @@ public class StorkApiExample {
         ServiceInstance instance = stork.getService("my-second-service").selectInstance()
                 .await().atMost(Duration.ofSeconds(1));
         System.out.println(instance.getHost() + ":" + instance.getPort());
+
+        // Another service using the random selection strategy, instead of round-robin and a static service registrar
+        stork.defineIfAbsent("my-third-service",
+                ServiceDefinition.of(new StaticConfiguration().withAddressList(example),
+                        new RandomConfiguration(), new StaticRegistrarConfiguration()));
     }
 }

@@ -191,12 +191,12 @@ public class ConfigClassWriter {
 
             out.println("   @Override");
             out.println(format(
-                    "   public ServiceRegistrar<%s> createServiceRegistrar(ServiceRegistrarConfig config, ",
+                    "   public ServiceRegistrar<%s> createServiceRegistrar(ConfigWithType config, String serviceName, ",
                     metadataKeyName));
             out.println("              StorkInfrastructure storkInfrastructure) {");
             out.println(format("      %s typedConfig = new %s(config.parameters());", configClassName, configClassName));
             out.println(
-                    "      return provider.createServiceRegistrar(typedConfig, config.name(), storkInfrastructure);");
+                    "      return provider.createServiceRegistrar(typedConfig, serviceName, storkInfrastructure);");
             out.println("   }");
 
             writeTypeMethod(type, out);

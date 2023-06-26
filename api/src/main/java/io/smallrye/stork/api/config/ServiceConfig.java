@@ -1,7 +1,8 @@
 package io.smallrye.stork.api.config;
 
 /**
- * Service configuration, wraps both (optional) LoadBalancer configuration and (required) ServiceDiscovery configuration
+ * Service configuration, wraps (optional) LoadBalancer configuration, (required) ServiceDiscovery configuration and (optional)
+ * ServiceRegistrar configuration
  * for a single service
  */
 public interface ServiceConfig {
@@ -24,6 +25,13 @@ public interface ServiceConfig {
      * @return (required) service discovery configuration
      */
     ConfigWithType serviceDiscovery();
+
+    /**
+     * ServiceRegistrar configuration for the service
+     *
+     * @return (required) service registrar configuration
+     */
+    ConfigWithType serviceRegistrar();
 
     /**
      * Whether the communication should use a secure connection (e.g. HTTPS)

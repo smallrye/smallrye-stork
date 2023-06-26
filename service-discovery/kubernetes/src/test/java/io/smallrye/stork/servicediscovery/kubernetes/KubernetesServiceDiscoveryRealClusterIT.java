@@ -37,8 +37,8 @@ public class KubernetesServiceDiscoveryRealClusterIT {
     @Test
     void shouldGetServiceFromK8sDefaultNamespace() {
 
-        TestConfigProvider.addServiceConfig("rest-service", null, "kubernetes",
-                null, Map.of("k8s-namespace", "stork-demo"));
+        TestConfigProvider.addServiceConfig("rest-service", null, "kubernetes", null,
+                null, Map.of("k8s-namespace", "stork-demo"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "rest-service";
@@ -63,8 +63,8 @@ public class KubernetesServiceDiscoveryRealClusterIT {
     void shouldGetServicesForDefaultNamespaceOnNonSpecified() {
         String serviceName = "pod1";
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes",
-                Collections.emptyMap(), Map.of("k8s-host", "https://192.168.49.2:8443/"));
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                Collections.emptyMap(), Map.of("k8s-host", "https://192.168.49.2:8443/"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
@@ -82,17 +82,15 @@ public class KubernetesServiceDiscoveryRealClusterIT {
 
     @Test
     void shouldRegisterServiceInstancesInDefaultNamespace() throws InterruptedException {
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", "https://127.0.0.1:41711/", "k8s-namespace", "stork"));
-        TestConfigProvider.addServiceRegistrarConfig("my-kube-registrar", "kubernetes",
+        String serviceName = "svc";
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", "kubernetes",
+                null, Map.of("k8s-host", "https://127.0.0.1:41711/", "k8s-namespace", "stork"),
                 Map.of("k8s-host", "https://127.0.0.1:41711/"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
-        //        String[] ips = { "10.96.96.231" };
 
-        ServiceRegistrar<KubernetesMetadataKey> kubeRegistrar = stork.getServiceRegistrar("my-kube-registrar");
+        ServiceRegistrar<KubernetesMetadataKey> kubeRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(ips.length);
         for (String ip : ips) {

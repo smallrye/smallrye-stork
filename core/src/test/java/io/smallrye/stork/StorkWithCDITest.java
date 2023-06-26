@@ -163,7 +163,7 @@ public class StorkWithCDITest extends WeldTestBase {
 
         @Override
         public List<ServiceConfig> getConfigs() {
-            ServiceConfig service = new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, null);
+            ServiceConfig service = new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, null, null);
             return List.of(service);
         }
 
@@ -178,7 +178,7 @@ public class StorkWithCDITest extends WeldTestBase {
 
         @Override
         public List<ServiceConfig> getConfigs() {
-            ServiceConfig service = new FakeServiceConfig("b", FAKE_SERVICE_DISCOVERY_CONFIG, null);
+            ServiceConfig service = new FakeServiceConfig("b", FAKE_SERVICE_DISCOVERY_CONFIG, null, null);
             return List.of(service);
         }
 
@@ -208,7 +208,7 @@ public class StorkWithCDITest extends WeldTestBase {
             public Map<String, String> parameters() {
                 return null;
             }
-        }, null));
+        }, null, null));
         weld.addBeanClass(MyConfigProvider.class);
         run();
 
@@ -217,7 +217,7 @@ public class StorkWithCDITest extends WeldTestBase {
 
     @Test
     public void testServiceWithServiceDiscoveryButNoMatchingProvider() {
-        configurations.add(new FakeServiceConfig("a", SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER, null));
+        configurations.add(new FakeServiceConfig("a", SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER, null, null));
         weld.addBeanClass(MyConfigProvider.class);
         run();
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
@@ -226,7 +226,7 @@ public class StorkWithCDITest extends WeldTestBase {
     @Test
     public void testWithLoadBalancerButNoMatchingProvider() {
         configurations
-                .add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LOAD_BALANCER_WITH_INVALID_PROVIDER));
+                .add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LOAD_BALANCER_WITH_INVALID_PROVIDER, null));
         weld.addBeanClass(MyConfigProvider.class);
         run();
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
@@ -235,7 +235,7 @@ public class StorkWithCDITest extends WeldTestBase {
     @Test
     public void testWithServiceDiscoveryAndASingleServiceInstance() {
         configurations.add(new FakeServiceConfig("a",
-                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
         ServiceInstance instance = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance);
         weld.addBeanClass(AnchoredServiceDiscoveryProvider.class);
@@ -258,7 +258,7 @@ public class StorkWithCDITest extends WeldTestBase {
     @Test
     public void testWithLegacySecureServiceDiscovery() {
         configurations.add(new FakeSecureServiceConfig("s",
-                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
         ServiceInstance instance = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance);
         weld.addBeanClass(AnchoredServiceDiscoveryProvider.class);
@@ -283,7 +283,7 @@ public class StorkWithCDITest extends WeldTestBase {
     @Test
     public void testWithSecureServiceDiscovery() {
         configurations.add(new FakeServiceConfig("s",
-                FAKE_SECURE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SECURE_SERVICE_DISCOVERY_CONFIG, null, null));
         ServiceInstance instance = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance);
         weld.addBeanClass(AnchoredServiceDiscoveryProvider.class);
@@ -307,7 +307,7 @@ public class StorkWithCDITest extends WeldTestBase {
     @Test
     public void testWithServiceDiscoveryAndATwoServiceInstances() {
         configurations.add(new FakeServiceConfig("a",
-                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
         ServiceInstance instance1 = mock(ServiceInstance.class);
         ServiceInstance instance2 = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance1);
@@ -335,7 +335,7 @@ public class StorkWithCDITest extends WeldTestBase {
     @Test
     public void testWithLoadBalancer() {
         configurations.add(new FakeServiceConfig("a",
-                FAKE_SERVICE_DISCOVERY_CONFIG, FAKE_LOAD_BALANCER_CONFIG));
+                FAKE_SERVICE_DISCOVERY_CONFIG, FAKE_LOAD_BALANCER_CONFIG, null));
         weld.addBeanClass(AnchoredServiceDiscoveryProvider.class);
         weld.addBeanClass(MockLoadBalancerProvider.class);
         weld.addBeanClass(AnchoredServiceDiscoveryProviderLoader.class);
@@ -362,7 +362,7 @@ public class StorkWithCDITest extends WeldTestBase {
         AnchoredServiceDiscoveryProvider.services.add(instance3);
 
         configurations.add(new FakeServiceConfig("a",
-                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
 
         weld.addBeanClass(AnchoredServiceDiscoveryProvider.class);
 
@@ -406,7 +406,7 @@ public class StorkWithCDITest extends WeldTestBase {
                     public Map<String, String> parameters() {
                         return Collections.emptyMap();
                     }
-                }));
+                }, null));
 
         weld.addBeanClass(AnchoredServiceDiscoveryProvider.class);
         weld.addBeanClass(MyConfigProvider.class);
@@ -428,8 +428,8 @@ public class StorkWithCDITest extends WeldTestBase {
 
     private static class FakeSecureServiceConfig extends FakeServiceConfig {
 
-        private FakeSecureServiceConfig(String name, ConfigWithType sd, ConfigWithType lb) {
-            super(name, sd, lb);
+        private FakeSecureServiceConfig(String name, ConfigWithType sd, ConfigWithType lb, ConfigWithType sr) {
+            super(name, sd, lb, sr);
         }
 
         @Override

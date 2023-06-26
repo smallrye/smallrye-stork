@@ -43,7 +43,7 @@ Stork also provides the ability to register services using Consul as backend.
 
 ### Service registration configuration
 
-For each service that should register the service instances in Consul, configure the service discovery `type`:
+For each service that should register the service instances in Consul, configure the service registrar `type`:
 
 === "stork standalone"
 ```properties

@@ -10,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.api.config.ServiceConfig;
-import io.smallrye.stork.api.config.ServiceRegistrarConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
 
 /**
@@ -20,8 +19,6 @@ import io.smallrye.stork.spi.config.ConfigProvider;
 @ApplicationScoped
 public class TestConfigProviderBean implements ConfigProvider {
     private final List<ServiceConfig> configs = new ArrayList<>();
-    private final List<ServiceRegistrarConfig> registrarConfigs = new ArrayList<>();
-
     private int priority = Integer.MAX_VALUE;
 
     public void setPriority(int priority) {
@@ -65,41 +62,77 @@ public class TestConfigProviderBean implements ConfigProvider {
                     }
                 };
             }
+
+            @Override
+            public ConfigWithType serviceRegistrar() {
+                return null;
+            }
         });
     }
 
-    public void addServiceRegistrarConfig(String registrarName, String registrarType, Map<String, String> parameters) {
-        registrarConfigs.add(new ServiceRegistrarConfig() {
+    public void addServiceConfig(String name, String loadBalancer, String serviceDiscovery, String serviceRegistrar,
+            Map<String, String> loadBalancerParams, Map<String, String> serviceDiscoveryParams,
+            Map<String, String> serviceRegistrarParams) {
+        configs.add(new ServiceConfig() {
             @Override
-            public String name() {
-                return registrarName;
+            public String serviceName() {
+                return name;
             }
 
             @Override
-            public String type() {
-                return registrarType;
+            public ConfigWithType loadBalancer() {
+                return loadBalancer == null ? null : new ConfigWithType() {
+                    @Override
+                    public String type() {
+                        return loadBalancer;
+                    }
+
+                    @Override
+                    public Map<String, String> parameters() {
+                        return Objects.requireNonNullElse(loadBalancerParams, Collections.emptyMap());
+                    }
+                };
             }
 
             @Override
-            public Map<String, String> parameters() {
-                return parameters;
+            public ConfigWithType serviceDiscovery() {
+                return new ConfigWithType() {
+                    @Override
+                    public String type() {
+                        return serviceDiscovery;
+                    }
+
+                    @Override
+                    public Map<String, String> parameters() {
+                        return Objects.requireNonNullElse(serviceDiscoveryParams, Collections.emptyMap());
+                    }
+                };
+            }
+
+            @Override
+            public ConfigWithType serviceRegistrar() {
+                return serviceRegistrar == null ? null : new ConfigWithType() {
+                    @Override
+                    public String type() {
+                        return serviceRegistrar;
+                    }
+
+                    @Override
+                    public Map<String, String> parameters() {
+                        return Objects.requireNonNullElse(serviceRegistrarParams, Collections.emptyMap());
+                    }
+                };
             }
         });
     }
 
     public void clear() {
         configs.clear();
-        registrarConfigs.clear();
     }
 
     @Override
     public List<ServiceConfig> getConfigs() {
         return configs;
-    }
-
-    @Override
-    public List<ServiceRegistrarConfig> getRegistrarConfigs() {
-        return registrarConfigs;
     }
 
     @Override

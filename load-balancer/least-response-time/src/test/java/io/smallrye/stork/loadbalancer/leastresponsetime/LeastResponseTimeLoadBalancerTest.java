@@ -43,14 +43,13 @@ public class LeastResponseTimeLoadBalancerTest {
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
-        TestConfigProvider.addServiceConfig("first-service", "least-response-time", "static",
-                null,
-                Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
-        TestConfigProvider.addServiceConfig("first-service-secure-random", "least-response-time", "static",
-                Map.of("use-secure-random", "true"),
-                Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)));
+        TestConfigProvider.addServiceConfig("first-service", "least-response-time", "static", null,
+                null, Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)), null);
+        TestConfigProvider.addServiceConfig("first-service-secure-random", "least-response-time", "static", null,
+                Map.of("use-secure-random", "true"), Map.of("address-list", String.format("%s,%s", FST_SRVC_1, FST_SRVC_2)),
+                null);
         TestConfigProvider.addServiceConfig("without-instances", "least-response-time",
-                "empty-services", null, Collections.emptyMap());
+                "empty-services", null, null, Collections.emptyMap(), null);
 
         stork = StorkTestUtils.getNewStorkInstance();
     }

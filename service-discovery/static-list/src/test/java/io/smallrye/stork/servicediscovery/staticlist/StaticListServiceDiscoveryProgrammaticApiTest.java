@@ -61,6 +61,14 @@ public class StaticListServiceDiscoveryProgrammaticApiTest {
                 .getInstances()
                 .await().atMost(Duration.ofSeconds(5));
 
+        for (ServiceInstance si : serviceInstances) {
+            System.out.println("----- instances: \n");
+            System.out.println("----- si host: " + si.getHost());
+            System.out.println("----- si port: " + si.getPort());
+            System.out.println("----- si id: " + si.getId());
+            System.out.println("----- si path: " + si.getPath());
+        }
+
         assertThat(serviceInstances).hasSize(2);
 
         List<String> list = serviceInstances.stream().map(si -> si.getHost() + ":" + si.getPort()).collect(Collectors.toList());

@@ -68,15 +68,14 @@ public class ConsulServiceRegistrationCDITest {
 
     @Test
     void shouldRegisterServiceInstancesInConsul() throws InterruptedException {
-        config.addServiceConfig("my-service", null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"));
-        config.addServiceRegistrarConfig("my-consul-registrar", "consul",
+        String serviceName = "my-service";
+        config.addServiceConfig(serviceName, null, "consul",
+                "consul", null,
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)),
                 Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        String serviceName = "my-service";
-
-        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getServiceRegistrar("my-consul-registrar");
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
         consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class)
@@ -91,7 +90,7 @@ public class ConsulServiceRegistrationCDITest {
         Service service = stork.getService(serviceName);
 
         service.getServiceDiscovery().getServiceInstances()
-                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .onFailure().invoke(th -> fail("Failed to get service instances from Consul", th))
                 .subscribe().with(instances::set);
 
         await().atMost(Duration.ofSeconds(20))

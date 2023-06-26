@@ -25,6 +25,13 @@
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
     "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method io.smallrye.stork.api.ServiceRegistrar<io.smallrye.stork.servicediscovery.eureka.EurekaMetadataKey> io.smallrye.stork.servicediscovery.eureka.EurekaServiceRegistrarProviderLoader::createServiceRegistrar(io.smallrye.stork.api.config.ServiceRegistrarConfig, io.smallrye.stork.spi.StorkInfrastructure)",
+        "new": "method io.smallrye.stork.api.ServiceRegistrar<io.smallrye.stork.servicediscovery.eureka.EurekaMetadataKey> io.smallrye.stork.servicediscovery.eureka.EurekaServiceRegistrarProviderLoader::createServiceRegistrar(io.smallrye.stork.api.config.ConfigWithType, java.lang.String, io.smallrye.stork.spi.StorkInfrastructure)",
+        "justification": "Use the ConfigWithType more generic type for registrars and service name."
+      }
     ]
   }
 }, {

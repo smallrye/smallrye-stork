@@ -153,7 +153,7 @@ public class StorkTest {
             public Map<String, String> parameters() {
                 return null;
             }
-        }, null));
+        }, null, null));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
@@ -161,7 +161,7 @@ public class StorkTest {
 
     @Test
     public void testServiceWithServiceDiscoveryButNoMatchingProvider() {
-        TestEnv.configurations.add(new FakeServiceConfig("a", SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER, null));
+        TestEnv.configurations.add(new FakeServiceConfig("a", SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER, null, null));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
     }
@@ -169,7 +169,7 @@ public class StorkTest {
     @Test
     public void testWithLoadBalancerButNoMatchingProvider() {
         TestEnv.configurations
-                .add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LOAD_BALANCER_WITH_INVALID_PROVIDER));
+                .add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LOAD_BALANCER_WITH_INVALID_PROVIDER, null));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
     }
@@ -177,7 +177,7 @@ public class StorkTest {
     @Test
     public void testWithServiceDiscoveryAndASingleServiceInstance() {
         TestEnv.configurations.add(new FakeServiceConfig("a",
-                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
         ServiceInstance instance = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance);
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
@@ -193,7 +193,7 @@ public class StorkTest {
     @Test
     public void testWithLegacySecureServiceDiscovery() {
         TestEnv.configurations.add(new FakeSecureServiceConfig("s",
-                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
         ServiceInstance instance = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance);
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
@@ -209,7 +209,7 @@ public class StorkTest {
     @Test
     public void testWithSecureServiceDiscovery() {
         TestEnv.configurations.add(new FakeServiceConfig("s",
-                FAKE_SECURE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SECURE_SERVICE_DISCOVERY_CONFIG, null, null));
         ServiceInstance instance = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance);
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
@@ -225,7 +225,7 @@ public class StorkTest {
     @Test
     public void testWithServiceDiscoveryAndATwoServiceInstances() {
         TestEnv.configurations.add(new FakeServiceConfig("a",
-                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
         ServiceInstance instance1 = mock(ServiceInstance.class);
         ServiceInstance instance2 = mock(ServiceInstance.class);
         AnchoredServiceDiscoveryProvider.services.add(instance1);
@@ -245,7 +245,7 @@ public class StorkTest {
     @Test
     public void testWithLoadBalancer() {
         TestEnv.configurations.add(new FakeServiceConfig("a",
-                FAKE_SERVICE_DISCOVERY_CONFIG, FAKE_LOAD_BALANCER_CONFIG));
+                FAKE_SERVICE_DISCOVERY_CONFIG, FAKE_LOAD_BALANCER_CONFIG, null));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Stork.initialize();
         Stork stork = Stork.getInstance();
@@ -263,7 +263,7 @@ public class StorkTest {
         AnchoredServiceDiscoveryProvider.services.add(instance3);
 
         TestEnv.configurations.add(new FakeServiceConfig("a",
-                FAKE_SERVICE_DISCOVERY_CONFIG, null));
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
 
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
@@ -298,7 +298,7 @@ public class StorkTest {
                     public Map<String, String> parameters() {
                         return Collections.emptyMap();
                     }
-                }));
+                }, null));
 
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
@@ -317,7 +317,7 @@ public class StorkTest {
 
         @Override
         public List<ServiceConfig> getConfigs() {
-            ServiceConfig service = new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, null);
+            ServiceConfig service = new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, null, null);
             return List.of(service);
         }
 
@@ -331,7 +331,7 @@ public class StorkTest {
 
         @Override
         public List<ServiceConfig> getConfigs() {
-            ServiceConfig service = new FakeServiceConfig("b", FAKE_SERVICE_DISCOVERY_CONFIG, null);
+            ServiceConfig service = new FakeServiceConfig("b", FAKE_SERVICE_DISCOVERY_CONFIG, null, null);
             return List.of(service);
         }
 
@@ -343,8 +343,8 @@ public class StorkTest {
 
     private static class FakeSecureServiceConfig extends FakeServiceConfig {
 
-        private FakeSecureServiceConfig(String name, ConfigWithType sd, ConfigWithType lb) {
-            super(name, sd, lb);
+        private FakeSecureServiceConfig(String name, ConfigWithType sd, ConfigWithType lb, ConfigWithType sr) {
+            super(name, sd, lb, sr);
         }
 
         @Override

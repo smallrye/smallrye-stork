@@ -59,13 +59,14 @@ public class MicroProfileConfigProviderTest {
     @Test
     void shouldConfigureServiceRegistrar() {
         Map<String, String> properties = new HashMap<>();
-        properties.put("stork-registrar." + MY_REGISTRAR + ".type", TestServiceRegistrarProvider.TYPE);
-        properties.put("stork-registrar." + MY_REGISTRAR + ".param1", "http://localhost:8080");
-        properties.put("stork-registrar." + MY_REGISTRAR + ".param2", "param2-value");
+        properties.put("stork." + MY_REGISTRAR + ".service-discovery.type", "test-sd-1");
+        properties.put("stork." + MY_REGISTRAR + ".service-registrar.type", TestServiceRegistrarProvider.TYPE);
+        properties.put("stork." + MY_REGISTRAR + ".service-registrar.param1", "http://localhost:8080");
+        properties.put("stork." + MY_REGISTRAR + ".service-registrar.param2", "param2-value");
 
         Stork stork = storkForConfig(properties);
 
-        ServiceRegistrar<TestMetadata> serviceRegistrar = stork.getServiceRegistrar(MY_REGISTRAR);
+        ServiceRegistrar<TestMetadata> serviceRegistrar = stork.getService(MY_REGISTRAR).getServiceRegistrar();
         assertThat(serviceRegistrar).isInstanceOf(TestServiceRegistrarProvider.TestServiceRegistrar.class);
 
         serviceRegistrar.registerServiceInstance("foo", Metadata.of(TestMetadata.class)

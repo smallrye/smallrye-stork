@@ -111,8 +111,8 @@ public class KubernetesServiceDiscoveryCacheTest {
         // Stork is called to get service instances again
         // Stork contacts the cluster to get the instances but it preserves the Stork service instances Id
 
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "svc";
