@@ -52,7 +52,17 @@ public class StaticListServiceDiscoveryProgrammaticApiCDITest {
                         new StaticConfiguration().withAddressList("localhost:443, localhost")))
                 .defineIfAbsent("shuffle-service", ServiceDefinition.of(
                         new StaticConfiguration()
-                                .withAddressList("localhost:8080, localhost:8081").withShuffle("true")));
+                                .withAddressList("localhost:8080, localhost:8081").withShuffle("true")))
+                .defineIfAbsent("empty-list-service", ServiceDefinition.of(new StaticConfiguration().withAddressList(null)));
+        ;
+    }
+
+    @Test
+    void testEmptyDetection() {
+        List<ServiceInstance> instances = stork.getService("empty-list-service").getInstances().await()
+                .atMost(Duration.ofSeconds(5));
+
+        assertThat(instances).hasSize(0);
     }
 
     @Test

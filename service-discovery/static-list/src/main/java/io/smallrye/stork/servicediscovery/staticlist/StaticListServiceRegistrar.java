@@ -1,7 +1,6 @@
 package io.smallrye.stork.servicediscovery.staticlist;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,27 +37,24 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
 
     public static final class StaticAddressesBackend {
 
-        private static Map<String, List<String>> backend;
+        private static Map<String, List<String>> backend = new HashMap<>();
 
         public static List<String> getAddresses(String serviceName) {
-            if (backend == null) {
-                backend = new HashMap<>();
-                backend.put(serviceName, Collections.emptyList());
-            }
             return backend.get(serviceName);
         }
 
         public static void add(String serviceName, String address) {
-            if (backend == null) {
-                backend = new HashMap<>();
-                backend.put(serviceName, new ArrayList<>());
-            } else if (backend.get(serviceName) == null) {
-                List<String> adresses = new ArrayList<>();
-                adresses.add(address);
-                backend.put(serviceName, adresses);
-            } else if (!backend.get(serviceName).contains(address)) {
-                backend.get(serviceName).add(address);
-
+            if (serviceName == null || serviceName.length() == 0) {
+                throw new IllegalArgumentException("No service name provided for address " + address);
+            }
+            if (backend.get(serviceName) != null) {
+                if (!backend.get(serviceName).contains(address)) {
+                    backend.get(serviceName).add(address);
+                }
+            } else {
+                List<String> addresses = new ArrayList<>();
+                addresses.add(address);
+                backend.put(serviceName, addresses);
             }
         }
 
@@ -66,6 +62,10 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
             if (backend != null) {
                 backend.remove(serviceName);
             }
+        }
+
+        public static void clearAll() {
+            backend.clear();
         }
     }
 
