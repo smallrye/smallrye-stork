@@ -46,6 +46,8 @@ public class StaticListServiceDiscoveryCDITest {
                 null, Map.of("address-list", "localhost:8083/foo, localhost:8083/bar"));
         config.addServiceConfig("secured-service", null, "static",
                 null, Map.of("address-list", "localhost:443, localhost"));
+        config.addServiceConfig("empty-list-service", null, "static", null,
+                null, Map.of("address-list", ""), null);
 
         this.stork = StorkTestUtils.getNewStorkInstance();
 
@@ -63,6 +65,14 @@ public class StaticListServiceDiscoveryCDITest {
         instances = stork.getService("second-service").getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1);
         assertThat(instances.get(0).isSecure()).isTrue();
+    }
+
+    @Test
+    void testEmptyDetection() {
+        List<ServiceInstance> instances = stork.getService("empty-list-service").getInstances().await()
+                .atMost(Duration.ofSeconds(5));
+
+        assertThat(instances).hasSize(0);
     }
 
     @Test

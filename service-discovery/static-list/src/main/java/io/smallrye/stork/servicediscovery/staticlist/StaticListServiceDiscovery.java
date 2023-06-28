@@ -34,19 +34,22 @@ public final class StaticListServiceDiscovery implements ServiceDiscovery {
     @Override
     public Uni<List<ServiceInstance>> getServiceInstances() {
         List<String> addresses = StaticAddressesBackend.getAddresses(serviceName);
-        for (String address : addresses) {
-            try {
-                HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(address, 80, "service");
-                DefaultServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(), hostAndPort.host,
-                        hostAndPort.port,
-                        hostAndPort.path, false);
-                if (!instances.contains(serviceInstance)) {
-                    instances
-                            .add(serviceInstance);
+        if (addresses != null && !addresses.isEmpty()) {
+            for (String address : addresses) {
+                try {
+                    HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(address, 80, "service");
+                    DefaultServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
+                            hostAndPort.host,
+                            hostAndPort.port,
+                            hostAndPort.path, false);
+                    if (!instances.contains(serviceInstance)) {
+                        instances
+                                .add(serviceInstance);
+                    }
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(
+                            "Address not parseable to URL: " + address + " for service " + serviceName);
                 }
-            } catch (Exception e) {
-                throw new IllegalArgumentException(
-                        "Address not parseable to URL: " + address + " for service " + serviceName);
             }
         }
 

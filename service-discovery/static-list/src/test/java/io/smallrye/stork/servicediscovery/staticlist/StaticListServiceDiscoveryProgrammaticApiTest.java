@@ -38,7 +38,16 @@ public class StaticListServiceDiscoveryProgrammaticApiTest {
                         new StaticConfiguration().withAddressList("localhost:443, localhost")))
                 .defineIfAbsent("shuffle-service", ServiceDefinition.of(
                         new StaticConfiguration()
-                                .withAddressList("localhost:8080, localhost:8081").withShuffle("true")));
+                                .withAddressList("localhost:8080, localhost:8081").withShuffle("true")))
+                .defineIfAbsent("empty-list-service", ServiceDefinition.of(new StaticConfiguration().withAddressList(null)));
+    }
+
+    @Test
+    void testEmptyDetection() {
+        List<ServiceInstance> instances = stork.getService("empty-list-service").getInstances().await()
+                .atMost(Duration.ofSeconds(5));
+
+        assertThat(instances).hasSize(0);
     }
 
     @Test
@@ -60,14 +69,6 @@ public class StaticListServiceDiscoveryProgrammaticApiTest {
         List<ServiceInstance> serviceInstances = stork.getService("first-service")
                 .getInstances()
                 .await().atMost(Duration.ofSeconds(5));
-
-        for (ServiceInstance si : serviceInstances) {
-            System.out.println("----- instances: \n");
-            System.out.println("----- si host: " + si.getHost());
-            System.out.println("----- si port: " + si.getPort());
-            System.out.println("----- si id: " + si.getId());
-            System.out.println("----- si path: " + si.getPath());
-        }
 
         assertThat(serviceInstances).hasSize(2);
 

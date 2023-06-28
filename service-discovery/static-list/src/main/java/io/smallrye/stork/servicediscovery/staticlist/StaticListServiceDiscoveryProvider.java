@@ -33,26 +33,25 @@ public class StaticListServiceDiscoveryProvider
     public ServiceDiscovery createServiceDiscovery(StaticConfiguration config, String serviceName,
             ServiceConfig serviceConfig, StorkInfrastructure storkInfrastructure) {
         String addresses = config.getAddressList();
-        if (addresses == null || addresses.isBlank()) {
-            throw new IllegalArgumentException("No address list defined for service " + serviceName);
-        }
         List<DefaultServiceInstance> addressList = new ArrayList<>();
-        for (String address : addresses.split(",")) {
-            address = address.trim();
-            try {
-                HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(address, 80, "service '" + serviceName + "'");
-                addressList
-                        .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostAndPort.host, hostAndPort.port,
-                                hostAndPort.path, isSecure(config.getSecure(), hostAndPort.port)));
-                StaticAddressesBackend.add(serviceName, address);
-            } catch (Exception e) {
-                throw new IllegalArgumentException(
-                        "Address not parseable to URL: " + address + " for service " + serviceName);
+        if (addresses != null && !addresses.isBlank()) {
+            for (String address : addresses.split(",")) {
+                address = address.trim();
+                try {
+                    HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(address, 80,
+                            "service '" + serviceName + "'");
+                    addressList
+                            .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostAndPort.host, hostAndPort.port,
+                                    hostAndPort.path, isSecure(config.getSecure(), hostAndPort.port)));
+                    StaticAddressesBackend.add(serviceName, address);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(
+                            "Address not parseable to URL: " + address + " for service " + serviceName);
+                }
             }
-        }
-
-        if (Boolean.parseBoolean(config.getShuffle())) {
-            Collections.shuffle(addressList);
+            if (Boolean.parseBoolean(config.getShuffle())) {
+                Collections.shuffle(addressList);
+            }
         }
 
         return new StaticListServiceDiscovery(serviceName, addressList);
