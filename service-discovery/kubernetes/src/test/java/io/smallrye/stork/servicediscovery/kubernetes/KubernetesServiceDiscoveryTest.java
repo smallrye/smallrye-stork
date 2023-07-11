@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,8 @@ import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointAddressBuilder;
@@ -27,6 +30,7 @@ import io.fabric8.kubernetes.api.model.EndpointPortBuilder;
 import io.fabric8.kubernetes.api.model.EndpointSubsetBuilder;
 import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.api.model.EndpointsBuilder;
+import io.fabric8.kubernetes.api.model.EndpointsListBuilder;
 import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
@@ -43,6 +47,7 @@ import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
+@DisabledOnOs(OS.WINDOWS)
 @EnableKubernetesMockClient(crud = true)
 public class KubernetesServiceDiscoveryTest {
 
@@ -493,19 +498,69 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
+    void shouldGetInstancesFromCache() throws InterruptedException {
+        String serviceName = "svc";
+
+        //Recording k8s cluster calls and build a endpoints as response
+        AtomicInteger serverHit = new AtomicInteger(0);
+        server.expect().get().withPath("/api/v1/namespaces/test/endpoints?fieldSelector=metadata.name%3Dsvc")
+                .andReply(200, r -> {
+                    serverHit.incrementAndGet();
+                    List<Endpoints> endpointsList = new ArrayList<>();
+                    endpointsList.add(registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                            "10.96.96.233"));
+                    return new EndpointsListBuilder().withItems(endpointsList).build();
+                }).always();
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(1);
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+
+        //second try to get instances, instances should be fetched from cache, cluster calls should be still 1
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(1);
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+
+    }
+
+    @Test
     void shouldFetchInstancesFromTheClusterWhenCacheIsInvalidated() throws InterruptedException {
 
-        // Given a service with 3 instances registered in the cluster
+        // Given a service with 3 instances registered in the cluster, in `test` namespace
         // Stork gather the cache from the cluster
         // When the endpoints are removed (this invalidates the cache)
         // Stork is called to get service instances again
         // Stork contacts the cluster to get the instances : it gets 0 of them
-
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));
-        Stork stork = StorkTestUtils.getNewStorkInstance();
-
         String serviceName = "svc";
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
 
         registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
@@ -524,9 +579,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
 
-        client.endpoints().withName(serviceName).delete();
-
-        Thread.sleep(5000);
+        client.endpoints().inNamespace(defaultNamespace).withName(serviceName).delete();
 
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
@@ -539,30 +592,20 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
-    void shouldFetchInstancesFromTheCache() throws InterruptedException {
+    void shouldFetchInstancesFromAllNsWhenCacheIsInvalidated() throws InterruptedException {
 
-        // Stork gathers the cache from the cluster
-        // Configure the mock cluster for recordings calls to a specific path
-        // Stork is called twice to get service instances
-        // Stork get the instances from the cache: assert that only 1 call to the cluster has been done
-
+        // Given a service with 3 instances registered in the cluster in any namespace
+        // Stork gather the cache from the cluster
+        // When the endpoints are removed (this invalidates the cache)
+        // Stork is called to get service instances again
+        // Stork contacts the cluster to get the instances : it gets 0 of them
         String serviceName = "svc";
-        String[] ips = { "10.96.96.231" };
 
-        //Recording k8s cluster calls and build the endpoints as response
-        AtomicInteger serverHit = new AtomicInteger(0);
-        server.expect().get().withPath("/api/v1/namespaces/test/endpoints?fieldSelector=metadata.name%3Dsvc")
-                .andReply(200, r -> {
-                    serverHit.incrementAndGet();
-                    Endpoints endpoints = buildAndRegisterKubernetesService(serviceName, defaultNamespace, true, ips);
-                    Arrays.stream(ips).map(ip -> buildAndRegisterBackendPod(serviceName, defaultNamespace, true, ips[0]))
-                            .collect(Collectors.toList());
-                    return endpoints;
-                }).always();
-
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
-                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "all", "refresh-period", "3"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -574,23 +617,28 @@ public class KubernetesServiceDiscoveryTest {
         await().atMost(Duration.ofSeconds(5))
                 .until(() -> instances.get() != null);
 
-        assertThat(serverHit.get()).isEqualTo(1);
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
 
-        //second try to get instances, instances should be fetched from cache
+        client.endpoints().inNamespace(defaultNamespace).withName(serviceName).delete();
+
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
                 .subscribe().with(instances::set);
 
         await().atMost(Duration.ofSeconds(5))
-                .until(() -> instances.get() != null);
+                .until(() -> instances.get().isEmpty());
 
-        assertThat(serverHit.get()).isEqualTo(1);
+        assertThat(instances.get()).hasSize(0);
     }
 
-    private void registerKubernetesResources(String serviceName, String namespace, String... ips) {
+    private Endpoints registerKubernetesResources(String serviceName, String namespace, String... ips) {
         Assert.checkNotNullParam("ips", ips);
-        buildAndRegisterKubernetesService(serviceName, namespace, true, ips);
+        Endpoints endpoints = buildAndRegisterKubernetesService(serviceName, namespace, true, ips);
         Arrays.stream(ips).forEach(ip -> buildAndRegisterBackendPod(serviceName, namespace, true, ip));
+        return endpoints;
     }
 
     private Map<String, Long> mapHostnameToIds(List<ServiceInstance> serviceInstances) {
