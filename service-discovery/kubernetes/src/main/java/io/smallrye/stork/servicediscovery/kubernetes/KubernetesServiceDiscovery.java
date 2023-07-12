@@ -20,12 +20,15 @@ import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointPort;
 import io.fabric8.kubernetes.api.model.EndpointSubset;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.EndpointsList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
+import io.fabric8.kubernetes.client.dsl.AnyNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.Metadata;
@@ -84,7 +87,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         this.client = new KubernetesClientBuilder().withConfig(k8sConfig).build();
         this.vertx = vertx;
         this.secure = isSecure(config);
-        client.endpoints().inform(new ResourceEventHandler<Endpoints>() {
+        AnyNamespaceOperation<Endpoints, EndpointsList, Resource<Endpoints>> endpointsOperation;
+        if (allNamespaces) {
+            endpointsOperation = client.endpoints().inAnyNamespace();
+        } else {
+            endpointsOperation = client.endpoints().inNamespace(namespace);
+        }
+        endpointsOperation.inform(new ResourceEventHandler<Endpoints>() {
             @Override
             public void onAdd(Endpoints obj) {
                 LOGGER.info("Endpoint added: {}", obj.getMetadata().getName());
