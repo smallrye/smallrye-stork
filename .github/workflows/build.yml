@@ -29,8 +29,8 @@ jobs:
       matrix:
         java: [
           { 'version': '11', 'opts': '-Drevapi.skip' },
-          { 'version': '16', 'opts': '-Drevapi.skip' },
-          { 'version': '17', 'opts': 'javadoc:javadoc' }
+          { 'version': '17', 'opts': 'javadoc:javadoc' },
+          { 'version': '20', 'opts': '-Drevapi.skip' }
         ]
     name: build with jdk ${{matrix.java.version}}
 
@@ -54,8 +54,8 @@ jobs:
       matrix:
         java: [
           { 'version': '11', 'opts': '' },
-          { 'version': '16', 'opts': '' },
-          { 'version': '17', 'opts': '' }
+          { 'version': '17', 'opts': '' },
+          { 'version': '20', 'opts': '' }
         ]
     name: build with jdk ${{matrix.java.version}} windows
 
