@@ -66,8 +66,8 @@ public class TestServiceRegistrarProvider
 
         @Override
         public Uni<Void> registerServiceInstance(String serviceName, Metadata<TestMetadata> metadata, String ipAddress,
-                int port) {
-            registrations.add(new Registration(serviceRegistrarName, config, metadata, serviceName, ipAddress, port));
+                int defaultPort) {
+            registrations.add(new Registration(serviceRegistrarName, config, metadata, serviceName, ipAddress, defaultPort));
             return Uni.createFrom().voidItem();
         }
     }

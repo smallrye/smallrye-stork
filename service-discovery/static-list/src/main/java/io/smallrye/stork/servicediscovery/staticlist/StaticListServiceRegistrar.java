@@ -27,8 +27,8 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
     @Override
     public Uni<Void> registerServiceInstance(String serviceName, Metadata<Metadata.DefaultMetadataKey> metadata,
             String ipAddress,
-            int port) {
-        HostAndPort hostAndPortToAdd = StorkAddressUtils.parseToHostAndPort(ipAddress, port,
+            int defaultPort) {
+        HostAndPort hostAndPortToAdd = StorkAddressUtils.parseToHostAndPort(ipAddress, defaultPort,
                 "service '" + serviceName + "'");
         String hostAndPortToAddString = StorkAddressUtils.parseToString(hostAndPortToAdd);
         StaticAddressesBackend.add(serviceName, hostAndPortToAddString);

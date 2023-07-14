@@ -43,11 +43,11 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
     @Override
     public Uni<Void> registerServiceInstance(String serviceName, Metadata<EurekaMetadataKey> metadata, String ipAddress,
-            int port) {
+            int defaultPort) {
 
         return registerApplicationInstance(client, serviceName,
                 metadata.getMetadata().get(EurekaMetadataKey.META_EUREKA_SERVICE_ID).toString(), "192.5.10.236", "acme.com",
-                port, null, -1, "UP", "");
+                defaultPort, null, -1, "UP", "");
 
     }
 

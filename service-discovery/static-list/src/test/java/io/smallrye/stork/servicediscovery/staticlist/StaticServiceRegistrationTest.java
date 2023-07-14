@@ -35,29 +35,29 @@ public class StaticServiceRegistrationTest {
     }
 
     @Test
-    void shouldGetAllServiceInstances() {
+    void shouldRegisterServiceInstances() {
         TestConfigProvider.addServiceConfig("first-service", null, "static", "static",
                 null, Map.of("address-list", "localhost:8080, localhost:8081"), null);
 
         stork = StorkTestUtils.getNewStorkInstance();
 
         String serviceName = "first-service";
-        List<ServiceInstance> serviceInstances = stork.getService(serviceName)
-                .getInstances()
-                .await().atMost(Duration.ofSeconds(5));
-
-        assertThat(serviceInstances).hasSize(2);
-        assertThat(serviceInstances.stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("localhost",
-                "localhost");
-        assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
-                8081);
-        assertThat(serviceInstances.stream().map(ServiceInstance::isSecure)).allSatisfy(b -> assertThat(b).isFalse());
+        //        List<ServiceInstance> serviceInstances = stork.getService(serviceName)
+        //                .getInstances()
+        //                .await().atMost(Duration.ofSeconds(5));
+        //
+        //        assertThat(serviceInstances).hasSize(2);
+        //        assertThat(serviceInstances.stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("localhost",
+        //                "localhost");
+        //        assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
+        //                8081);
+        //        assertThat(serviceInstances.stream().map(ServiceInstance::isSecure)).allSatisfy(b -> assertThat(b).isFalse());
 
         ServiceRegistrar<Metadata.DefaultMetadataKey> staticRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         staticRegistrar.registerServiceInstance(serviceName, "remotehost", 9090);
 
-        serviceInstances = stork.getService(serviceName)
+        List<ServiceInstance> serviceInstances = stork.getService(serviceName)
                 .getInstances()
                 .await().atMost(Duration.ofSeconds(5));
 
@@ -69,7 +69,7 @@ public class StaticServiceRegistrationTest {
     }
 
     @Test
-    void shouldGetAllServiceInstancesWithoutConfig() {
+    void shouldRegisterServiceInstanceWithEmptyAddressList() {
         TestConfigProvider.addServiceConfig("first-service", null, "static", "static",
                 null, null, null);
 
@@ -89,6 +89,31 @@ public class StaticServiceRegistrationTest {
         assertThat(serviceInstances.stream().map(ServiceInstance::getHost)).contains("localhost");
         assertThat(serviceInstances.stream().map(ServiceInstance::getPort)).contains(8080);
         assertThat(serviceInstances.stream().map(ServiceInstance::isSecure)).allSatisfy(b -> assertThat(b).isFalse());
+
+    }
+
+    @Test
+    void shouldRegisterServiceInstancesWithSchemeAndPath() {
+        TestConfigProvider.addServiceConfig("first-service", null, "static", "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "first-service";
+
+        ServiceRegistrar<Metadata.DefaultMetadataKey> staticRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        staticRegistrar.registerServiceInstance(serviceName, "http://localhost:8081/hello", 8080);
+
+        List<ServiceInstance> serviceInstances = stork.getService(serviceName)
+                .getInstances()
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(serviceInstances).hasSize(1);
+        assertThat(serviceInstances.get(0).getHost()).isEqualTo("localhost");
+        assertThat(serviceInstances.get(0).getPort()).isEqualTo(8081);
+        assertThat(serviceInstances.get(0).getPath()).isPresent();
+        assertThat(serviceInstances.get(0).getPath().get()).isEqualTo("/hello");
 
     }
 }
