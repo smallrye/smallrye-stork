@@ -8,6 +8,7 @@ public interface ServiceRegistrar<MetadataKeyType extends Enum<MetadataKeyType> 
         return registerServiceInstance(serviceName, Metadata.empty(), ipAddress, defaultPort);
     }
 
-    Uni<Void> registerServiceInstance(String serviceName, Metadata<MetadataKeyType> metadata, String ipAddress, int defaultPort);
+    Uni<Void> registerServiceInstance(String serviceName, Metadata<MetadataKeyType> metadata, String ipAddress,
+            int defaultPort);
 
 }
