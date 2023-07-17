@@ -24,14 +24,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.method.removed",
-        "old": "method java.util.List<io.smallrye.stork.api.config.ServiceRegistrarConfig> io.smallrye.stork.microprofile.MicroProfileConfigProvider::getRegistrarConfigs()",
-        "justification": "Registrar config is now part of the service config."
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",

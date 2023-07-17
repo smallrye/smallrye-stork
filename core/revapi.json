@@ -31,14 +31,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.method.addedToInterface",
-        "new": "method java.util.Optional<java.lang.String> io.smallrye.stork.api.ServiceInstance::getPath()",
-        "justification": "New method to handle API gateways"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",
