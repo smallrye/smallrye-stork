@@ -35,14 +35,14 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
 
     @Override
     public Uni<Void> registerServiceInstance(String serviceName, Metadata<ConsulMetadataKey> metadata, String ipAddress,
-            int port) {
+            int defaultPort) {
 
         String consulId = metadata.getMetadata().get(ConsulMetadataKey.META_CONSUL_SERVICE_ID).toString();
 
         List<String> tags = new ArrayList<>();
         return Uni.createFrom().emitter(em -> client.registerService(
                 new ServiceOptions().setId(consulId).setName(serviceName).setTags(tags)
-                        .setAddress(ipAddress).setPort(port))
+                        .setAddress(ipAddress).setPort(defaultPort))
                 .onComplete(result -> {
                     if (result.failed()) {
                         log.error("Unable to register instances of service {}", serviceName,

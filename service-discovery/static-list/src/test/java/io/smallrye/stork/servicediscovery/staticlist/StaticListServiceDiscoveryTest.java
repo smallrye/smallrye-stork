@@ -38,6 +38,9 @@ public class StaticListServiceDiscoveryTest {
         TestConfigProvider.addServiceConfig("scheme-service", null, "static", null,
                 null, Map.of("address-list", "http://localhost:8080, https://localhost:8081"), null);
 
+        TestConfigProvider.addServiceConfig("service-with-path", null, "static", null,
+                null, Map.of("address-list", "http://localhost:8080/hello"), null);
+
         TestConfigProvider.addServiceConfig("empty-list-service", null, "static", null,
                 null, Map.of("address-list", ""), null);
 
@@ -68,6 +71,19 @@ public class StaticListServiceDiscoveryTest {
                 "localhost");
         assertThat(instances.stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080,
                 8081);
+    }
+
+    @Test
+    void testPathDetection() {
+        List<ServiceInstance> instances = stork.getService("service-with-path").getInstances().await()
+                .atMost(Duration.ofSeconds(5));
+
+        assertThat(instances).hasSize(1);
+        assertThat(instances.get(0).getHost()).isEqualTo("localhost");
+        assertThat(instances.get(0).getPort()).isEqualTo(8080);
+        assertThat(instances.get(0).getPath()).isPresent();
+        assertThat(instances.get(0).getPath().get()).isEqualTo("/hello");
+
     }
 
     @Test
