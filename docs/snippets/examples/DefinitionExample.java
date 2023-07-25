@@ -22,7 +22,8 @@ public class DefinitionExample {
                 ServiceDefinition.of(new StaticConfiguration().withAddressList(example),
                         new RandomConfiguration()));
 
-        // Another service using the random selection strategy, instead of round-robin and a static service registrar
+        // Another service using the random selection strategy, instead of round-robin
+        // and a static service registrar
         stork.defineIfAbsent("my-second-service",
                 ServiceDefinition.of(new StaticConfiguration().withAddressList(example),
                         new RandomConfiguration(), new StaticRegistrarConfiguration()));

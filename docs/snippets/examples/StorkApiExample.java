@@ -31,7 +31,8 @@ public class StorkApiExample {
                 .await().atMost(Duration.ofSeconds(1));
         System.out.println(instance.getHost() + ":" + instance.getPort());
 
-        // Another service using the random selection strategy, instead of round-robin and a static service registrar
+        // Another service using the random selection strategy, instead of round-robin
+        // and a static service registrar
         stork.defineIfAbsent("my-third-service",
                 ServiceDefinition.of(new StaticConfiguration().withAddressList(example),
                         new RandomConfiguration(), new StaticRegistrarConfiguration()));

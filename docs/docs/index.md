@@ -24,6 +24,7 @@ Nevertheless, a modern distributed system or microservice-based application typi
 IPs get randomly assigned, and instances can be created or destroyed at any time.
 With such dynamics, hard-coded locations are a dead-end.
 
+
 ![the problem](images/problem-light.png#only-light)
 ![the problem](images/problem-dark.png#only-dark)
 

@@ -50,7 +50,7 @@ Optionally, you can also add `@ApplicationScoped` annotation in order to provide
 A service discovery provider class should look as follows:
 
 ```java linenums="1"
---8<-- "snippets/examples/AcmeServiceDiscoveryProvider.java"
+{{ insert('examples/AcmeServiceDiscoveryProvider.java') }}
 ```
 
 Note, that the `ServiceDiscoveryProvider` interface takes a configuration class as a parameter. This configuration class 
@@ -60,7 +60,7 @@ Its name is created by appending `Configuration` to the service discovery type, 
 The next step is to implement the `ServiceDiscovery` interface:
 
 ```java linenums="1"
---8<-- "snippets/examples/AcmeServiceDiscovery.java"
+{{ insert('examples/AcmeServiceDiscovery.java') }}
 ```
 
 This implementation is simplistic.
@@ -98,7 +98,7 @@ When building your service discovery project, the configuration generator create
 This class can be used to configure your service discovery using the Stork programmatic API.
 
 ```java linenums="1"
---8<-- "snippets/examples/AcmeDiscoveryApiUsage.java"
+{{ insert('examples/AcmeDiscoveryApiUsage.java') }}
 ```
 
 Remember that attributes, like `host`, are declared using the `@ServiceDiscoveryAttribute` annotation on the `ServiceDiscoveryProvider` implementation.
@@ -118,13 +118,13 @@ For homogeneity, we recommend the following attribute:
 The following snippet extends the _acme_ service discovery with the `refresh-period` attribute:
 
 ```java linenums="1"
---8<-- "snippets/examples/CachedAcmeServiceDiscoveryProvider.java"
+{{ insert('examples/CachedAcmeServiceDiscoveryProvider.java') }}
 ```
 
 Extending `io.smallrye.stork.impl.CachingServiceDiscovery` changes the structure of the service discovery implementation:
 
 ```java linenums="1"
---8<-- "snippets/examples/CachedAcmeServiceDiscovery.java"
+{{ insert('examples/CachedAcmeServiceDiscovery.java') }}
 ```
 
 1. Call the `super` constructor with the `refresh-period` value

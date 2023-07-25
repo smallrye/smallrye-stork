@@ -112,7 +112,10 @@ plugins:
       theme_folder: "include/themes"
       theme_light: "light.puml"
       theme_dark: "dark.puml"
-  - macros
+  - macros:
+      verbose: true
+      module_name: mkdocs-customizations/macros/docissimo
+      include_dir: mkdocs-customizations/macros
 
 
 extra:

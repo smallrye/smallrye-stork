@@ -50,7 +50,7 @@ Optionally, you can also add `@ApplicationScoped` annotation in order to provide
 
 A load balancer provider class should look as follows:
 ```java linenums="1"
---8<-- "snippets/examples/AcmeLoadBalancerProvider.java"
+{{ insert('examples/AcmeLoadBalancerProvider.java') }}
 ```
 
 Note, that the `LoadBalancerProvider` interface takes a configuration class as a parameter. 
@@ -62,7 +62,7 @@ The next step is to implement the `LoadBalancer` interface.
 The essence of load balancers' work happens in the `selectServiceInstance` method. The method returns a single `ServiceInstance` from a collection. 
 
 ```java linenums="1"
---8<-- "snippets/examples/AcmeLoadBalancer.java"
+{{ insert('examples/AcmeLoadBalancer.java') }}
 ```
 
 This implementation is simplistic and just picks a random instance from the received list.
@@ -99,7 +99,7 @@ When building your load balancer project, the configuration generator creates a 
 This class can be used to configure your load balancer using the Stork programmatic API. 
 
 ```java linenums="1"
---8<-- "snippets/examples/AcmeSelectorApiUsage.java"
+{{ insert('examples/AcmeSelectorApiUsage.java') }}
 ```
 
 Remember that attributes, like `my-attribute`, are declared using the `@LoadBalancerAttribute` annotation on the `LoadBalancerProvider` implementation.
