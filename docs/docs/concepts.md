@@ -33,7 +33,7 @@ The `Stork` instance is a _singleton_.
 It needs to be initialized once (when the application starts) and shutdown when the application stops:
 
 ```java linenums="1"
---8<-- "snippets/examples/StorkEntryPointExample.java"
+{{ insert('examples/StorkEntryPointExample.java') }}
 ```
 
 During the initialization, Stork looks for `io.smallrye.stork.config.ConfigProvider` SPI provider and CDI beans (from 2.x version) and retrieves the list of managed services:
@@ -49,7 +49,7 @@ Services are pre-configured with their name, service discovery, and optionally, 
 You retrieve a `Service` using the `Stork#getService(String name)` method.
 
 ```java linenums="1"
---8<-- "snippets/examples/StorkServiceExample.java"
+{{ insert('examples/StorkServiceExample.java') }}
 ```
 
 The `Service` lets you retrieve the list of `ServiceInstance`, or select a single one, when a load-balancer is configured.
@@ -60,7 +60,7 @@ The `io.smallrye.stork.api.ServiceInstance` represents an actual instance of the
 It provides the metadata to configure a _client_ to interact with that specific instance of service.
 
 ```java linenums="1"
---8<-- "snippets/examples/StorkServiceLookupExample.java"
+{{ insert('examples/StorkServiceLookupExample.java') }}
 ```
 
 The service selection is a two-steps process:
@@ -69,7 +69,7 @@ The service selection is a two-steps process:
 2. Service selection - using the load balancer
 
 ```java linenums="1"
---8<-- "snippets/examples/StorkServiceSelectionExample.java"
+{{ insert('examples/StorkServiceSelectionExample.java') }}
 ```
 
 ## Service Discovery

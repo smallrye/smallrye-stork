@@ -104,8 +104,6 @@ Contacting the cluster too much frequently can result in performance problems. I
 Moreover, the caching expiration has been also improved in order to only update the retrieved set of `ServiceInstance` if some of them changes and an event is emitted. 
 This is done by creating an [Informer](https://www.javadoc.io/static/io.fabric8/kubernetes-client-api/6.1.1/io/fabric8/kubernetes/client/informers/SharedIndexInformer.html), similar to a [Watch](https://www.javadoc.io/static/io.fabric8/kubernetes-client-api/6.1.1/io/fabric8/kubernetes/client/Watch.html),  able to observe the events on the service instances resources. 
 
---8<-- "../src/main/java/io/smallrye/stork/servicediscovery/kubernetes/KubernetesServiceDiscovery.java"
-
 Note that: 
  - the cache is invalidated when an event is received. 
  - the cache is validated once the instances are retrieved from the cluster, in the `fetchNewServiceInstances` method.
