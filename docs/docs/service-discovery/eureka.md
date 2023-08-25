@@ -72,6 +72,6 @@ quarkus.stork.my-service.service-registrar.eureka-host=localhost
 quarkus.stork.my-service.service-registrar.eureka-port=8761
 ```
 
-Consul service registrar is configured with the following parameters:
+Eureka service registrar is configured with the following parameters:
 
 --8<-- "../service-discovery/eureka/target/classes/META-INF/stork-docs/eureka-sr-attributes.txt"
