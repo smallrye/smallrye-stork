@@ -9,28 +9,27 @@ public interface ObservationPoints {
 
     class StorkResolutionEvent {
         // Handler / Reporter
-        protected final ObservationCollector.EventCompletionHandler handler;
+        private final ObservationCollector.EventCompletionHandler handler;
 
         // Metadata
-        protected final String serviceName;
-        protected final String serviceDiscoveryType;
-        protected final String serviceSelectionType;
+        private final String serviceName;
+        private final String serviceDiscoveryType;
+        private final String serviceSelectionType;
 
         // Time
-        protected final long begin;
-        protected volatile long endOfServiceDiscovery;
-        protected volatile long endOfServiceSelection;
+        private final long begin;
+        private volatile long endOfServiceDiscovery;
+        private volatile long endOfServiceSelection;
 
         // Service discovery data
-        protected volatile int instancesCount = -1;
+        volatile int instancesCount = -1;
 
         // Service selection data
-        protected volatile long selectedInstanceId = -1L;
+        volatile long selectedInstance = -1L;
 
         // Overall status
-        protected volatile boolean done;
-        protected volatile boolean serviceDiscoveryDone;
-        protected volatile Throwable failure;
+        volatile boolean succeeded;
+        volatile Throwable failure;
 
         public StorkResolutionEvent(String serviceName, String serviceDiscoveryType, String serviceSelectionType,
                 ObservationCollector.EventCompletionHandler handler) {
@@ -53,15 +52,14 @@ public interface ObservationPoints {
 
         public void onServiceDiscoveryFailure(Throwable throwable) {
             this.endOfServiceDiscovery = System.nanoTime();
-            this.serviceDiscoveryDone = true;
             this.failure = throwable;
             this.handler.complete(this);
         }
 
         public void onServiceSelectionSuccess(long id) {
             this.endOfServiceSelection = System.nanoTime();
-            this.selectedInstanceId = id;
-            this.done = true;
+            this.selectedInstance = id;
+            this.succeeded = true;
             this.handler.complete(this);
         }
 
@@ -72,7 +70,7 @@ public interface ObservationPoints {
         }
 
         public boolean isDone() {
-            return done || failure != null;
+            return succeeded || failure != null;
         }
 
         public Duration getOverallDuration() {
@@ -83,7 +81,7 @@ public interface ObservationPoints {
         }
 
         public Duration getServiceDiscoveryDuration() {
-            if (!serviceDiscoveryDone) {
+            if (!isDone()) {
                 return null;
             }
             return Duration.ofNanos(endOfServiceDiscovery - begin);
