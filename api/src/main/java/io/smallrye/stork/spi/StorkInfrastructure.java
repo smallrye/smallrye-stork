@@ -2,6 +2,9 @@ package io.smallrye.stork.spi;
 
 import java.util.function.Supplier;
 
+import io.smallrye.stork.api.observability.NoopObservationCollector;
+import io.smallrye.stork.api.observability.ObservationCollector;
+
 /**
  * A provider for "utility" objects used by service discovery and load balancer implementations.
  *
@@ -24,4 +27,8 @@ public interface StorkInfrastructure {
      * @throws NullPointerException if utilityClass or defaultSupplier are null
      */
     <T> T get(Class<T> utilityClass, Supplier<T> defaultSupplier);
+
+    default ObservationCollector getObservationCollector() {
+        return new NoopObservationCollector();
+    }
 }

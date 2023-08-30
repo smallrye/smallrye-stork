@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.stork.api.observability.ObservationCollector;
+import io.smallrye.stork.api.observability.ObservationPoints;
 
 /**
  * Represents a <em>Service</em>.
@@ -16,23 +18,34 @@ public class Service {
     private final Semaphore instanceSelectionLock;
     private final LoadBalancer loadBalancer;
     private final ServiceDiscovery serviceDiscovery;
-    private final ServiceRegistrar serviceRegistrar;
+    private final ServiceRegistrar<?> serviceRegistrar;
     private final String serviceName;
+    private final String serviceDiscoveryType;
+    private final String serviceSelectionType;
+    private final ObservationCollector observations;
 
     /**
      * Creates a new Service.
      *
      * @param serviceName the name, must not be {@code null}, must not be blank
+     * @param serviceDiscoveryType the type of the service discovery (for observability purpose)
+     * @param serviceSelectionType the type of the service selection (for observability purpose)
+     * @param collector the observation collector, must not be {@code null}
      * @param loadBalancer the load balancer, can be {@code null}
      * @param serviceDiscovery the service discovery, must not be {@code null}
      * @param serviceRegistrar the service registrar, can be {@code null}
      * @param requiresStrictRecording whether strict recording must be enabled
      */
-    public Service(String serviceName, LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery,
-            ServiceRegistrar serviceRegistrar, boolean requiresStrictRecording) {
+    public Service(String serviceName,
+            String serviceSelectionType, String serviceDiscoveryType, ObservationCollector collector,
+            LoadBalancer loadBalancer, ServiceDiscovery serviceDiscovery,
+            ServiceRegistrar<?> serviceRegistrar, boolean requiresStrictRecording) {
         this.loadBalancer = loadBalancer;
         this.serviceDiscovery = serviceDiscovery;
         this.serviceRegistrar = serviceRegistrar;
+        this.serviceDiscoveryType = serviceDiscoveryType;
+        this.serviceSelectionType = serviceSelectionType;
+        this.observations = collector;
         this.serviceName = serviceName;
         this.instanceSelectionLock = requiresStrictRecording ? new Semaphore(1) : null;
     }
@@ -41,7 +54,7 @@ public class Service {
      * Selects a service instance.
      * <p>
      * The selection looks for the service instances and select the one to use using the load balancer.
-     *
+     * <p>
      * <b>Note:</b> this method doesn't record a start of an operation using this load balancer and does not
      * synchronize load balancer invocations even if the load balancer is not thread safe
      *
@@ -49,13 +62,29 @@ public class Service {
      *         a service instance capable of handling a call
      */
     public Uni<ServiceInstance> selectInstance() {
+        ObservationPoints.StorkResolutionEvent event = observations.create(serviceName, serviceDiscoveryType,
+                serviceSelectionType);
         return serviceDiscovery.getServiceInstances()
-                .map(this::selectInstance);
+                .onItemOrFailure().invoke((list, failure) -> {
+                    if (failure != null) {
+                        event.onServiceDiscoveryFailure(failure);
+                    } else {
+                        event.onServiceDiscoverySuccess(list);
+                    }
+                })
+                .map(this::selectInstance)
+                .onItemOrFailure().invoke((selected, failure) -> {
+                    if (failure != null) {
+                        event.onServiceSelectionFailure(failure);
+                    } else {
+                        event.onServiceSelectionSuccess(selected.getId());
+                    }
+                });
     }
 
     /**
      * Using the underlying load balancer, select a service instance from the collection of service instances.
-     *
+     * <p>
      * <b>Note:</b> this method doesn't record a start of an operation using this load balancer and does not
      * synchronize load balancer invocations even if the load balancer is not thread safe
      *
@@ -80,8 +109,23 @@ public class Service {
      * @see LoadBalancer#requiresStrictRecording()
      */
     public Uni<ServiceInstance> selectInstanceAndRecordStart(boolean measureTime) {
-        return serviceDiscovery.getServiceInstances()
-                .map(list -> selectInstanceAndRecordStart(list, measureTime));
+        ObservationPoints.StorkResolutionEvent event = observations.create(serviceName, serviceDiscoveryType,
+                serviceSelectionType);
+        return serviceDiscovery.getServiceInstances().onItemOrFailure().invoke((list, failure) -> {
+            if (failure != null) {
+                event.onServiceDiscoveryFailure(failure);
+            } else {
+                event.onServiceDiscoverySuccess(list);
+            }
+        })
+                .map(list -> selectInstanceAndRecordStart(list, measureTime))
+                .onItemOrFailure().invoke((selected, failure) -> {
+                    if (failure != null) {
+                        event.onServiceSelectionFailure(failure);
+                    } else {
+                        event.onServiceSelectionSuccess(selected.getId());
+                    }
+                });
     }
 
     /**
