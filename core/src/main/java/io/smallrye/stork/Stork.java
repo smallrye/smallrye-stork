@@ -207,13 +207,15 @@ public final class Stork implements StorkServiceRegistry {
 
         final var loadBalancerConfig = serviceConfig.loadBalancer();
         final LoadBalancer loadBalancer;
+        String loadBalancerType;
         if (loadBalancerConfig == null) {
             // no load balancer, use round-robin
             LOGGER.debug("No load balancer configured for type {}, using {}", serviceDiscoveryType,
                     RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE);
+            loadBalancerType = RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE;
             loadBalancer = new RoundRobinLoadBalancer();
         } else {
-            String loadBalancerType = loadBalancerConfig.type();
+            loadBalancerType = loadBalancerConfig.type();
             final var loadBalancerProvider = loadBalancerLoaders.get(loadBalancerType);
             if (loadBalancerProvider == null) {
                 throw new IllegalArgumentException("No LoadBalancerProvider for type " + loadBalancerType);
@@ -223,7 +225,7 @@ public final class Stork implements StorkServiceRegistry {
         }
 
         final var serviceRegistrarConfig = serviceConfig.serviceRegistrar();
-        ServiceRegistrar serviceRegistrar = null;
+        ServiceRegistrar<?> serviceRegistrar = null;
         if (serviceRegistrarConfig == null) {
             LOGGER.debug("No service registrar configured for service {}", serviceConfig.serviceName());
         } else {
@@ -237,7 +239,9 @@ public final class Stork implements StorkServiceRegistry {
                     serviceConfig.serviceName(), infrastructure);
         }
 
-        return new Service(serviceConfig.serviceName(), loadBalancer, serviceDiscovery, serviceRegistrar,
+        return new Service(serviceConfig.serviceName(),
+                loadBalancerType, serviceDiscoveryType, infrastructure.getObservationCollector(),
+                loadBalancer, serviceDiscovery, serviceRegistrar,
                 loadBalancer.requiresStrictRecording());
     }
 
