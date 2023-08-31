@@ -1,5 +1,8 @@
 package io.smallrye.stork;
 
+import static io.smallrye.stork.FakeServiceConfig.FAKE_LOAD_BALANCER_CONFIG;
+import static io.smallrye.stork.FakeServiceConfig.FAKE_SECURE_SERVICE_DISCOVERY_CONFIG;
+import static io.smallrye.stork.FakeServiceConfig.FAKE_SERVICE_DISCOVERY_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
@@ -26,50 +29,11 @@ import io.smallrye.stork.spi.config.ConfigProvider;
 @SuppressWarnings("unchecked")
 public class StorkTest {
 
-    private static final ConfigWithType FAKE_SERVICE_DISCOVERY_CONFIG = new ConfigWithType() {
-
-        @Override
-        public String type() {
-            return "fake";
-        }
-
-        @Override
-        public Map<String, String> parameters() {
-            return Collections.emptyMap();
-        }
-    };
-
-    private static final ConfigWithType FAKE_SECURE_SERVICE_DISCOVERY_CONFIG = new ConfigWithType() {
-
-        @Override
-        public String type() {
-            return "fake";
-        }
-
-        @Override
-        public Map<String, String> parameters() {
-            return Map.of("secure", "true");
-        }
-    };
-
     private static final ConfigWithType SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER = new ConfigWithType() {
 
         @Override
         public String type() {
             return "non-existent";
-        }
-
-        @Override
-        public Map<String, String> parameters() {
-            return Collections.emptyMap();
-        }
-    };
-
-    private static final ConfigWithType FAKE_LOAD_BALANCER_CONFIG = new ConfigWithType() {
-
-        @Override
-        public String type() {
-            return "fake-selector";
         }
 
         @Override
