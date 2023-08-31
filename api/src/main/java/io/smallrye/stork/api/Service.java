@@ -202,6 +202,10 @@ public class Service {
         return serviceRegistrar;
     }
 
+    public ObservationCollector getObservations() {
+        return observations;
+    }
+
     /**
      * @return the service name.
      */
