@@ -25,8 +25,6 @@ import io.smallrye.stork.spi.config.ConfigProvider;
 
 public class ObservationTest {
 
-    //TODO Test with response time monitoring (both success and failure)
-
     @BeforeEach
     public void setUp() throws IOException {
         Stork.shutdown();
@@ -41,7 +39,8 @@ public class ObservationTest {
     }
 
     @Test
-    void testEveryThingIsOk() {
+    void shouldGetMetricsWhenSelectingInstance() {
+        //Given a configuration service using a SD and default LB
         TestEnv.configurations.add(new FakeServiceConfig("my-service",
                 FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
 
@@ -51,9 +50,12 @@ public class ObservationTest {
         Stork stork = getNewObservableStork();
 
         Service service = stork.getService("my-service");
-        assertThat(service.selectInstance().await().indefinitely()).isEqualTo(instance);
-        assertThat(service.getObservations()).isNotNull();
 
+        //When we try to get service instances
+        assertThat(service.selectInstance().await().indefinitely()).isEqualTo(instance);
+
+        //One instance is found and metrics are also gathered accordingly
+        assertThat(service.getObservations()).isNotNull();
         ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
@@ -68,7 +70,8 @@ public class ObservationTest {
     }
 
     @Test
-    void testMetricsWhenServiceDiscoveryFailure() {
+    void shouldGetMetricsAfterSelectingInstanceWhenServiceDiscoveryFails() {
+        //Given a configuration service using a failing SD and default LB
         FakeServiceConfig e = new FakeServiceConfig("my-service",
                 new MockConfiguration(), null, null);
         TestEnv.configurations.add(e);
@@ -76,11 +79,13 @@ public class ObservationTest {
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Stork stork = getNewObservableStork();
 
+        //When we try to get service instances
         Service service = stork.getService("my-service");
 
         when(service.getServiceDiscovery().getServiceInstances())
                 .thenReturn(Uni.createFrom().failure(new RuntimeException("Service Discovery induced failure")));
 
+        //An error is thrown and metrics are also gathered accordingly
         Exception exception = assertThrows(RuntimeException.class, () -> {
             service.selectInstance().await().indefinitely();
         });
@@ -101,7 +106,7 @@ public class ObservationTest {
     }
 
     @Test
-    void testMetricsWhenLoadBalancerFailure() {
+    void shouldGetMetricsWhenSelectingInstanceFails() {
         TestEnv.configurations.add(new FakeServiceConfig("my-service",
                 FAKE_SERVICE_DISCOVERY_CONFIG, new FakeSelectorConfiguration(), null));
 
@@ -136,7 +141,7 @@ public class ObservationTest {
     }
 
     @Test
-    void testWhenNoServicesDiscovered() {
+    void shouldGetMetricsAfterSelectingInstanceWhenWhenNoServicesDiscovered() {
         TestEnv.configurations.add(new FakeServiceConfig("my-service",
                 FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
 
@@ -146,6 +151,131 @@ public class ObservationTest {
         Service service = stork.getService("my-service");
         Exception exception = assertThrows(NoServiceInstanceFoundException.class, () -> {
             service.selectInstance().await().indefinitely();
+        });
+
+        assertThat(service.getObservations()).isNotNull();
+
+        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        assertThat(metrics.getServiceName()).isEqualTo("my-service");
+        assertThat(metrics.isDone()).isTrue();
+        assertThat(metrics.failure()).isNotNull();
+        assertThat(metrics.failure()).isEqualTo(exception);
+        assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(0);
+        assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
+        assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
+        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
+        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+
+    }
+
+    // From here, same tests but using the selectInstanceAndRecordStart method
+
+    @Test
+    void shouldGetMetricsWhenSelectingInstanceWithRecordAndStart() {
+        TestEnv.configurations.add(new FakeServiceConfig("my-service",
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
+
+        ServiceInstance instance = mock(ServiceInstance.class);
+        AnchoredServiceDiscoveryProvider.services.add(instance);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
+        Stork stork = getNewObservableStork();
+
+        Service service = stork.getService("my-service");
+        assertThat(service.selectInstanceAndRecordStart(true).await().indefinitely()).isEqualTo(instance);
+        assertThat(service.getObservations()).isNotNull();
+
+        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        assertThat(metrics.getServiceName()).isEqualTo("my-service");
+        assertThat(metrics.isDone()).isTrue();
+        assertThat(metrics.failure()).isNull();
+        assertThat(metrics.getOverallDuration()).isNotNull();
+        assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
+        assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
+        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
+        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+
+    }
+
+    @Test
+    void shouldGetMetricsAfterSelectingInstanceWithMonitoringWhenServiceDiscoveryFails() {
+        FakeServiceConfig e = new FakeServiceConfig("my-service",
+                new MockConfiguration(), null, null);
+        TestEnv.configurations.add(e);
+
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
+        Stork stork = getNewObservableStork();
+
+        Service service = stork.getService("my-service");
+
+        when(service.getServiceDiscovery().getServiceInstances())
+                .thenReturn(Uni.createFrom().failure(new RuntimeException("Service Discovery induced failure")));
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            service.selectInstanceAndRecordStart(true).await().indefinitely();
+        });
+
+        assertThat(exception.getMessage()).isEqualTo("Service Discovery induced failure");
+        assertThat(service.getObservations()).isNotNull();
+
+        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        assertThat(metrics.getServiceName()).isEqualTo("my-service");
+        assertThat(metrics.isDone()).isTrue();
+        assertThat(metrics.failure()).isEqualTo(exception);
+        assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(-1);
+        assertThat(metrics.getServiceDiscoveryType()).isEqualTo("mock");
+        assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
+        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
+        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+
+    }
+
+    @Test
+    void shouldGetMetricsWhenSelectingInstanceWithMonitoringFails() {
+        TestEnv.configurations.add(new FakeServiceConfig("my-service",
+                FAKE_SERVICE_DISCOVERY_CONFIG, new FakeSelectorConfiguration(), null));
+
+        ServiceInstance instance = mock(ServiceInstance.class);
+        AnchoredServiceDiscoveryProvider.services.add(instance);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
+        Stork stork = getNewObservableStork();
+
+        Service service = stork.getService("my-service");
+        LoadBalancer loadBalancer = service.getLoadBalancer();
+
+        when(loadBalancer.selectServiceInstance(any(Collection.class)))
+                .thenThrow(new RuntimeException("Load Balancer induced failure"));
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            service.selectInstanceAndRecordStart(true).await().indefinitely();
+        });
+
+        assertThat(exception.getMessage()).isEqualTo("Load Balancer induced failure");
+        assertThat(service.getObservations()).isNotNull();
+
+        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        assertThat(metrics.getServiceName()).isEqualTo("my-service");
+        assertThat(metrics.isDone()).isTrue();
+        assertThat(metrics.failure()).isEqualTo(exception);
+        assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
+        assertThat(metrics.getServiceSelectionType()).isEqualTo("fake-selector");
+        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
+        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+
+    }
+
+    @Test
+    void shouldGetMetricsAfterSelectingInstanceWithMonitoringWhenWhenNoServicesDiscovered() {
+        TestEnv.configurations.add(new FakeServiceConfig("my-service",
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
+
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
+        Stork stork = getNewObservableStork();
+
+        Service service = stork.getService("my-service");
+        Exception exception = assertThrows(NoServiceInstanceFoundException.class, () -> {
+            service.selectInstanceAndRecordStart(true).await().indefinitely();
         });
 
         assertThat(service.getObservations()).isNotNull();
