@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 
 import org.junit.jupiter.api.AfterEach;
@@ -60,13 +61,22 @@ public class ObservationTest {
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isNull();
-        assertThat(metrics.getOverallDuration()).isNotNull();
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
-        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
-        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
 
+        assertDurations(metrics);
+
+    }
+
+    private static void assertDurations(ObservationPoints.StorkResolutionEvent metrics) {
+        Duration overallDuration = metrics.getOverallDuration();
+        Duration serviceDiscoveryDuration = metrics.getServiceDiscoveryDuration();
+        Duration serviceSelectionDuration = metrics.getServiceSelectionDuration();
+        assertThat(overallDuration).isNotNull();
+        assertThat(serviceDiscoveryDuration).isNotNull();
+        assertThat(serviceSelectionDuration).isNotNull();
+        assertThat(overallDuration).isGreaterThanOrEqualTo(serviceDiscoveryDuration.plus(serviceSelectionDuration));
     }
 
     @Test
@@ -100,8 +110,7 @@ public class ObservationTest {
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(-1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("mock");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
-        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
-        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+        assertDurations(metrics);
 
     }
 
@@ -135,8 +144,7 @@ public class ObservationTest {
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("fake-selector");
-        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
-        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+        assertDurations(metrics);
 
     }
 
@@ -163,9 +171,7 @@ public class ObservationTest {
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(0);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
-        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
-        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
-
+        assertDurations(metrics);
     }
 
     // From here, same tests but using the selectInstanceAndRecordStart method
@@ -192,8 +198,7 @@ public class ObservationTest {
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
-        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
-        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+        assertDurations(metrics);
 
     }
 
@@ -225,8 +230,7 @@ public class ObservationTest {
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(-1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("mock");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
-        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
-        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+        assertDurations(metrics);
 
     }
 
@@ -260,8 +264,7 @@ public class ObservationTest {
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("fake-selector");
-        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
-        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+        assertDurations(metrics);
 
     }
 
@@ -288,8 +291,7 @@ public class ObservationTest {
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(0);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
-        assertThat(metrics.getServiceDiscoveryDuration()).isNotNull();
-        assertThat(metrics.getServiceSelectionDuration()).isNotNull();
+        assertDurations(metrics);
 
     }
 
