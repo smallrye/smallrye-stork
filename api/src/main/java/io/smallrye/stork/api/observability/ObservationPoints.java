@@ -9,27 +9,28 @@ public interface ObservationPoints {
 
     class StorkResolutionEvent {
         // Handler / Reporter
-        private final ObservationCollector.EventCompletionHandler handler;
+        protected final ObservationCollector.EventCompletionHandler handler;
 
         // Metadata
-        private final String serviceName;
-        private final String serviceDiscoveryType;
-        private final String serviceSelectionType;
+        protected final String serviceName;
+        protected final String serviceDiscoveryType;
+        protected final String serviceSelectionType;
 
         // Time
-        private final long begin;
-        private volatile long endOfServiceDiscovery;
-        private volatile long endOfServiceSelection;
+        protected final long begin;
+        protected volatile long endOfServiceDiscovery;
+        protected volatile long endOfServiceSelection;
 
         // Service discovery data
-        volatile int instancesCount = -1;
+        protected volatile int instancesCount = -1;
 
         // Service selection data
-        volatile long selectedInstance = -1L;
+        protected volatile long selectedInstance = -1L;
 
         // Overall status
-        volatile boolean succeeded;
-        volatile Throwable failure;
+        protected volatile boolean done;
+        protected volatile boolean serviceDiscoveryDone;
+        protected volatile Throwable failure;
 
         public StorkResolutionEvent(String serviceName, String serviceDiscoveryType, String serviceSelectionType,
                 ObservationCollector.EventCompletionHandler handler) {
@@ -42,6 +43,7 @@ public interface ObservationPoints {
 
         public void onServiceDiscoverySuccess(List<ServiceInstance> instances) {
             this.endOfServiceDiscovery = System.nanoTime();
+            this.serviceDiscoveryDone = true;
             if (instances != null) {
                 this.instancesCount = instances.size();
             } else {
@@ -51,6 +53,7 @@ public interface ObservationPoints {
 
         public void onServiceDiscoveryFailure(Throwable throwable) {
             this.endOfServiceDiscovery = System.nanoTime();
+            this.serviceDiscoveryDone = true;
             this.failure = throwable;
             this.handler.complete(this);
         }
@@ -58,7 +61,7 @@ public interface ObservationPoints {
         public void onServiceSelectionSuccess(long id) {
             this.endOfServiceSelection = System.nanoTime();
             this.selectedInstance = id;
-            this.succeeded = true;
+            this.done = true;
             this.handler.complete(this);
         }
 
@@ -69,7 +72,7 @@ public interface ObservationPoints {
         }
 
         public boolean isDone() {
-            return succeeded || failure != null;
+            return done || failure != null;
         }
 
         public Duration getOverallDuration() {
@@ -80,7 +83,7 @@ public interface ObservationPoints {
         }
 
         public Duration getServiceDiscoveryDuration() {
-            if (!isDone()) {
+            if (!serviceDiscoveryDone) {
                 return null;
             }
             return Duration.ofNanos(endOfServiceDiscovery - begin);
