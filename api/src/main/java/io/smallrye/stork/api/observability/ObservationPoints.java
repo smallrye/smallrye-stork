@@ -119,6 +119,7 @@ public interface ObservationPoints {
         public long getSelectedInstanceId() {
             return selectedInstanceId;
         }
+
     }
 
 }
