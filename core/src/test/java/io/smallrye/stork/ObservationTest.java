@@ -62,6 +62,7 @@ public class ObservationTest {
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isNull();
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
 
@@ -108,6 +109,7 @@ public class ObservationTest {
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(-1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("mock");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
@@ -142,6 +144,7 @@ public class ObservationTest {
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("fake-selector");
         assertDurations(metrics);
@@ -149,7 +152,7 @@ public class ObservationTest {
     }
 
     @Test
-    void shouldGetMetricsAfterSelectingInstanceWhenWhenNoServicesDiscovered() {
+    void shouldGetMetricsAfterSelectingInstanceWhenNoServicesDiscovered() {
         TestEnv.configurations.add(new FakeServiceConfig("my-service",
                 FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
 
@@ -169,6 +172,7 @@ public class ObservationTest {
         assertThat(metrics.failure()).isNotNull();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(0);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
@@ -196,6 +200,7 @@ public class ObservationTest {
         assertThat(metrics.failure()).isNull();
         assertThat(metrics.getOverallDuration()).isNotNull();
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
@@ -228,6 +233,7 @@ public class ObservationTest {
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(-1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("mock");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
@@ -262,6 +268,7 @@ public class ObservationTest {
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("fake-selector");
         assertDurations(metrics);
@@ -289,6 +296,7 @@ public class ObservationTest {
         assertThat(metrics.failure()).isNotNull();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(0);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);

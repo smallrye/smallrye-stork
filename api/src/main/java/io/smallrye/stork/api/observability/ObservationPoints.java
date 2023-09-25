@@ -25,7 +25,7 @@ public interface ObservationPoints {
         protected volatile int instancesCount = -1;
 
         // Service selection data
-        protected volatile long selectedInstance = -1L;
+        protected volatile long selectedInstanceId = -1L;
 
         // Overall status
         protected volatile boolean done;
@@ -60,7 +60,7 @@ public interface ObservationPoints {
 
         public void onServiceSelectionSuccess(long id) {
             this.endOfServiceSelection = System.nanoTime();
-            this.selectedInstance = id;
+            this.selectedInstanceId = id;
             this.done = true;
             this.handler.complete(this);
         }
@@ -115,6 +115,11 @@ public interface ObservationPoints {
         public Throwable failure() {
             return failure;
         }
+
+        public long getSelectedInstanceId() {
+            return selectedInstanceId;
+        }
+
     }
 
 }
