@@ -6,7 +6,7 @@ import java.util.concurrent.Semaphore;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.observability.ObservationCollector;
-import io.smallrye.stork.api.observability.ObservationPoints;
+import io.smallrye.stork.api.observability.StorkServiceMetrics;
 
 /**
  * Represents a <em>Service</em>.
@@ -62,22 +62,22 @@ public class Service {
      *         a service instance capable of handling a call
      */
     public Uni<ServiceInstance> selectInstance() {
-        ObservationPoints.StorkResolutionEvent event = observations.create(serviceName, serviceDiscoveryType,
+        StorkServiceMetrics metrics = observations.create(serviceName, serviceDiscoveryType,
                 serviceSelectionType);
         return serviceDiscovery.getServiceInstances()
                 .onItemOrFailure().invoke((list, failure) -> {
                     if (failure != null) {
-                        event.onServiceDiscoveryFailure(failure);
+                        metrics.onServiceDiscoveryFailure(failure);
                     } else {
-                        event.onServiceDiscoverySuccess(list);
+                        metrics.onServiceDiscoverySuccess(list);
                     }
                 })
                 .map(this::selectInstance)
                 .onItemOrFailure().invoke((selected, failure) -> {
                     if (failure != null) {
-                        event.onServiceSelectionFailure(failure);
+                        metrics.onServiceSelectionFailure(failure);
                     } else {
-                        event.onServiceSelectionSuccess(selected.getId());
+                        metrics.onServiceSelectionSuccess(selected.getId());
                     }
                 });
     }
@@ -109,21 +109,21 @@ public class Service {
      * @see LoadBalancer#requiresStrictRecording()
      */
     public Uni<ServiceInstance> selectInstanceAndRecordStart(boolean measureTime) {
-        ObservationPoints.StorkResolutionEvent event = observations.create(serviceName, serviceDiscoveryType,
+        StorkServiceMetrics metrics = observations.create(serviceName, serviceDiscoveryType,
                 serviceSelectionType);
         return serviceDiscovery.getServiceInstances().onItemOrFailure().invoke((list, failure) -> {
             if (failure != null) {
-                event.onServiceDiscoveryFailure(failure);
+                metrics.onServiceDiscoveryFailure(failure);
             } else {
-                event.onServiceDiscoverySuccess(list);
+                metrics.onServiceDiscoverySuccess(list);
             }
         })
                 .map(list -> selectInstanceAndRecordStart(list, measureTime))
                 .onItemOrFailure().invoke((selected, failure) -> {
                     if (failure != null) {
-                        event.onServiceSelectionFailure(failure);
+                        metrics.onServiceSelectionFailure(failure);
                     } else {
-                        event.onServiceSelectionSuccess(selected.getId());
+                        metrics.onServiceSelectionSuccess(selected.getId());
                     }
                 });
     }

@@ -6,13 +6,9 @@ import io.smallrye.stork.api.ServiceInstance;
 
 public class NoopObservationCollector implements ObservationCollector {
 
-    private static final EventCompletionHandler NOOP_HANDLER = ev -> {
-        // NOOP
-    };
-
-    public static final ObservationPoints.StorkResolutionEvent NOOP_STORK_EVENT = new ObservationPoints.StorkResolutionEvent(
+    public static final StorkServiceMetrics NOOP_STORK_EVENT = new StorkServiceMetrics(
             null, null,
-            null, NOOP_HANDLER) {
+            null) {
         @Override
         public void onServiceDiscoverySuccess(List<ServiceInstance> instances) {
             // Noop
@@ -35,7 +31,7 @@ public class NoopObservationCollector implements ObservationCollector {
     };
 
     @Override
-    public ObservationPoints.StorkResolutionEvent create(String serviceName, String serviceDiscoveryType,
+    public StorkServiceMetrics create(String serviceName, String serviceDiscoveryType,
             String serviceSelectionType) {
         return NOOP_STORK_EVENT;
     }
