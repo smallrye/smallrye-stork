@@ -37,6 +37,9 @@ public class ObservationTest {
     @AfterEach
     public void cleanup() throws IOException {
         Stork.shutdown();
+        AnchoredServiceDiscoveryProvider.services.clear();
+        TestEnv.clearSPIs();
+        TestEnv.configurations.clear();
     }
 
     @Test
