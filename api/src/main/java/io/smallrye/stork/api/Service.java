@@ -62,22 +62,22 @@ public class Service {
      *         a service instance capable of handling a call
      */
     public Uni<ServiceInstance> selectInstance() {
-        StorkObservationPoints event = observations.create(serviceName, serviceDiscoveryType,
+        StorkObservationPoints observationPoints = observations.create(serviceName, serviceDiscoveryType,
                 serviceSelectionType);
         return serviceDiscovery.getServiceInstances()
                 .onItemOrFailure().invoke((list, failure) -> {
                     if (failure != null) {
-                        event.onServiceDiscoveryFailure(failure);
+                        observationPoints.onServiceDiscoveryFailure(failure);
                     } else {
-                        event.onServiceDiscoverySuccess(list);
+                        observationPoints.onServiceDiscoverySuccess(list);
                     }
                 })
                 .map(this::selectInstance)
                 .onItemOrFailure().invoke((selected, failure) -> {
                     if (failure != null) {
-                        event.onServiceSelectionFailure(failure);
+                        observationPoints.onServiceSelectionFailure(failure);
                     } else {
-                        event.onServiceSelectionSuccess(selected.getId());
+                        observationPoints.onServiceSelectionSuccess(selected.getId());
                     }
                 });
     }
@@ -109,21 +109,21 @@ public class Service {
      * @see LoadBalancer#requiresStrictRecording()
      */
     public Uni<ServiceInstance> selectInstanceAndRecordStart(boolean measureTime) {
-        StorkObservationPoints event = observations.create(serviceName, serviceDiscoveryType,
+        StorkObservationPoints observationPoints = observations.create(serviceName, serviceDiscoveryType,
                 serviceSelectionType);
         return serviceDiscovery.getServiceInstances().onItemOrFailure().invoke((list, failure) -> {
             if (failure != null) {
-                event.onServiceDiscoveryFailure(failure);
+                observationPoints.onServiceDiscoveryFailure(failure);
             } else {
-                event.onServiceDiscoverySuccess(list);
+                observationPoints.onServiceDiscoverySuccess(list);
             }
         })
                 .map(list -> selectInstanceAndRecordStart(list, measureTime))
                 .onItemOrFailure().invoke((selected, failure) -> {
                     if (failure != null) {
-                        event.onServiceSelectionFailure(failure);
+                        observationPoints.onServiceSelectionFailure(failure);
                     } else {
-                        event.onServiceSelectionSuccess(selected.getId());
+                        observationPoints.onServiceSelectionSuccess(selected.getId());
                     }
                 });
     }
