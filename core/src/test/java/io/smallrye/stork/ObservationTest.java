@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 
+import io.smallrye.stork.api.observability.StorkResolutionEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,6 @@ import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceInstance;
-import io.smallrye.stork.api.observability.ObservationPoints;
 import io.smallrye.stork.integration.ObservableStorkInfrastructure;
 import io.smallrye.stork.spi.config.ConfigProvider;
 
@@ -37,10 +37,13 @@ public class ObservationTest {
     @AfterEach
     public void cleanup() throws IOException {
         Stork.shutdown();
+        AnchoredServiceDiscoveryProvider.services.clear();
+        TestEnv.clearSPIs();
+        TestEnv.configurations.clear();
     }
 
     @Test
-    void shouldGetMetricsWhenSelectingInstance() {
+    void shouldGetMetricsWhenSelectingInstanceHappyPath() {
         //Given a configuration service using a SD and default LB
         TestEnv.configurations.add(new FakeServiceConfig("my-service",
                 FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
@@ -57,11 +60,13 @@ public class ObservationTest {
 
         //One instance is found and metrics are also gathered accordingly
         assertThat(service.getObservations()).isNotNull();
-        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isNull();
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getSelectedInstanceId()).isNotNegative();
+        assertThat(metrics.isServiceDiscoverySuccessful()).isTrue();
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
 
@@ -69,7 +74,7 @@ public class ObservationTest {
 
     }
 
-    private static void assertDurations(ObservationPoints.StorkResolutionEvent metrics) {
+    private static void assertDurations(StorkResolutionEvent metrics) {
         Duration overallDuration = metrics.getOverallDuration();
         Duration serviceDiscoveryDuration = metrics.getServiceDiscoveryDuration();
         Duration serviceSelectionDuration = metrics.getServiceSelectionDuration();
@@ -103,11 +108,13 @@ public class ObservationTest {
         assertThat(exception.getMessage()).isEqualTo("Service Discovery induced failure");
         assertThat(service.getObservations()).isNotNull();
 
-        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(-1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
+        assertThat(metrics.isServiceDiscoverySuccessful()).isFalse();
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("mock");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
@@ -137,11 +144,13 @@ public class ObservationTest {
         assertThat(exception.getMessage()).isEqualTo("Load Balancer induced failure");
         assertThat(service.getObservations()).isNotNull();
 
-        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
+        assertThat(metrics.isServiceDiscoverySuccessful()).isTrue();
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("fake-selector");
         assertDurations(metrics);
@@ -163,12 +172,14 @@ public class ObservationTest {
 
         assertThat(service.getObservations()).isNotNull();
 
-        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isNotNull();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(0);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
+        assertThat(metrics.isServiceDiscoverySuccessful()).isTrue();
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
@@ -177,7 +188,7 @@ public class ObservationTest {
     // From here, same tests but using the selectInstanceAndRecordStart method
 
     @Test
-    void shouldGetMetricsWhenSelectingInstanceWithRecordAndStart() {
+    void shouldGetMetricsWhenSelectingInstanceWithRecordAndStartHappyPath() {
         TestEnv.configurations.add(new FakeServiceConfig("my-service",
                 FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
 
@@ -190,12 +201,14 @@ public class ObservationTest {
         assertThat(service.selectInstanceAndRecordStart(true).await().indefinitely()).isEqualTo(instance);
         assertThat(service.getObservations()).isNotNull();
 
-        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isNull();
         assertThat(metrics.getOverallDuration()).isNotNull();
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getSelectedInstanceId()).isNotNegative();
+        assertThat(metrics.isServiceDiscoverySuccessful()).isTrue();
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
@@ -223,11 +236,13 @@ public class ObservationTest {
         assertThat(exception.getMessage()).isEqualTo("Service Discovery induced failure");
         assertThat(service.getObservations()).isNotNull();
 
-        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(-1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
+        assertThat(metrics.isServiceDiscoverySuccessful()).isFalse();
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("mock");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
@@ -257,11 +272,13 @@ public class ObservationTest {
         assertThat(exception.getMessage()).isEqualTo("Load Balancer induced failure");
         assertThat(service.getObservations()).isNotNull();
 
-        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(1);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
+        assertThat(metrics.isServiceDiscoverySuccessful()).isTrue();
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("fake-selector");
         assertDurations(metrics);
@@ -283,12 +300,14 @@ public class ObservationTest {
 
         assertThat(service.getObservations()).isNotNull();
 
-        ObservationPoints.StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        StorkResolutionEvent metrics = FakeObservationCollector.FAKE_STORK_EVENT;
         assertThat(metrics.getServiceName()).isEqualTo("my-service");
         assertThat(metrics.isDone()).isTrue();
         assertThat(metrics.failure()).isNotNull();
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(0);
+        assertThat(metrics.getSelectedInstanceId()).isEqualTo(-1);
+        assertThat(metrics.isServiceDiscoverySuccessful()).isTrue();
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
