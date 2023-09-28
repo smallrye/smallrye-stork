@@ -6,7 +6,7 @@ import java.util.concurrent.Semaphore;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.observability.ObservationCollector;
-import io.smallrye.stork.api.observability.StorkResolutionEvent;
+import io.smallrye.stork.api.observability.StorkObservationPoints;
 
 /**
  * Represents a <em>Service</em>.
@@ -62,7 +62,7 @@ public class Service {
      *         a service instance capable of handling a call
      */
     public Uni<ServiceInstance> selectInstance() {
-        StorkResolutionEvent event = observations.create(serviceName, serviceDiscoveryType,
+        StorkObservationPoints event = observations.create(serviceName, serviceDiscoveryType,
                 serviceSelectionType);
         return serviceDiscovery.getServiceInstances()
                 .onItemOrFailure().invoke((list, failure) -> {
@@ -109,7 +109,7 @@ public class Service {
      * @see LoadBalancer#requiresStrictRecording()
      */
     public Uni<ServiceInstance> selectInstanceAndRecordStart(boolean measureTime) {
-        StorkResolutionEvent event = observations.create(serviceName, serviceDiscoveryType,
+        StorkObservationPoints event = observations.create(serviceName, serviceDiscoveryType,
                 serviceSelectionType);
         return serviceDiscovery.getServiceInstances().onItemOrFailure().invoke((list, failure) -> {
             if (failure != null) {

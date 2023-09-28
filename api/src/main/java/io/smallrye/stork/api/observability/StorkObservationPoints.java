@@ -1,13 +1,13 @@
 package io.smallrye.stork.api.observability;
 
-import io.smallrye.stork.api.ServiceInstance;
-
 import java.time.Duration;
 import java.util.List;
 
-public class StorkResolutionEvent {
+import io.smallrye.stork.api.ServiceInstance;
+
+public class StorkObservationPoints {
     // Handler / Reporter
-    protected final EventCompletionHandler handler;
+    protected final StorkEventHandler handler;
 
     // Metadata
     protected final String serviceName;
@@ -30,8 +30,8 @@ public class StorkResolutionEvent {
     protected volatile boolean serviceDiscoverySuccessful = false;
     protected volatile Throwable failure;
 
-    public StorkResolutionEvent(String serviceName, String serviceDiscoveryType, String serviceSelectionType,
-                                EventCompletionHandler handler) {
+    public StorkObservationPoints(String serviceName, String serviceDiscoveryType, String serviceSelectionType,
+            StorkEventHandler handler) {
         this.handler = handler;
         this.serviceName = serviceName;
         this.serviceDiscoveryType = serviceDiscoveryType;
