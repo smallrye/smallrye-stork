@@ -7,28 +7,28 @@ import io.smallrye.stork.api.ServiceInstance;
 
 public class StorkObservationPoints {
     // Handler / Reporter
-    protected final StorkEventHandler handler;
+    private final StorkEventHandler handler;
 
     // Metadata
-    protected final String serviceName;
-    protected final String serviceDiscoveryType;
-    protected final String serviceSelectionType;
+    private final String serviceName;
+    private final String serviceDiscoveryType;
+    private final String serviceSelectionType;
 
     // Time
-    protected final long begin;
-    protected volatile long endOfServiceDiscovery;
-    protected volatile long endOfServiceSelection;
+    private final long begin;
+    private volatile long endOfServiceDiscovery;
+    private volatile long endOfServiceSelection;
 
     // Service discovery data
-    protected volatile int instancesCount = -1;
+    private volatile int instancesCount = -1;
 
     // Service selection data
-    protected volatile long selectedInstanceId = -1L;
+    private volatile long selectedInstanceId = -1L;
 
     // Overall status
-    protected volatile boolean done;
-    protected volatile boolean serviceDiscoverySuccessful = false;
-    protected volatile Throwable failure;
+    private volatile boolean done;
+    private volatile boolean serviceDiscoverySuccessful = false;
+    private volatile Throwable failure;
 
     public StorkObservationPoints(String serviceName, String serviceDiscoveryType, String serviceSelectionType,
             StorkEventHandler handler) {
@@ -52,7 +52,6 @@ public class StorkObservationPoints {
     public void onServiceDiscoveryFailure(Throwable throwable) {
         this.endOfServiceDiscovery = System.nanoTime();
         this.failure = throwable;
-        this.handler.complete(this);
     }
 
     public void onServiceSelectionSuccess(long id) {
@@ -64,7 +63,9 @@ public class StorkObservationPoints {
 
     public void onServiceSelectionFailure(Throwable throwable) {
         this.endOfServiceSelection = System.nanoTime();
-        this.failure = throwable;
+        if (failure != throwable) {
+            this.failure = throwable;
+        }
         this.handler.complete(this);
     }
 
