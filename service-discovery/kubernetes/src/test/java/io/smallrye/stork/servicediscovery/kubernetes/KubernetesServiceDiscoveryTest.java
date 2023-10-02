@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -49,6 +50,7 @@ import io.smallrye.stork.test.TestConfigProvider;
 
 @DisabledOnOs(OS.WINDOWS)
 @EnableKubernetesMockClient(crud = true)
+@Disabled("flaky test - see https://github.com/smallrye/smallrye-stork/issues/667")
 public class KubernetesServiceDiscoveryTest {
 
     KubernetesClient client;
