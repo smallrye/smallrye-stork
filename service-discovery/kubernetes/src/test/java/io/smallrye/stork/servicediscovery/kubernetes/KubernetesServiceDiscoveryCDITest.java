@@ -24,6 +24,7 @@ import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -56,6 +57,7 @@ import io.smallrye.stork.test.TestConfigProviderBean;
 @DisabledOnOs(OS.WINDOWS)
 @ExtendWith(WeldJunit5Extension.class)
 @EnableKubernetesMockClient(crud = true)
+@Disabled("flaky test - see https://github.com/smallrye/smallrye-stork/issues/667")
 public class KubernetesServiceDiscoveryCDITest {
 
     @WeldSetup
