@@ -5,7 +5,7 @@ import java.util.List;
 
 import io.smallrye.stork.api.ServiceInstance;
 
-public class StorkObservationPoints {
+public class StorkObservation {
     // Handler / Reporter
     private final StorkEventHandler handler;
 
@@ -30,7 +30,7 @@ public class StorkObservationPoints {
     private volatile boolean serviceDiscoverySuccessful = false;
     private volatile Throwable failure;
 
-    public StorkObservationPoints(String serviceName, String serviceDiscoveryType, String serviceSelectionType,
+    public StorkObservation(String serviceName, String serviceDiscoveryType, String serviceSelectionType,
             StorkEventHandler handler) {
         this.handler = handler;
         this.serviceName = serviceName;
@@ -109,10 +109,6 @@ public class StorkObservationPoints {
 
     public Throwable failure() {
         return failure;
-    }
-
-    public long getSelectedInstanceId() {
-        return selectedInstanceId;
     }
 
     public boolean isServiceDiscoverySuccessful() {

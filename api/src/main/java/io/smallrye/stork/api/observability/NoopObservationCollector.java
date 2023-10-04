@@ -10,7 +10,7 @@ public class NoopObservationCollector implements ObservationCollector {
         // NOOP
     };
 
-    public static final StorkObservationPoints NOOP_STORK_EVENT = new StorkObservationPoints(
+    public static final StorkObservation NOOP_STORK_EVENT = new StorkObservation(
             null, null,
             null, NOOP_HANDLER) {
         @Override
@@ -35,7 +35,7 @@ public class NoopObservationCollector implements ObservationCollector {
     };
 
     @Override
-    public StorkObservationPoints create(String serviceName, String serviceDiscoveryType,
+    public StorkObservation create(String serviceName, String serviceDiscoveryType,
             String serviceSelectionType) {
         return NOOP_STORK_EVENT;
     }
