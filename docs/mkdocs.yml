@@ -8,6 +8,7 @@ nav:
   - Overview: 'index.md'
   - Concepts: 'concepts.md'
   - Programmatic API: 'programmatic-api.md'
+  - Observability: 'observability.md'
   - Javadoc: 'https://javadoc.io/doc/io.smallrye.stork/smallrye-stork-api/latest/index.html'
   - Using Stork with Quarkus: './quarkus.md'
   - Service Discovery:
