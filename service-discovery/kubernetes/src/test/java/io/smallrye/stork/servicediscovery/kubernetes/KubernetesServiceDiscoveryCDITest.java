@@ -57,7 +57,6 @@ import io.smallrye.stork.test.TestConfigProviderBean;
 @DisabledOnOs(OS.WINDOWS)
 @ExtendWith(WeldJunit5Extension.class)
 @EnableKubernetesMockClient(crud = true)
-@Disabled("flaky test - see https://github.com/smallrye/smallrye-stork/issues/667")
 public class KubernetesServiceDiscoveryCDITest {
 
     @WeldSetup
