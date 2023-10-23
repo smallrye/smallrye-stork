@@ -50,7 +50,6 @@ import io.smallrye.stork.test.TestConfigProvider;
 
 @DisabledOnOs(OS.WINDOWS)
 @EnableKubernetesMockClient(crud = true)
-@Disabled("flaky test - see https://github.com/smallrye/smallrye-stork/issues/667")
 public class KubernetesServiceDiscoveryTest {
 
     KubernetesClient client;
