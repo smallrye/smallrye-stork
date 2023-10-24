@@ -4,22 +4,27 @@ import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKe
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import io.vertx.core.impl.ConcurrentHashSet;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -593,7 +598,7 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     @Test
-    void shouldFetchInstancesFromAllNsWhenCacheIsInvalidated() throws InterruptedException {
+    void shouldFetchInstancesFromAllNsWhenCacheIsInvalidated() {
 
         // Given a service with 3 instances registered in the cluster in any namespace
         // Stork gather the cache from the cluster
@@ -608,31 +613,39 @@ public class KubernetesServiceDiscoveryTest {
 
         registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
-        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+        Set<ServiceInstance> instances = new ConcurrentHashSet<>();
 
         Service service = stork.getService(serviceName);
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
-                .subscribe().with(instances::set);
+                .subscribe().with(instances::addAll);
 
         await().atMost(Duration.ofSeconds(5))
-                .until(() -> instances.get() != null);
+                .until(() -> !instances.isEmpty());
 
-        assertThat(instances.get()).hasSize(3);
-        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
-        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
-                "10.96.96.232", "10.96.96.233");
+        assertThat(instances)
+                .hasSize(3)
+                .extracting(ServiceInstance::getPort, ServiceInstance::getHost)
+                .containsExactlyInAnyOrder(
+                        tuple(8080, "10.96.96.231"),
+                        tuple(8080, "10.96.96.232"),
+                        tuple(8080, "10.96.96.233"));
 
-        client.endpoints().inNamespace(defaultNamespace).withName(serviceName).delete();
+        client.endpoints().inNamespace(defaultNamespace).withName(serviceName)
+                .withTimeout(100, TimeUnit.MILLISECONDS)
+                .delete();
 
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
-                .subscribe().with(instances::set);
+                .subscribe().with(received -> {
+                    instances.clear();
+                    instances.addAll(received);
+                });
 
         await().atMost(Duration.ofSeconds(5))
-                .until(() -> instances.get().isEmpty());
+                .until(instances::isEmpty);
 
-        assertThat(instances.get()).hasSize(0);
+        assertThat(instances).isEmpty();
     }
 
     private Endpoints registerKubernetesResources(String serviceName, String namespace, String... ips) {
@@ -690,15 +703,11 @@ public class KubernetesServiceDiscoveryTest {
     }
 
     private Pod buildAndRegisterBackendPod(String name, String namespace, boolean register, String ip) {
-
-        Map<String, String> serviceLabels = new HashMap<>();
-        serviceLabels.put("app.kubernetes.io/name", name);
-        serviceLabels.put("app.kubernetes.io/version", "1.0");
-
-        Map<String, String> podLabels = new HashMap<>(serviceLabels);
-        podLabels.put("ui", "ui-" + ipAsSuffix(ip));
-        Pod backendPod = new PodBuilder().withNewMetadata().withName(name + "-" + ipAsSuffix(ip))
-                .withLabels(podLabels)
+        Pod backendPod = new PodBuilder().withNewMetadata()
+                .withName(name + "-" + ipAsSuffix(ip))
+                .addToLabels("app.kubernetes.io/name", name)
+                .addToLabels("app.kubernetes.io/version", "1.0")
+                .addToLabels("ui", "ui-" + ipAsSuffix(ip))
                 .withNamespace(namespace)
                 .endMetadata()
                 .build();
