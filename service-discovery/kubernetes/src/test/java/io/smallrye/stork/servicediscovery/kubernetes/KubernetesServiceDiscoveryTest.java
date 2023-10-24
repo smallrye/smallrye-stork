@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -404,17 +405,16 @@ public class KubernetesServiceDiscoveryTest {
     @Test
     void shouldFetchInstancesFromTheClusterWhenCacheIsInvalidated() throws InterruptedException {
 
-        // Given a service with 3 instances registered in the cluster
+        // Given a service with 3 instances registered in the cluster, in `test` namespace
         // Stork gather the cache from the cluster
         // When the endpoints are removed (this invalidates the cache)
         // Stork is called to get service instances again
         // Stork contacts the cluster to get the instances : it gets 0 of them
+        String serviceName = "svc";
 
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes",
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes",
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
-
-        String serviceName = "svc";
 
         registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
@@ -433,9 +433,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
 
-        client.endpoints().withName(serviceName).delete();
-
-        Thread.sleep(5000);
+        client.endpoints().inNamespace(defaultNamespace).withName(serviceName).withTimeout(100, TimeUnit.MILLISECONDS).delete();
 
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
