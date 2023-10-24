@@ -11,18 +11,15 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import io.vertx.core.impl.ConcurrentHashSet;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +49,7 @@ import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
+import io.vertx.core.impl.ConcurrentHashSet;
 
 @DisabledOnOs(OS.WINDOWS)
 @EnableKubernetesMockClient(crud = true)
@@ -585,7 +583,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
 
-        client.endpoints().inNamespace(defaultNamespace).withName(serviceName).delete();
+        client.endpoints().inNamespace(defaultNamespace).withName(serviceName).withTimeout(100, TimeUnit.MILLISECONDS).delete();
 
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))

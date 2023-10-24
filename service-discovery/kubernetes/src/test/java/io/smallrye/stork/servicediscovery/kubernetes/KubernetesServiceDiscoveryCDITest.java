@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import io.vertx.core.impl.ConcurrentHashSet;
 import jakarta.inject.Inject;
 
 import org.hamcrest.Matchers;
@@ -56,6 +55,7 @@ import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProviderBean;
+import io.vertx.core.impl.ConcurrentHashSet;
 
 @DisabledOnOs(OS.WINDOWS)
 @ExtendWith(WeldJunit5Extension.class)
@@ -597,7 +597,7 @@ public class KubernetesServiceDiscoveryCDITest {
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
                 "10.96.96.232", "10.96.96.233");
 
-        client.endpoints().inNamespace(defaultNamespace).withName(serviceName).delete();
+        client.endpoints().inNamespace(defaultNamespace).withName(serviceName).withTimeout(100, TimeUnit.MILLISECONDS).delete();
 
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
