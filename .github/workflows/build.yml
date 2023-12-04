@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v4
         name: checkout
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         name: set up jdk ${{matrix.java.version}}
         with:
           distribution: temurin
@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@v4
         name: checkout
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         name: set up jdk ${{matrix.java.version}}
         with:
           distribution: temurin
@@ -81,7 +81,7 @@ jobs:
     name: Compatibility Check
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
@@ -99,7 +99,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
