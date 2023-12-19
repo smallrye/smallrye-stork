@@ -150,4 +150,10 @@ If you want to customize the expiration strategy, you need:
 1. Implement the `cache` method where the expiration strategy should be defined.
 2. Invalidate the cache when expiration condition evaluates to true.
 
-Take a look to the [Kubernetes Service Discovery](kubernetes.md#Caching the service instances) for further details about this feature.
+Look at the example bellow:
+
+```java linenums="1"
+{{ insert('examples/CustomExpirationCachedAcmeServiceDiscovery.java') }}
+```
+
+Additionally, you can check the [Kubernetes Service Discovery](kubernetes.md#Caching the service instances) for further details about an event-based invalidation example.
