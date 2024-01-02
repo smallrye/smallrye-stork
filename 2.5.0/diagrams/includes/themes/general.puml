@@ -1,0 +1,98 @@
+!define BORDER_THICKNESS 3
+skinparam backgroundColor transparent
+
+skinparam classFontSize 30
+
+skinparam Padding 4
+skinparam RoundCorner 4
+skinparam Shadowing false
+
+skinparam Default {
+  FontColor FONT_COLOR
+  FontSize 30
+}
+
+skinparam class {
+    BackgroundColor BG_MAIN_COLOR
+    ArrowColor FONT_COLOR
+    BorderColor FONT_COLOR
+    FontSize 30
+}
+
+skinparam Arrow {
+  Color FONT_COLOR
+  FontColor FONT_COLOR
+  FontStyle Bold
+  FontSize 30
+}
+
+skinparam package {
+  FontColor FONT_COLOR
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam node {
+  FontColor FONT_COLOR
+  BackgroundColor BG_PACKAGE_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam component {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+  Style uml2
+}
+
+skinparam database {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam cloud {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam collections {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Control {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Boundary {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Entity {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam interface {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam SequenceParticipantBorderThickness 3
+skinparam sequence {
+  ParticipantBackgroundColor BG_MAIN_COLOR
+  ParticipantBorderColor BORDER_COLOR
+  ParticipantFontStyle normal
+  ParticipantFontColor FONT_COLOR
+  LifeLineBorderColor BORDER_COLOR
+  LifeLineBackgroundColor BG_MAIN_COLOR
+  ArrowColor FONT_COLOR
+  ArrowBorderColor BORDER_COLOR
+  ArrowFontColor FONT_COLOR
+  ArrowThickness 3
+  ActorBackgroundColor BG_MAIN_COLOR
+  ActorBorderColor BORDER_COLOR
+  ActorFontColor FONT_COLOR
+}
