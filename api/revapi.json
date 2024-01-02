@@ -27,15 +27,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method void io.smallrye.stork.api.Service::<init>(java.lang.String, io.smallrye.stork.api.LoadBalancer, io.smallrye.stork.api.ServiceDiscovery, io.smallrye.stork.api.ServiceRegistrar, boolean)",
-        "new": "method void io.smallrye.stork.api.Service::<init>(java.lang.String, java.lang.String, java.lang.String, io.smallrye.stork.api.observability.ObservationCollector, io.smallrye.stork.api.LoadBalancer, io.smallrye.stork.api.ServiceDiscovery, io.smallrye.stork.api.ServiceRegistrar<?>, boolean)",
-        "justification": "Implementing observability"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",
