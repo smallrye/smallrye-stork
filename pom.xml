@@ -57,7 +57,7 @@
         <revapi-reporter-text.version>0.15.0</revapi-reporter-text.version>
         <revapi.skip>true</revapi.skip>
 
-        <jandex-maven-plugin.version>1.2.3</jandex-maven-plugin.version>
+        <jandex-maven-plugin.version>3.1.6</jandex-maven-plugin.version>
 
         <plugin.version.failsafe>3.2.5</plugin.version.failsafe>
 
@@ -299,7 +299,7 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.jboss.jandex</groupId>
+                <groupId>io.smallrye</groupId>
                 <artifactId>jandex-maven-plugin</artifactId>
                 <version>${jandex-maven-plugin.version}</version>
                 <executions>
