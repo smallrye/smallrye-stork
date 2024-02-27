@@ -51,7 +51,7 @@
         <version.mockito>5.2.0</version.mockito>
         <version.jackson>2.16.1</version.jackson>
         <version.weld>5.1.2.Final</version.weld>
-        <version.spring-boot>2.7.9</version.spring-boot>
+        <version.spring-boot>2.7.12</version.spring-boot>
 
         <revapi-maven-plugin.version>0.15.0</revapi-maven-plugin.version>
         <revapi-java.version>0.28.1</revapi-java.version>
