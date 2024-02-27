@@ -136,8 +136,11 @@
                 <artifactId>stork-microprofile-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
-
+            <dependency>
+                <groupId>io.smallrye.stork</groupId>
+                <artifactId>stork-spring-boot-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.smallrye.stork</groupId>
                 <artifactId>stork-test-utils</artifactId>

@@ -79,6 +79,11 @@
             <artifactId>stork-service-discovery-static-list</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-spring-boot-config</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.microprofile.rest.client</groupId>
             <artifactId>microprofile-rest-client-api</artifactId>
         </dependency>
