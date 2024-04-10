@@ -84,7 +84,7 @@ public class ProgrammaticApiTest {
         Stork.initialize();
         assertThatThrownBy(() -> Stork.getInstance().defineIfAbsent(null,
                 ServiceDefinition.of(new FakeConfiguration().withSecure("true"), new SingleConfiguration())))
-                        .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
 
         assertThatThrownBy(() -> Stork.getInstance().defineIfAbsent("acme",
                 ServiceDefinition.of(null, new SingleConfiguration()))).isInstanceOf(IllegalArgumentException.class);

@@ -21,7 +21,7 @@ public enum DnsMetadataKey implements MetadataKey {
 
     /**
      * Creates a new DnsMetadataKey
-     * 
+     *
      * @param name the name
      */
     DnsMetadataKey(String name) {

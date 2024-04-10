@@ -27,7 +27,7 @@ public class CompositeServiceDiscovery implements ServiceDiscovery {
 
     /**
      * Creates a new CompositeServiceDiscovery
-     * 
+     *
      * @param serviceName the service name
      * @param serviceNames the composed service names
      */
