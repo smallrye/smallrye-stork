@@ -28,7 +28,6 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '11', 'opts': '-Drevapi.skip' },
           { 'version': '17', 'opts': 'javadoc:javadoc' },
           { 'version': '20', 'opts': 'javadoc:javadoc' },
           { 'version': '21', 'opts': '-Drevapi.skip' }
@@ -54,7 +53,6 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '11', 'opts': '' },
           { 'version': '17', 'opts': '' },
           { 'version': '20', 'opts': '' },
           { 'version': '21', 'opts': '' }
