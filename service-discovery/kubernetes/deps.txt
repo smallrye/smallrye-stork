@@ -1,6 +1,0 @@
-Coucou Clement,
-
-J'ai un probleme avec les tests.
-Quand une erreur arrive ici https://github.com/aureamunoz/smallrye-stork/blob/22df52f122dacf9ae9b22b62d06bbe0f0f5b2dff/service-discovery/knative/src/main/java/io/smallrye/stork/servicediscovery/knative/KnativeServiceDiscovery.java#L115
-on aterri la: https://github.com/aureamunoz/smallrye-stork/blob/22df52f122dacf9ae9b22b62d06bbe0f0f5b2dff/service-discovery/knative/src/main/java/io/smallrye/stork/servicediscovery/knative/KnativeServiceDiscovery.java#L127 et ca c'est ok. Par contre, dans le test, cela ne fail pas
-https://github.com/aureamunoz/smallrye-stork/blob/22df52f122dacf9ae9b22b62d06bbe0f0f5b2dff/service-discovery/knative/src/test/java/io/smallrye/stork/servicediscovery/knative/KnativeServiceDiscoveryTest.java#L276
