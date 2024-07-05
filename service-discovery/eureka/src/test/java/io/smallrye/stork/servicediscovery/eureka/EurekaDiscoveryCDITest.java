@@ -23,6 +23,8 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -44,6 +46,7 @@ import io.vertx.mutiny.ext.web.client.WebClient;
 @ExplicitParamInjection
 public class EurekaDiscoveryCDITest {
 
+    private static final Logger log = LoggerFactory.getLogger(EurekaDiscoveryCDITest.class);
     @WeldSetup
     public WeldInitiator weld = WeldInitiator.of(TestConfigProviderBean.class,
             EurekaServiceDiscoveryProviderLoader.class);
@@ -51,7 +54,7 @@ public class EurekaDiscoveryCDITest {
     public static final int EUREKA_PORT = 8761;
 
     @Container
-    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.2"))
+    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.3"))
             .withExposedPorts(EUREKA_PORT);
 
     private static Vertx vertx = Vertx.vertx();;
@@ -314,7 +317,7 @@ public class EurekaDiscoveryCDITest {
         await().until(() -> missing.getInstances().await().atMost(Duration.ofSeconds(5)).size() == 0);
     }
 
-    @Disabled(value = "Enable if you want to test a contextualized server, it will requirers adding a server.servlet.context-path=/myserviceregistry property to application.properties file")
+    @Disabled(value = "Enable if you want to test a contextualized server, it will require adding a server.servlet.context-path=/myserviceregistry property to application.properties file")
     @Test
     public void testContextualizedServer(TestInfo info) {
         String serviceName = info.getDisplayName() + "-my-service";

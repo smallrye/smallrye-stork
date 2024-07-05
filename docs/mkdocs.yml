@@ -30,6 +30,11 @@ nav:
     - Power Of Two Choices: 'load-balancer/power-of-two-choices.md'
     - Sticky: 'load-balancer/sticky.md'
     - Custom Load Balancer: 'load-balancer/custom-load-balancer.md'
+  - Service Registration:
+      - Consul: 'service-registration/consul.md'
+      - Eureka: 'service-registration/eureka.md'
+      - Static List: 'service-registration/static-list.md'
+      - Custom Service Registration: 'service-registration/custom-service-registration.md'
 
 theme:
   name: material

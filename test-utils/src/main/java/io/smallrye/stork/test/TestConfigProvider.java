@@ -62,7 +62,7 @@ public class TestConfigProvider implements ConfigProvider {
 
             @Override
             public ConfigWithType serviceDiscovery() {
-                return new ConfigWithType() {
+                return serviceDiscovery == null ? null : new ConfigWithType() {
                     @Override
                     public String type() {
                         return serviceDiscovery;

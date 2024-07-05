@@ -80,6 +80,10 @@
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-service-registration-static-list</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-spring-boot-config</artifactId>
             <scope>provided</scope>
         </dependency>

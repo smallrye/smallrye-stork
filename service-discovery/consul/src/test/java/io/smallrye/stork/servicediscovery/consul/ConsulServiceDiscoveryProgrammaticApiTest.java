@@ -1,8 +1,8 @@
 package io.smallrye.stork.servicediscovery.consul;
 
-import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
-import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE;
-import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE_ADDRESS;
+import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
+import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_NODE;
+import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_NODE_ADDRESS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
@@ -31,6 +31,7 @@ import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
+import io.smallrye.stork.impl.ConsulMetadataKey;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 import io.vertx.core.Vertx;

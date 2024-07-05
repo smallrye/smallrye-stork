@@ -31,6 +31,30 @@
         "old": "method void io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscovery::<init>(java.util.List<io.smallrye.stork.impl.DefaultServiceInstance>)",
         "new": "method void io.smallrye.stork.servicediscovery.staticlist.StaticListServiceDiscovery::<init>(java.lang.String, java.util.List<io.smallrye.stork.impl.DefaultServiceInstance>)",
         "justification": "Static Service Discovery needs now the service name to locate the corresponding instances"
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceRegistrar",
+        "justification": "This class has been relocated to a dedicated service-registration/static-list module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceRegistrarProvider",
+        "justification": "This class has been relocated to a dedicated service-registration/static-list module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticListServiceRegistrarProviderLoader",
+        "justification": "This class has been relocated to a dedicated service-registration/static-list module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.staticlist.StaticRegistrarConfiguration",
+        "justification": "This class has been relocated to a dedicated service-registration/static-list module."
       }
 
     ]

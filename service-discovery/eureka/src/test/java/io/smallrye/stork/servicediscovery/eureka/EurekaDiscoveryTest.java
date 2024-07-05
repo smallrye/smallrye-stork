@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -38,8 +40,10 @@ import io.vertx.mutiny.ext.web.client.WebClient;
 @DisabledOnOs(OS.WINDOWS)
 public class EurekaDiscoveryTest {
 
+    private static final Logger log = LoggerFactory.getLogger(EurekaDiscoveryTest.class);
+
     @Container
-    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.2"))
+    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.3"))
             .withExposedPorts(EUREKA_PORT);
 
     private static Vertx vertx = Vertx.vertx();

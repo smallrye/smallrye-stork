@@ -45,9 +45,12 @@ import io.smallrye.stork.spi.internal.ServiceRegistrarLoader;
         "io.smallrye.stork.api.config.LoadBalancerAttributes",
         "io.smallrye.stork.api.config.ServiceDiscoveryType",
         "io.smallrye.stork.api.config.ServiceDiscoveryAttribute",
-        "io.smallrye.stork.api.config.ServiceDiscoveryAttributes"
+        "io.smallrye.stork.api.config.ServiceDiscoveryAttributes",
+        "io.smallrye.stork.api.config.ServiceRegistrarType",
+        "io.smallrye.stork.api.config.ServiceRegistrarAttribute",
+        "io.smallrye.stork.api.config.ServiceRegistrarAttributes"
 })
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
 @AutoService(Processor.class)
 public class ConfigurationGenerator extends AbstractProcessor {
 

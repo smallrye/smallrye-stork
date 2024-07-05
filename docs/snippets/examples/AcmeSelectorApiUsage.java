@@ -5,7 +5,7 @@ import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.api.StorkServiceRegistry;
 import io.smallrye.stork.servicediscovery.staticlist.StaticConfiguration;
-import io.smallrye.stork.servicediscovery.staticlist.StaticRegistrarConfiguration;
+import io.smallrye.stork.serviceregistration.staticlist.StaticRegistrarConfiguration;
 
 public class AcmeSelectorApiUsage {
 

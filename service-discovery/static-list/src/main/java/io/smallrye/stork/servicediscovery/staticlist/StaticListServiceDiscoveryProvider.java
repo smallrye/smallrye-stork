@@ -11,10 +11,10 @@ import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
 import io.smallrye.stork.api.config.ServiceDiscoveryType;
 import io.smallrye.stork.impl.DefaultServiceInstance;
-import io.smallrye.stork.servicediscovery.staticlist.StaticListServiceRegistrar.StaticAddressesBackend;
 import io.smallrye.stork.spi.ServiceDiscoveryProvider;
 import io.smallrye.stork.spi.StorkInfrastructure;
 import io.smallrye.stork.utils.HostAndPort;
+import io.smallrye.stork.utils.InMemoryAddressesBackend;
 import io.smallrye.stork.utils.ServiceInstanceIds;
 import io.smallrye.stork.utils.StorkAddressUtils;
 
@@ -43,7 +43,7 @@ public class StaticListServiceDiscoveryProvider
                     addressList
                             .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostAndPort.host, hostAndPort.port,
                                     hostAndPort.path, isSecure(config.getSecure(), hostAndPort.port)));
-                    StaticAddressesBackend.add(serviceName, address);
+                    InMemoryAddressesBackend.add(serviceName, address);
                 } catch (Exception e) {
                     throw new IllegalArgumentException(
                             "Address not parseable to URL: " + address + " for service " + serviceName);

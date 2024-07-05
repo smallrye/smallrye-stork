@@ -50,6 +50,17 @@ public class Service {
         this.instanceSelectionLock = requiresStrictRecording ? new Semaphore(1) : null;
     }
 
+    private Service(Builder builder) {
+        this.serviceName = builder.serviceName;
+        this.serviceSelectionType = builder.serviceSelectionType;
+        this.serviceDiscoveryType = builder.serviceDiscoveryType;
+        this.observations = builder.observations;
+        this.loadBalancer = builder.loadBalancer;
+        this.serviceDiscovery = builder.serviceDiscovery;
+        this.serviceRegistrar = builder.serviceRegistrar;
+        this.instanceSelectionLock = builder.requiresStrictRecording ? new Semaphore(1) : null;
+    }
+
     /**
      * Selects a service instance.
      * <p>
@@ -212,4 +223,59 @@ public class Service {
     public String getServiceName() {
         return serviceName;
     }
+
+    public static class Builder {
+        private String serviceName;
+        private final ObservationCollector observations;
+        private ServiceDiscovery serviceDiscovery;
+        private String serviceSelectionType = "round-robin";
+        private String serviceDiscoveryType;
+        private LoadBalancer loadBalancer;
+        private ServiceRegistrar<?> serviceRegistrar;
+        private boolean requiresStrictRecording = false;
+
+        public Builder serviceName(String serviceName) {
+            this.serviceName = serviceName;
+            return this;
+        }
+
+        public Builder(ObservationCollector observations) {
+            this.observations = observations;
+        }
+
+        public Builder serviceDiscovery(ServiceDiscovery serviceDiscovery) {
+            this.serviceDiscovery = serviceDiscovery;
+            return this;
+        }
+
+        public Builder serviceSelectionType(String serviceSelectionType) {
+            this.serviceSelectionType = serviceSelectionType;
+            return this;
+        }
+
+        public Builder serviceDiscoveryType(String serviceDiscoveryType) {
+            this.serviceDiscoveryType = serviceDiscoveryType;
+            return this;
+        }
+
+        public Builder loadBalancer(LoadBalancer loadBalancer) {
+            this.loadBalancer = loadBalancer;
+            return this;
+        }
+
+        public Builder serviceRegistrar(ServiceRegistrar<?> serviceRegistrar) {
+            this.serviceRegistrar = serviceRegistrar;
+            return this;
+        }
+
+        public Builder requiresStrictRecording(boolean requiresStrictRecording) {
+            this.requiresStrictRecording = requiresStrictRecording;
+            return this;
+        }
+
+        public Service build() {
+            return new Service(this);
+        }
+    }
+
 }

@@ -7,8 +7,8 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.ServiceDiscovery;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.impl.DefaultServiceInstance;
-import io.smallrye.stork.servicediscovery.staticlist.StaticListServiceRegistrar.StaticAddressesBackend;
 import io.smallrye.stork.utils.HostAndPort;
+import io.smallrye.stork.utils.InMemoryAddressesBackend;
 import io.smallrye.stork.utils.ServiceInstanceIds;
 import io.smallrye.stork.utils.StorkAddressUtils;
 
@@ -33,7 +33,7 @@ public final class StaticListServiceDiscovery implements ServiceDiscovery {
 
     @Override
     public Uni<List<ServiceInstance>> getServiceInstances() {
-        List<String> addresses = StaticAddressesBackend.getAddresses(serviceName);
+        List<String> addresses = InMemoryAddressesBackend.getAddresses(serviceName);
         if (addresses != null && !addresses.isEmpty()) {
             for (String address : addresses) {
                 try {

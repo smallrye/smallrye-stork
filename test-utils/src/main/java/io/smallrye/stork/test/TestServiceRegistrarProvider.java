@@ -7,13 +7,13 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.MetadataKey;
 import io.smallrye.stork.api.ServiceRegistrar;
-import io.smallrye.stork.api.config.ServiceDiscoveryAttribute;
+import io.smallrye.stork.api.config.ServiceRegistrarAttribute;
 import io.smallrye.stork.api.config.ServiceRegistrarType;
 import io.smallrye.stork.spi.ServiceRegistrarProvider;
 import io.smallrye.stork.spi.StorkInfrastructure;
 
-@ServiceDiscoveryAttribute(name = "one", description = "no description")
-@ServiceDiscoveryAttribute(name = "two", description = "no description")
+@ServiceRegistrarAttribute(name = "one", description = "no description")
+@ServiceRegistrarAttribute(name = "two", description = "no description")
 @ServiceRegistrarType(value = TestServiceRegistrarProvider.TYPE, metadataKey = TestServiceRegistrarProvider.TestMetadata.class)
 public class TestServiceRegistrarProvider
         implements ServiceRegistrarProvider<TestSrRegistrarConfiguration, TestServiceRegistrarProvider.TestMetadata> {

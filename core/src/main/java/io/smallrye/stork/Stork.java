@@ -129,7 +129,9 @@ public final class Stork implements StorkServiceRegistry {
                 services.put(serviceConfig.serviceName(), service);
             }
             for (Service service : services.values()) {
-                service.getServiceDiscovery().initialize(this);
+                if (service.getServiceDiscovery() != null) {
+                    service.getServiceDiscovery().initialize(this);
+                }
             }
         }
 
@@ -178,54 +180,64 @@ public final class Stork implements StorkServiceRegistry {
             Map<String, ServiceDiscoveryLoader> serviceDiscoveryProviders,
             Map<String, ServiceRegistrarLoader> serviceRegistrarLoaders, ServiceConfig serviceConfig) {
         var serviceDiscoveryConfig = serviceConfig.serviceDiscovery();
-        if (serviceDiscoveryConfig == null) {
-            throw new IllegalArgumentException(
-                    "No service discovery defined for service " + serviceConfig.serviceName());
-        }
-        String serviceDiscoveryType = serviceDiscoveryConfig.type();
-        if (serviceDiscoveryType == null) {
+        var serviceBuilder = new Service.Builder(infrastructure.getObservationCollector());
+        if (serviceDiscoveryConfig != null && serviceDiscoveryConfig.type() == null) {
             throw new IllegalArgumentException(
                     "Service discovery type not defined for service " + serviceConfig.serviceName());
         }
 
-        final var serviceDiscoveryProvider = serviceDiscoveryProviders.get(serviceDiscoveryType);
-        if (serviceDiscoveryProvider == null) {
-            throw new IllegalArgumentException("ServiceDiscoveryProvider not found for type " + serviceDiscoveryType);
+        if (serviceDiscoveryConfig != null) {
+            if (serviceDiscoveryProviders.get(serviceDiscoveryConfig.type()) == null) {
+                throw new IllegalArgumentException(
+                        "ServiceDiscoveryProvider not found for type " + serviceDiscoveryConfig.type());
+            }
         }
 
         if (serviceConfig.secure()) {
             // Backward compatibility
             LOGGER.warn("The 'secure' attribute is deprecated, use the 'secure' service discovery attribute instead");
             // We do not know if we can add to the parameters, such create a new SimpleConfigWithType
-            Map<String, String> newConfig = new HashMap<>(serviceDiscoveryConfig.parameters());
-            newConfig.put("secure", "true");
-            serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryType, newConfig);
+            if (serviceDiscoveryConfig != null) {
+                Map<String, String> newConfig = new HashMap<>(serviceDiscoveryConfig.parameters());
+                newConfig.put("secure", "true");
+                serviceDiscoveryConfig = new SimpleServiceConfig.SimpleServiceDiscoveryConfig(serviceDiscoveryConfig.type(),
+                        newConfig);
+            }
         }
 
-        final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
-                serviceConfig.serviceName(), serviceConfig, infrastructure);
+        if (serviceDiscoveryConfig != null) {
+            final var serviceDiscoveryProvider = serviceDiscoveryProviders.get(serviceDiscoveryConfig.type());
+            final var serviceDiscovery = serviceDiscoveryProvider.createServiceDiscovery(serviceDiscoveryConfig,
+                    serviceConfig.serviceName(), serviceConfig, infrastructure);
 
-        final var loadBalancerConfig = serviceConfig.loadBalancer();
-        final LoadBalancer loadBalancer;
-        String loadBalancerType;
-        if (loadBalancerConfig == null) {
-            // no load balancer, use round-robin
-            LOGGER.debug("No load balancer configured for type {}, using {}", serviceDiscoveryType,
-                    RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE);
-            loadBalancerType = RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE;
-            loadBalancer = new RoundRobinLoadBalancer();
-        } else {
-            loadBalancerType = loadBalancerConfig.type();
-            final var loadBalancerProvider = loadBalancerLoaders.get(loadBalancerType);
-            if (loadBalancerProvider == null) {
-                throw new IllegalArgumentException("No LoadBalancerProvider for type " + loadBalancerType);
+            final var loadBalancerConfig = serviceConfig.loadBalancer();
+            final LoadBalancer loadBalancer;
+            String loadBalancerType;
+            if (loadBalancerConfig == null) {
+                // no load balancer, use round-robin
+                LOGGER.debug("No load balancer configured for type {}, using {}", serviceDiscoveryConfig.type(),
+                        RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE);
+                loadBalancerType = RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE;
+                loadBalancer = new RoundRobinLoadBalancer();
+            } else {
+                loadBalancerType = loadBalancerConfig.type();
+                final var loadBalancerProvider = loadBalancerLoaders.get(loadBalancerType);
+                if (loadBalancerProvider == null) {
+                    throw new IllegalArgumentException("No LoadBalancerProvider for type " + loadBalancerType);
+                }
+
+                loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
             }
-
-            loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
+            serviceBuilder = serviceBuilder.serviceName(serviceConfig.serviceName())
+                    .serviceDiscovery(serviceDiscovery)
+                    .serviceSelectionType(loadBalancerType)
+                    .serviceDiscoveryType(serviceDiscoveryConfig.type())
+                    .loadBalancer(loadBalancer)
+                    .requiresStrictRecording(loadBalancer.requiresStrictRecording());
         }
 
         final var serviceRegistrarConfig = serviceConfig.serviceRegistrar();
-        ServiceRegistrar<?> serviceRegistrar = null;
+        final ServiceRegistrar<?> serviceRegistrar;
         if (serviceRegistrarConfig == null) {
             LOGGER.debug("No service registrar configured for service {}", serviceConfig.serviceName());
         } else {
@@ -237,12 +249,10 @@ public final class Stork implements StorkServiceRegistry {
 
             serviceRegistrar = serviceRegistrarLoader.createServiceRegistrar(serviceRegistrarConfig,
                     serviceConfig.serviceName(), infrastructure);
+            serviceBuilder.serviceName(serviceConfig.serviceName()).serviceRegistrar(serviceRegistrar);
         }
 
-        return new Service(serviceConfig.serviceName(),
-                loadBalancerType, serviceDiscoveryType, infrastructure.getObservationCollector(),
-                loadBalancer, serviceDiscovery, serviceRegistrar,
-                loadBalancer.requiresStrictRecording());
+        return serviceBuilder.build();
     }
 
     private <T extends ElementWithType> Map<String, T> loadFromServiceLoader(Class<T> loaderClass) {
