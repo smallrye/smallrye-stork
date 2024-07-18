@@ -31,6 +31,36 @@
         "old": "method io.smallrye.stork.api.ServiceRegistrar<io.smallrye.stork.servicediscovery.eureka.EurekaMetadataKey> io.smallrye.stork.servicediscovery.eureka.EurekaServiceRegistrarProviderLoader::createServiceRegistrar(io.smallrye.stork.api.config.ServiceRegistrarConfig, io.smallrye.stork.spi.StorkInfrastructure)",
         "new": "method io.smallrye.stork.api.ServiceRegistrar<io.smallrye.stork.servicediscovery.eureka.EurekaMetadataKey> io.smallrye.stork.servicediscovery.eureka.EurekaServiceRegistrarProviderLoader::createServiceRegistrar(io.smallrye.stork.api.config.ConfigWithType, java.lang.String, io.smallrye.stork.spi.StorkInfrastructure)",
         "justification": "Use the ConfigWithType more generic type for registrars and service name."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.eureka.EurekaRegistrarConfiguration",
+        "justification": "This class has been relocated to a dedicated service-registration/eureka module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceRegistrar",
+        "justification": "This class has been relocated to a dedicated service-registration/eureka module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceRegistrarProvider",
+        "justification": "This class has been relocated to a dedicated service-registration/eureka module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.eureka.EurekaServiceRegistrarProviderLoader",
+        "justification": "This class has been relocated to a dedicated service-registration/eureka module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "enum io.smallrye.stork.servicediscovery.eureka.EurekaMetadataKey",
+        "justification": "This enum has been relocated to the stork-core module."
       }
     ]
   }

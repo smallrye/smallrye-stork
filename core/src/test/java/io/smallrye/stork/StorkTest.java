@@ -55,6 +55,19 @@ public class StorkTest {
         }
     };
 
+    private static final ConfigWithType SERVICE_REGISTRAR_CONFIG = new ConfigWithType() {
+
+        @Override
+        public String type() {
+            return "test";
+        }
+
+        @Override
+        public Map<String, String> parameters() {
+            return Collections.emptyMap();
+        }
+    };
+
     @BeforeEach
     public void init() {
         TestEnv.SPI_ROOT.mkdirs();
@@ -277,6 +290,23 @@ public class StorkTest {
         Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
     }
 
+    @Test
+    public void initWithOnlyServiceRegistrarConfiguration() {
+        TestEnv.configurations.add(new FakeServiceConfig("test", null, null, SERVICE_REGISTRAR_CONFIG));
+        TestEnv.install(ConfigProvider.class, RegistrarConfigProvider.class);
+        Assertions.assertDoesNotThrow(() -> Stork.initialize());
+    }
+
+    @Test
+    void initWithoutServiceDiscovery() {
+        TestEnv.configurations.add(new FakeServiceConfig("a", null, null, null));
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
+        Assertions.assertDoesNotThrow(() -> Stork.initialize());
+        Stork stork = Stork.getInstance();
+        Assertions.assertTrue(stork.getServiceOptional("missing").isEmpty());
+        Assertions.assertThrows(NoSuchServiceDefinitionException.class, () -> stork.getService("missing"));
+    }
+
     public static class ServiceAConfigProvider implements ConfigProvider {
 
         @Override
@@ -296,6 +326,20 @@ public class StorkTest {
         @Override
         public List<ServiceConfig> getConfigs() {
             ServiceConfig service = new FakeServiceConfig("b", FAKE_SERVICE_DISCOVERY_CONFIG, null, null);
+            return List.of(service);
+        }
+
+        @Override
+        public int priority() {
+            return 100;
+        }
+    }
+
+    public static class RegistrarConfigProvider implements ConfigProvider {
+
+        @Override
+        public List<ServiceConfig> getConfigs() {
+            ServiceConfig service = new FakeServiceConfig("test", null, null, SERVICE_REGISTRAR_CONFIG);
             return List.of(service);
         }
 

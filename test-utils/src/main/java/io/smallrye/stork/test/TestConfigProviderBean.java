@@ -50,7 +50,7 @@ public class TestConfigProviderBean implements ConfigProvider {
 
             @Override
             public ConfigWithType serviceDiscovery() {
-                return new ConfigWithType() {
+                return serviceDiscovery == null ? null : new ConfigWithType() {
                     @Override
                     public String type() {
                         return serviceDiscovery;
@@ -96,7 +96,7 @@ public class TestConfigProviderBean implements ConfigProvider {
 
             @Override
             public ConfigWithType serviceDiscovery() {
-                return new ConfigWithType() {
+                return serviceDiscovery == null ? null : new ConfigWithType() {
                     @Override
                     public String type() {
                         return serviceDiscovery;

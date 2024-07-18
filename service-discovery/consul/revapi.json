@@ -31,6 +31,36 @@
         "old": "method io.smallrye.stork.api.ServiceRegistrar<io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey> io.smallrye.stork.servicediscovery.consul.ConsulServiceRegistrarProviderLoader::createServiceRegistrar(io.smallrye.stork.api.config.ServiceRegistrarConfig, io.smallrye.stork.spi.StorkInfrastructure)",
         "new": "method io.smallrye.stork.api.ServiceRegistrar<io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey> io.smallrye.stork.servicediscovery.consul.ConsulServiceRegistrarProviderLoader::createServiceRegistrar(io.smallrye.stork.api.config.ConfigWithType, java.lang.String, io.smallrye.stork.spi.StorkInfrastructure)",
         "justification": "Use the ConfigWithType more generic type for registrars."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.consul.ConsulRegistrarConfiguration",
+        "justification": "This class has been relocated to a dedicated service-registration/consul module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.consul.ConsulServiceRegistrar",
+        "justification": "This class has been relocated to a dedicated service-registration/consul module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.consul.ConsulServiceRegistrarProvider",
+        "justification": "This class has been relocated to a dedicated service-registration/consul module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.stork.servicediscovery.consul.ConsulServiceRegistrarProviderLoader",
+        "justification": "This class has been relocated to a dedicated service-registration/consul module."
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "enum io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey",
+        "justification": "This enum has been relocated to the stork-core module."
       }
     ]
   }

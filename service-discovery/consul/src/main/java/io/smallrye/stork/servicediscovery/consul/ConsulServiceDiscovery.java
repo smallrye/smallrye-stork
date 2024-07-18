@@ -1,8 +1,8 @@
 package io.smallrye.stork.servicediscovery.consul;
 
-import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
-import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE;
-import static io.smallrye.stork.servicediscovery.consul.ConsulMetadataKey.META_CONSUL_SERVICE_NODE_ADDRESS;
+import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
+import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_NODE;
+import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_NODE_ADDRESS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.impl.CachingServiceDiscovery;
+import io.smallrye.stork.impl.ConsulMetadataKey;
 import io.smallrye.stork.impl.DefaultServiceInstance;
 import io.smallrye.stork.utils.ServiceInstanceIds;
 import io.smallrye.stork.utils.ServiceInstanceUtils;

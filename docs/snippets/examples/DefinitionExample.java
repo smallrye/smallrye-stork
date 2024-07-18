@@ -3,9 +3,8 @@ package examples;
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.loadbalancer.random.RandomConfiguration;
-import io.smallrye.stork.servicediscovery.consul.ConsulRegistrarConfiguration;
 import io.smallrye.stork.servicediscovery.staticlist.StaticConfiguration;
-import io.smallrye.stork.servicediscovery.staticlist.StaticRegistrarConfiguration;
+import io.smallrye.stork.serviceregistration.staticlist.StaticRegistrarConfiguration;
 
 public class DefinitionExample {
 
