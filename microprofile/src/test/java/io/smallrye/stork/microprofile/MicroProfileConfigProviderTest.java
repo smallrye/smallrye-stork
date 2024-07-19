@@ -12,7 +12,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import io.smallrye.config.ConfigValuePropertiesConfigSource;
+import io.smallrye.config.ConfigValue;
+import io.smallrye.config.MapBackedConfigValueConfigSource;
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigBuilder;
 import io.smallrye.stork.Stork;
@@ -234,8 +235,18 @@ public class MicroProfileConfigProviderTest {
     }
 
     private Stork storkForConfig(Map<String, String> properties) {
+        Map<String, ConfigValue> backend = new HashMap<>();
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            ConfigValue.ConfigValueBuilder builder = new ConfigValue.ConfigValueBuilder();
+            builder.withName(entry.getKey()).withValue(entry.getValue()).withRawValue(entry.getValue())
+                    .withConfigSourceName("test-config-source").withConfigSourceOrdinal(0);
+            backend.put(entry.getKey(), builder.build());
+        }
+
+        MapBackedConfigValueConfigSource source = new MapBackedConfigValueConfigSource("test-config-source", backend, 0) {
+        };
         SmallRyeConfig config = new SmallRyeConfigBuilder()
-                .withSources(new ConfigValuePropertiesConfigSource(properties, "test-config-source", 0))
+                .withSources(source)
                 .build();
         ConfigProviderResolver.setInstance(new TestMicroProfileConfigProvider(config));
         return StorkTestUtils.getNewStorkInstance();
