@@ -76,10 +76,14 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
                         .put("name", "MyOwn"))
                 .put("leaseInfo", new JsonObject().put("renewalIntervalInSecs", 10000).put("durationInSecs", 10000));
 
-        return client.post(path + "/eureka/apps/" + applicationId)
+        Uni<Void> response = client.post(path + "/eureka/apps/" + applicationId)
                 .putHeader("content-type", "application/json")
                 .putHeader("accept", "application/json")
-                .sendJson(instance).replaceWithVoid();
+                .sendJson(instance)
+                .invoke(() -> log.info("Instance registered for service {}: {}", applicationId, registration))
+                .replaceWithVoid();
+
+        return response;
 
     }
 
