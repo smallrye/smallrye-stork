@@ -28,6 +28,7 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
                 "service '" + serviceName + "'");
         String hostAndPortToAddString = StorkAddressUtils.parseToString(hostAndPortToAdd);
         InMemoryAddressesBackend.add(serviceName, hostAndPortToAddString);
+        log.info("Address %s has been registered for service %s", hostAndPortToAddString, serviceName);
         return Uni.createFrom().voidItem();
     }
 
