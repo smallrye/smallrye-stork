@@ -79,9 +79,10 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
         Uni<Void> response = client.post(path + "/eureka/apps/" + applicationId)
                 .putHeader("content-type", "application/json")
                 .putHeader("accept", "application/json")
-                .sendJson(instance).replaceWithVoid();
+                .sendJson(instance)
+                .invoke(() -> log.info("Instance registered for service {}: {}", applicationId, registration))
+                .replaceWithVoid();
 
-        log.info("Instance registered for service {}: {}", applicationId, registration);
         return response;
 
     }
