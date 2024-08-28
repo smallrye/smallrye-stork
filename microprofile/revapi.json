@@ -24,44 +24,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.field.removedWithConstant",
-        "old": "field io.smallrye.stork.microprofile.MicroProfileConfigProvider.LOAD_BALANCER",
-        "justification": "Moved to stork-core io.smallrye.stork.utils.StorkConfigUtils.LOAD_BALANCER"
-      },
-      {
-        "ignore": true,
-        "code": "java.field.removedWithConstant",
-        "old": "field io.smallrye.stork.microprofile.MicroProfileConfigProvider.LOAD_BALANCER_EMBEDDED",
-        "justification": "Moved to stork-core io.smallrye.stork.utils.StorkConfigUtils.LOAD_BALANCER_EMBEDDED"
-      },
-      {
-        "ignore": true,
-        "code": "java.field.removedWithConstant",
-        "old": "field io.smallrye.stork.microprofile.MicroProfileConfigProvider.SERVICE_DISCOVERY",
-        "justification": "Moved to stork-core io.smallrye.stork.utils.StorkConfigUtils.SERVICE_DISCOVERY"
-      },
-      {
-        "ignore": true,
-        "code": "java.field.removedWithConstant",
-        "old": "field io.smallrye.stork.microprofile.MicroProfileConfigProvider.SERVICE_DISCOVERY_EMBEDDED",
-        "justification": "Moved to stork-core io.smallrye.stork.utils.StorkConfigUtils.SERVICE_DISCOVERY_EMBEDDED"
-      },
-      {
-        "ignore": true,
-        "code": "java.field.removedWithConstant",
-        "old": "field io.smallrye.stork.microprofile.MicroProfileConfigProvider.SERVICE_REGISTRAR",
-        "justification": "Moved to stork-core io.smallrye.stork.utils.StorkConfigUtils.SERVICE_REGISTRAR"
-      },
-      {
-        "ignore": true,
-        "code": "java.field.removedWithConstant",
-        "old": "field io.smallrye.stork.microprofile.MicroProfileConfigProvider.SERVICE_REGISTRAR_EMBEDDED",
-        "justification": "Moved to stork-core io.smallrye.stork.utils.StorkConfigUtils.SERVICE_REGISTRAR_EMBEDDED"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",
