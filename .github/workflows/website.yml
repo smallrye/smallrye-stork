@@ -25,10 +25,7 @@ jobs:
         with:
           python-version: 3.x
       - name: Tools setup
-        run: |
-          gpg --quiet --batch --yes --decrypt --passphrase="${{secrets.SECRET_PASSPHRASE}}" --output smallrye-sign.asc .github/release/smallrye-sign.asc.gpg
-          gpg --quiet --batch --yes --decrypt --passphrase="${{secrets.SECRET_PASSPHRASE}}" --output maven-settings.xml .github/release/maven-settings.xml.gpg
-          gpg --fast-import --no-tty --batch --yes smallrye-sign.asc
+        run: |          
           git config --global user.name "SmallRye CI"
           git config --global user.email "smallrye@googlegroups.com"
           cd docs
@@ -37,6 +34,6 @@ jobs:
           pipenv install
           cd ..
       - name: Build local artifacts
-        run: mvn -B install -DskipTests -Prelease -s maven-settings.xml
+        run: mvn -B install -DskipTests
       - name: Render docs and publish
         run: .github/render-documentation.sh
