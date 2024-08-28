@@ -313,6 +313,7 @@
                 <configuration>
                     <skip>${revapi.skip}</skip>
                     <checkDependencies>false</checkDependencies>
+                    <oldVersion>2.6.1</oldVersion>
                 </configuration>
             </plugin>
             <plugin>

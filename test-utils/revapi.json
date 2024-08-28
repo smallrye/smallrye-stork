@@ -24,7 +24,25 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "class io.smallrye.stork.test.TestServiceRegistrarProvider",
+        "new": "class io.smallrye.stork.test.TestServiceRegistrarProvider",
+        "annotation": "@io.smallrye.stork.api.config.ServiceDiscoveryAttributes({@io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"one\", description = \"no description\"), @io.smallrye.stork.api.config.ServiceDiscoveryAttribute(name = \"two\", description = \"no description\")})",
+        "justification": "New registrar API"
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "class io.smallrye.stork.test.TestServiceRegistrarProvider",
+        "new": "class io.smallrye.stork.test.TestServiceRegistrarProvider",
+        "annotation": "@io.smallrye.stork.api.config.ServiceRegistrarAttributes({@io.smallrye.stork.api.config.ServiceRegistrarAttribute(name = \"one\", description = \"no description\"), @io.smallrye.stork.api.config.ServiceRegistrarAttribute(name = \"two\", description = \"no description\")})",
+        "justification": "New registrar API"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",
