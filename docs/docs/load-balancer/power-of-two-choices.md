@@ -30,18 +30,14 @@ For each service expected to use a random service selection, configure the `load
 
 === "stork standalone"
     ```properties
-    stork.my-service.service-discovery.type=...
-    stork.my-service.service-discovery...=...
     stork.my-service.load-balancer.type=power-of-two-choices
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.service-discovery.type=...
-    quarkus.stork.my-service.service-discovery...=...
     quarkus.stork.my-service.load-balancer.type=power-of-two-choices
     ```
 
-Supported attributes are the following:
+Supported configuration properties are the following:
 
---8<-- "../load-balancer/power-of-two-choices/target/classes/META-INF/stork-docs/power-of-two-choices-lb-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/power-of-two-choices-lb-attributes.txt"

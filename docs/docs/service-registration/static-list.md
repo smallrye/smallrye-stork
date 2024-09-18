@@ -31,4 +31,4 @@ quarkus.stork.my-service.service-registrar.type=static
 
 Static service registrar is configured with the following parameters:
 
---8<-- "../service-registration/consul/target/classes/META-INF/stork-docs/static-sr-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/static-sr-attributes.txt"

@@ -35,4 +35,4 @@ quarkus.stork.my-service.service-registrar.type=consul
 
 Consul service registrar is configured with the following parameters:
 
---8<-- "../service-registration/consul/target/classes/META-INF/stork-docs/consul-sr-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/consul-sr-attributes.txt"

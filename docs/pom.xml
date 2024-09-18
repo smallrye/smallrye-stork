@@ -84,6 +84,14 @@
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-service-registration-consul</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-service-registration-eureka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-spring-boot-config</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -109,7 +117,16 @@
         </dependency>
         <dependency>
             <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-service-discovery-dns</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-service-discovery-kubernetes</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-service-discovery-knative</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -129,6 +146,11 @@
         <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-load-balancer-least-response-time</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.stork</groupId>
+            <artifactId>stork-load-balancer-sticky</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -95,7 +95,7 @@ Stork inspects the _Knative Service_ and retrieves the url of the service.
 
 Supported attributes are the following:
 
---8<-- "../service-discovery/knative/target/classes/META-INF/stork-docs/knative-sd-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/knative-sd-attributes.txt"
 
 
 ## Caching the service instances
