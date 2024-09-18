@@ -43,4 +43,4 @@ Remember to define the services that make up your composite service.
 
 These are all the parameters of the composite service discovery:
 
---8<-- "../service-discovery/composite/target/classes/META-INF/stork-docs/composite-sd-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/composite-sd-attributes.txt"

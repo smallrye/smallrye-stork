@@ -35,26 +35,4 @@ For each service that should get the service instances from Consul, configure th
 
 Consul service discovery is configured with the following parameters:
 
---8<-- "../service-discovery/consul/target/classes/META-INF/stork-docs/consul-sd-attributes.txt"
-
-## Service registration
-
-Stork also provides the ability to register services using Consul as backend.
-
-### Service registration configuration
-
-For each service that should register the service instances in Consul, configure the service registrar `type`:
-
-=== "stork standalone"
-```properties
-stork.my-service.service-registrar.type=consul
-```
-
-=== "stork in quarkus"
-```properties
-quarkus.stork.my-service.service-registrar.type=consul
-```
-
-Consul service registrar is configured with the following parameters:
-
---8<-- "../service-discovery/consul/target/classes/META-INF/stork-docs/consul-sr-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/consul-sd-attributes.txt"

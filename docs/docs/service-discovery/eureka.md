@@ -39,7 +39,7 @@ Stork looks for the service with the given name (`my-service` in the previous ex
 
 Supported attributes are the following:
 
---8<-- "../service-discovery/eureka/target/classes/META-INF/stork-docs/eureka-sd-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/eureka-sd-attributes.txt"
 
 The `application` attribute is optional.
 It uses the Stork service name (`my-service` in the previous configuration) if not set.
@@ -50,28 +50,3 @@ Using this attribute prevents load-balancing as you will always select a single 
 The `secure` attribute indicates if you want the _secure virtual address_ of the application instance.
 If set to `true`, unsecured instances are filtered out from the available instances.
 
-## Service registration
-
-Stork also provides the ability to register services using Eureka as backend.
-
-### Service registration configuration
-
-For each service that should register the service instances in Eureka, configure the service registrar `type`:
-
-=== "stork standalone"
-```properties
-stork.my-service.service-registrar.type=eureka
-stork.my-service.service-registrar.eureka-host=localhost
-stork.my-service.service-registrar.eureka-port=8761
-```
-
-=== "stork in quarkus"
-```properties
-quarkus.stork.my-service.service-registrar.type=eureka
-quarkus.stork.my-service.service-registrar.eureka-host=localhost
-quarkus.stork.my-service.service-registrar.eureka-port=8761
-```
-
-Eureka service registrar is configured with the following parameters:
-
---8<-- "../service-discovery/eureka/target/classes/META-INF/stork-docs/eureka-sr-attributes.txt"

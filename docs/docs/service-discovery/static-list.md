@@ -33,26 +33,4 @@ For each service that should use the static list of service instances configure 
 
 These are all the static service discovery parameters:
 
---8<-- "../service-discovery/static-list/target/classes/META-INF/stork-docs/static-sd-attributes.txt"
-
-## Service registration
-
-Stork also provides the ability to register services using Static list as backend.
-
-### Service registration configuration
-
-For each service that should register the service instances in a static list, configure the service registrar `type`:
-
-=== "stork standalone"
-```properties
-stork.my-service.service-registrar.type=static
-```
-
-=== "stork in quarkus"
-```properties
-quarkus.stork.my-service.service-registrar.type=static
-```
-
-Static service registrar is configured with the following parameters:
-
---8<-- "../service-discovery/consul/target/classes/META-INF/stork-docs/static-sr-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/static-sd-attributes.txt"
