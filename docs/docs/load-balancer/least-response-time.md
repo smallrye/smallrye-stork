@@ -32,15 +32,11 @@ For each service expected to use a least-response-time selection, configure the 
 
 === "stork standalone"
     ```properties
-    stork.my-service.service-discovery.type=...
-    stork.my-service.service-discovery...=...
     stork.my-service.load-balancer.type=least-response-time
     ```
 
 === "stork in quarkus"
     ```properties
-    quarkus.stork.my-service.service-discovery.type=...
-    quarkus.stork.my-service.service-discovery...=...
     quarkus.stork.my-service.load-balancer.type=least-response-time
     ```
 
@@ -73,3 +69,7 @@ score(n) = \delta^{n - n_{max}} * \frac{\sum_i t_i * w_i}{\sum_i w_i} =
 $$
 
 The `declining-factor` should be in $(0, 1]$ , the default is $0.9$. Using a lower value makes the older response times less important.
+
+Supported configuration properties are the following:
+
+--8<-- "target/attributes/META-INF/stork-docs/least-response-time-lb-attributes.txt"

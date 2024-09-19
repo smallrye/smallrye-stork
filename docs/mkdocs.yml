@@ -26,7 +26,7 @@ nav:
     - Round Robin: 'load-balancer/round-robin.md'
     - Random: 'load-balancer/random.md'
     - Least Requests: 'load-balancer/least-requests.md'
-    - Response Time: 'load-balancer/response-time.md'
+    - Least Response Time: 'load-balancer/least-response-time.md'
     - Power Of Two Choices: 'load-balancer/power-of-two-choices.md'
     - Sticky: 'load-balancer/sticky.md'
     - Custom Load Balancer: 'load-balancer/custom-load-balancer.md'
@@ -93,7 +93,8 @@ markdown_extensions:
       - name: mermaid
         class: mermaid
         format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: !relative $config_dir
   - pymdownx.inlinehilite
   - pymdownx.details
   - pymdownx.smartsymbols

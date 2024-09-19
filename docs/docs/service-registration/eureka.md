@@ -36,4 +36,4 @@ quarkus.stork.my-service.service-registrar.eureka-port=8761
 
 Eureka service registrar is configured with the following parameters:
 
---8<-- "../service-registration/eureka/target/classes/META-INF/stork-docs/eureka-sr-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/eureka-sr-attributes.txt"
