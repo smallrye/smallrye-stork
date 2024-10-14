@@ -38,8 +38,13 @@ For each service that should consist of multiple services, configure the service
     quarkus.stork.serviceB.service-discovery.type=...
     ```
 
-
 Remember to define the services that make up your composite service.
+
+Be aware that Stork doesn't work as a standalone service discovery cluster. 
+Instead, it processes composite configurations—meaning it handles multiple configurations that may use different service discovery implementation. 
+For each specific configuration, Stork delegates the service discovery task to the appropriate service discovery provider. 
+If one of these providers doesn't respond or fails, it affects Stork's ability to resolve that specific configuration, but it doesn't mean Stork itself is faulty; 
+it relies on the performance of the service discovery systems it’s configured to work with.
 
 These are all the parameters of the composite service discovery:
 
