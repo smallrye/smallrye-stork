@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,7 +69,7 @@ public class ConsulServiceDiscoveryTest {
                 null);
         stork = StorkTestUtils.getNewStorkInstance();
         List<String> tags = List.of("primary");
-        registerService(serviceName, 8406, tags, "example.com");
+        registerService(new ConsulServiceOptions(serviceName, 8406, tags, List.of("example.com")));
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -84,7 +85,7 @@ public class ConsulServiceDiscoveryTest {
         deregisterServiceInstances(instances.get());
 
         List<String> sTags = List.of("secondary");
-        registerService(serviceName, 8506, sTags, "another.example.com");
+        registerService(new ConsulServiceOptions(serviceName, 8506, sTags, List.of("another.example.com")));
 
         // when the consul service discovery is called before the end of refreshing period
         service.getServiceDiscovery().getServiceInstances()
@@ -117,7 +118,7 @@ public class ConsulServiceDiscoveryTest {
         //Given a service `my-service` registered in consul
         List<String> tags = List.of("primary");
         Map<String, String> metadata = Maps.newHashMap("meta", "metadata for my-service");
-        registerService(serviceName, 8406, tags, "example.com");
+        registerService(new ConsulServiceOptions(serviceName, 8406, tags, List.of("example.com")));
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -138,7 +139,7 @@ public class ConsulServiceDiscoveryTest {
 
         //the service settings change in consul
         List<String> sTags = List.of("secondary");
-        registerService(serviceName, 8506, sTags, "another.example.com");
+        registerService(new ConsulServiceOptions(serviceName, 8506, sTags, List.of("another.example.com")));
 
         // let's wait until the new services are populated to Stork (from Consul)
         await().atMost(Duration.ofSeconds(7))
@@ -173,8 +174,8 @@ public class ConsulServiceDiscoveryTest {
                 null);
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
-        registerService("my-consul-service", 8406, null, "consul.com");
-        registerService("another-service", 8606, null, "another.example.com");
+        registerService(new ConsulServiceOptions("my-consul-service", 8406, null, List.of("consul.com")));
+        registerService(new ConsulServiceOptions("another-service", 8606, null, List.of("another.example.com")));
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -203,8 +204,8 @@ public class ConsulServiceDiscoveryTest {
                 null);
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
-        registerService("my-consul-service", 8406, null, "consul.com");
-        registerService("another-service", 8606, null, "another.example.com");
+        registerService(new ConsulServiceOptions("my-consul-service", 8406, null, List.of("consul.com")));
+        registerService(new ConsulServiceOptions("another-service", 8606, null, List.of("another.example.com")));
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -233,7 +234,7 @@ public class ConsulServiceDiscoveryTest {
         stork = StorkTestUtils.getNewStorkInstance();
         //Given a service `my-service` registered in consul
         List<String> tags = List.of("primary");
-        registerService(serviceName, 8406, tags, "example.com");
+        registerService(new ConsulServiceOptions(serviceName, 8406, tags, List.of("example.com")));
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -256,7 +257,7 @@ public class ConsulServiceDiscoveryTest {
         deregisterServiceInstances(instances.get());
 
         //the service settings change in consul
-        registerService(serviceName, 8406, tags, "example.com", "another.example.com");
+        registerService(new ConsulServiceOptions(serviceName, 8406, tags, List.of("example.com", "another.example.com")));
 
         // let's wait until the new services are populated to Stork (from Consul)
         await().atMost(Duration.ofSeconds(10)).until(
@@ -285,13 +286,48 @@ public class ConsulServiceDiscoveryTest {
                 .hasValueSatisfying(instance -> assertThat(instance.getId()).isNotEqualTo(serviceId));
     }
 
-    private void registerService(String serviceName, int port, List<String> tags,
-            String... addresses) throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(addresses.length);
-        for (String address : addresses) {
+    @Test
+    void shouldDiscoverServiceWithoutAddress() throws InterruptedException {
+        //Given a service `my-consul-service` registered in consul and a refresh-period of 5 seconds
+        String serviceName = "my-consul-service";
+        TestConfigProvider.addServiceConfig("my-consul-service", null, "consul", null,
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5",
+                        "application", "my-consul-service"),
+                null);
+        stork = StorkTestUtils.getNewStorkInstance();
+        registerService(new ConsulServiceOptions("my-consul-service", 8406, null, new ArrayList<>()));
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        // call stork service discovery and gather service instances in the cache
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Consul", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        // Then the service instance is found
+        assertThat(instances.get()).hasSize(1);
+        assertThat(instances.get().get(0).getHost()).isEqualTo("127.0.0.1");
+        assertThat(instances.get().get(0).getPort()).isEqualTo(8406);
+        assertThat(instances.get().get(0).isSecure()).isFalse();
+    }
+
+    public record ConsulServiceOptions(String serviceName, int port, List<String> tags, List<String> addresses) {
+    }
+
+    private void registerService(ConsulServiceOptions consulServiceOptions) throws InterruptedException {
+        if (consulServiceOptions.addresses().isEmpty()) {
+            consulServiceOptions.addresses.add("");
+        }
+        CountDownLatch latch = new CountDownLatch(consulServiceOptions.addresses().size());
+        for (String address : consulServiceOptions.addresses()) {
             client.registerService(
-                    new ServiceOptions().setId("" + (consulId++)).setName(serviceName).setTags(tags)
-                            .setAddress(address).setPort(port))
+                    new ServiceOptions().setId("" + (consulId++)).setName(consulServiceOptions.serviceName())
+                            .setTags(consulServiceOptions.tags())
+                            .setAddress(address).setPort(consulServiceOptions.port()))
                     .onComplete(result -> {
                         if (result.failed()) {
                             fail("Failed to register service in Consul", result.cause());
