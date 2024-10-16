@@ -73,8 +73,8 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
             Metadata<ConsulMetadataKey> consulMetadata = createConsulMetadata(serviceEntry);
             String address = service.getAddress();
             int port = serviceEntry.getService().getPort();
-            if (address == null) {
-                throw new IllegalArgumentException("Got null address for service " + serviceName);
+            if (address == null || address.isEmpty() || address.isBlank()) {
+                address = serviceEntry.getNode().getAddress();
             }
             ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, address, port);
             if (matching != null) {
