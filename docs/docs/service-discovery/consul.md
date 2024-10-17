@@ -5,6 +5,8 @@ It's often used as service discovery backend to register and locate the services
 Consul makes it simple for services to register themselves and to discover other services via a DNS or HTTP interface. 
 External services can be registered as well.
 
+As [specified](https://developer.hashicorp.com/consul/api-docs/agent/service#address) in the Consul documentation, if the host address is not provided, Stork will automatically use the Consul node address for the instance.
+
 This page explains how Stork can use Consul to handle the service discovery and service registration.
 
 ## Dependency
@@ -36,3 +38,4 @@ For each service that should get the service instances from Consul, configure th
 Consul service discovery is configured with the following parameters:
 
 --8<-- "target/attributes/META-INF/stork-docs/consul-sd-attributes.txt"
+

@@ -75,6 +75,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
             String address = service.getAddress();
             int port = serviceEntry.getService().getPort();
             if (address == null || address.isEmpty() || address.isBlank()) {
+                //If address not provided, the agent address should be used. See https://developer.hashicorp.com/consul/api-docs/agent/service#address
                 address = serviceEntry.getNode().getAddress();
             }
             ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, address, port);
