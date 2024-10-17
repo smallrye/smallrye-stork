@@ -32,8 +32,7 @@
     <url>http://smallrye.io</url>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
 
         <version.assertj>3.26.3</version.assertj>
         <version.microprofile-config-api>3.1</version.microprofile-config-api>
