@@ -42,7 +42,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
             int defaultPort) {
 
         return registerApplicationInstance(client, serviceName,
-                metadata.getMetadata().get(EurekaMetadataKey.META_EUREKA_SERVICE_ID).toString(), "192.5.10.236", "acme.com",
+                metadata.getMetadata().get(EurekaMetadataKey.META_EUREKA_SERVICE_ID).toString(), ipAddress, null,
                 defaultPort, null, -1, "UP", "");
 
     }
