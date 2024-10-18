@@ -27,6 +27,7 @@ import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.impl.EurekaMetadataKey;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
@@ -77,7 +78,7 @@ public class EurekaRegistrationTest {
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
         eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)
-                .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), "acme.com", 8406).subscribe()
+                .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), "localhost", 8406).subscribe()
                 .with(success -> registrationLatch.countDown(), failure -> fail(""));
 
         await().atMost(Duration.ofSeconds(10))
@@ -92,6 +93,14 @@ public class EurekaRegistrationTest {
         HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
         assertThat(httpResponse).isNotNull();
         assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
+
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
+        assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
+        assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
 
     }
 
