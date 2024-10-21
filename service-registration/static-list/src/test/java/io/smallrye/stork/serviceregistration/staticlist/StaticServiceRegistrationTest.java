@@ -1,6 +1,8 @@
 package io.smallrye.stork.serviceregistration.staticlist;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -88,5 +90,29 @@ public class StaticServiceRegistrationTest {
 
         assertThat(addresses).hasSize(1);
         assertThat(addresses.get(0)).isEqualTo("localhost:8081/hello");
+    }
+
+    @Test
+    void shouldFailIfAddresseNull() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "first-service";
+
+        ServiceRegistrar<Metadata.DefaultMetadataKey> staticRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        staticRegistrar.registerServiceInstance(serviceName, "http://localhost:8081/hello", 8080);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            staticRegistrar.registerServiceInstance(serviceName, null, 8080);
+        });
+
+        String expectedMessage = "Parameter ipAddress should be provided.";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+
     }
 }
