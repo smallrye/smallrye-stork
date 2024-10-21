@@ -37,6 +37,7 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
     @Override
     public Uni<Void> registerServiceInstance(String serviceName, Metadata<ConsulMetadataKey> metadata, String ipAddress,
             int defaultPort) {
+        checkAddressNotNull(ipAddress);
 
         String consulId = metadata.getMetadata().get(ConsulMetadataKey.META_CONSUL_SERVICE_ID).toString();
 
