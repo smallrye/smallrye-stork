@@ -3,6 +3,8 @@ package io.smallrye.stork.serviceregistration.consul;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
 import java.util.Map;
@@ -84,6 +86,28 @@ public class ConsulServiceRegistrationTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.awaitItem().getItem()).isNotNull();
+
+    }
+
+    @Test
+    void shouldFailIfNoIpAddressProvided() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class)
+                    .with(ConsulMetadataKey.META_CONSUL_SERVICE_ID, serviceName), null, 8406);
+        });
+
+        String expectedMessage = "Parameter ipAddress should be provided.";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
 
     }
 }
