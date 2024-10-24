@@ -3,6 +3,8 @@ package io.smallrye.stork.serviceregistration.eureka;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
 import java.util.Map;
@@ -101,6 +103,28 @@ public class EurekaRegistrationTest {
         assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
+
+    }
+
+    @Test
+    void shouldFailIfNoIpAddressProvided() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)
+                    .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), null, 8406);
+        });
+
+        String expectedMessage = "Parameter ipAddress should be provided.";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
 
     }
 
