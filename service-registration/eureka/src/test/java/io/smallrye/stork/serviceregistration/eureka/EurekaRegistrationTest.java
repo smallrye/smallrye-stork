@@ -3,6 +3,8 @@ package io.smallrye.stork.serviceregistration.eureka;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
 import java.util.Map;
@@ -27,6 +29,7 @@ import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.impl.EurekaMetadataKey;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.core.buffer.Buffer;
@@ -77,7 +80,7 @@ public class EurekaRegistrationTest {
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
         eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)
-                .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), "acme.com", 8406).subscribe()
+                .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), "localhost", 8406).subscribe()
                 .with(success -> registrationLatch.countDown(), failure -> fail(""));
 
         await().atMost(Duration.ofSeconds(10))
@@ -92,6 +95,36 @@ public class EurekaRegistrationTest {
         HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
         assertThat(httpResponse).isNotNull();
         assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
+
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
+        assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
+        assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
+
+    }
+
+    @Test
+    void shouldFailIfNoIpAddressProvided() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)
+                    .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), null, 8406);
+        });
+
+        String expectedMessage = "Parameter ipAddress should be provided.";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
 
     }
 

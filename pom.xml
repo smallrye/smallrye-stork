@@ -42,7 +42,7 @@
         <vertx.version>4.5.10</vertx.version>
         <version.vertx-mutiny-bindings>3.15.1</version.vertx-mutiny-bindings>
         <!-- override the testcontainers version with the newest one -->
-        <version.testcontainers>1.20.2</version.testcontainers>
+        <version.testcontainers>1.20.3</version.testcontainers>
 
         <kubernetes-client.version>6.13.4</kubernetes-client.version>
         <!-- we cannot update to 2.x as jboss-logging does not support SLF4J 2 for now -->
@@ -58,7 +58,7 @@
         <revapi-reporter-text.version>0.15.0</revapi-reporter-text.version>
         <revapi.skip>true</revapi.skip>
 
-        <jandex-maven-plugin.version>3.2.2</jandex-maven-plugin.version>
+        <jandex-maven-plugin.version>3.2.3</jandex-maven-plugin.version>
 
         <plugin.version.failsafe>3.5.1</plugin.version.failsafe>
 

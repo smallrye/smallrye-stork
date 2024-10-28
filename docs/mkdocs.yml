@@ -14,6 +14,7 @@ nav:
   - Javadoc: 'https://javadoc.io/doc/io.smallrye.stork/smallrye-stork-api/latest/index.html'
   - Using Stork with Quarkus: './quarkus.md'
   - Service Discovery:
+    - Overview: 'service-discovery/overview.md'
     - Consul: 'service-discovery/consul.md'
     - DNS: 'service-discovery/dns.md'
     - Kubernetes: 'service-discovery/kubernetes.md'
@@ -23,6 +24,7 @@ nav:
     - Static List: 'service-discovery/static-list.md'
     - Custom Service Discovery: 'service-discovery/custom-service-discovery.md'
   - Load-Balancing:
+    - Overview: 'load-balancer/overview.md'
     - Round Robin: 'load-balancer/round-robin.md'
     - Random: 'load-balancer/random.md'
     - Least Requests: 'load-balancer/least-requests.md'
@@ -31,6 +33,7 @@ nav:
     - Sticky: 'load-balancer/sticky.md'
     - Custom Load Balancer: 'load-balancer/custom-load-balancer.md'
   - Service Registration:
+      - Overview: 'service-registration/overview.md'
       - Consul: 'service-registration/consul.md'
       - Eureka: 'service-registration/eureka.md'
       - Static List: 'service-registration/static-list.md'
