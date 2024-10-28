@@ -1,62 +1,29 @@
 name: SmallRye Release
-
+run-name: Perform ${{github.event.inputs.tag || github.ref_name}} Release
 on:
-  pull_request:
-    types: [closed]
-    paths:
-      - '.github/project.yml'
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release'
+        required: true
+
+permissions:
+  attestations: write
+  id-token: write
+  # Needed for the publish-* workflows
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    name: release
-    if: ${{github.event.pull_request.merged == true}}
-    env:
-      GITHUB_TOKEN: ${{secrets.RELEASE_TOKEN}}
-
-    steps:
-      - uses: radcortez/project-metadata-action@main
-        name: retrieve project metadata
-        id: metadata
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          metadata-file-path: '.github/project.yml'
-
-      - uses: actions/checkout@v4
-        with:
-          token: ${{secrets.RELEASE_TOKEN}}
-
-      - name: Java setup
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-          server-id: 'oss.sonatype'
-          server-username: 'MAVEN_DEPLOY_USERNAME'
-          server-password: 'MAVEN_DEPLOY_TOKEN'
-          gpg-private-key: ${{secrets.MAVEN_GPG_PRIVATE_KEY}}
-          gpg-passphrase: 'MAVEN_GPG_PASSPHRASE'
-
-      - name: maven release ${{steps.metadata.outputs.current-version}}
-        env:
-          MAVEN_DEPLOY_USERNAME: ${{secrets.MAVEN_DEPLOY_USERNAME}}
-          MAVEN_DEPLOY_TOKEN: ${{secrets.MAVEN_DEPLOY_TOKEN}}
-          MAVEN_GPG_PASSPHRASE: ${{secrets.MAVEN_GPG_PASSPHRASE}}
-        run: |
-          java -version
-          git config --global user.name "SmallRye CI"
-          git config --global user.email "smallrye@googlegroups.com"
-          git checkout -b release
-          mvn -B release:prepare -Prelease,coverage -DreleaseVersion=${{steps.metadata.outputs.current-version}} -DdevelopmentVersion=${{steps.metadata.outputs.next-version}}
-          git checkout ${{github.base_ref}}
-          git rebase release
-          mvn -B release:perform -Prelease
-          git push
-          git push --tags
-
-      - uses: radcortez/milestone-release-action@main
-        name: milestone release
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          milestone-title: ${{steps.metadata.outputs.current-version}}
+  perform-release:
+    name: Perform Release
+    uses: smallrye/.github/.github/workflows/perform-release.yml@main
+    secrets: inherit
+    with:
+      version: ${{github.event.inputs.tag || github.ref_name}}
