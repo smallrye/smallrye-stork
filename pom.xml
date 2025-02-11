@@ -61,6 +61,7 @@
         <jandex-maven-plugin.version>3.2.6</jandex-maven-plugin.version>
 
         <plugin.version.failsafe>3.5.2</plugin.version.failsafe>
+        <plugin.version.compiler>3.13.0</plugin.version.compiler>
 
         <sonar.projectName>SmallRye Stork</sonar.projectName>
         <sonar.projectKey>smallrye_smallrye-stork</sonar.projectKey>
@@ -303,6 +304,30 @@
                         <excludePackageNames>*.impl:*.impl.*</excludePackageNames>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${plugin.version.compiler}</version>
+                    <executions>
+                        <execution>
+                            <id>default-compile</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
+                                <annotationProcessorPaths>
+                                    <path>
+                                        <groupId>io.smallrye.stork</groupId>
+                                        <artifactId>stork-configuration-generator</artifactId>
+                                        <version>${project.version}</version>
+                                    </path>
+                                </annotationProcessorPaths>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -357,29 +382,6 @@
                             <sources>
                                 <source>target/generated-sources/annotations</source>
                             </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
-                            <annotationProcessorPaths>
-                                <path>
-                                    <groupId>io.smallrye.stork</groupId>
-                                    <artifactId>stork-configuration-generator</artifactId>
-                                    <version>${project.version}</version>
-                                </path>
-                            </annotationProcessorPaths>
                         </configuration>
                     </execution>
                 </executions>
