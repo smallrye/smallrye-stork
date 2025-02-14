@@ -20,7 +20,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>46</version>
+        <version>47</version>
     </parent>
 
     <groupId>io.smallrye.stork</groupId>
@@ -61,6 +61,7 @@
         <jandex-maven-plugin.version>3.2.6</jandex-maven-plugin.version>
 
         <plugin.version.failsafe>3.5.2</plugin.version.failsafe>
+        <plugin.version.compiler>3.13.0</plugin.version.compiler>
 
         <sonar.projectName>SmallRye Stork</sonar.projectName>
         <sonar.projectKey>smallrye_smallrye-stork</sonar.projectKey>
@@ -302,6 +303,30 @@
                     <configuration>
                         <excludePackageNames>*.impl:*.impl.*</excludePackageNames>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${plugin.version.compiler}</version>
+                    <executions>
+                        <execution>
+                            <id>default-compile</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <configuration>
+                                <annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
+                                <annotationProcessorPaths>
+                                    <path>
+                                        <groupId>io.smallrye.stork</groupId>
+                                        <artifactId>stork-configuration-generator</artifactId>
+                                        <version>${project.version}</version>
+                                    </path>
+                                </annotationProcessorPaths>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
