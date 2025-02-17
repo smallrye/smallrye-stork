@@ -8,7 +8,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -505,14 +504,16 @@ public class KubernetesServiceDiscoveryTest {
     void shouldGetInstancesFromCache() throws InterruptedException {
         String serviceName = "svc";
 
-        //Recording k8s cluster calls and build a endpoints as response
+        //Given a few instances for a svc service
+        List<Endpoints> endpointsList = List
+                .of(registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                        "10.96.96.233"));
+
+        //Recording k8s cluster calls and and build the response with the (previous registered) endpoints
         AtomicInteger serverHit = new AtomicInteger(0);
         server.expect().get().withPath("/api/v1/namespaces/test/endpoints?fieldSelector=metadata.name%3Dsvc")
                 .andReply(200, r -> {
                     serverHit.incrementAndGet();
-                    List<Endpoints> endpointsList = new ArrayList<>();
-                    endpointsList.add(registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
-                            "10.96.96.233"));
                     return new EndpointsListBuilder().withItems(endpointsList).build();
                 }).always();
 
