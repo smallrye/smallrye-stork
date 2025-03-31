@@ -38,7 +38,8 @@ public class StaticListServiceDiscoveryProvider
             for (String address : addresses.split(",")) {
                 address = address.trim();
                 try {
-                    HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(address, 80,
+                    HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(address,
+                            address.startsWith(StorkAddressUtils.HTTPS_PREFIX) ? 443 : 80,
                             "service '" + serviceName + "'");
                     addressList
                             .add(new DefaultServiceInstance(ServiceInstanceIds.next(), hostAndPort.host, hostAndPort.port,
