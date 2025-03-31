@@ -60,7 +60,7 @@
 
         <jandex-maven-plugin.version>3.2.7</jandex-maven-plugin.version>
 
-        <plugin.version.failsafe>3.5.2</plugin.version.failsafe>
+        <plugin.version.failsafe>3.5.3</plugin.version.failsafe>
         <plugin.version.compiler>3.14.0</plugin.version.compiler>
 
         <sonar.projectName>SmallRye Stork</sonar.projectName>
