@@ -38,6 +38,7 @@ import io.smallrye.stork.spi.config.SimpleServiceConfig;
 import io.smallrye.stork.spi.internal.LoadBalancerLoader;
 import io.smallrye.stork.spi.internal.ServiceDiscoveryLoader;
 import io.smallrye.stork.spi.internal.ServiceRegistrarLoader;
+import io.smallrye.stork.utils.InMemoryAddressesBackend;
 
 /**
  * The entrypoint for SmallRye Stork.
@@ -264,7 +265,16 @@ public final class Stork implements StorkServiceRegistry {
      * Closes the stork instance.
      */
     public static void shutdown() {
-        REFERENCE.set(null);
+        var previous = REFERENCE.getAndSet(null);
+        if (previous != null) {
+            previous.clear();
+        }
+        InMemoryAddressesBackend.clearAll();
+    }
+
+    private void clear() {
+        services.clear();
+        serviceRegistrars.clear();
     }
 
     /**
