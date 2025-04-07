@@ -93,7 +93,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         } else {
             endpointsOperation = client.endpoints().inNamespace(namespace);
         }
-        endpointsOperation.inform(new ResourceEventHandler<Endpoints>() {
+        endpointsOperation.withField(METADATA_NAME, application).inform(new ResourceEventHandler<Endpoints>() {
             @Override
             public void onAdd(Endpoints obj) {
                 LOGGER.info("Endpoint added: {}", obj.getMetadata().getName());
@@ -127,6 +127,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     @Override
     public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
+        invalidated.set(false);
         Uni<Map<Endpoints, List<Pod>>> endpointsUni = Uni.createFrom().emitter(
                 emitter -> {
                     vertx.executeBlocking(future -> {
@@ -172,6 +173,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                             LOGGER.error("Unable to retrieve the endpoint from the {} service", application,
                                     result.cause());
                             emitter.fail(result.cause());
+                            invalidated.set(true);
                         }
                     });
                 });
