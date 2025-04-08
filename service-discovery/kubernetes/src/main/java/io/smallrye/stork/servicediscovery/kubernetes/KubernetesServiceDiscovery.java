@@ -127,7 +127,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     @Override
     public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
-        invalidated.set(false);
+//        invalidated.set(false);
         Uni<Map<Endpoints, List<Pod>>> endpointsUni = Uni.createFrom().emitter(
                 emitter -> {
                     vertx.executeBlocking(future -> {
