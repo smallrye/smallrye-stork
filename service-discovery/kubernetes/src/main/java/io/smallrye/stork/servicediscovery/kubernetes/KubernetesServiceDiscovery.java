@@ -83,6 +83,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
         Config k8sConfig = new ConfigBuilder(base)
                 .withMasterUrl(masterUrl)
+                .withRequestRetryBackoffLimit(0) //TODO: expose this in the config
                 .withNamespace(namespace).build();
         this.client = new KubernetesClientBuilder().withConfig(k8sConfig).build();
         this.vertx = vertx;
