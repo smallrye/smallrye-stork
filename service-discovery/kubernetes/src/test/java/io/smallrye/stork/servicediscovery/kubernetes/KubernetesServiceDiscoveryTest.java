@@ -555,7 +555,7 @@ public class KubernetesServiceDiscoveryTest {
 
     /**
      * Verifies that the cluster is reached when the cache is invalidated. No retries.
-     *  The cache is only reset when the call is success but this doesn't trigger multiple calls because retries are not enabled.
+     * The cache is only reset when the call is success but this doesn't trigger multiple calls because retries are not enabled.
      *
      * <p>
      * This test ensures that the system does not enter a loop of cluster calls when the cluster fails,
@@ -594,7 +594,7 @@ public class KubernetesServiceDiscoveryTest {
 
         //We trigger an event in the cluster just to invalidate cache
         registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
-                        "10.96.96.233");
+                "10.96.96.233");
 
         serviceDiscovery.getServiceInstances()
                 .onFailure().invoke(th -> fail("Expected recovery on failure"))
