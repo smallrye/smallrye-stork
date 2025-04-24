@@ -51,7 +51,7 @@ public class EurekaDiscoveryCDITest {
     public static final int EUREKA_PORT = 8761;
 
     @Container
-    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.2"))
+    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.3"))
             .withExposedPorts(EUREKA_PORT);
 
     private static Vertx vertx = Vertx.vertx();;

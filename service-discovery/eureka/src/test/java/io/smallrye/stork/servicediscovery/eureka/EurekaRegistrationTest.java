@@ -39,7 +39,7 @@ import io.vertx.mutiny.ext.web.client.WebClient;
 public class EurekaRegistrationTest {
 
     @Container
-    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.2"))
+    public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.3"))
             .withExposedPorts(EUREKA_PORT);
     private static Vertx vertx = Vertx.vertx();
     private WebClient client;

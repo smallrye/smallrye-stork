@@ -38,7 +38,6 @@ import io.smallrye.stork.spi.config.SimpleServiceConfig;
 import io.smallrye.stork.spi.internal.LoadBalancerLoader;
 import io.smallrye.stork.spi.internal.ServiceDiscoveryLoader;
 import io.smallrye.stork.spi.internal.ServiceRegistrarLoader;
-import io.smallrye.stork.utils.InMemoryAddressesBackend;
 
 /**
  * The entrypoint for SmallRye Stork.
@@ -269,7 +268,7 @@ public final class Stork implements StorkServiceRegistry {
         if (previous != null) {
             previous.clear();
         }
-        InMemoryAddressesBackend.clearAll();
+        //        InMemoryAddressesBackend.clearAll();
     }
 
     private void clear() {
