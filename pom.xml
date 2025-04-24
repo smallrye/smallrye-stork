@@ -53,7 +53,7 @@
         <version.spring-boot>3.0.7</version.spring-boot>
 
         <revapi-maven-plugin.version>0.15.1</revapi-maven-plugin.version>
-        <revapi-java.version>0.28.3</revapi-java.version>
+        <revapi-java.version>0.28.4</revapi-java.version>
         <revapi-reporter-json.version>0.5.1</revapi-reporter-json.version>
         <revapi-reporter-text.version>0.15.1</revapi-reporter-text.version>
         <revapi.skip>true</revapi.skip>
