@@ -106,7 +106,10 @@ This is done by creating an [Informer](https://www.javadoc.io/static/io.fabric8/
 
 Note that: 
  - the cache is invalidated when an event is received. 
- - the cache is validated once the instances are retrieved from the cluster, in the `fetchNewServiceInstances` method.
- - the `cache` method is overrided to customize the expiration strategy. In this case the collection of service instances will be kept until an event occurs.
+ - the cache is validated, if and only if, the instances are retrieved successfully from the cluster, in the `fetchNewServiceInstances` method.
+ - In case of an error, the last successfully retrieved instances are returned, and a retry mechanism is triggered. 
+The system will attempt to contact the cluster up to the number of times specified by request-retry-backoff-limit, waiting request-retry-backoff-interval milliseconds between each attempt.
+By default, retries are disabled to prevent the system from entering an infinite loop of calls to an unresponsive cluster.
+ - the `cache` method is overridden to customize the expiration strategy. In this case the collection of service instances will be kept until an event occurs.
 
 

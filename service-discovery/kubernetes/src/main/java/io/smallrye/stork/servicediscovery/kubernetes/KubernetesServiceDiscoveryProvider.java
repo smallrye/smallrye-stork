@@ -21,6 +21,8 @@ import io.vertx.core.Vertx;
 @ServiceDiscoveryAttribute(name = "port-name", description = "The Kubernetes application port name. If not defined, when exposing multiple ports, Stork will use the first one.")
 @ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", defaultValue = CachingServiceDiscovery.DEFAULT_REFRESH_INTERVAL)
 @ServiceDiscoveryAttribute(name = "secure", description = "Whether the connection with the service should be encrypted with TLS.")
+@ServiceDiscoveryAttribute(name = "request-retry-backoff-limit", description = "Maximum number of retry attempts allowed after a request failure.")
+@ServiceDiscoveryAttribute(name = "request-retry-backoff-interval", description = "Amount of time to wait between retry attempts after a request fails.")
 @ApplicationScoped
 public class KubernetesServiceDiscoveryProvider
         implements ServiceDiscoveryProvider<KubernetesConfiguration> {

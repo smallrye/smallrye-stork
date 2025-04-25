@@ -54,6 +54,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     private final String namespace;
     private final boolean secure;
     private final Vertx vertx;
+    private final int requestRetryBackoffLimit;
+    private final int requestRetryBackoffInterval;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
@@ -73,6 +75,10 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         this.application = config.getApplication() == null ? serviceName : config.getApplication();
         this.namespace = config.getK8sNamespace() == null ? base.getNamespace() : config.getK8sNamespace();
         this.portName = config.getPortName();
+        this.requestRetryBackoffInterval = config.getRequestRetryBackoffInterval() == null ? 0
+                : Integer.parseInt(config.getRequestRetryBackoffInterval());
+        this.requestRetryBackoffLimit = config.getRequestRetryBackoffLimit() == null ? 0
+                : Integer.parseInt(config.getRequestRetryBackoffLimit());
 
         allNamespaces = namespace != null && namespace.equalsIgnoreCase("all");
 
@@ -83,7 +89,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
         Config k8sConfig = new ConfigBuilder(base)
                 .withMasterUrl(masterUrl)
-                .withRequestRetryBackoffLimit(0) //TODO: expose this in the config
+                .withRequestRetryBackoffLimit(requestRetryBackoffLimit)
+                .withRequestRetryBackoffInterval(requestRetryBackoffInterval)
                 .withNamespace(namespace).build();
         this.client = new KubernetesClientBuilder().withConfig(k8sConfig).build();
         this.vertx = vertx;
