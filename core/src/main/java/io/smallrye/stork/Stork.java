@@ -268,7 +268,6 @@ public final class Stork implements StorkServiceRegistry {
         if (previous != null) {
             previous.clear();
         }
-        //        InMemoryAddressesBackend.clearAll();
     }
 
     private void clear() {
