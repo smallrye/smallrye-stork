@@ -95,7 +95,7 @@ Then, it can select the instance.
 
 Supported attributes are the following:
 
---8<-- "../service-discovery/kubernetes/target/classes/META-INF/stork-docs/kubernetes-sd-attributes.txt"
+--8<-- "target/attributes/META-INF/stork-docs/kubernetes-sd-attributes.txt"
 
 
 ## Caching the service instances

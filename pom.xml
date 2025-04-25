@@ -28,31 +28,29 @@
     <version>2.6.2-SNAPSHOT</version>
 
     <packaging>pom</packaging>
-    <name>SmallRye Service Discovery : Parent</name>
+    <name>SmallRye Stork : Parent</name>
     <url>http://smallrye.io</url>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
 
-        <version.assertj>3.25.3</version.assertj>
+        <version.assertj>3.26.3</version.assertj>
         <version.microprofile-config-api>3.1</version.microprofile-config-api>
-        <version.mutiny>2.5.7</version.mutiny>
+        <version.mutiny>2.7.0</version.mutiny>
         <version.smallrye-config>3.5.4</version.smallrye-config>
 
-        <vertx.version>4.5.1</vertx.version>
-        <version.vertx-mutiny-bindings>3.10.0</version.vertx-mutiny-bindings>
+        <vertx.version>4.5.10</vertx.version>
+        <version.vertx-mutiny-bindings>3.17.1</version.vertx-mutiny-bindings>
         <!-- override the testcontainers version with the newest one -->
-        <version.testcontainers>1.19.6</version.testcontainers>
+        <version.testcontainers>1.20.4</version.testcontainers>
 
-
-        <kubernetes-client.version>6.13.3</kubernetes-client.version>
+        <kubernetes-client.version>6.13.4</kubernetes-client.version>
         <!-- we cannot update to 2.x as jboss-logging does not support SLF4J 2 for now -->
-        <version.slf4j>2.0.12</version.slf4j>
+        <version.slf4j>2.0.16</version.slf4j>
         <version.mockito>5.2.0</version.mockito>
-        <version.jackson>2.16.1</version.jackson>
-        <version.weld>5.1.2.Final</version.weld>
-        <version.spring-boot>2.7.18</version.spring-boot>
+        <version.jackson>2.18.2</version.jackson>
+        <version.weld>6.0.0.Final</version.weld>
+        <version.spring-boot>3.0.7</version.spring-boot>
 
         <revapi-maven-plugin.version>0.15.0</revapi-maven-plugin.version>
         <revapi-java.version>0.28.1</revapi-java.version>
@@ -60,9 +58,9 @@
         <revapi-reporter-text.version>0.15.0</revapi-reporter-text.version>
         <revapi.skip>true</revapi.skip>
 
-        <jandex-maven-plugin.version>3.1.6</jandex-maven-plugin.version>
+        <jandex-maven-plugin.version>3.2.3</jandex-maven-plugin.version>
 
-        <plugin.version.failsafe>3.2.5</plugin.version.failsafe>
+        <plugin.version.failsafe>3.5.2</plugin.version.failsafe>
 
         <sonar.projectName>SmallRye Stork</sonar.projectName>
         <sonar.projectKey>smallrye_smallrye-stork</sonar.projectKey>
@@ -107,7 +105,7 @@
             <dependency>
                 <groupId>jakarta.enterprise</groupId>
                 <artifactId>jakarta.enterprise.cdi-api</artifactId>
-                <version>4.0.1</version>
+                <version>4.1.0</version>
             </dependency>
 
             <!-- Jackson dependencies, imported as a BOM -->
@@ -189,12 +187,12 @@
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-spi</artifactId>
-                <version>5.0.Final</version>
+                <version>6.0.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-api</artifactId>
-                <version>5.0.Final</version>
+                <version>6.0.Final</version>
             </dependency>
 
             <dependency>
@@ -206,7 +204,7 @@
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-junit5</artifactId>
-                <version>4.0.2.Final</version>
+                <version>4.0.3.Final</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -300,7 +298,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.6.3</version>
+                    <version>3.11.2</version>
                     <configuration>
                         <excludePackageNames>*.impl:*.impl.*</excludePackageNames>
                     </configuration>
@@ -314,6 +312,7 @@
                 <configuration>
                     <skip>${revapi.skip}</skip>
                     <checkDependencies>false</checkDependencies>
+                    <oldVersion>2.6.1</oldVersion>
                 </configuration>
             </plugin>
             <plugin>
@@ -346,7 +345,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <!-- Mostly for IDE to add the generated-sources to the classpath -->
-                <version>3.5.0</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>add-generated-sources</id>

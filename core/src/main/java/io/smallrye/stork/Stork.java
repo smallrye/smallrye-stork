@@ -264,7 +264,15 @@ public final class Stork implements StorkServiceRegistry {
      * Closes the stork instance.
      */
     public static void shutdown() {
-        REFERENCE.set(null);
+        var previous = REFERENCE.getAndSet(null);
+        if (previous != null) {
+            previous.clear();
+        }
+    }
+
+    private void clear() {
+        services.clear();
+        serviceRegistrars.clear();
     }
 
     /**
