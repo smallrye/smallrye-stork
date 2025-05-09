@@ -39,7 +39,8 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
             int defaultPort) {
         checkAddressNotNull(ipAddress);
 
-        String consulId = metadata.getMetadata().get(ConsulMetadataKey.META_CONSUL_SERVICE_ID).toString();
+        String consulId = metadata.getMetadata().isEmpty() ? serviceName
+                : metadata.getMetadata().get(ConsulMetadataKey.META_CONSUL_SERVICE_ID).toString();
 
         List<String> tags = new ArrayList<>();
         return Uni.createFrom().emitter(em -> client.registerService(

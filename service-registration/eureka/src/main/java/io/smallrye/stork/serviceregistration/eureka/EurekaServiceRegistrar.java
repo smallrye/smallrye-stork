@@ -43,8 +43,11 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
         checkAddressNotNull(ipAddress);
 
+        String eurekaId = metadata.getMetadata().isEmpty() ? serviceName
+                : metadata.getMetadata().get(EurekaMetadataKey.META_EUREKA_SERVICE_ID).toString();
+
         return registerApplicationInstance(client, serviceName,
-                metadata.getMetadata().get(EurekaMetadataKey.META_EUREKA_SERVICE_ID).toString(), ipAddress, null,
+                eurekaId, ipAddress, null,
                 defaultPort, null, -1, "UP", "");
 
     }
