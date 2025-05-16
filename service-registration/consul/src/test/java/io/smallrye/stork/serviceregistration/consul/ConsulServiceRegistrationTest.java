@@ -55,6 +55,39 @@ public class ConsulServiceRegistrationTest {
     }
 
     @Test
+    void shouldRegisterConsulIdDefaultingToServiceName() {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+        consulRegistrar.registerServiceInstance(serviceName, "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        assertThat(subscriber.awaitItem().getItem()).isNotNull();
+    }
+
+    @Test
     void shouldRegisterServiceInstancesInConsul() throws InterruptedException {
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
