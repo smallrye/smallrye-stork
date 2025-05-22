@@ -205,7 +205,7 @@
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-junit5</artifactId>
-                <version>5.0.0.Final</version>
+                <version>5.0.1.Final</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
