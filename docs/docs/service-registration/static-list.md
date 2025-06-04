@@ -32,3 +32,19 @@ quarkus.stork.my-service.service-registrar.type=static
 Static service registrar is configured with the following parameters:
 
 --8<-- "target/attributes/META-INF/stork-docs/static-sr-attributes.txt"
+
+## Service deregistration configuration
+
+There is no specific configuration required to enable deregistration; however, you must ensure that a consul service registrar is configured for the service:
+
+=== "stork standalone"
+```properties
+stork.my-service.service-registrar.type=static
+```
+
+=== "stork in quarkus"
+```properties
+quarkus.stork.my-service.service-registrar.type=static
+```
+
+As with registration, deregistration relies on the service name. 

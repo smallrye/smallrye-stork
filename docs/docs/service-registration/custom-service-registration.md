@@ -24,7 +24,7 @@ The former brings classes necessary to implement custom registrar, the latter co
 
 ## Implementing a service registrar provider
 
-Service discovery implementation consists of three elements:
+Service registration implementation consists of three elements:
 
 - `ServiceRegistrar` which is responsible for registering service instances for a single Stork service.
 - `ServiceRegistrarProvider` which creates instances of `ServiceRegistrar` for a given service registrar _type_.
@@ -55,7 +55,7 @@ A service registrar provider class should look as follows:
 
 Note, that the `ServiceRegistrarProvider` interface takes a configuration class as a parameter. This configuration class 
 is generated automatically by the _Configuration Generator_. 
-Its name is created by appending `Configuration` to the service discovery type, such as `AcmeConfiguration`.
+Its name is created by appending `Configuration` to the service registrar type, such as `AcmeConfiguration`.
 
 The next step is to implement the `ServiceRegistrar` interface:
 
@@ -64,11 +64,16 @@ The next step is to implement the `ServiceRegistrar` interface:
 ```
 
 This implementation is simplistic.
-Typically, instead of creating a service instance with values from the configuration, you would connect to a service discovery backend, look for the service and build the list of service instance accordingly.
+Typically, instead of creating a service instance with values from the configuration, you would connect to a service registration backend, look for the service and build the list of service instance accordingly.
 That's why the method returns a `Uni`.
 Most of the time, the lookup is a remote operation.
 
 As you can see, the `AcmeConfiguration` class gives access to the configuration attribute.
+
+#### Implement your own service deregistration mechanism
+
+Finally, you can implement your own service deregistration mechanism in `deregisterServiceInstance` method.
+
 
 ## Using your service registrar
 
@@ -90,4 +95,4 @@ Then, in the configuration, just add:
     ```
 
 
-Then, Stork will use your implementation to register the service instances using the `my-service` backend.
+Then, Stork will use your implementation to register/deregister the service instances using the `my-service` backend.
