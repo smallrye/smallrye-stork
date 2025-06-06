@@ -110,6 +110,10 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <source>16</source>
+                    <target>16</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>

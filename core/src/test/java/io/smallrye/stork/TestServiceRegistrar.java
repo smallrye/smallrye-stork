@@ -23,4 +23,9 @@ public class TestServiceRegistrar implements ServiceRegistrar<TestMetadataKey> {
             int defaultPort) {
         return null;
     }
+
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName) {
+        return null;
+    }
 }

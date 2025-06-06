@@ -1,4 +1,4 @@
-# Eureka Service Discovery
+# Eureka Service Registration
 
 [Eureka](https://github.com/Netflix/eureka) is a RESTful service that is primarily used in the AWS cloud for the purpose of discovery, load balancing, and failover of middle-tier servers.
 
@@ -37,3 +37,19 @@ quarkus.stork.my-service.service-registrar.eureka-port=8761
 Eureka service registrar is configured with the following parameters:
 
 --8<-- "target/attributes/META-INF/stork-docs/eureka-sr-attributes.txt"
+
+## Service deregistration configuration
+
+There is no specific configuration required to enable deregistration; however, you must ensure that a consul service registrar is configured for the service:
+
+=== "stork standalone"
+```properties
+stork.my-service.service-registrar.type=eureka
+```
+
+=== "stork in quarkus"
+```properties
+quarkus.stork.my-service.service-registrar.type=eureka
+```
+
+As with registration, deregistration relies on the service name. 

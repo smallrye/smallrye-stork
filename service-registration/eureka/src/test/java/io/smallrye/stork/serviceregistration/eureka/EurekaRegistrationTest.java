@@ -43,6 +43,7 @@ public class EurekaRegistrationTest {
     @Container
     public GenericContainer<?> eureka = new GenericContainer<>(DockerImageName.parse("quay.io/amunozhe/eureka-server:0.3"))
             .withExposedPorts(EUREKA_PORT);
+
     private static Vertx vertx = Vertx.vertx();
     private WebClient client;
 
@@ -58,6 +59,8 @@ public class EurekaRegistrationTest {
                 .setDefaultPort(eureka.getMappedPort(EUREKA_PORT)));
         port = eureka.getMappedPort(EUREKA_PORT);
         host = eureka.getHost();
+        System.out.println("Eureka host: " + host);
+        System.out.println("Eureka port: " + port);
     }
 
     @AfterEach
@@ -71,7 +74,8 @@ public class EurekaRegistrationTest {
     public void testRegistrationServiceInstances(TestInfo info) {
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
-                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port), "eureka-health-check-url",
+                        "/q/health/live"));
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
@@ -103,6 +107,7 @@ public class EurekaRegistrationTest {
         assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
+        assertThat(jsonServiceInstance.getString("healthCheckUrl")).isEqualTo("/q/health/live");
 
     }
 
@@ -163,6 +168,61 @@ public class EurekaRegistrationTest {
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
+
+    }
+
+    @Test
+    public void shouldDeregisterEurekaIdDefaultingToServiceName(TestInfo info) {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "localhost", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<HttpResponse<Buffer>> response = client.get("/eureka/apps/my-service")
+                .putHeader("Accept", "application/json;charset=UTF-8").send();
+
+        UniAssertSubscriber<HttpResponse<Buffer>> subscriber = response
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
+        assertThat(httpResponse).isNotNull();
+        assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
+
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
+        assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
+        assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
+        CountDownLatch deregistrationLatch = new CountDownLatch(1);
+        eurekaServiceRegistrar.deregisterServiceInstance(serviceName)
+                .subscribe()
+                .with(success -> deregistrationLatch.countDown(), failure -> fail("Failure: " + failure.getMessage()));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> deregistrationLatch.getCount() == 0L);
+
+        Uni<HttpResponse<Buffer>> response2 = client.get("/eureka/apps/my-service")
+                .putHeader("Accept", "application/json;charset=UTF-8").send();
+
+        UniAssertSubscriber<HttpResponse<Buffer>> subscriber2 = response2
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        HttpResponse<Buffer> httpResponse2 = subscriber2.awaitItem().getItem();
+        assertThat(httpResponse2).isNotNull();
+        assertThat(httpResponse2.statusCode()).isEqualTo(404);
 
     }
 

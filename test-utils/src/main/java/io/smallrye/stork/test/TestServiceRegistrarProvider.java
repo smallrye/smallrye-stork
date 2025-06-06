@@ -70,6 +70,12 @@ public class TestServiceRegistrarProvider
             registrations.add(new Registration(serviceRegistrarName, config, metadata, serviceName, ipAddress, defaultPort));
             return Uni.createFrom().voidItem();
         }
+
+        @Override
+        public Uni<Void> deregisterServiceInstance(String serviceName) {
+            registrations.removeIf(registration -> registration.serviceName.equals(serviceName));
+            return Uni.createFrom().voidItem();
+        }
     }
 
     public enum TestMetadata implements MetadataKey {

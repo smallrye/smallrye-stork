@@ -33,4 +33,10 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
         return Uni.createFrom().voidItem();
     }
 
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName) {
+        InMemoryAddressesBackend.clear(serviceName);
+        return Uni.createFrom().voidItem();
+    }
+
 }
