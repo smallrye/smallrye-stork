@@ -58,7 +58,6 @@ public class ConsulServiceDiscoveryTest {
         consulId = 0L;
         client = ConsulClient.create(Vertx.vertx(),
                 new ConsulClientOptions().setHost("localhost").setPort(consulPort));
-        System.out.println("Consul port " + consulPort);
     }
 
     @Test

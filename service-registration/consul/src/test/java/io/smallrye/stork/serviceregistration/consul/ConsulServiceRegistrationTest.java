@@ -1,6 +1,5 @@
 package io.smallrye.stork.serviceregistration.consul;
 
-import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
@@ -55,7 +54,6 @@ public class ConsulServiceRegistrationTest {
         consulPort = consul.getMappedPort(8500);
         client = ConsulClient.create(Vertx.vertx(),
                 new ConsulClientOptions().setHost("localhost").setPort(consulPort));
-        System.out.println("Consul port " + consulPort);
     }
 
     @Test
@@ -131,9 +129,9 @@ public class ConsulServiceRegistrationTest {
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
                 null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
-                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "consul-health-check-url",
-                        "/q/health/live", "consul-health-check-interval", "10s",
-                        "consul-health-check-deregister-after", "30s"));
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "health-check-url",
+                        "/q/health/live", "health-check-interval", "10s",
+                        "health-check-deregister-after", "30s"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
         ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();

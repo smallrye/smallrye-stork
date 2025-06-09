@@ -50,16 +50,16 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
         ServiceOptions serviceOptions = new ServiceOptions().setId(consulId).setName(serviceName).setTags(tags)
                 .setAddress(ipAddress).setPort(defaultPort);
 
-        if (config.getConsulHealthCheckUrl() != null && !config.getConsulHealthCheckUrl().isBlank()) {
+        if (config.getHealthCheckUrl() != null && !config.getHealthCheckUrl().isBlank()) {
             CheckOptions check = new CheckOptions()
-                    .setHttp(config.getConsulHealthCheckUrl());
+                    .setHttp(config.getHealthCheckUrl());
 
-            if (config.getConsulHealthCheckInterval() != null) {
-                check.setInterval(config.getConsulHealthCheckInterval());
+            if (config.getHealthCheckInterval() != null) {
+                check.setInterval(config.getHealthCheckInterval());
             }
 
-            if (config.getConsulHealthCheckDeregisterAfter() != null) {
-                check.setDeregisterAfter(config.getConsulHealthCheckDeregisterAfter());
+            if (config.getHealthCheckDeregisterAfter() != null) {
+                check.setDeregisterAfter(config.getHealthCheckDeregisterAfter());
             }
             serviceOptions.setCheckOptions(check);
         }

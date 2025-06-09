@@ -95,8 +95,8 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
             registration
                     .put("secureVipAddress", secureVirtualAddress);
         }
-        if (config.getEurekaHealthCheckUrl() != null && !config.getEurekaHealthCheckUrl().isBlank()) {
-            registration.put("healthCheckUrl", config.getEurekaHealthCheckUrl());
+        if (config.getHealthCheckUrl() != null && !config.getHealthCheckUrl().isBlank()) {
+            registration.put("healthCheckUrl", config.getHealthCheckUrl());
         }
         if (securePort != -1) {
             registration.put("securePort", new JsonObject().put("$", securePort).put("@enabled", "true"));
