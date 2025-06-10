@@ -59,8 +59,6 @@ public class EurekaRegistrationTest {
                 .setDefaultPort(eureka.getMappedPort(EUREKA_PORT)));
         port = eureka.getMappedPort(EUREKA_PORT);
         host = eureka.getHost();
-        System.out.println("Eureka host: " + host);
-        System.out.println("Eureka port: " + port);
     }
 
     @AfterEach

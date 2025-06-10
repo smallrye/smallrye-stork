@@ -51,4 +51,7 @@ stork.my-service.service-registrar.type=consul
 quarkus.stork.my-service.service-registrar.type=consul
 ```
 
-As with registration, deregistration relies on the service name. 
+As with registration, deregistration relies on the service name.
+
+Note that standalone Stork does not handle automatic service deregistration. 
+In contrast, the Quarkus Stork extension automatically deregisters service instances when the application terminates.
