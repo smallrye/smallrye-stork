@@ -27,4 +27,8 @@ This feature complements the registration mechanism.
 This operation is typically should be triggered when a service instance is shut down or no longer available, helping maintain a consistent and accurate service registry.
 To enable service deregistration, you can invoke the `deregisterServiceInstance` method on the `ServiceRegistrar` implementation programmatically.
 
+**Note**: When used in standalone mode, Stork does **not** automatically handle service instance registration or deregistration. 
+However, when using the quarkus-stork-registration extension within a Quarkus application, 
+service instances are automatically registered at application startup and deregistered upon shutdown, unless this behavior is explicitly disabled.
+
 In the following sections you can have more details about each specific implementation.
