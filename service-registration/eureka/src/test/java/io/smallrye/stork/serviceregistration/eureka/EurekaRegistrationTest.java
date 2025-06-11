@@ -72,7 +72,7 @@ public class EurekaRegistrationTest {
     public void testRegistrationServiceInstances(TestInfo info) {
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
-                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port), "eureka-health-check-url",
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port), "health-check-url",
                         "/q/health/live"));
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
