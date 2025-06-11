@@ -125,6 +125,49 @@ public class ConsulServiceRegistrationTest {
     }
 
     @Test
+    void shouldRegisterServiceInstancesUsingOptionsInConsul() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+        ServiceRegistrar.RegistrarOptions registrarOptions = new ServiceRegistrar.RegistrarOptions(serviceName, "10.96.96.231",
+                8406, List.of("v1.2.3", "canary"), Map.of("protocol", "https",
+                        "max_connections", "100", "team", "platform"));
+        consulRegistrar.registerServiceInstance(registrarOptions).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        ServiceEntryList item = subscriber.awaitItem().getItem();
+        assertThat(item).isNotNull();
+        item.getList().stream().findFirst().ifPresent(service -> {
+            assertThat(service.getService().getTags()).containsExactlyInAnyOrder("v1.2.3", "canary");
+            assertThat(service.getService().getMeta()).containsAllEntriesOf(Map.of("protocol", "https",
+                    "max_connections", "100", "team", "platform"));
+        });
+
+    }
+
+    @Test
     void shouldRegisterServiceInstancesWithHealthCheckInConsul() throws InterruptedException {
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
