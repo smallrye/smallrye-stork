@@ -52,6 +52,31 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
     }
 
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName) {
+        return client.get("/eureka/apps/" + serviceName)
+                .putHeader("Accept", "application/json;charset=UTF-8")
+                .send().invoke(() -> log.info("Instance found for '{}'", serviceName))
+                .flatMap(item -> {
+                    JsonObject body = item.bodyAsJsonObject();
+                    JsonObject application = body.getJsonObject("application");
+                    JsonObject instance = application.getJsonArray("instance").getJsonObject(0);
+                    return deregisterApplicationInstance(application.getString("name"), instance.getString("instanceId"));
+                });
+
+    }
+
+    private Uni<Void> deregisterApplicationInstance(String applicationId, String instanceId) {
+        return client.delete("/eureka/apps/" + applicationId + "/" + instanceId)
+                .putHeader("Accept", "application/xml")
+                .send()
+                .onFailure()
+                .invoke(err -> log.error("Unable to deregister '{}' of '{}'. Error: {}", instanceId, applicationId,
+                        err.getMessage()))
+                .onItem().invoke(resp -> log.info("'" + instanceId + "'" + " successfully deregistered")).replaceWithVoid();
+
+    }
+
     private Uni<Void> registerApplicationInstance(WebClient client, String applicationId, String instanceId,
             String ipAddress, String virtualAddress, int port,
             String secureVirtualAddress, int securePort, String state, String path) {
@@ -69,6 +94,9 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
         if (secureVirtualAddress != null) {
             registration
                     .put("secureVipAddress", secureVirtualAddress);
+        }
+        if (config.getHealthCheckUrl() != null && !config.getHealthCheckUrl().isBlank()) {
+            registration.put("healthCheckUrl", config.getHealthCheckUrl());
         }
         if (securePort != -1) {
             registration.put("securePort", new JsonObject().put("$", securePort).put("@enabled", "true"));

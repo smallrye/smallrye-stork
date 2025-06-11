@@ -20,4 +20,10 @@ public class AcmeServiceRegistrar implements ServiceRegistrar {
         //do whatever is needed for registering service instance
         return Uni.createFrom().voidItem();
     }
+
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName) {
+        //do whatever is needed for deregistering service instance
+        return Uni.createFrom().voidItem();
+    }
 }

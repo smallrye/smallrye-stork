@@ -18,4 +18,6 @@ public interface ServiceRegistrar<MetadataKeyType extends Enum<MetadataKeyType> 
     Uni<Void> registerServiceInstance(String serviceName, Metadata<MetadataKeyType> metadata, String ipAddress,
             int defaultPort);
 
+    Uni<Void> deregisterServiceInstance(String serviceName);
+
 }
