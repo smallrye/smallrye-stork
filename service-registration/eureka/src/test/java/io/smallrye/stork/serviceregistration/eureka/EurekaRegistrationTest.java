@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -106,6 +107,52 @@ public class EurekaRegistrationTest {
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
         assertThat(jsonServiceInstance.getString("healthCheckUrl")).isEqualTo("/q/health/live");
+
+    }
+
+    @Test
+    public void testRegistrationServiceInstancesWithOptions(TestInfo info) {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port), "health-check-url",
+                        "/q/health/live"));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+
+        ServiceRegistrar.RegistrarOptions registrarOptions = new ServiceRegistrar.RegistrarOptions(serviceName, "localhost",
+                8406, List.of(), Map.of("protocol", "https", "max_connections", "100", "team", "platform"));
+
+        eurekaServiceRegistrar.registerServiceInstance(registrarOptions).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<HttpResponse<Buffer>> response = client.get("/eureka/apps/my-service")
+                .putHeader("Accept", "application/json;charset=UTF-8").send();
+
+        UniAssertSubscriber<HttpResponse<Buffer>> subscriber = response
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
+        assertThat(httpResponse).isNotNull();
+        assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
+
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
+        assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
+        assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
+        assertThat(jsonServiceInstance.getString("healthCheckUrl")).isEqualTo("/q/health/live");
+        assertThat(jsonServiceInstance.getJsonObject("metadata").getString("protocol")).isEqualTo("https");
+        assertThat(jsonServiceInstance.getJsonObject("metadata").getString("max_connections")).isEqualTo("100");
+        assertThat(jsonServiceInstance.getJsonObject("metadata").getString("team")).isEqualTo("platform");
 
     }
 

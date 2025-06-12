@@ -2,8 +2,8 @@ package io.smallrye.stork.serviceregistration.consul;
 
 import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +39,16 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
     }
 
     @Override
+    public Uni<Void> registerServiceInstance(RegistrarOptions options) {
+        checkRegistrarOptionsNotNull(options);
+        checkAddressNotNull(options.ipAddress());
+
+        return registerInstance(options.serviceName(), options.ipAddress(), options.defaultPort(), options.serviceName(),
+                options.tags(), options.metadata());
+
+    }
+
+    @Override
     public Uni<Void> registerServiceInstance(String serviceName, Metadata<ConsulMetadataKey> metadata, String ipAddress,
             int defaultPort) {
         checkAddressNotNull(ipAddress);
@@ -46,9 +56,13 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
         String consulId = metadata.getMetadata().isEmpty() ? serviceName
                 : metadata.getMetadata().get(ConsulMetadataKey.META_CONSUL_SERVICE_ID).toString();
 
-        List<String> tags = new ArrayList<>();
-        ServiceOptions serviceOptions = new ServiceOptions().setId(consulId).setName(serviceName).setTags(tags)
-                .setAddress(ipAddress).setPort(defaultPort);
+        return registerInstance(serviceName, ipAddress, defaultPort, consulId, List.of(), Map.of());
+    }
+
+    private Uni<Void> registerInstance(String serviceName, String ipAddress, int defaultPort, String consulId,
+            List<String> tags, Map<String, String> metadata) {
+        ServiceOptions serviceOptions = new ServiceOptions().setId(consulId).setName(serviceName).setAddress(ipAddress)
+                .setPort(defaultPort).setTags(tags).setMeta(metadata);
 
         if (config.getHealthCheckUrl() != null && !config.getHealthCheckUrl().isBlank()) {
             CheckOptions check = new CheckOptions()

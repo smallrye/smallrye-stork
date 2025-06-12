@@ -1,5 +1,7 @@
 package io.smallrye.stork.serviceregistration.eureka;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,18 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
         return registerApplicationInstance(client, serviceName,
                 eurekaId, ipAddress, null,
-                defaultPort, null, -1, "UP", "");
+                defaultPort, null, -1, "UP", "", null);
+
+    }
+
+    @Override
+    public Uni<Void> registerServiceInstance(RegistrarOptions options) {
+        checkRegistrarOptionsNotNull(options);
+        checkAddressNotNull(options.ipAddress());
+
+        return registerApplicationInstance(client, options.serviceName(),
+                options.serviceName(), options.ipAddress(), null,
+                options.defaultPort(), null, -1, "UP", "", options.metadata());
 
     }
 
@@ -79,7 +92,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
     private Uni<Void> registerApplicationInstance(WebClient client, String applicationId, String instanceId,
             String ipAddress, String virtualAddress, int port,
-            String secureVirtualAddress, int securePort, String state, String path) {
+            String secureVirtualAddress, int securePort, String state, String path, Map<String, String> metadata) {
         JsonObject instance = new JsonObject();
         JsonObject registration = new JsonObject();
         instance.put("instance", registration);
@@ -102,6 +115,13 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
             registration.put("securePort", new JsonObject().put("$", securePort).put("@enabled", "true"));
         }
 
+        if (metadata != null && !metadata.isEmpty()) {
+            JsonObject jsonMetadata = new JsonObject();
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                jsonMetadata.put(entry.getKey(), entry.getValue());
+            }
+            registration.put("metadata", jsonMetadata);
+        }
         registration
                 .put("status", state.toUpperCase())
                 .put("dataCenterInfo", new JsonObject()
