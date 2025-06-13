@@ -510,6 +510,7 @@ public class KubernetesServiceDiscoveryTest {
             }
         }
     }
+
     @Disabled
     @Test
     void shouldGetInstancesFromCache() throws InterruptedException {
