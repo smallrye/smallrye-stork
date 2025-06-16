@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -70,7 +69,6 @@ public class KubernetesServiceDiscoveryTest {
         defaultNamespace = client.getNamespace();
     }
 
-    @Disabled
     @Test
     void shouldGetServiceFromK8sDefaultNamespace() {
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
@@ -109,7 +107,6 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isFalse());
     }
 
-    @Disabled
     @Test
     void shouldGetServiceFromK8sWithApplicationNameConfig() {
         TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
@@ -148,7 +145,6 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isFalse());
     }
 
-    @Disabled
     @Test
     void shouldGetServiceFromK8sDefaultNamespaceUsingProgrammaticAPI() {
         Stork stork = StorkTestUtils.getNewStorkInstance();
@@ -187,7 +183,6 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isFalse());
     }
 
-    @Disabled
     @Test
     void shouldHandleSecureAttribute() {
 
@@ -227,7 +222,6 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isTrue());
     }
 
-    @Disabled
     @Test
     void shouldDiscoverServiceWithSpecificName() {
 
@@ -263,7 +257,6 @@ public class KubernetesServiceDiscoveryTest {
         }
     }
 
-    @Disabled
     @Test
     void shouldGetServiceFromSpecificNamespace() {
 
@@ -305,7 +298,6 @@ public class KubernetesServiceDiscoveryTest {
         }
     }
 
-    @Disabled
     @Test
     void shouldGetServiceUsingFirstPortWhenMultiplePortsFromSpecificNamespace() {
         String serviceName = "svc";
@@ -351,7 +343,6 @@ public class KubernetesServiceDiscoveryTest {
         }
     }
 
-    @Disabled
     @Test
     void shouldGetServiceUsingSelectedPortNameWhenMultiplePortsFromSpecificNamespace() {
         String serviceName = "svc";
@@ -397,7 +388,6 @@ public class KubernetesServiceDiscoveryTest {
         }
     }
 
-    @Disabled
     @Test
     void shouldGetServiceFromAllNamespace() {
 
@@ -438,7 +428,6 @@ public class KubernetesServiceDiscoveryTest {
         }
     }
 
-    @Disabled
     @Test
     void shouldPreserveIdsOnRefetch() throws InterruptedException {
 
@@ -511,7 +500,6 @@ public class KubernetesServiceDiscoveryTest {
         }
     }
 
-    @Disabled
     @Test
     void shouldGetInstancesFromCache() throws InterruptedException {
         String serviceName = "svc";
@@ -574,7 +562,6 @@ public class KubernetesServiceDiscoveryTest {
      * and that it behaves correctly when the cluster state changes.
      * </p>
      */
-    @Disabled
     @Test
     void shouldCallTheClusterWhenCacheInvalidated() throws InterruptedException {
         String serviceName = "svc";
@@ -721,7 +708,6 @@ public class KubernetesServiceDiscoveryTest {
 
     }
 
-    @Disabled
     @Test
     void shouldFetchInstancesFromTheClusterWhenCacheIsInvalidated() throws InterruptedException {
 
@@ -765,7 +751,6 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(instances.get()).hasSize(0);
     }
 
-    @Disabled
     @Test
     void shouldFetchInstancesFromAllNsWhenCacheIsInvalidated() {
 
