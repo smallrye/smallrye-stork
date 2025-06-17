@@ -1,5 +1,7 @@
 package io.smallrye.stork.serviceregistration.eureka;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,13 +50,49 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
         return registerApplicationInstance(client, serviceName,
                 eurekaId, ipAddress, null,
-                defaultPort, null, -1, "UP", "");
+                defaultPort, null, -1, "UP", "", null);
+
+    }
+
+    @Override
+    public Uni<Void> registerServiceInstance(RegistrarOptions options) {
+        checkRegistrarOptionsNotNull(options);
+        checkAddressNotNull(options.ipAddress());
+
+        return registerApplicationInstance(client, options.serviceName(),
+                options.serviceName(), options.ipAddress(), null,
+                options.defaultPort(), null, -1, "UP", "", options.metadata());
+
+    }
+
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName) {
+        return client.get("/eureka/apps/" + serviceName)
+                .putHeader("Accept", "application/json;charset=UTF-8")
+                .send().invoke(() -> log.info("Instance found for '{}'", serviceName))
+                .flatMap(item -> {
+                    JsonObject body = item.bodyAsJsonObject();
+                    JsonObject application = body.getJsonObject("application");
+                    JsonObject instance = application.getJsonArray("instance").getJsonObject(0);
+                    return deregisterApplicationInstance(application.getString("name"), instance.getString("instanceId"));
+                });
+
+    }
+
+    private Uni<Void> deregisterApplicationInstance(String applicationId, String instanceId) {
+        return client.delete("/eureka/apps/" + applicationId + "/" + instanceId)
+                .putHeader("Accept", "application/xml")
+                .send()
+                .onFailure()
+                .invoke(err -> log.error("Unable to deregister '{}' of '{}'. Error: {}", instanceId, applicationId,
+                        err.getMessage()))
+                .onItem().invoke(resp -> log.info("'" + instanceId + "'" + " successfully deregistered")).replaceWithVoid();
 
     }
 
     private Uni<Void> registerApplicationInstance(WebClient client, String applicationId, String instanceId,
             String ipAddress, String virtualAddress, int port,
-            String secureVirtualAddress, int securePort, String state, String path) {
+            String secureVirtualAddress, int securePort, String state, String path, Map<String, String> metadata) {
         JsonObject instance = new JsonObject();
         JsonObject registration = new JsonObject();
         instance.put("instance", registration);
@@ -70,10 +108,20 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
             registration
                     .put("secureVipAddress", secureVirtualAddress);
         }
+        if (config.getHealthCheckUrl() != null && !config.getHealthCheckUrl().isBlank()) {
+            registration.put("healthCheckUrl", config.getHealthCheckUrl());
+        }
         if (securePort != -1) {
             registration.put("securePort", new JsonObject().put("$", securePort).put("@enabled", "true"));
         }
 
+        if (metadata != null && !metadata.isEmpty()) {
+            JsonObject jsonMetadata = new JsonObject();
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                jsonMetadata.put(entry.getKey(), entry.getValue());
+            }
+            registration.put("metadata", jsonMetadata);
+        }
         registration
                 .put("status", state.toUpperCase())
                 .put("dataCenterInfo", new JsonObject()

@@ -27,7 +27,14 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.Uni<java.lang.Void> io.smallrye.stork.api.ServiceRegistrar<MetadataKeyType extends java.lang.Enum<MetadataKeyType> & io.smallrye.stork.api.MetadataKey>::deregisterServiceInstance(java.lang.String)",
+        "justification": "The method has bee added to extend the capabilities of the ServiceRegistrar interface by providing support for service deregistration. It is a backward-compatible change, as it adds a default method to the interface and does not break existing implementations."
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

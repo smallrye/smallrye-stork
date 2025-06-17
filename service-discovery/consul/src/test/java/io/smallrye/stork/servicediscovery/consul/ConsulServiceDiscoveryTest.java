@@ -232,7 +232,6 @@ public class ConsulServiceDiscoveryTest {
                 null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
                 null);
         stork = StorkTestUtils.getNewStorkInstance();
-        //Given a service `my-service` registered in consul
         List<String> tags = List.of("primary");
         registerService(new ConsulServiceOptions(serviceName, 8406, tags, List.of("example.com")));
 

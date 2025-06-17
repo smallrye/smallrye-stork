@@ -36,20 +36,20 @@
 
         <version.assertj>3.27.3</version.assertj>
         <version.microprofile-config-api>3.1</version.microprofile-config-api>
-        <version.mutiny>2.8.0</version.mutiny>
-        <version.smallrye-config>3.12.4</version.smallrye-config>
+        <version.mutiny>2.9.0</version.mutiny>
+        <version.smallrye-config>3.13.2</version.smallrye-config>
 
         <vertx.version>4.5.10</vertx.version>
-        <version.vertx-mutiny-bindings>3.18.1</version.vertx-mutiny-bindings>
+        <version.vertx-mutiny-bindings>3.19.0</version.vertx-mutiny-bindings>
         <!-- override the testcontainers version with the newest one -->
-        <version.testcontainers>1.21.0</version.testcontainers>
+        <version.testcontainers>1.21.1</version.testcontainers>
 
-        <kubernetes-client.version>7.2.0</kubernetes-client.version>
+        <kubernetes-client.version>7.3.1</kubernetes-client.version>
         <!-- we cannot update to 2.x as jboss-logging does not support SLF4J 2 for now -->
         <version.slf4j>2.0.17</version.slf4j>
         <version.mockito>5.2.0</version.mockito>
         <version.jackson>2.19.0</version.jackson>
-        <version.weld>6.0.2.Final</version.weld>
+        <version.weld>6.0.3.Final</version.weld>
         <version.spring-boot>3.0.7</version.spring-boot>
 
         <revapi-maven-plugin.version>0.15.1</revapi-maven-plugin.version>
@@ -205,7 +205,7 @@
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-junit5</artifactId>
-                <version>5.0.0.Final</version>
+                <version>5.0.1.Final</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -370,7 +370,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <!-- Mostly for IDE to add the generated-sources to the classpath -->
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>add-generated-sources</id>
