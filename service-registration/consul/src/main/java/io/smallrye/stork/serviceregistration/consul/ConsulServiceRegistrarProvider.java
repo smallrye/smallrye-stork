@@ -15,7 +15,7 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 @ServiceRegistrarAttribute(name = "consul-port", description = "The Consul port.", defaultValue = "8500")
 @ServiceRegistrarAttribute(name = "health-check-url", description = "The liveness http address.", defaultValue = "")
 @ServiceRegistrarAttribute(name = "health-check-interval", description = "How often Consul performs the health check", defaultValue = "30s")
-@ServiceRegistrarAttribute(name = "health-check-deregister-after", description = "How long after the check is in critical status Consul will remove the service from the catalogue.", defaultValue = "1M")
+@ServiceRegistrarAttribute(name = "health-check-deregister-after", description = "How long after the check is in critical status Consul will remove the service from the catalogue.", defaultValue = "1m")
 public class ConsulServiceRegistrarProvider
         implements ServiceRegistrarProvider<ConsulRegistrarConfiguration, ConsulMetadataKey> {
 
