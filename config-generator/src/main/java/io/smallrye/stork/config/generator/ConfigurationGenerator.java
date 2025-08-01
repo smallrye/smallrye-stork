@@ -118,7 +118,7 @@ public class ConfigurationGenerator extends AbstractProcessor {
                 loaders.add(
                         configWriter.createServiceRegistrarLoader(element, metadataKeyClass, configClassName, type));
                 if (!types.add(type)) {
-                    throw new IllegalArgumentException("Multiple classes found for service discovery type: " + type);
+                    throw new IllegalArgumentException("Multiple classes found for service registrar type: " + type);
                 }
 
                 docWriter.createAttributeTable(type, attributes);
