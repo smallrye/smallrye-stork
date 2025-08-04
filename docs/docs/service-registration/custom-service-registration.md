@@ -55,7 +55,7 @@ A service registrar provider class should look as follows:
 
 Note, that the `ServiceRegistrarProvider` interface takes a configuration class as a parameter. This configuration class 
 is generated automatically by the _Configuration Generator_. 
-Its name is created by appending `Configuration` to the service registrar type, such as `AcmeConfiguration`.
+Its name is created by appending `RegistrarConfiguration` to the service registrar type, such as `AcmeRegistrarConfiguration`.
 
 The next step is to implement the `ServiceRegistrar` interface:
 
