@@ -55,6 +55,32 @@ public class StorkTest {
         }
     };
 
+    private static final ConfigWithType SERVICE_REGISTRAR_WITH_INVALID_PROVIDER = new ConfigWithType() {
+
+        @Override
+        public String type() {
+            return "non-existent";
+        }
+
+        @Override
+        public Map<String, String> parameters() {
+            return Collections.emptyMap();
+        }
+    };
+
+    private static final ConfigWithType DISABLED_UNKNOWN_SERVICE_REGISTRAR_PROVIDER = new ConfigWithType() {
+
+        @Override
+        public String type() {
+            return "non-existent";
+        }
+
+        @Override
+        public Map<String, String> parameters() {
+            return Map.of("enabled", "false");
+        }
+    };
+
     private static final ConfigWithType SERVICE_REGISTRAR_CONFIG = new ConfigWithType() {
 
         @Override
@@ -149,6 +175,22 @@ public class StorkTest {
                 .add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LOAD_BALANCER_WITH_INVALID_PROVIDER, null));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
+    }
+
+    @Test
+    public void testWithRegistrarButNoMatchingProvider() {
+        TestEnv.configurations
+                .add(new FakeServiceConfig("a", null, null, SERVICE_REGISTRAR_WITH_INVALID_PROVIDER));
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
+        Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
+    }
+
+    @Test
+    public void testWithDisabledUnknownRegistrarNoMatchingProvider() {
+        TestEnv.configurations
+                .add(new FakeServiceConfig("a", null, null, DISABLED_UNKNOWN_SERVICE_REGISTRAR_PROVIDER));
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
+        Assertions.assertDoesNotThrow(() -> Stork.initialize());
     }
 
     @Test

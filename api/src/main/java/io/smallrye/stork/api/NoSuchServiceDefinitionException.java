@@ -11,6 +11,6 @@ public class NoSuchServiceDefinitionException extends RuntimeException {
      * @param serviceName the service name
      */
     public NoSuchServiceDefinitionException(String serviceName) {
-        super("No service defined for name " + serviceName);
+        super("No service configuration defined for name " + serviceName);
     }
 }

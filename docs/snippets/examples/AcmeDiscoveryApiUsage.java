@@ -5,6 +5,8 @@ import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.api.StorkServiceRegistry;
 
+import java.util.List;
+
 public class AcmeDiscoveryApiUsage {
 
     public void example(StorkServiceRegistry stork) {
@@ -12,7 +14,7 @@ public class AcmeDiscoveryApiUsage {
                 new AcmeConfiguration().withHost("my-host"))
         );
 
-        Uni<ServiceInstance> uni = stork.getService("my-service").selectInstance();
+        Uni<List<ServiceInstance>> serviceInstances = stork.getService("my-service").getInstances();
     }
 
 }

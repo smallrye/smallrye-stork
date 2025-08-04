@@ -5,12 +5,26 @@ In SmallRye Stork, service registration is automated and integrated with support
 This ensures that services can dynamically join and leave the network.
 
 #### Key Features:
-- **Automatic Registration**: For Quarkus applications, SmallRye Stork automatically registers it with the configured service registry (e.g., Consul).
+- **Automatic Registration**: For **Quarkus applications**, SmallRye Stork automatically registers the application with the configured service registry — but **only for built-in registrars such as Consul, Eureka, and Static**. 
+If you're using a custom registrar, registration must still be handled programmatically, as before this feature.
+
+Registration is enabled by default. If you want to disable registration, you can do it per service using the following property:
+  
+=== "stork standalone"
+```properties
+stork.my-service.service-registrar.enable=false
+```
+
+=== "stork in quarkus"
+```properties
+quarkus.stork.my-service.service-registrar.enable=false
+```
+  
 
 **IMPORTANT** Public IP address needs to be provided. Smallrye Stork will fail if the service IP address is not provided during registration.
 
 #### Supported Registries:
-Currently, Smallrye Stork provides seamless integration with **Consul**, Eureka and a Static registry.
+Currently, Smallrye Stork provides seamless integration with Consul, Eureka and a Static registry.
 This integration simplifies the management of dynamic environments where services are frequently added or removed.
 
 #### Custom Registration:

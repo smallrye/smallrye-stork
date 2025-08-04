@@ -213,6 +213,18 @@ public class Service {
         return serviceRegistrar;
     }
 
+    public Uni<Void> registerInstance(String serviceName, String ipAddress, int port) {
+        return serviceRegistrar.registerServiceInstance(serviceName, ipAddress, port);
+    }
+
+    public Uni<Void> registerInstance(ServiceRegistrar.RegistrarOptions options) {
+        return serviceRegistrar.registerServiceInstance(options);
+    }
+
+    public Uni<Void> deregisterServiceInstance(String serviceName) {
+        return serviceRegistrar.deregisterServiceInstance(serviceName);
+    }
+
     public ObservationCollector getObservations() {
         return observations;
     }

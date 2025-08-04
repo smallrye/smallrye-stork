@@ -10,9 +10,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @ServiceRegistrarType(value = "acme", metadataKey = Metadata.DefaultMetadataKey.class)
 @ServiceRegistrarAttribute(name = "host",
-        description = "Host name of the service discovery server.", required = true)
+        description = "Host name of the service registration server.", required = true)
 @ServiceRegistrarAttribute(name = "port",
-        description = "Port of the service discovery server.", required = false)
+        description = "Port of the service registration server.", required = false)
 @ApplicationScoped
 public class AcmeServiceRegistrarProvider
         implements ServiceRegistrarProvider<AcmeRegistrarConfiguration, Metadata.DefaultMetadataKey> {
