@@ -190,7 +190,9 @@ public final class Stork implements StorkServiceRegistry {
         if (serviceDiscoveryConfig != null) {
             if (serviceDiscoveryProviders.get(serviceDiscoveryConfig.type()) == null) {
                 throw new IllegalArgumentException(
-                        "ServiceDiscoveryProvider not found for type " + serviceDiscoveryConfig.type());
+                        "No ServiceDiscoveryProvider implementation was found for type '" + serviceDiscoveryConfig.type()
+                                + "', which is required by service '" + serviceConfig.serviceName() + "'");
+
             }
         }
 
@@ -224,7 +226,8 @@ public final class Stork implements StorkServiceRegistry {
                 loadBalancerType = loadBalancerConfig.type();
                 final var loadBalancerProvider = loadBalancerLoaders.get(loadBalancerType);
                 if (loadBalancerProvider == null) {
-                    throw new IllegalArgumentException("No LoadBalancerProvider for type " + loadBalancerType);
+                    throw new IllegalArgumentException("No LoadBalancerProvider implementation was found for type '"
+                            + loadBalancerType + "', which is required by service '" + serviceConfig.serviceName() + "'");
                 }
 
                 loadBalancer = loadBalancerProvider.createLoadBalancer(loadBalancerConfig, serviceDiscovery);
@@ -242,15 +245,20 @@ public final class Stork implements StorkServiceRegistry {
         if (serviceRegistrarConfig == null) {
             LOGGER.debug("No service registrar configured for service {}", serviceConfig.serviceName());
         } else {
-            String serviceRegistrarType = serviceRegistrarConfig.type();
-            final var serviceRegistrarLoader = serviceRegistrarLoaders.get(serviceRegistrarType);
-            if (serviceRegistrarLoader == null) {
-                throw new IllegalArgumentException("No ServiceRegistrarLoader for type " + serviceRegistrarType);
-            }
+            boolean enabled = Boolean
+                    .parseBoolean(serviceRegistrarConfig.parameters().getOrDefault("enabled", "true"));
+            if (enabled) {
+                String serviceRegistrarType = serviceRegistrarConfig.type();
+                final var serviceRegistrarLoader = serviceRegistrarLoaders.get(serviceRegistrarType);
+                if (serviceRegistrarLoader == null) {
+                    throw new IllegalArgumentException("No ServiceRegistrarLoader implementation was found for type '"
+                            + serviceRegistrarType + "', which is required by service '" + serviceConfig.serviceName() + "'");
+                }
 
-            serviceRegistrar = serviceRegistrarLoader.createServiceRegistrar(serviceRegistrarConfig,
-                    serviceConfig.serviceName(), infrastructure);
-            serviceBuilder.serviceName(serviceConfig.serviceName()).serviceRegistrar(serviceRegistrar);
+                serviceRegistrar = serviceRegistrarLoader.createServiceRegistrar(serviceRegistrarConfig,
+                        serviceConfig.serviceName(), infrastructure);
+                serviceBuilder.serviceName(serviceConfig.serviceName()).serviceRegistrar(serviceRegistrar);
+            }
         }
 
         return serviceBuilder.build();

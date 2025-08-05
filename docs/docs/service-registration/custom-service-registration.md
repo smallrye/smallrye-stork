@@ -75,7 +75,7 @@ As you can see, the `AcmeConfiguration` class gives access to the configuration 
 Finally, you can implement your own service deregistration mechanism in `deregisterServiceInstance` method.
 
 
-## Using your service registrar
+## Using your service registrar using the programmatic API
 
 In the project using it, don't forget to add the dependency on the module providing your implementation.
 Then, in the configuration, just add:
@@ -95,4 +95,13 @@ Then, in the configuration, just add:
     ```
 
 
-Then, Stork will use your implementation to register/deregister the service instances using the `my-service` backend.
+When building your service registrar project project, the configuration generator creates a configuration class.
+Then, Stork will use your implementation to register/deregister the service instances using the `acme` backend.
+
+This class can be used to configure your service registrar using the Stork programmatic API.
+
+```java linenums="1"
+{{ insert('examples/AcmeRegistrarApiUsage.java') }}
+```
+
+
