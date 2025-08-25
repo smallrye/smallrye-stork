@@ -152,8 +152,11 @@ public class Service {
      * @see LoadBalancer#requiresStrictRecording()
      */
     public ServiceInstance selectInstanceAndRecordStart(Collection<ServiceInstance> instances, boolean measureTime) {
+        StorkObservation observationPoints = observations.create(serviceName, serviceDiscoveryType,
+                serviceSelectionType);
         if (instanceSelectionLock == null) {
             ServiceInstance result = loadBalancer.selectServiceInstance(instances);
+            observationPoints.onServiceSelectionSuccess(result.getId());
             if (result.gatherStatistics()) {
                 result.recordStart(measureTime);
             }
@@ -166,11 +169,13 @@ public class Service {
                     if (result.gatherStatistics()) {
                         result.recordStart(measureTime);
                     }
+                    observationPoints.onServiceSelectionSuccess(result.getId());
                     return result;
                 } finally {
                     instanceSelectionLock.release();
                 }
             } catch (InterruptedException e) {
+                observationPoints.onServiceSelectionFailure(e);
                 Thread.currentThread().interrupt();
                 throw new RuntimeException("Failed to lock for ServiceInstance selection", e);
             }
