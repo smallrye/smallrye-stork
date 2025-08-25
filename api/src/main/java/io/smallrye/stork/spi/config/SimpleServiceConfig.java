@@ -3,6 +3,7 @@ package io.smallrye.stork.spi.config;
 import java.util.Collections;
 import java.util.Map;
 
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.stork.api.config.ConfigWithType;
 import io.smallrye.stork.api.config.ServiceConfig;
 
@@ -24,7 +25,7 @@ public class SimpleServiceConfig implements ServiceConfig {
             ConfigWithType serviceDiscoveryConfig, ConfigWithType serviceRegistrarConfig) {
         this.serviceName = serviceName;
         this.loadBalancerConfig = loadBalancerConfig;
-        this.serviceDiscoveryConfig = serviceDiscoveryConfig;
+        this.serviceDiscoveryConfig = ParameterValidation.nonNull(serviceDiscoveryConfig, "service discovery type config");
         this.serviceRegistrarConfig = serviceRegistrarConfig;
     }
 
