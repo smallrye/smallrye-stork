@@ -36,7 +36,7 @@ public interface LoadBalancer {
      * @return true if the selecting service instance should be called atomically with marking the operation as started
      *
      * @see Service#selectInstanceAndRecordStart(boolean)
-     * @see Service#selectInstanceAndRecordStart(Collection, boolean)
+     * @see Service#selectInstanceFromListAndRecordStart(Collection, boolean)
      */
     default boolean requiresStrictRecording() {
         return true;
