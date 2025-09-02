@@ -111,6 +111,8 @@ public class Service {
     /**
      * Selects a service instance and records a start of an operation using the instance
      * <p>
+     *
+     *
      * The selection looks for the service instances and select the one to use using the load balancer.
      *
      * @param measureTime whether the operation for which the operation is chosen records time (will call
@@ -129,7 +131,7 @@ public class Service {
                 observationPoints.onServiceDiscoverySuccess(list);
             }
         })
-                .map(list -> selectInstanceAndRecordStart(list, measureTime))
+                .map(list -> selectInstanceFromListAndRecordStart(list, measureTime))
                 .onItemOrFailure().invoke((selected, failure) -> {
                     if (failure != null) {
                         observationPoints.onServiceSelectionFailure(failure);
@@ -139,19 +141,11 @@ public class Service {
                 });
     }
 
-    /**
-     * Select a ServiceInstance for this service from a collection and record a start of an operation using the instance.
-     * <p>
-     * Access to the underlying LoadBalancer method is serialized.
-     *
-     * @param instances instances to choose from
-     * @param measureTime whether the operation for which the operation is chosen records time (will call
-     *        {@link ServiceInstance#recordReply()})
-     * @return the selected instance
-     * @see #selectInstanceAndRecordStart(boolean)
-     * @see LoadBalancer#requiresStrictRecording()
-     */
-    public ServiceInstance selectInstanceAndRecordStart(Collection<ServiceInstance> instances, boolean measureTime) {
+    public ServiceInstance selectInstanceFromListAndRecordStart(Collection<ServiceInstance> instances, boolean measureTime) {
+        return doSelectInstanceFromListAndRecordStart(instances, measureTime);
+    }
+
+    private ServiceInstance doSelectInstanceFromListAndRecordStart(Collection<ServiceInstance> instances, boolean measureTime) {
         if (instanceSelectionLock == null) {
             ServiceInstance result = loadBalancer.selectServiceInstance(instances);
             if (result.gatherStatistics()) {
@@ -174,6 +168,30 @@ public class Service {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException("Failed to lock for ServiceInstance selection", e);
             }
+        }
+    }
+
+    /**
+     * Select a ServiceInstance for this service from a collection and record a start of an operation using the instance.
+     * <p>
+     * Access to the underlying LoadBalancer method is serialized.
+     *
+     * @param instances instances to choose from
+     * @param measureTime whether the operation for which the operation is chosen records time (will call
+     *        {@link ServiceInstance#recordReply()})
+     * @return the selected instance
+     * @see #selectInstanceAndRecordStart(boolean)
+     * @see LoadBalancer#requiresStrictRecording()
+     */
+    public ServiceInstance selectInstanceAndRecordStart(Collection<ServiceInstance> instances, boolean measureTime) {
+        StorkObservation observationPoints = observations.create(serviceName, serviceDiscoveryType, serviceSelectionType);
+        try {
+            ServiceInstance result = doSelectInstanceFromListAndRecordStart(instances, measureTime);
+            observationPoints.onServiceSelectionSuccess(result.getId());
+            return result;
+        } catch (RuntimeException e) {
+            observationPoints.onServiceSelectionFailure(e);
+            throw e;
         }
     }
 

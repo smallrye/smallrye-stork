@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import io.smallrye.stork.api.NoServiceInstanceFoundException;
 import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.api.observability.StorkObservation;
+import io.smallrye.stork.impl.DefaultServiceInstance;
 import io.smallrye.stork.integration.ObservableStorkInfrastructure;
 import io.smallrye.stork.spi.config.ConfigProvider;
 
@@ -300,6 +303,70 @@ public class ObservationTest {
         assertThat(metrics.failure()).isEqualTo(exception);
         assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(0);
         assertThat(metrics.isServiceDiscoverySuccessful()).isTrue();
+        assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
+        assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
+        assertDurations(metrics);
+
+    }
+
+    public static List<ServiceInstance> defaultInstances() {
+        return List.of(
+                new DefaultServiceInstance(1L, "localhost", 8080, false),
+                new DefaultServiceInstance(2L, "localhost", 8081, false),
+                new DefaultServiceInstance(3L, "127.0.0.1", 8443, true),
+                new DefaultServiceInstance(4L, "service.local", 9090, false));
+    }
+
+    @Test
+    void shouldGetMetricsWhenSelectingInstanceFromListWithRecordAndStartHappyPath() {
+        TestEnv.configurations.add(new FakeServiceConfig("my-service",
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
+
+        ServiceInstance instance = mock(ServiceInstance.class);
+        AnchoredServiceDiscoveryProvider.services.add(instance);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
+        Stork stork = getNewObservableStork();
+
+        Service service = stork.getService("my-service");
+        assertThat(service.selectInstanceAndRecordStart(defaultInstances(), true)).isNotNull();
+        assertThat(service.getObservations()).isNotNull();
+
+        StorkObservation metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        assertThat(metrics.getServiceName()).isEqualTo("my-service");
+        assertThat(metrics.isDone()).isTrue();
+        assertThat(metrics.failure()).isNull();
+        assertThat(metrics.getOverallDuration()).isNotNull();
+        assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(-1);
+        assertThat(metrics.isServiceDiscoverySuccessful()).isFalse();
+        assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
+        assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
+        assertDurations(metrics);
+    }
+
+    @Test
+    void shouldGetMetricsWhenSelectingInstanceFromListWithRecordAndStartUnhappyPath() {
+        TestEnv.configurations.add(new FakeServiceConfig("my-service",
+                FAKE_SERVICE_DISCOVERY_CONFIG, null, null));
+
+        ServiceInstance instance = mock(ServiceInstance.class);
+        AnchoredServiceDiscoveryProvider.services.add(instance);
+        TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
+        Stork stork = getNewObservableStork();
+
+        Service service = stork.getService("my-service");
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            service.selectInstanceAndRecordStart(Collections.emptyList(), true);
+        });
+        //
+        assertThat(exception.getMessage()).isEqualTo("No services found.");
+        assertThat(service.getObservations()).isNotNull();
+
+        StorkObservation metrics = FakeObservationCollector.FAKE_STORK_EVENT;
+        assertThat(metrics.getServiceName()).isEqualTo("my-service");
+        assertThat(metrics.isDone()).isTrue();
+        assertThat(metrics.failure()).isEqualTo(exception);
+        assertThat(metrics.getDiscoveredInstancesCount()).isEqualTo(-1);
         assertThat(metrics.getServiceDiscoveryType()).isEqualTo("fake");
         assertThat(metrics.getServiceSelectionType()).isEqualTo("round-robin");
         assertDurations(metrics);
