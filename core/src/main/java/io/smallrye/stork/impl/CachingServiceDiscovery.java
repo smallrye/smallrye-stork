@@ -30,7 +30,7 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
 
     private volatile List<ServiceInstance> lastResults;
 
-    private final Uni<List<ServiceInstance>> instances;
+    private Uni<List<ServiceInstance>> instances;
 
     public CachingServiceDiscovery(String refreshPeriod) {
         try {
@@ -61,10 +61,29 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
     }
 
     /**
+     * Invalidates the cached service discovery result.
+     * <p>
+     * This method clears the current memoized {@link Uni} of {@link ServiceInstance} objects
+     * by setting it to {@code null}. The next time {@code getInstances()} is called, a new
+     * memoized {@code Uni} will be created and the service discovery process will be executed again.
+     * <p>
+     */
+    public void invalidate() {
+        this.instances = null;
+    }
+
+    /**
      *
      * @return all `ServiceInstance`'s for the service
      */
     public Uni<List<ServiceInstance>> getServiceInstances() {
+        if (instances == null) {
+            instances = fetchNewServiceInstances(this.lastResults)
+                    .invoke(l -> this.lastResults = l)
+                    .onFailure().invoke(this::handleFetchError)
+                    .onFailure().recoverWithItem(this.lastResults);
+            instances = cache(instances);
+        }
         return instances;
     }
 
@@ -73,4 +92,6 @@ public abstract class CachingServiceDiscovery implements ServiceDiscovery {
     }
 
     public abstract Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances);
+
+    //    public abstract void invalidate();
 }
