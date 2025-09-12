@@ -4,6 +4,7 @@ import static io.smallrye.stork.servicediscovery.dns.DnsServiceDiscoveryTestUtil
 import static io.smallrye.stork.servicediscovery.dns.DnsServiceDiscoveryTestUtils.getDnsIp;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.Collections;
 import java.util.Map;
@@ -11,11 +12,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import jakarta.inject.Inject;
+
+import org.jboss.weld.junit5.WeldInitiator;
+import org.jboss.weld.junit5.WeldJunit5Extension;
+import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -29,16 +36,25 @@ import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Ports;
 
 import io.smallrye.stork.Stork;
+import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.test.StorkTestUtils;
-import io.smallrye.stork.test.TestConfigProvider;
+import io.smallrye.stork.test.TestConfigProviderBean;
 import io.vertx.core.Vertx;
 import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
 
 @Testcontainers
+@ExtendWith(WeldJunit5Extension.class)
 @DisabledOnOs(OS.WINDOWS)
-public class DnsServiceDiscoveryTest {
-    private static final Logger log = LoggerFactory.getLogger(DnsServiceDiscoveryTest.class);
+public class DnsServiceDiscoveryProgrammaticApiCDITest {
+    @WeldSetup
+    public WeldInitiator weld = WeldInitiator.of(TestConfigProviderBean.class,
+            DnsServiceDiscoveryProviderLoader.class);
+
+    @Inject
+    TestConfigProviderBean config;
+
+    private static final Logger log = LoggerFactory.getLogger(DnsServiceDiscoveryProgrammaticApiCDITest.class);
 
     public static final ExposedPort TCP_8500 = ExposedPort.tcp(8500);
     public static final ExposedPort UDP_8600 = ExposedPort.udp(8600);
@@ -65,11 +81,31 @@ public class DnsServiceDiscoveryTest {
 
     @BeforeEach
     void setUp() {
-        TestConfigProvider.clear();
-        Map<ExposedPort, Ports.Binding[]> portBindings = consul.getContainerInfo().getNetworkSettings().getPorts()
-                .getBindings();
-        consulPort = Integer.parseInt(portBindings.get(TCP_8500)[0].getHostPortSpec());
-        dnsPort = Integer.parseInt(portBindings.get(UDP_8600)[0].getHostPortSpec());
+        config.clear();
+        // Starting and wiring the container can take a bit of time.
+        // So, let's be defensive.
+        await().until(() -> consul.getContainerInfo() != null && consul.getContainerInfo().getNetworkSettings() != null
+                && consul.getContainerInfo().getNetworkSettings().getPorts() != null
+                && consul.getContainerInfo().getNetworkSettings().getPorts().getBindings() != null);
+        consulPort = await()
+                .until(() -> {
+                    Map<ExposedPort, Ports.Binding[]> bindings = consul.getContainerInfo().getNetworkSettings().getPorts()
+                            .getBindings();
+                    if (bindings.get(TCP_8500) == null || bindings.get(TCP_8500)[0] == null) {
+                        return null;
+                    }
+                    return Integer.parseInt(bindings.get(TCP_8500)[0].getHostPortSpec());
+                }, notNullValue());
+        dnsPort = await()
+                .until(() -> {
+                    Map<ExposedPort, Ports.Binding[]> bindings = consul.getContainerInfo().getNetworkSettings().getPorts()
+                            .getBindings();
+                    if (bindings.get(UDP_8600) == null || bindings.get(UDP_8600)[0] == null) {
+                        return null;
+                    }
+                    return Integer.parseInt(bindings.get(UDP_8600)[0].getHostPortSpec());
+                }, notNullValue());
+
         client = ConsulClient.create(Vertx.vertx(),
                 new ConsulClientOptions().setHost("localhost").setPort(consulPort));
         stork = StorkTestUtils.getNewStorkInstance();
@@ -85,11 +121,12 @@ public class DnsServiceDiscoveryTest {
 
     @Test
     void shouldGetInstancesForMavenOrg() {
-        TestConfigProvider.addServiceConfig("maven", null, "dns", null,
+        String serviceName = "my-service";
+        config.addServiceConfig("maven", null, "dns", null,
                 null, Map.of("hostname", "maven.org", "record-type", "A", "port", "8392", "refresh-period", "5M"),
                 null);
-        String serviceName = "maven";
-        stork = StorkTestUtils.getNewStorkInstance();
+
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
 
         DnsServiceDiscoveryTestUtils.shouldGetInstancesForMavenOrg(stork, serviceName);
 
@@ -100,27 +137,28 @@ public class DnsServiceDiscoveryTest {
         //Given a service `my-service` registered in consul (available via DNS) and a refresh-period of 5 minutes
         String serviceName = "my-service";
 
-        TestConfigProvider.addServiceConfig("my-service", null, "dns", null,
+        config.addServiceConfig("my-service", null, "dns", null,
                 null,
                 Map.of("hostname", "my-service.service.dc1.consul", "dns-servers", getDnsIp(consul) + ":" + dnsPort, "port",
                         "8111", "refresh-period", "5M"),
                 null);
 
-        stork = StorkTestUtils.getNewStorkInstance();
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
         DnsServiceDiscoveryTestUtils.shouldGetServiceInstanceIdsFromDns(stork, client, serviceName, registeredConsulServices);
+
     }
 
     @Test
     void shouldGetServiceInstanceIdsFromDnsWithoutResolving() throws InterruptedException {
         String serviceName = "my-service";
 
-        TestConfigProvider.addServiceConfig("my-service", null, "dns", null,
+        config.addServiceConfig("my-service", null, "dns", null,
                 null,
                 Map.of("hostname", "my-service.service.dc1.consul", "dns-servers", getDnsIp(consul) + ":" + dnsPort, "port",
                         "8111", "resolve-srv", "false", "refresh-period", "5M"),
                 null);
 
-        stork = StorkTestUtils.getNewStorkInstance();
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
 
         DnsServiceDiscoveryTestUtils.shouldGetServiceInstanceIdsFromDnsWithoutResolving(stork, client, serviceName,
                 registeredConsulServices);
@@ -129,27 +167,29 @@ public class DnsServiceDiscoveryTest {
     @Test
     void shouldFailWithoutPortForA() throws InterruptedException {
         //Given a service `my-service-3` registered in consul and a refresh-period of 5 minutes
-        TestConfigProvider.addServiceConfig("my-service", null, "dns", null,
+        config.addServiceConfig("my-service", null, "dns", null,
                 null,
                 Map.of("hostname", "my-service.service.dc1.consul", "dns-servers", getDnsIp(consul) + ":" + dnsPort,
                         "record-type",
                         "A"),
                 null);
 
-        assertThatThrownBy(() -> StorkTestUtils.getNewStorkInstance())
+        assertThatThrownBy(
+                () -> stork.defineIfAbsent("my-service", ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery())))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void shouldFailWithoutPortForAAAA() throws InterruptedException {
-        TestConfigProvider.addServiceConfig("my-service", null, "dns", null,
+        config.addServiceConfig("my-service", null, "dns", null,
                 null,
                 Map.of("hostname", "my-service.service.dc1.consul", "dns-servers", getDnsIp(consul) + ":" + dnsPort,
                         "record-type",
                         "AAAA"),
                 null);
 
-        assertThatThrownBy(() -> StorkTestUtils.getNewStorkInstance())
+        assertThatThrownBy(
+                () -> stork.defineIfAbsent("my-service", ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery())))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -158,13 +198,13 @@ public class DnsServiceDiscoveryTest {
         //Given a service `my-service-2` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service-3";
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "dns", null,
+        config.addServiceConfig(serviceName, null, "dns", null,
                 null,
                 Map.of("hostname", "my-service-3.service.dc1.consul", "dns-servers", getDnsIp(consul) + ":" + dnsPort, "port",
                         "8111", "record-type", "A"),
                 null);
 
-        stork = StorkTestUtils.getNewStorkInstance();
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
 
         DnsServiceDiscoveryTestUtils.shouldFetchA(stork, client, serviceName, registeredConsulServices);
     }
@@ -174,16 +214,15 @@ public class DnsServiceDiscoveryTest {
         //Given a service `my-service-x` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service-x";
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "dns", null,
+        config.addServiceConfig(serviceName, null, "dns", null,
                 null,
                 Map.of("hostname", "my-service-x.service.dc1.consul", "dns-servers", getDnsIp(consul) + ":" + dnsPort),
                 null);
 
-        stork = StorkTestUtils.getNewStorkInstance();
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
 
         DnsServiceDiscoveryTestUtils.shouldFetchSRVWithAValues(stork, client, serviceName,
                 registeredConsulServices);
-
     }
 
     @Test
@@ -191,12 +230,12 @@ public class DnsServiceDiscoveryTest {
         //Given a service `my-service-2` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service-x";
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "dns", null,
+        config.addServiceConfig(serviceName, null, "dns", null,
                 null,
                 Map.of("hostname", "my-service-x.service.dc1.consul", "dns-servers", getDnsIp(consul) + ":" + dnsPort),
                 null);
 
-        stork = StorkTestUtils.getNewStorkInstance();
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
 
         DnsServiceDiscoveryTestUtils.shouldFetchSRVWithAAAAValues(stork, client, serviceName,
                 registeredConsulServices);
@@ -207,12 +246,12 @@ public class DnsServiceDiscoveryTest {
         //Given a service `my-service-2` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service-3";
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "dns", null,
+        config.addServiceConfig(serviceName, null, "dns", null,
                 null,
                 Map.of("hostname", serviceName + ".service.dc1.consul", "record-type", "AAAA", "port", "8111", "dns-servers",
                         getDnsIp(consul) + ":" + dnsPort, "refresh-period", "5M"),
                 null);
-        stork = StorkTestUtils.getNewStorkInstance();
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
 
         DnsServiceDiscoveryTestUtils.shouldFetchAAAA(stork, client, serviceName,
                 registeredConsulServices);
@@ -224,12 +263,12 @@ public class DnsServiceDiscoveryTest {
         //Given a service `my-service-2` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service-2";
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "dns", null,
+        config.addServiceConfig(serviceName, null, "dns", null,
                 null,
                 Map.of("hostname", "my-service-2.service.dc1.consul", "record-type", "SRV", "dns-servers",
                         getDnsIp(consul) + ":" + dnsPort, "refresh-period", "5s"),
                 null);
-        stork = StorkTestUtils.getNewStorkInstance();
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
 
         DnsServiceDiscoveryTestUtils.shouldRefetchWhenRefreshPeriodReached(stork, log, client, serviceName,
                 registeredConsulServices);
@@ -240,12 +279,12 @@ public class DnsServiceDiscoveryTest {
         //Given a service `my-service-2` registered in consul and a refresh-period of 5 minutes
         String serviceName = "my-service-2";
 
-        TestConfigProvider.addServiceConfig(serviceName, null, "dns", null,
+        config.addServiceConfig(serviceName, null, "dns", null,
                 null,
                 Map.of("hostname", "my-service-2.service.dc1.consul", "record-type", "SRV", "dns-servers",
                         getDnsIp(consul) + ":" + dnsPort, "refresh-period", "5M"),
                 null);
-        stork = StorkTestUtils.getNewStorkInstance();
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
 
         DnsServiceDiscoveryTestUtils.shouldRefetchWhenCacheInvalidated(stork, log, client, serviceName,
                 registeredConsulServices);

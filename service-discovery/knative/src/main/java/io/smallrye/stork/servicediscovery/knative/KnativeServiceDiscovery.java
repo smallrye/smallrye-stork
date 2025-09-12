@@ -99,6 +99,7 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
         return uni.memoize().until(() -> invalidated.get());
     }
 
+    @Override
     public void invalidate() {
         invalidated.set(true);
     }
