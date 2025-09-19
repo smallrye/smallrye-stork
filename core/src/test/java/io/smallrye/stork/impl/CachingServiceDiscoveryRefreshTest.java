@@ -2,8 +2,10 @@ package io.smallrye.stork.impl;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,9 +15,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import io.smallrye.mutiny.Uni;
@@ -80,4 +84,63 @@ class CachingServiceDiscoveryRefreshTest {
         }
 
     }
+
+    @Test
+    @Timeout(10)
+    void shouldInvalidateCacheAndTriggerRefreshAgain() throws InterruptedException {
+        AtomicInteger refreshCount = new AtomicInteger(0);
+
+        CachingServiceDiscovery discovery = new CachingServiceDiscovery("1M") {
+            @Override
+            public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
+                refreshCount.incrementAndGet();
+                return Uni.createFrom().item(List.of(
+                        new DefaultServiceInstance(1, "localhost", 8406, Optional.empty(), false),
+                        new DefaultServiceInstance(1, "localhost", 8407, Optional.empty(), false)));
+            }
+        };
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        discovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        // first call --> should call fetchNewInstances
+        assertThat(instances.get()).hasSize(2);
+        assertThat(refreshCount.get()).isEqualTo(1);
+
+        instances.set(null);
+
+        // Second call, no explicit validation happen --> should NOT call fetchNewInstances
+        discovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(2);
+        assertThat(refreshCount.get()).isEqualTo(1);
+
+        instances.set(null);
+
+        // Explicit invalidation
+        discovery.invalidate();
+
+        // New call --> should NOT call fetchNewInstances
+        discovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(2);
+        assertThat(refreshCount.get()).isEqualTo(2);
+    }
+
 }

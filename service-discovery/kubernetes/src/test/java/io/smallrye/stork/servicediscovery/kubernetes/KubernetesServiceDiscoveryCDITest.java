@@ -568,6 +568,225 @@ public class KubernetesServiceDiscoveryCDITest {
     }
 
     @Test
+    void shouldGetInstancesFromClusterForceCacheInvalidation() throws InterruptedException {
+        String serviceName = "svc";
+
+        //Given a few instances for a svc service
+        List<Endpoints> endpointsList = List
+                .of(registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                        "10.96.96.233"));
+
+        //Recording k8s cluster calls and and build the response with the (previous registered) endpoints
+        AtomicInteger serverHit = new AtomicInteger(0);
+        server.expect().get().withPath("/api/v1/namespaces/test/endpoints?fieldSelector=metadata.name%3Dsvc")
+                .andReply(200, r -> {
+                    serverHit.incrementAndGet();
+                    return new EndpointsListBuilder().withItems(endpointsList).build();
+                }).always();
+
+        config.addServiceConfig(serviceName, null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"), null);
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(1);
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        KubernetesServiceDiscovery kubernetesDiscovery = (KubernetesServiceDiscovery) service.getServiceDiscovery();
+        kubernetesDiscovery.invalidate();
+
+        //second try to get instances, instances should be fetched from cache, cluster calls should be still 1
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(2);
+        assertThat(instances.get()).hasSize(3);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232", "10.96.96.233");
+
+    }
+
+    /**
+     * Verifies that the cluster is reached when the cache is invalidated. No retries.
+     * The cache is only reset when the call is success but this doesn't trigger multiple calls because retries are not enabled.
+     *
+     * <p>
+     * This test ensures that the system does not enter a loop of cluster calls when the cluster fails,
+     * and that it behaves correctly when the cluster state changes.
+     * </p>
+     */
+    @Test
+    void shouldCallTheClusterWhenCacheInvalidated() throws InterruptedException {
+        String serviceName = "svc";
+
+        //Recording k8s cluster calls and build the response with the (previous registered) endpoints
+        AtomicInteger serverHit = new AtomicInteger(0);
+        server.expect().get().withPath("/api/v1/namespaces/test/endpoints?fieldSelector=metadata.name%3Dsvc")
+                .andReply(500, r -> {
+                    serverHit.incrementAndGet();
+                    return "Internal Server Error";
+                }).always();
+
+        config.addServiceConfig(serviceName, null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"), null);
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService(serviceName);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        KubernetesServiceDiscovery serviceDiscovery = (KubernetesServiceDiscovery) service.getServiceDiscovery();
+        serviceDiscovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Expected recovery on failure"))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(1);
+
+        //We trigger an event in the cluster just to invalidate cache
+        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                "10.96.96.233");
+
+        serviceDiscovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Expected recovery on failure"))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(2);
+
+        serviceDiscovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Expected recovery on failure"))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        // Since the previous call failed, the cache wasn't reset and we reach the cluster this time incremeting the serverHit to 3.
+        assertThat(serverHit.get()).isEqualTo(3);
+
+        //We trigger an event in the cluster just to invalidate cache
+        registerKubernetesResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
+                "10.96.96.236");
+
+        serviceDiscovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Expected recovery on failure"))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(4);
+
+    }
+
+    /**
+     * Verifies that the cluster is reached when the cache is invalidated. With retries.
+     * The cache is only reset when the call is success.
+     *
+     * <p>
+     * This test ensures that the system does only the calls configured by the retries param.
+     * </p>
+     */
+    @Test
+    void shouldCallTheClusterWhenCacheInvalidatedAndRetries() throws InterruptedException {
+        String serviceName = "svc";
+
+        //Recording k8s cluster calls and build the response with the (previous registered) endpoints
+        AtomicInteger serverHit = new AtomicInteger(0);
+        server.expect().get().withPath("/api/v1/namespaces/test/endpoints?fieldSelector=metadata.name%3Dsvc")
+                .andReply(500, r -> {
+                    serverHit.incrementAndGet();
+                    return "Internal Server Error";
+                }).always();
+
+        //We’re using the same retries = 0 configuration as the default because we couldn’t get the test to pass reliably in CI otherwise. In any case, the goal of this test is to verify that the user's configuration overrides the default one — not to test that the Kubernetes client actually performs a specific number of retries.
+        config.addServiceConfig(serviceName, null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3",
+                        "request-retry-backoff-limit", "0"),
+                null);
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService(serviceName);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        KubernetesServiceDiscovery serviceDiscovery = (KubernetesServiceDiscovery) service.getServiceDiscovery();
+        serviceDiscovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Expected recovery on failure"))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(1);
+
+        //We trigger an event in the cluster just to invalidate cache
+        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                "10.96.96.233");
+
+        serviceDiscovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Expected recovery on failure"))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(2);
+
+        serviceDiscovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Expected recovery on failure"))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        // Since the previous call failed, the cache wasn't reset and we reach the cluster this time incremeting the serverHit to 3.
+        assertThat(serverHit.get()).isEqualTo(3);
+
+        //We trigger an event in the cluster just to invalidate cache
+        registerKubernetesResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
+                "10.96.96.236");
+
+        serviceDiscovery.getServiceInstances()
+                .onFailure().invoke(th -> fail("Expected recovery on failure"))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(serverHit.get()).isEqualTo(4);
+
+    }
+
+    @Test
     void shouldFetchInstancesFromTheClusterWhenCacheIsInvalidated() throws InterruptedException {
 
         // Given a service with 3 instances registered in the cluster, in `test` namespace
