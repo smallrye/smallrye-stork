@@ -36,7 +36,7 @@ public class CustomExpirationCachedAcmeServiceDiscovery extends CachingServiceDi
         return uni.memoize().until(() -> invalidated.get());
     }
 
-    //command-based cache invalidation: user triggers the action to invalidate the cache.
+    @Override
     public void invalidate() {
         invalidated.set(true);
     }
