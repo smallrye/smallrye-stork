@@ -1,4 +1,4 @@
 name: SmallRye Stork
 release:
-  current-version: 2.7.4
-  next-version: 2.7.5-SNAPSHOT
+  current-version: 2.7.5
+  next-version: 2.7.6-SNAPSHOT
