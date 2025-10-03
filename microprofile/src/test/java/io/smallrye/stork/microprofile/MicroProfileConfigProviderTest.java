@@ -58,9 +58,8 @@ public class MicroProfileConfigProviderTest {
     }
 
     @Test
-    void shouldConfigureServiceRegistrar() {
+    void shouldConfigureServiceRegistrarOnly() {
         Map<String, String> properties = new HashMap<>();
-        properties.put("stork." + MY_REGISTRAR + ".service-discovery.type", "test-sd-1");
         properties.put("stork." + MY_REGISTRAR + ".service-registrar.type", TestServiceRegistrarProvider.TYPE);
         properties.put("stork." + MY_REGISTRAR + ".service-registrar.param1", "http://localhost:8080");
         properties.put("stork." + MY_REGISTRAR + ".service-registrar.param2", "param2-value");
