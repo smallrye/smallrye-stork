@@ -90,17 +90,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-<!--                    This makes the processor available for both compile and test-compile phases, needed here for fixing missing generated classes when using jdk 25-->
-                    <annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>io.smallrye.stork</groupId>
-                            <artifactId>stork-configuration-generator</artifactId>
-                            <version>${project.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
                 <executions>
                     <execution>
                         <id>default-compile</id>
