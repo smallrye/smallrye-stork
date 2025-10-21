@@ -29,7 +29,6 @@ jobs:
       matrix:
         java: [
           { 'version': '17', 'opts': 'javadoc:javadoc' },
-          { 'version': '20', 'opts': 'javadoc:javadoc' },
           { 'version': '21', 'opts': '-Drevapi.skip' },
           { 'version': '25', 'opts': '-Drevapi.skip' }
         ]
@@ -55,7 +54,6 @@ jobs:
       matrix:
         java: [
           { 'version': '17', 'opts': '' },
-          { 'version': '20', 'opts': '' },
           { 'version': '21', 'opts': '' },
           { 'version': '25', 'opts': '' }
         ]
@@ -83,7 +81,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-java@v5
         with:
-          java-version: 25
+          java-version: 21
           distribution: temurin
           cache: maven
       - name: Compatibility Check
