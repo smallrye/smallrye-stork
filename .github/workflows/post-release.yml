@@ -15,9 +15,9 @@ jobs:
         with:
           fetch-depth: 0 # fetch all commits and branches for mike to work properly
       - uses: actions/setup-java@v5
-        name: Set up Java 21
+        name: Set up Java 25
         with:
-          java-version: 21
+          java-version: 25
           distribution: temurin
           cache: maven       
       - name: Build local artifacts
