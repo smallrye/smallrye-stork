@@ -1,4 +1,4 @@
-package io.smallrye.stork.loadbalancer.random;
+package io.smallrye.stork.loadbalancer.sticky;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
