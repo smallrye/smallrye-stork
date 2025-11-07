@@ -1,4 +1,4 @@
-package io.smallrye.stork.loadbalancer.random;
+package io.smallrye.stork.loadbalancer.sticky;
 
 import java.time.Duration;
 import java.util.Collection;
