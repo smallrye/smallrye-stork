@@ -90,6 +90,22 @@ class RoundRobinLoadBalancerProviderTest {
     }
 
     @Test
+    public void shouldHandleCounterOverflowWithoutIndexOutOfBoundsIssue1121() {
+        RoundRobinLoadBalancer lb = new RoundRobinLoadBalancer(Integer.MAX_VALUE - 2);
+        ServiceInstance instance1 = mock(ServiceInstance.class);
+        ServiceInstance instance2 = mock(ServiceInstance.class);
+        ServiceInstance instance3 = mock(ServiceInstance.class);
+        when(instance1.getId()).thenReturn(1L);
+        when(instance2.getId()).thenReturn(2L);
+        when(instance3.getId()).thenReturn(3L);
+        List<ServiceInstance> list = List.of(instance1, instance2, instance3);
+
+        for (int i = 0; i < 10; i++) {
+            assertThat(lb.selectServiceInstance(list).getId()).isBetween(1L, 3L);
+        }
+    }
+
+    @Test
     public void testType() {
         assertThat(provider.type()).isEqualTo(RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE);
     }

@@ -12,7 +12,16 @@ import io.smallrye.stork.api.ServiceInstance;
 
 public class RoundRobinLoadBalancer implements LoadBalancer {
 
-    private final AtomicInteger index = new AtomicInteger();
+    private final AtomicInteger index;
+
+    public RoundRobinLoadBalancer() {
+        index = new AtomicInteger(0);
+    }
+
+    // Intended for testing only – allows setting the initial counter value.
+    public RoundRobinLoadBalancer(int initialValue) {
+        index = new AtomicInteger(initialValue);
+    }
 
     @Override
     public ServiceInstance selectServiceInstance(Collection<ServiceInstance> serviceInstances) {
@@ -35,6 +44,6 @@ public class RoundRobinLoadBalancer implements LoadBalancer {
             return null;
         }
 
-        return instances.get(index.getAndIncrement() % instances.size());
+        return instances.get(Math.floorMod(index.getAndIncrement(), instances.size()));
     }
 }
