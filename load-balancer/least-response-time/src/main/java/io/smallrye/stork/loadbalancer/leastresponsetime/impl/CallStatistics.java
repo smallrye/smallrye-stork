@@ -68,7 +68,7 @@ public class CallStatistics implements CallStatisticsCollector {
                 CallsData newData;
                 newData = new CallsData(callIdx, timeInNs, 1);
 
-                if (storage.put(callIdx, newData) == null) {
+                if (storage.put(serviceInstanceId, newData) == null) {
                     break; // success if there was no data (inserted in the meantime)
                 }
             }
