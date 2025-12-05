@@ -5,6 +5,7 @@ import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
 import java.util.List;
 import java.util.Map;
 
+import io.vertx.core.net.JksOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,19 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
         ConsulClientOptions options = new ConsulClientOptions();
         options.setHost(config.getConsulHost());
         options.setPort(getPort(serviceName, config.getConsulPort()));
+        if (config.getSsl().equalsIgnoreCase("true")) {
+            options.setSsl(true)
+                    .setTrustStoreOptions(new JksOptions()
+                            .setPath(config.getTrustStorePath())
+                            .setPassword(config.getTrustStorePassword()))
+                    .setKeyStoreOptions(new JksOptions()
+                            .setPath(config.getKeyStorePath())
+                            .setPassword(config.getKeyStorePassword()))
+                    .setAclToken(config.getAclToken());
+            if (config.getVerifyHost().equalsIgnoreCase("true")) {
+                options.setVerifyHost(true);
+            }
+        }
         client = ConsulClient.create(vertx, options);
 
     }
