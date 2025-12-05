@@ -19,6 +19,7 @@ import io.smallrye.stork.impl.DefaultServiceInstance;
 import io.smallrye.stork.utils.ServiceInstanceIds;
 import io.smallrye.stork.utils.ServiceInstanceUtils;
 import io.vertx.core.Vertx;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
 import io.vertx.ext.consul.Service;
@@ -46,6 +47,19 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         options.setPort(getPort(serviceName, config.getConsulPort()));
         passing = Boolean.parseBoolean(config.getUseHealthChecks());
         this.application = config.getApplication() == null ? serviceName : config.getApplication();
+        if (config.getSsl().equalsIgnoreCase("true")) {
+            options.setSsl(true)
+                    .setTrustStoreOptions(new JksOptions()
+                            .setPath(config.getTrustStorePath())
+                            .setPassword(config.getTrustStorePassword()))
+                    .setKeyStoreOptions(new JksOptions()
+                            .setPath(config.getKeyStorePath())
+                            .setPassword(config.getKeyStorePassword()))
+                    .setAclToken(config.getAclToken());
+            if (config.getVerifyHost().equalsIgnoreCase("true")) {
+                options.setVerifyHost(true);
+            }
+        }
         client = ConsulClient.create(vertx, options);
     }
 
