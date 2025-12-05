@@ -139,4 +139,21 @@ public class ConsulServiceDiscoveryCDITest {
         ConsulServiceDiscoveryTestUtils.shouldDiscoverServiceWithoutAddress(client, stork, serviceName);
     }
 
+    @Test
+    void shouldAcceptSslConfiguration() {
+        String serviceName = "my-secure-service";
+        config.addServiceConfig(serviceName, null, "consul", null,
+                Map.of("consul-host", "localhost",
+                        "consul-port", String.valueOf(consulPort),
+                        "ssl", "true",
+                        "trust-store-path", "/path/to/truststore.jks",
+                        "trust-store-password", "changeit",
+                        "key-store-path", "/path/to/keystore.jks",
+                        "key-store-password", "changeit",
+                        "verify-host", "true",
+                        "acl-token", "my-acl-token"));
+        stork = StorkTestUtils.getNewStorkInstance();
+        ConsulServiceDiscoveryTestUtils.shouldAcceptSslConfiguration(stork, serviceName);
+    }
+
 }
