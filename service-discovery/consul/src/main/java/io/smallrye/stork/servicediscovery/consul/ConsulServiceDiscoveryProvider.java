@@ -20,6 +20,13 @@ import io.vertx.core.Vertx;
 @ServiceDiscoveryAttribute(name = "application", description = "The application name; if not defined Stork service name will be used.")
 @ServiceDiscoveryAttribute(name = "refresh-period", description = "Service discovery cache refresh period.", defaultValue = CachingServiceDiscovery.DEFAULT_REFRESH_INTERVAL)
 @ServiceDiscoveryAttribute(name = "secure", description = "whether the connection with the service should be encrypted with TLS.")
+@ServiceDiscoveryAttribute(name = "ssl", description = "是否使用 ssh", defaultValue = "false")
+@ServiceDiscoveryAttribute(name = "trust-store-path", description = "trust-store-path", defaultValue = "")
+@ServiceDiscoveryAttribute(name = "trust-store-password", description = "trust-store-password", defaultValue = "")
+@ServiceDiscoveryAttribute(name = "key-store-path", description = "key-store-path", defaultValue = "")
+@ServiceDiscoveryAttribute(name = "key-store-password", description = "key-store-password", defaultValue = "")
+@ServiceDiscoveryAttribute(name = "verify-host", description = "verify-host", defaultValue = "false")
+@ServiceDiscoveryAttribute(name = "acl-token", description = "acl-token", defaultValue = "")
 @ServiceDiscoveryType("consul")
 @ApplicationScoped
 public class ConsulServiceDiscoveryProvider implements ServiceDiscoveryProvider<ConsulConfiguration> {
