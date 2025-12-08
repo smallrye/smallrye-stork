@@ -29,7 +29,7 @@
     <name>SmallRye Stork Service Discovery : Consul</name>
 
     <properties>
-        <revapi.skip>true</revapi.skip>
+        <revapi.skip>false</revapi.skip>
     </properties>
 
     <dependencies>
