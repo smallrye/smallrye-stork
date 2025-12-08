@@ -14,6 +14,7 @@ import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.impl.ConsulMetadataKey;
 import io.smallrye.stork.spi.StorkInfrastructure;
 import io.vertx.core.Vertx;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.consul.CheckOptions;
 import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
@@ -34,6 +35,19 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
         ConsulClientOptions options = new ConsulClientOptions();
         options.setHost(config.getConsulHost());
         options.setPort(getPort(serviceName, config.getConsulPort()));
+        if (config.getSsl().equalsIgnoreCase("true")) {
+            options.setSsl(true)
+                    .setTrustStoreOptions(new JksOptions()
+                            .setPath(config.getTrustStorePath())
+                            .setPassword(config.getTrustStorePassword()))
+                    .setKeyStoreOptions(new JksOptions()
+                            .setPath(config.getKeyStorePath())
+                            .setPassword(config.getKeyStorePassword()))
+                    .setAclToken(config.getAclToken());
+            if (config.getVerifyHost().equalsIgnoreCase("true")) {
+                options.setVerifyHost(true);
+            }
+        }
         client = ConsulClient.create(vertx, options);
 
     }
