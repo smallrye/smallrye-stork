@@ -93,6 +93,74 @@ Stork looks for the _Kubernetes Service_ with the given name (`my-service` in th
 Instead of using the _Kubernetes Service_ IP directly, and let Kubernetes handle the selection and balancing, Stork inspects the service and retrieves the list of _pods_ providing the service.
 Then, it can select the instance.
 
+
+## EndpointSlice support
+
+Recent Kubernetes versions expose service endpoints using **EndpointSlices** (`discovery.k8s.io/v1`), 
+which are the recommended and scalable replacement for classic `Endpoints`.
+
+Stork supports EndpointSlices and can use them transparently for service discovery.
+
+### Why EndpointSlices
+
+Compared to classic `Endpoints`, EndpointSlices:
+
+* Scale better for services with many pods.
+* Reduce load on the Kubernetes API server.
+* Produce smaller and more frequent updates.
+* Are the preferred API in modern Kubernetes clusters.
+
+When available, EndpointSlices are the recommended source for service discovery.
+
+## Configuration
+
+By default, Stork uses **classic Endpoints** for compatibility.
+EndpointSlices can be enabled explicitly or selected automatically.
+
+### Explicit configuration
+
+You can force the use of EndpointSlices per service:
+
+```properties
+quarkus.stork.my-service.service-discovery.use-endpoint-slices=true
+```
+
+Or explicitly disable them:
+
+```properties
+quarkus.stork.my-service.service-discovery.use-endpoint-slices=false
+```
+
+### Automatic detection (default behavior)
+
+If `use-endpoint-slices` is not configured, Stork applies the following logic:
+
+1. If the Kubernetes cluster exposes the `discovery.k8s.io/v1` API **and**
+2. EndpointSlices exist for the target service
+
+→ Stork uses EndpointSlices.
+
+Otherwise, it falls back to classic Endpoints.
+
+This ensures backward compatibility with older clusters and services while automatically benefiting from EndpointSlices when available.
+
+## Service instance resolution with EndpointSlices
+
+When using EndpointSlices, Stork does **not** resolve Pods.
+
+Instead, service instances are derived directly from the EndpointSlice objects:
+
+* `endpoint.addresses` → instance host
+* `endpointSlice.ports` → instance port
+* `endpointSlice.labels` → instance metadata
+
+Each EndpointSlice represents a homogeneous group of endpoints.
+All addresses in a slice share the same set of ports.
+If different port combinations exist, Kubernetes exposes them as separate EndpointSlices.
+
+This guarantees that all `(address, port)` combinations returned by Stork are valid.
+
+
 Supported attributes are the following:
 
 --8<-- "target/attributes/META-INF/stork-docs/kubernetes-sd-attributes.txt"
@@ -112,4 +180,6 @@ The system will attempt to contact the cluster up to the number of times specifi
 By default, retries are disabled to prevent the system from entering an infinite loop of calls to an unresponsive cluster.
  - the `cache` method is overridden to customize the expiration strategy. In this case the collection of service instances will be kept until an event occurs.
 
+When EndpointSlice are selected, Stork creates informers on the `EndpointSlice` resources instead of classic `Endpoints`. 
+The caching behavior remains unchanged.
 

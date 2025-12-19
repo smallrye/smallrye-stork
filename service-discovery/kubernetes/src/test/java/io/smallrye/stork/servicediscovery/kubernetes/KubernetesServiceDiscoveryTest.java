@@ -1,6 +1,8 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
 import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
+import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesTestUtils.ipAsSuffix;
+import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesTestUtils.mapHostnameToIds;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -9,15 +11,12 @@ import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,22 +24,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
-import io.fabric8.kubernetes.api.model.EndpointAddress;
-import io.fabric8.kubernetes.api.model.EndpointAddressBuilder;
 import io.fabric8.kubernetes.api.model.EndpointPort;
 import io.fabric8.kubernetes.api.model.EndpointPortBuilder;
-import io.fabric8.kubernetes.api.model.EndpointSubsetBuilder;
 import io.fabric8.kubernetes.api.model.Endpoints;
-import io.fabric8.kubernetes.api.model.EndpointsBuilder;
 import io.fabric8.kubernetes.api.model.EndpointsListBuilder;
-import io.fabric8.kubernetes.api.model.ObjectReference;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
-import io.smallrye.common.constraint.Assert;
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.Service;
@@ -61,12 +52,15 @@ public class KubernetesServiceDiscoveryTest {
     String k8sMasterUrl;
     String defaultNamespace;
 
+    KubernetesTestUtils utils;
+
     @BeforeEach
     void setUp() {
         TestConfigProvider.clear();
         System.setProperty(Config.KUBERNETES_TRUST_CERT_SYSTEM_PROPERTY, "true");
         k8sMasterUrl = client.getMasterUrl().toString();
         defaultNamespace = client.getNamespace();
+        utils = new KubernetesTestUtils(client);
     }
 
     @Test
@@ -78,7 +72,7 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
 
-        registerKubernetesResources(serviceName, defaultNamespace, ips);
+        utils.registerKubernetesResources(serviceName, defaultNamespace, ips);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -116,7 +110,7 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
 
-        registerKubernetesResources("greetingApp", defaultNamespace, ips);
+        utils.registerKubernetesResources("greetingApp", defaultNamespace, ips);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -154,7 +148,7 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
 
-        registerKubernetesResources(serviceName, defaultNamespace, ips);
+        utils.registerKubernetesResources(serviceName, defaultNamespace, ips);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -193,7 +187,7 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
 
-        registerKubernetesResources(serviceName, defaultNamespace, ips);
+        utils.registerKubernetesResources(serviceName, defaultNamespace, ips);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -231,9 +225,9 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        registerKubernetesResources("rest-service", defaultNamespace, "10.96.96.231", "10.96.96.232",
+        utils.registerKubernetesResources("rest-service", defaultNamespace, "10.96.96.231", "10.96.96.232",
                 "10.96.96.233");
-        registerKubernetesResources("svc", defaultNamespace, "10.95.95.125");
+        utils.registerKubernetesResources("svc", defaultNamespace, "10.95.95.125");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -267,7 +261,7 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String specificNs = "ns1";
 
-        registerKubernetesResources(serviceName, specificNs, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesResources(serviceName, specificNs, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -311,8 +305,8 @@ public class KubernetesServiceDiscoveryTest {
         EndpointPort[] ports = new EndpointPort[] {
                 new EndpointPortBuilder().withName("http1").withPort(8080).withProtocol("TCP").build(),
                 new EndpointPortBuilder().withName("http2").withPort(8081).withProtocol("TCP").build() };
-        buildAndRegisterKubernetesService(serviceName, specificNs, true, ports, ips);
-        Arrays.stream(ips).forEach(ip -> buildAndRegisterBackendPod(serviceName, specificNs, true, ip));
+        utils.buildAndRegisterKubernetesService(serviceName, specificNs, true, ports, ips);
+        Arrays.stream(ips).forEach(ip -> utils.buildAndRegisterBackendPod(serviceName, specificNs, true, ip));
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -356,8 +350,8 @@ public class KubernetesServiceDiscoveryTest {
         EndpointPort[] ports = new EndpointPort[] {
                 new EndpointPortBuilder().withName("http1").withPort(8080).withProtocol("TCP").build(),
                 new EndpointPortBuilder().withName("http2").withPort(8081).withProtocol("TCP").build() };
-        buildAndRegisterKubernetesService(serviceName, specificNs, true, ports, ips);
-        Arrays.stream(ips).forEach(ip -> buildAndRegisterBackendPod(serviceName, specificNs, true, ip));
+        utils.buildAndRegisterKubernetesService(serviceName, specificNs, true, ports, ips);
+        Arrays.stream(ips).forEach(ip -> utils.buildAndRegisterBackendPod(serviceName, specificNs, true, ip));
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -396,8 +390,8 @@ public class KubernetesServiceDiscoveryTest {
         Stork stork = StorkTestUtils.getNewStorkInstance();
         String serviceName = "svc";
 
-        registerKubernetesResources(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
-        registerKubernetesResources(serviceName, "ns2", "10.99.99.241", "10.99.99.242", "10.99.99.243");
+        utils.registerKubernetesResources(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesResources(serviceName, "ns2", "10.99.99.241", "10.99.99.242", "10.99.99.243");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -437,7 +431,7 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -461,7 +455,7 @@ public class KubernetesServiceDiscoveryTest {
         client.pods().withName("svc-109696232").delete();
         client.pods().withName("svc-109696233").delete();
 
-        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232");
+        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232");
 
         Thread.sleep(5000);
 
@@ -480,7 +474,7 @@ public class KubernetesServiceDiscoveryTest {
         client.pods().withName("svc-109696231").delete();
         client.pods().withName("svc-109696232").delete();
 
-        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.234");
+        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.234");
 
         Thread.sleep(5000);
 
@@ -506,7 +500,7 @@ public class KubernetesServiceDiscoveryTest {
 
         //Given a few instances for a svc service
         List<Endpoints> endpointsList = List
-                .of(registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                .of(utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
                         "10.96.96.233"));
 
         //Recording k8s cluster calls and and build the response with the (previous registered) endpoints
@@ -559,7 +553,7 @@ public class KubernetesServiceDiscoveryTest {
 
         //Given a few instances for a svc service
         List<Endpoints> endpointsList = List
-                .of(registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                .of(utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
                         "10.96.96.233"));
 
         //Recording k8s cluster calls and and build the response with the (previous registered) endpoints
@@ -658,7 +652,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(serverHit.get()).isEqualTo(1);
 
         //We trigger an event in the cluster just to invalidate cache
-        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
                 "10.96.96.233");
 
         serviceDiscovery.getServiceInstances()
@@ -681,7 +675,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(serverHit.get()).isEqualTo(3);
 
         //We trigger an event in the cluster just to invalidate cache
-        registerKubernetesResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
+        utils.registerKubernetesResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
                 "10.96.96.236");
 
         serviceDiscovery.getServiceInstances()
@@ -737,7 +731,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(serverHit.get()).isEqualTo(1);
 
         //We trigger an event in the cluster just to invalidate cache
-        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
                 "10.96.96.233");
 
         serviceDiscovery.getServiceInstances()
@@ -760,7 +754,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(serverHit.get()).isEqualTo(3);
 
         //We trigger an event in the cluster just to invalidate cache
-        registerKubernetesResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
+        utils.registerKubernetesResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
                 "10.96.96.236");
 
         serviceDiscovery.getServiceInstances()
@@ -788,7 +782,7 @@ public class KubernetesServiceDiscoveryTest {
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -831,7 +825,7 @@ public class KubernetesServiceDiscoveryTest {
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "all", "refresh-period", "3"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
         Set<ServiceInstance> instances = new ConcurrentHashSet<>();
 
@@ -866,83 +860,6 @@ public class KubernetesServiceDiscoveryTest {
                 .until(instances::isEmpty);
 
         assertThat(instances).isEmpty();
-    }
-
-    private Endpoints registerKubernetesResources(String serviceName, String namespace, String... ips) {
-        Assert.checkNotNullParam("ips", ips);
-        Endpoints endpoints = buildAndRegisterKubernetesService(serviceName, namespace, true, ips);
-        Arrays.stream(ips).forEach(ip -> buildAndRegisterBackendPod(serviceName, namespace, true, ip));
-        return endpoints;
-    }
-
-    private Map<String, Long> mapHostnameToIds(List<ServiceInstance> serviceInstances) {
-        Map<String, Long> result = new HashMap<>();
-        for (ServiceInstance serviceInstance : serviceInstances) {
-            result.put(serviceInstance.getHost(), serviceInstance.getId());
-        }
-        return result;
-    }
-
-    private Endpoints buildAndRegisterKubernetesService(String applicationName, String namespace, boolean register,
-            String... ipAdresses) {
-        EndpointPort[] ports = new EndpointPort[] { new EndpointPortBuilder().withPort(8080).withProtocol("TCP").build() };
-        return buildAndRegisterKubernetesService(applicationName, namespace, register, ports, ipAdresses);
-    }
-
-    private Endpoints buildAndRegisterKubernetesService(String applicationName, String namespace, boolean register,
-            EndpointPort[] ports, String... ipAdresses) {
-
-        Map<String, String> serviceLabels = new HashMap<>();
-        serviceLabels.put("app.kubernetes.io/name", applicationName);
-        serviceLabels.put("app.kubernetes.io/version", "1.0");
-
-        List<EndpointAddress> endpointAddresses = Arrays.stream(ipAdresses)
-                .map(ipAddress -> {
-                    ObjectReference targetRef = new ObjectReference(null, null, "Pod",
-                            applicationName + "-" + ipAsSuffix(ipAddress), namespace, null, UUID.randomUUID().toString());
-                    EndpointAddress endpointAddress = new EndpointAddressBuilder().withIp(ipAddress).withTargetRef(targetRef)
-                            .build();
-                    return endpointAddress;
-                }).collect(Collectors.toList());
-        Endpoints endpoint = new EndpointsBuilder()
-                .withNewMetadata().withName(applicationName).withLabels(serviceLabels).endMetadata()
-                .addToSubsets(new EndpointSubsetBuilder().withAddresses(endpointAddresses)
-                        .addToPorts(ports)
-                        .build())
-                .build();
-
-        if (register) {
-            if (namespace != null) {
-                client.endpoints().inNamespace(namespace).resource(endpoint).create();
-            } else {
-                client.endpoints().resource(endpoint).create();
-            }
-        }
-        return endpoint;
-
-    }
-
-    private Pod buildAndRegisterBackendPod(String name, String namespace, boolean register, String ip) {
-        Pod backendPod = new PodBuilder().withNewMetadata()
-                .withName(name + "-" + ipAsSuffix(ip))
-                .addToLabels("app.kubernetes.io/name", name)
-                .addToLabels("app.kubernetes.io/version", "1.0")
-                .addToLabels("ui", "ui-" + ipAsSuffix(ip))
-                .withNamespace(namespace)
-                .endMetadata()
-                .build();
-        if (register) {
-            if (namespace != null) {
-                client.pods().inNamespace(namespace).resource(backendPod).create();
-            } else {
-                client.pods().resource(backendPod).create();
-            }
-        }
-        return backendPod;
-    }
-
-    private String ipAsSuffix(String ipAddress) {
-        return ipAddress.replace(".", "");
     }
 
 }
