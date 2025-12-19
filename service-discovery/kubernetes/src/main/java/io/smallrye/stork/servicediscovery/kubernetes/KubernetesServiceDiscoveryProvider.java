@@ -23,6 +23,7 @@ import io.vertx.core.Vertx;
 @ServiceDiscoveryAttribute(name = "secure", description = "Whether the connection with the service should be encrypted with TLS.")
 @ServiceDiscoveryAttribute(name = "request-retry-backoff-limit", description = "Maximum number of retry attempts allowed after a request failure.")
 @ServiceDiscoveryAttribute(name = "request-retry-backoff-interval", description = "Amount of time to wait between retry attempts after a request fails.")
+@ServiceDiscoveryAttribute(name = "use-endpoint-slices", description = "Use the EndpointSlice API instead", defaultValue = "false")
 @ApplicationScoped
 public class KubernetesServiceDiscoveryProvider
         implements ServiceDiscoveryProvider<KubernetesConfiguration> {
