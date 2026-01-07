@@ -94,8 +94,9 @@ Instead of using the _Kubernetes Service_ IP directly, and let Kubernetes handle
 Then, it can select the instance.
 
 
-## EndpointSlice support
+## EndpointSlice support (Experimental)
 
+This feature is experimental. It is opt-in, and the API or behavior may change based on user feedback and Kubernetes evolution.
 Recent Kubernetes versions expose service endpoints using **EndpointSlices** (`discovery.k8s.io/v1`), 
 which are the recommended and scalable replacement for classic `Endpoints`.
 

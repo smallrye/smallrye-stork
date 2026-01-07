@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -96,6 +97,163 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
         assertThat(instances.get()).hasSize(1);
         assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
         assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactly(ips[0]);
+
+        for (ServiceInstance serviceInstance : instances.get()) {
+            Map<String, String> labels = serviceInstance.getLabels();
+            assertThat(labels).contains(
+                    entry("kubernetes.io/version", "1.0"),
+                    entry("kubernetes.io/service-name", "svc"));
+        }
+
+        instances.get().stream()
+                .map(ServiceInstance::getMetadata)
+                .forEach(metadata -> {
+                    Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+                    assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+                });
+
+        assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isFalse());
+    }
+
+    @Test
+    void shouldAggregateEndpointSlices() {
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null,
+                Map.of(
+                        "k8s-host", k8sMasterUrl,
+                        "k8s-namespace", "test",
+                        "use-endpoint-slices", "true"),
+                null);
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "svc";
+        String[] ips1 = { "10.96.96.231" };
+        int[] ports1 = { 8080 };
+
+        String[] ips2 = { "10.96.96.232" };
+        int[] ports2 = { 9090 };
+
+        registerKubernetesEndpointSlice(serviceName, "test", ips1, ports1);
+        registerKubernetesEndpointSlice(serviceName, "test", ips2, ports2);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes (EndpointSlices)", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(2);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder(ips1[0], ips2[0]);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080, 9090);
+
+        for (ServiceInstance serviceInstance : instances.get()) {
+            Map<String, String> labels = serviceInstance.getLabels();
+            assertThat(labels).contains(
+                    entry("kubernetes.io/version", "1.0"),
+                    entry("kubernetes.io/service-name", "svc"));
+        }
+
+        instances.get().stream()
+                .map(ServiceInstance::getMetadata)
+                .forEach(metadata -> {
+                    Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+                    assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+                });
+
+        assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isFalse());
+    }
+
+    @Test
+    void shouldAggregateEndpointSlicesWithMultipleAddressesForSamePort() {
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null,
+                Map.of(
+                        "k8s-host", k8sMasterUrl,
+                        "k8s-namespace", "test",
+                        "use-endpoint-slices", "true"),
+                null);
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "svc";
+        String[] ips1 = { "10.96.96.231", "10.96.96.232" };
+        int[] ports1 = { 8080 };
+
+        registerKubernetesEndpointSlice(serviceName, "test", ips1, ports1);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes (EndpointSlices)", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(2);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder(ips1[0], ips1[1]);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080, 8080);
+
+        for (ServiceInstance serviceInstance : instances.get()) {
+            Map<String, String> labels = serviceInstance.getLabels();
+            assertThat(labels).contains(
+                    entry("kubernetes.io/version", "1.0"),
+                    entry("kubernetes.io/service-name", "svc"));
+        }
+
+        instances.get().stream()
+                .map(ServiceInstance::getMetadata)
+                .forEach(metadata -> {
+                    Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+                    assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+                });
+
+        assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isFalse());
+    }
+
+    @Test
+    void shouldAggregateEndpointSlicesWithMultiplePorts() {
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null,
+                Map.of(
+                        "k8s-host", k8sMasterUrl,
+                        "k8s-namespace", "test",
+                        "use-endpoint-slices", "true"),
+                null);
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "svc";
+        String[] ips1 = { "10.96.96.231", "10.96.96.232" };
+        int[] ports1 = { 8080, 8081 };
+
+        String[] ips2 = { "10.96.96.232" };
+        int[] ports2 = { 9090 };
+
+        registerKubernetesEndpointSlice(serviceName, "test", ips1, ports1);
+        registerKubernetesEndpointSlice(serviceName, "test", ips2, ports2);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes (EndpointSlices)", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(5);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder(ips1[0], ips1[1], ips1[0],
+                ips1[1], ips2[0]);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).containsExactlyInAnyOrder(8080, 8080, 8081, 8081,
+                9090);
 
         for (ServiceInstance serviceInstance : instances.get()) {
             Map<String, String> labels = serviceInstance.getLabels();
@@ -251,9 +409,10 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
         for (Integer port : ports) {
             portList.add(new io.fabric8.kubernetes.api.model.discovery.v1.EndpointPortBuilder().withPort(port).build());
         }
+        String randomSuffix = UUID.randomUUID().toString().substring(0, 4);
         EndpointSlice slice = new EndpointSliceBuilder()
                 .withNewMetadata()
-                .withName(serviceName + "- endpointSlice")
+                .withName(serviceName + "- endpointSlice-" + randomSuffix)
                 .withNamespace(namespace)
                 .withLabels(Map.of(
                         "kubernetes.io/service-name", serviceName,
