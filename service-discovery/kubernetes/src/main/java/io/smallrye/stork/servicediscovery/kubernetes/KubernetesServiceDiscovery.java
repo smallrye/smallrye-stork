@@ -47,6 +47,10 @@ import io.vertx.core.Vertx;
  * An implementation of service discovery for Kubernetes.
  * This implementation locates a Kubernetes service and retrieves the <em>endpoints</em> (the address of the pods
  * backing the service).
+ *
+ * Experimental feature: EndpointSlice-based service discovery.
+ * Behavior and configuration may change in future versions.
+ *
  */
 public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
@@ -127,23 +131,27 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
      */
 
     private boolean shouldUseEndpointSlices() {
+        boolean shouldUseEndpointSlices = false;
         if (useEndpointSlices) {
-            return true;
+            shouldUseEndpointSlices = true;
         }
         //cluster autodetection: EndpointSlices live in `discovery.k8s.io/v1`
         boolean apiAvailable = client.getApiGroups().getGroups().stream()
                 .anyMatch(g -> DISCOVERY_K8S_API.equals(g.getName()));
 
         if (!apiAvailable) {
-            return false; // old cluster - endpoints
+            shouldUseEndpointSlices = false; // old cluster - endpoints
         }
 
         EndpointSliceList slices = client.discovery().v1().endpointSlices()
                 .inNamespace(namespace)
                 .withLabel(SERVICE_SELECTOR, application)
                 .list();
-
-        return slices != null && !slices.getItems().isEmpty();
+        shouldUseEndpointSlices = slices != null && !slices.getItems().isEmpty();
+        if (shouldUseEndpointSlices) {
+            LOGGER.info("EndpointSlice discovery is enabled (experimental)");
+        }
+        return shouldUseEndpointSlices;
     }
 
     private void configureEndpointsInformer() {
@@ -303,7 +311,6 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             List<io.fabric8.kubernetes.api.model.discovery.v1.EndpointPort> ports = slice.getPorts();
             for (Endpoint endpoint : slice.getEndpoints()) {
 
-                //not sure to filter this
                 if (endpoint.getConditions() != null
                         && Boolean.FALSE.equals(endpoint.getConditions().getReady())) {
                     continue;
