@@ -34,7 +34,7 @@
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
 
-        <version.assertj>3.27.6</version.assertj>
+        <version.assertj>3.27.7</version.assertj>
         <version.microprofile-config-api>3.1</version.microprofile-config-api>
         <version.mutiny>3.1.0</version.mutiny>
         <version.smallrye-config>3.15.1</version.smallrye-config>
@@ -50,7 +50,7 @@
         <version.mockito>5.2.0</version.mockito>
         <version.jackson>2.21.0</version.jackson>
         <version.weld>6.0.4.Final</version.weld>
-        <version.spring-boot>4.0.1</version.spring-boot>
+        <version.spring-boot>4.0.2</version.spring-boot>
 
         <revapi-maven-plugin.version>0.15.1</revapi-maven-plugin.version>
         <revapi-java.version>0.28.4</revapi-java.version>
