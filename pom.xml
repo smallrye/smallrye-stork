@@ -37,7 +37,7 @@
         <version.assertj>3.27.6</version.assertj>
         <version.microprofile-config-api>3.1</version.microprofile-config-api>
         <version.mutiny>3.1.0</version.mutiny>
-        <version.smallrye-config>3.15.0</version.smallrye-config>
+        <version.smallrye-config>3.15.1</version.smallrye-config>
 
         <vertx.version>4.5.24</vertx.version>
         <version.vertx-mutiny-bindings>3.21.3</version.vertx-mutiny-bindings>
