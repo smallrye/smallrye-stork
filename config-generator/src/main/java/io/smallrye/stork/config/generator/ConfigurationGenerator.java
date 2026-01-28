@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -20,8 +19,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-
-import com.google.auto.service.AutoService;
 
 import io.smallrye.stork.api.config.LoadBalancerAttribute;
 import io.smallrye.stork.api.config.LoadBalancerAttributes;
@@ -51,7 +48,6 @@ import io.smallrye.stork.spi.internal.ServiceRegistrarLoader;
         "io.smallrye.stork.api.config.ServiceRegistrarAttributes"
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
-@AutoService(Processor.class)
 public class ConfigurationGenerator extends AbstractProcessor {
 
     public static final LoadBalancerAttribute[] EMPTY_LB_ATTRIBUTES = new LoadBalancerAttribute[0];
