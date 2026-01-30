@@ -232,6 +232,27 @@ public class ConsulServiceRegistrationTest {
     }
 
     @Test
+    void shouldAcceptSslConfiguration() {
+        String serviceName = "my-secure-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, null,
+                Map.of("consul-host", "localhost",
+                        "consul-port", String.valueOf(consulPort),
+                        "ssl", "true",
+                        "trust-store-path", "/path/to/truststore.jks",
+                        "trust-store-password", "changeit",
+                        "key-store-path", "/path/to/keystore.jks",
+                        "key-store-password", "changeit",
+                        "verify-host", "true",
+                        "acl-token", "my-acl-token"));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        assertThat(consulRegistrar).isNotNull();
+        assertThat(consulRegistrar).isInstanceOf(ConsulServiceRegistrar.class);
+    }
+
+    @Test
     void shouldDeregisterServiceInstancesInConsul() throws InterruptedException {
         //Given a service `my-service` registered in consul
         String serviceName = "my-service";
