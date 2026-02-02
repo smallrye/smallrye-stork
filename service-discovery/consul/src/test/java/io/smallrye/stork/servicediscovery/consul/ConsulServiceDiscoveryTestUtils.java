@@ -338,4 +338,11 @@ public class ConsulServiceDiscoveryTestUtils {
             }
         }
     }
+
+    public static void shouldAcceptSslConfiguration(Stork stork, String serviceName) {
+        Service service = stork.getService(serviceName);
+        assertThat(service).isNotNull();
+        assertThat(service.getServiceDiscovery()).isNotNull();
+        assertThat(service.getServiceDiscovery()).isInstanceOf(ConsulServiceDiscovery.class);
+    }
 }

@@ -150,4 +150,21 @@ public class ConsulServiceDiscoveryProgrammaticApiCDITest {
         stork.defineIfAbsent(serviceName, ServiceDefinition.of(config.getConfigs().get(0).serviceDiscovery()));
         ConsulServiceDiscoveryTestUtils.shouldDiscoverServiceWithoutAddress(client, stork, serviceName);
     }
+
+    @Test
+    void shouldAcceptSslConfiguration() {
+        String serviceName = "my-secure-service";
+        ConsulConfiguration consulConfig = new ConsulConfiguration()
+                .withConsulHost("localhost")
+                .withConsulPort(String.valueOf(consulPort))
+                .withSsl("true")
+                .withTrustStorePath("/path/to/truststore.jks")
+                .withTrustStorePassword("changeit")
+                .withKeyStorePath("/path/to/keystore.jks")
+                .withKeyStorePassword("changeit")
+                .withVerifyHost("true")
+                .withAclToken("my-acl-token");
+        stork.defineIfAbsent(serviceName, ServiceDefinition.of(consulConfig));
+        ConsulServiceDiscoveryTestUtils.shouldAcceptSslConfiguration(stork, serviceName);
+    }
 }
