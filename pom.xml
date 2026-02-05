@@ -184,11 +184,32 @@
                 <artifactId>weld-se-core</artifactId>
                 <version>${version.weld}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging-processor</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.jdeparser</groupId>
+                        <artifactId>jdeparser</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-spi</artifactId>
                 <version>6.0.Final</version>
+                <!-- Exclude Weld's annotation processors - transitive deps, not needed and prevent modularization -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging-processor</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.jdeparser</groupId>
+                        <artifactId>jdeparser</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jboss.weld</groupId>
@@ -201,12 +222,34 @@
                 <artifactId>weld-core-impl</artifactId>
                 <version>${version.weld}</version>
                 <scope>test</scope>
+                <!-- Exclude Weld's annotation processors - transitive deps, not needed and prevent modularization -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging-processor</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.jdeparser</groupId>
+                        <artifactId>jdeparser</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.jboss.weld</groupId>
                 <artifactId>weld-junit5</artifactId>
                 <version>5.0.3.Final</version>
                 <scope>test</scope>
+                <!-- Exclude Weld's annotation processors - transitive deps, not needed and prevent modularization -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.logging</groupId>
+                        <artifactId>jboss-logging-processor</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.jboss.jdeparser</groupId>
+                        <artifactId>jdeparser</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -304,6 +347,25 @@
                         <excludePackageNames>*.impl:*.impl.*</excludePackageNames>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>io.github.dmlloyd.maven</groupId>
+                    <artifactId>module-services-plugin</artifactId>
+                    <version>1.2</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <useModulePath>false</useModulePath>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -359,6 +421,18 @@
                                 <source>target/generated-sources/annotations</source>
                             </sources>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.github.dmlloyd.maven</groupId>
+                <artifactId>module-services-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
