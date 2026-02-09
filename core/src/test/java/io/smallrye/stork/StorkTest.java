@@ -4,6 +4,7 @@ import static io.smallrye.stork.FakeServiceConfig.FAKE_LOAD_BALANCER_CONFIG;
 import static io.smallrye.stork.FakeServiceConfig.FAKE_SECURE_SERVICE_DISCOVERY_CONFIG;
 import static io.smallrye.stork.FakeServiceConfig.FAKE_SERVICE_DISCOVERY_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
@@ -13,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -119,10 +119,10 @@ public class StorkTest {
     @Test
     void initWithoutServiceDiscoveryOrLoadBalancer() {
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
-        Assertions.assertDoesNotThrow(() -> Stork.initialize());
+        assertThatCode(() -> Stork.initialize()).doesNotThrowAnyException();
         Stork stork = Stork.getInstance();
-        Assertions.assertTrue(stork.getServiceOptional("missing").isEmpty());
-        Assertions.assertThrows(NoSuchServiceDefinitionException.class, () -> stork.getService("missing"));
+        assertThat(stork.getServiceOptional("missing")).isEmpty();
+        assertThatThrownBy(() -> stork.getService("missing")).isInstanceOf(NoSuchServiceDefinitionException.class);
     }
 
     @Test
@@ -130,11 +130,11 @@ public class StorkTest {
         TestEnv.install(ConfigProvider.class, ServiceAConfigProvider.class, ServiceBConfigProvider.class);
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertTrue(stork.getServiceOptional("a").isEmpty());
+        assertThat(stork.getServiceOptional("a")).isEmpty();
 
-        Assertions.assertTrue(stork.getServiceOptional("missing").isEmpty());
-        Assertions.assertTrue(stork.getServiceOptional("b").isPresent());
-        Assertions.assertNotNull(stork.getService("b"));
+        assertThat(stork.getServiceOptional("missing")).isEmpty();
+        assertThat(stork.getServiceOptional("b")).isPresent();
+        assertThat(stork.getService("b")).isNotNull();
     }
 
     @Test
@@ -159,14 +159,14 @@ public class StorkTest {
         }, null, null));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
 
-        Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
+        assertThatThrownBy(Stork::initialize).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     public void testServiceWithServiceDiscoveryButNoMatchingProvider() {
         TestEnv.configurations.add(new FakeServiceConfig("a", SERVICE_DISCOVERY_CONFIG_WITH_INVALID_PROVIDER, null, null));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
-        Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
+        assertThatThrownBy(Stork::initialize).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -174,7 +174,7 @@ public class StorkTest {
         TestEnv.configurations
                 .add(new FakeServiceConfig("a", FAKE_SERVICE_DISCOVERY_CONFIG, LOAD_BALANCER_WITH_INVALID_PROVIDER, null));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
-        Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
+        assertThatThrownBy(Stork::initialize).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -182,7 +182,7 @@ public class StorkTest {
         TestEnv.configurations
                 .add(new FakeServiceConfig("a", null, null, SERVICE_REGISTRAR_WITH_INVALID_PROVIDER));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
-        Assertions.assertThrows(IllegalArgumentException.class, Stork::initialize);
+        assertThatThrownBy(Stork::initialize).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class StorkTest {
         TestEnv.configurations
                 .add(new FakeServiceConfig("a", null, null, DISABLED_UNKNOWN_SERVICE_REGISTRAR_PROVIDER));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
-        Assertions.assertDoesNotThrow(() -> Stork.initialize());
+        assertThatCode(() -> Stork.initialize()).doesNotThrowAnyException();
     }
 
     @Test
@@ -203,10 +203,10 @@ public class StorkTest {
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
-        Assertions.assertNotNull(stork.getService("a").getServiceDiscovery());
-        Assertions.assertEquals(stork.getService("a").selectInstance().await().indefinitely(), instance);
-        Assertions.assertNotNull(stork.getService("a").getLoadBalancer());
+        assertThat(stork.getServiceOptional("a")).isPresent();
+        assertThat(stork.getService("a").getServiceDiscovery()).isNotNull();
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance);
+        assertThat(stork.getService("a").getLoadBalancer()).isNotNull();
     }
 
     @Test
@@ -219,10 +219,10 @@ public class StorkTest {
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertTrue(stork.getServiceOptional("s").isPresent());
-        Assertions.assertNotNull(stork.getService("s").getServiceDiscovery());
-        Assertions.assertNotNull(stork.getService("s").getLoadBalancer());
-        Assertions.assertTrue(stork.getService("s").selectInstance().await().indefinitely().isSecure());
+        assertThat(stork.getServiceOptional("s")).isPresent();
+        assertThat(stork.getService("s").getServiceDiscovery()).isNotNull();
+        assertThat(stork.getService("s").getLoadBalancer()).isNotNull();
+        assertThat(stork.getService("s").selectInstance().await().indefinitely().isSecure()).isTrue();
     }
 
     @Test
@@ -235,10 +235,10 @@ public class StorkTest {
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertTrue(stork.getServiceOptional("s").isPresent());
-        Assertions.assertNotNull(stork.getService("s").getServiceDiscovery());
-        Assertions.assertNotNull(stork.getService("s").getLoadBalancer());
-        Assertions.assertTrue(stork.getService("s").selectInstance().await().indefinitely().isSecure());
+        assertThat(stork.getServiceOptional("s")).isPresent();
+        assertThat(stork.getService("s").getServiceDiscovery()).isNotNull();
+        assertThat(stork.getService("s").getLoadBalancer()).isNotNull();
+        assertThat(stork.getService("s").selectInstance().await().indefinitely().isSecure()).isTrue();
     }
 
     @Test
@@ -254,11 +254,10 @@ public class StorkTest {
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
-        Assertions.assertNotNull(stork.getService("a").getServiceDiscovery());
-        Assertions.assertTrue(stork.getService("a").getInstances().await().indefinitely().contains(instance1));
-        Assertions.assertTrue(stork.getService("a").getInstances().await().indefinitely().contains(instance2));
-        Assertions.assertNotNull(stork.getService("a").getLoadBalancer());
+        assertThat(stork.getServiceOptional("a")).isPresent();
+        assertThat(stork.getService("a").getServiceDiscovery()).isNotNull();
+        assertThat(stork.getService("a").getInstances().await().indefinitely()).contains(instance1, instance2);
+        assertThat(stork.getService("a").getLoadBalancer()).isNotNull();
     }
 
     @Test
@@ -268,8 +267,8 @@ public class StorkTest {
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
-        Assertions.assertNotNull(stork.getService("a").getLoadBalancer());
+        assertThat(stork.getServiceOptional("a")).isPresent();
+        assertThat(stork.getService("a").getLoadBalancer()).isNotNull();
     }
 
     @Test
@@ -288,13 +287,13 @@ public class StorkTest {
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertEquals(instance1, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertEquals(instance3, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertEquals(instance1, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
-        Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance1);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance2);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance3);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance1);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance2);
+        assertThat(stork.getServiceOptional("a")).isPresent();
+        assertThat(stork.getService("a").getLoadBalancer()).isInstanceOf(RoundRobinLoadBalancer.class);
     }
 
     @Test
@@ -323,30 +322,30 @@ public class StorkTest {
 
         Stork.initialize();
         Stork stork = Stork.getInstance();
-        Assertions.assertEquals(instance1, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertEquals(instance3, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertEquals(instance1, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertEquals(instance2, stork.getService("a").selectInstance().await().indefinitely());
-        Assertions.assertTrue(stork.getServiceOptional("a").isPresent());
-        Assertions.assertTrue(stork.getService("a").getLoadBalancer() instanceof RoundRobinLoadBalancer);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance1);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance2);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance3);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance1);
+        assertThat(stork.getService("a").selectInstance().await().indefinitely()).isEqualTo(instance2);
+        assertThat(stork.getServiceOptional("a")).isPresent();
+        assertThat(stork.getService("a").getLoadBalancer()).isInstanceOf(RoundRobinLoadBalancer.class);
     }
 
     @Test
     public void initWithOnlyServiceRegistrarConfiguration() {
         TestEnv.configurations.add(new FakeServiceConfig("test", null, null, SERVICE_REGISTRAR_CONFIG));
         TestEnv.install(ConfigProvider.class, RegistrarConfigProvider.class);
-        Assertions.assertDoesNotThrow(() -> Stork.initialize());
+        assertThatCode(() -> Stork.initialize()).doesNotThrowAnyException();
     }
 
     @Test
     void initWithoutServiceDiscovery() {
         TestEnv.configurations.add(new FakeServiceConfig("a", null, null, null));
         TestEnv.install(ConfigProvider.class, TestEnv.AnchoredConfigProvider.class);
-        Assertions.assertDoesNotThrow(() -> Stork.initialize());
+        assertThatCode(() -> Stork.initialize()).doesNotThrowAnyException();
         Stork stork = Stork.getInstance();
-        Assertions.assertTrue(stork.getServiceOptional("missing").isEmpty());
-        Assertions.assertThrows(NoSuchServiceDefinitionException.class, () -> stork.getService("missing"));
+        assertThat(stork.getServiceOptional("missing")).isEmpty();
+        assertThatThrownBy(() -> stork.getService("missing")).isInstanceOf(NoSuchServiceDefinitionException.class);
     }
 
     public static class ServiceAConfigProvider implements ConfigProvider {

@@ -19,6 +19,8 @@ import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,22 +63,10 @@ public class RandomLoadBalancerCDITest {
         stork = StorkTestUtils.getNewStorkInstance();
     }
 
-    @Test
-    void shouldPickBothService() {
-        Service service = stork.getService("first-service");
-
-        Set<String> instances = new HashSet<>();
-
-        for (int i = 0; i < 100; i++) {
-            instances.add(asString(selectInstance(service)));
-        }
-
-        assertThat(instances).hasSize(2).contains(FST_SRVC_1, FST_SRVC_2);
-    }
-
-    @Test
-    void testWithSecureRandom() {
-        Service service = stork.getService("first-service-secure-random");
+    @ParameterizedTest
+    @ValueSource(strings = { "first-service", "first-service-secure-random" })
+    void shouldPickBothService(String serviceName) {
+        Service service = stork.getService(serviceName);
 
         Set<String> instances = new HashSet<>();
 

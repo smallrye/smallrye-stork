@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -61,6 +62,7 @@ public class DnsServiceDiscoveryTest {
     Stork stork;
     int consulPort;
     int dnsPort;
+    @AutoClose
     ConsulClient client;
 
     @BeforeEach
