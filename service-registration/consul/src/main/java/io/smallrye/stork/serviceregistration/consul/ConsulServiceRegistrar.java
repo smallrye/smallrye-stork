@@ -37,10 +37,10 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
         options.setPort(getPort(serviceName, config.getConsulPort()));
         if (config.getSsl().equalsIgnoreCase("true")) {
             options.setSsl(true)
-                    .setTrustStoreOptions(new JksOptions()
+                    .setTrustOptions(new JksOptions()
                             .setPath(config.getTrustStorePath())
                             .setPassword(config.getTrustStorePassword()))
-                    .setKeyStoreOptions(new JksOptions()
+                    .setKeyCertOptions(new JksOptions()
                             .setPath(config.getKeyStorePath())
                             .setPassword(config.getKeyStorePassword()))
                     .setAclToken(config.getAclToken());

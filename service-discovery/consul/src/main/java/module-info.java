@@ -23,7 +23,7 @@ module io.smallrye.stork.servicediscovery.consul {
     requires io.vertx.web.common;
     requires io.vertx.auth.common;
     requires io.vertx.core;
-    requires io.vertx.client.consul;
+    requires io.vertx.consul.client;
     requires io.netty.buffer;
     requires io.netty.transport;
     requires io.netty.handler;

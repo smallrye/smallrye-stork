@@ -42,7 +42,7 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KnativeServiceDiscovery.class);
 
-    private AtomicBoolean invalidated = new AtomicBoolean();
+    private final AtomicBoolean invalidated = new AtomicBoolean();
 
     /**
      * Creates a new KubernetesServiceDiscovery.
@@ -108,7 +108,7 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
     public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
         Uni<List<Service>> knServicesUni = Uni.createFrom().emitter(
                 emitter -> {
-                    vertx.executeBlocking(future -> {
+                    vertx.executeBlocking(() -> {
                         List<Service> items = new ArrayList<>();
 
                         if (allNamespaces) {
@@ -120,11 +120,10 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
                                 items.add(e);
                             }
                         }
-                        future.complete(items);
-                    }, result -> {
+                        return items;
+                    }).onComplete(result -> {
                         if (result.succeeded()) {
-                            @SuppressWarnings("unchecked")
-                            List<Service> knServices = (List<Service>) result.result();
+                            List<Service> knServices = result.result();
                             emitter.complete(knServices);
                         } else {
                             LOGGER.error("Unable to retrieve the knative service from the {} service", application,

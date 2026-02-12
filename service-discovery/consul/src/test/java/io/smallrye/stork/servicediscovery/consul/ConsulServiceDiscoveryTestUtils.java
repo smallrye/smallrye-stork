@@ -326,7 +326,7 @@ public class ConsulServiceDiscoveryTestUtils {
                 .map(consulId -> (String) consulId)
                 .collect(Collectors.toList());
         for (String id : consulIds) {
-            client.deregisterService(id, res -> {
+            client.deregisterService(id).onComplete(res -> {
                 if (res.succeeded()) {
                     latch.countDown();
                 } else {
