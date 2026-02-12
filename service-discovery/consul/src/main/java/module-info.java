@@ -17,13 +17,13 @@ module io.smallrye.stork.servicediscovery.consul {
     requires jakarta.interceptor;
     requires jakarta.inject;
     requires org.jctools.core;
-    requires org.slf4j;
+    requires org.jboss.logging;
     requires io.vertx.web.client;
     requires io.vertx.uritemplate;
     requires io.vertx.web.common;
     requires io.vertx.auth.common;
     requires io.vertx.core;
-    requires io.vertx.client.consul;
+    requires io.vertx.consul.client;
     requires io.netty.buffer;
     requires io.netty.transport;
     requires io.netty.handler;

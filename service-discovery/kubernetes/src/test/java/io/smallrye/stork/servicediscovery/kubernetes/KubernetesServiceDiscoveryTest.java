@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,7 +40,6 @@ import io.smallrye.stork.api.ServiceDefinition;
 import io.smallrye.stork.api.ServiceInstance;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
-import io.vertx.core.impl.ConcurrentHashSet;
 
 @DisabledOnOs(OS.WINDOWS)
 @EnableKubernetesMockClient(crud = true)
@@ -827,7 +827,7 @@ public class KubernetesServiceDiscoveryTest {
 
         utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
 
-        Set<ServiceInstance> instances = new ConcurrentHashSet<>();
+        Set<ServiceInstance> instances = new CopyOnWriteArraySet<>();
 
         Service service = stork.getService(serviceName);
         service.getServiceDiscovery().getServiceInstances()

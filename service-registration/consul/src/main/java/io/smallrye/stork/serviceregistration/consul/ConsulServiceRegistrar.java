@@ -5,8 +5,7 @@ import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.Metadata;
@@ -21,7 +20,7 @@ import io.vertx.ext.consul.ConsulClientOptions;
 import io.vertx.ext.consul.ServiceOptions;
 
 public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKey> {
-    private static final Logger log = LoggerFactory.getLogger(ConsulServiceRegistrar.class);
+    private static final Logger log = Logger.getLogger(ConsulServiceRegistrar.class);
     private final Vertx vertx;
     private final ConsulRegistrarConfiguration config;
 
@@ -37,10 +36,10 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
         options.setPort(getPort(serviceName, config.getConsulPort()));
         if (config.getSsl().equalsIgnoreCase("true")) {
             options.setSsl(true)
-                    .setTrustStoreOptions(new JksOptions()
+                    .setTrustOptions(new JksOptions()
                             .setPath(config.getTrustStorePath())
                             .setPassword(config.getTrustStorePassword()))
-                    .setKeyStoreOptions(new JksOptions()
+                    .setKeyCertOptions(new JksOptions()
                             .setPath(config.getKeyStorePath())
                             .setPassword(config.getKeyStorePassword()))
                     .setAclToken(config.getAclToken());
@@ -95,11 +94,11 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
                 serviceOptions)
                 .onComplete(result -> {
                     if (result.failed()) {
-                        log.error("Unable to register instances of service {}", serviceName,
+                        log.errorf("Unable to register instances of service %s", serviceName,
                                 result.cause());
                         em.fail(result.cause());
                     } else {
-                        log.info("Instances of service {} has been registered ", serviceName);
+                        log.infof("Instances of service %s has been registered ", serviceName);
                         em.complete(result.result());
                     }
                 }));
@@ -110,11 +109,11 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
         return Uni.createFrom().emitter(em -> client.deregisterService(serviceName)
                 .onComplete(result -> {
                     if (result.failed()) {
-                        log.error("Unable to deregister instances of service {}", serviceName,
+                        log.errorf("Unable to deregister instances of service %s", serviceName,
                                 result.cause());
                         em.fail(result.cause());
                     } else {
-                        log.info("Instances of service {} has been deregistered ", serviceName);
+                        log.infof("Instances of service %s has been deregistered ", serviceName);
                         em.complete(result.result());
                     }
                 }));

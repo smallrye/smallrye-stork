@@ -12,11 +12,11 @@ import io.smallrye.stork.impl.DefaultServiceInstance;
 import io.smallrye.stork.spi.StorkInfrastructure;
 import io.smallrye.stork.utils.ServiceInstanceIds;
 import io.smallrye.stork.utils.ServiceInstanceUtils;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
-import io.vertx.mutiny.core.buffer.Buffer;
 import io.vertx.mutiny.ext.web.client.HttpResponse;
 import io.vertx.mutiny.ext.web.client.WebClient;
 

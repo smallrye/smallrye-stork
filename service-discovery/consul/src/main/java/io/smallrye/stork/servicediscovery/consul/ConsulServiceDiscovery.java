@@ -32,14 +32,12 @@ import io.vertx.ext.consul.ServiceEntryList;
 public class ConsulServiceDiscovery extends CachingServiceDiscovery {
 
     private final ConsulClient client;
-    private final String serviceName;
     private final String application;
     private final boolean secure;
     private final boolean passing;
 
     ConsulServiceDiscovery(String serviceName, ConsulConfiguration config, Vertx vertx) {
         super(config.getRefreshPeriod());
-        this.serviceName = serviceName;
         this.secure = isSecure(config);
         // TODO: more validation
         ConsulClientOptions options = new ConsulClientOptions();
@@ -49,10 +47,10 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
         this.application = config.getApplication() == null ? serviceName : config.getApplication();
         if (config.getSsl().equalsIgnoreCase("true")) {
             options.setSsl(true)
-                    .setTrustStoreOptions(new JksOptions()
+                    .setTrustOptions(new JksOptions()
                             .setPath(config.getTrustStorePath())
                             .setPassword(config.getTrustStorePassword()))
-                    .setKeyStoreOptions(new JksOptions()
+                    .setKeyCertOptions(new JksOptions()
                             .setPath(config.getKeyStorePath())
                             .setPassword(config.getKeyStorePassword()))
                     .setAclToken(config.getAclToken());
@@ -88,7 +86,7 @@ public class ConsulServiceDiscovery extends CachingServiceDiscovery {
             Metadata<ConsulMetadataKey> consulMetadata = createConsulMetadata(serviceEntry);
             String address = service.getAddress();
             int port = serviceEntry.getService().getPort();
-            if (address == null || address.isEmpty() || address.isBlank()) {
+            if (address == null || address.isBlank()) {
                 //If address not provided, the agent address should be used. See https://developer.hashicorp.com/consul/api-docs/agent/service#address
                 address = serviceEntry.getNode().getAddress();
             }

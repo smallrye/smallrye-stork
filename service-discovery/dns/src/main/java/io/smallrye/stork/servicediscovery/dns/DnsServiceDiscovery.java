@@ -11,8 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -37,7 +36,7 @@ import io.vertx.core.dns.SrvRecord;
  */
 public class DnsServiceDiscovery extends CachingServiceDiscovery {
 
-    private static final Logger log = LoggerFactory.getLogger(DnsServiceDiscovery.class);
+    private static final Logger log = Logger.getLogger(DnsServiceDiscovery.class);
 
     private final String serviceName;
     private final String hostname;
@@ -203,28 +202,30 @@ public class DnsServiceDiscovery extends CachingServiceDiscovery {
                     String target = record.getItem2().target();
                     DnsClient client = record.getItem1();
                     // TODO : an option to specify that one of these queries could be skipped
-                    Uni<List<String>> aInstances = Uni.createFrom().emitter(em -> client.resolveA(target, addresses -> {
-                        if (addresses.failed()) {
-                            log.warn("Failed to lookup the address retrieved from DNS: " + target, addresses.cause());
-                            em.complete(Collections.emptyList());
-                        } else {
-                            em.complete(addresses.result());
-                        }
-                    }));
-                    Uni<List<String>> aaaaInstances = Uni.createFrom().emitter(em -> client.resolveAAAA(target, addresses -> {
-                        if (addresses.failed()) {
-                            log.warn("Failed to lookup the address retrieved from DNS: " + target, addresses.cause());
-                            em.complete(Collections.emptyList());
-                        } else {
-                            em.complete(addresses.result());
-                        }
-                    }));
+                    Uni<List<String>> aInstances = Uni.createFrom()
+                            .emitter(em -> client.resolveA(target).onComplete(addresses -> {
+                                if (addresses.failed()) {
+                                    log.warnf("Failed to lookup the address retrieved from DNS: %s", target, addresses.cause());
+                                    em.complete(Collections.emptyList());
+                                } else {
+                                    em.complete(addresses.result());
+                                }
+                            }));
+                    Uni<List<String>> aaaaInstances = Uni.createFrom()
+                            .emitter(em -> client.resolveAAAA(target).onComplete(addresses -> {
+                                if (addresses.failed()) {
+                                    log.warnf("Failed to lookup the address retrieved from DNS: %s", target, addresses.cause());
+                                    em.complete(Collections.emptyList());
+                                } else {
+                                    em.complete(addresses.result());
+                                }
+                            }));
                     return Uni.combine().all().unis(aInstances, aaaaInstances)
-                            .combinedWith((strings, strings2) -> {
+                            .with((strings, strings2) -> {
                                 List<String> result = new ArrayList<>(strings);
                                 result.addAll(strings2);
                                 if (result.isEmpty()) {
-                                    log.warn("Failed to resolve ip address for target from SRV request: " + target);
+                                    log.warnf("Failed to resolve ip address for target from SRV request: %s", target);
                                 }
                                 return result;
                             }).onItem().transform(

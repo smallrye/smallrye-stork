@@ -7,15 +7,14 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.spi.config.SimpleServiceConfig;
 
 public class StorkConfigUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(StorkConfigUtils.class);
+    private static final Logger log = Logger.getLogger(StorkConfigUtils.class);
 
     private static final String CONFIG_PROPERTY_PART_EXPRESSION = "\".*\"|[^.]+";
     private static final Pattern CONFIG_PROP_PART = Pattern.compile(CONFIG_PROPERTY_PART_EXPRESSION);

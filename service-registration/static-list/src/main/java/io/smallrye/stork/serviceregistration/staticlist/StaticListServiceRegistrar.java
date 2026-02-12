@@ -1,7 +1,6 @@
 package io.smallrye.stork.serviceregistration.staticlist;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.Metadata;
@@ -12,7 +11,7 @@ import io.smallrye.stork.utils.InMemoryAddressesBackend;
 import io.smallrye.stork.utils.StorkAddressUtils;
 
 public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.DefaultMetadataKey> {
-    private static final Logger log = LoggerFactory.getLogger(StaticListServiceRegistrar.class);
+    private static final Logger log = Logger.getLogger(StaticListServiceRegistrar.class);
     private final StaticRegistrarConfiguration config;
 
     public StaticListServiceRegistrar(StaticRegistrarConfiguration config, String serviceName,
@@ -29,7 +28,7 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
                 "service '" + serviceName + "'");
         String hostAndPortToAddString = StorkAddressUtils.parseToString(hostAndPortToAdd);
         InMemoryAddressesBackend.add(serviceName, hostAndPortToAddString);
-        log.info("Address {} has been registered for service {}", hostAndPortToAddString, serviceName);
+        log.infof("Address %s has been registered for service %s", hostAndPortToAddString, serviceName);
         return Uni.createFrom().voidItem();
     }
 

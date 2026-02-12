@@ -23,6 +23,10 @@
             <artifactId>stork-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.smallrye.stork</groupId>
             <artifactId>stork-test-utils</artifactId>
             <scope>test</scope>
