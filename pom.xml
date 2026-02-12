@@ -470,6 +470,7 @@
         <module>service-registration/eureka</module>
         <module>test-utils</module>
         <module>docs</module>
+        <module>samples/vertx-endpoint-resolver-example</module>
     </modules>
 
     <profiles>
