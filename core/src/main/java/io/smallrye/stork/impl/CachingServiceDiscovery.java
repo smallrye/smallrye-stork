@@ -6,8 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.ServiceDiscovery;
@@ -22,7 +21,7 @@ import io.smallrye.stork.utils.DurationUtils;
  */
 public abstract class CachingServiceDiscovery implements ServiceDiscovery {
 
-    private static final Logger log = LoggerFactory.getLogger(CachingServiceDiscovery.class);
+    private static final Logger log = Logger.getLogger(CachingServiceDiscovery.class);
     public static final String REFRESH_PERIOD = "refresh-period";
 
     public final Duration refreshPeriod;

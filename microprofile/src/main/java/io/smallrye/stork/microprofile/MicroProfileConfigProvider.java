@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.microprofile.config.Config;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
@@ -19,7 +18,7 @@ import io.smallrye.stork.utils.StorkConfigUtils;
  */
 public class MicroProfileConfigProvider implements ConfigProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(MicroProfileConfigProvider.class);
+    private static final Logger log = Logger.getLogger(MicroProfileConfigProvider.class);
 
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
 

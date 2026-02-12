@@ -15,7 +15,7 @@ module io.smallrye.stork.springboot {
     requires jakarta.interceptor;
     requires jakarta.inject;
     requires org.jctools.core;
-    requires org.slf4j;
+    requires org.jboss.logging;
 
     requires spring.boot;
     requires spring.core;
@@ -28,7 +28,6 @@ module io.smallrye.stork.springboot {
     requires micrometer.observation;
     requires micrometer.commons;
     requires spring.boot.autoconfigure;
-    requires org.jboss.logging;
     requires io.smallrye.common.annotation;
 
     provides io.smallrye.stork.spi.config.ConfigProvider with io.smallrye.stork.springboot.SpringBootConfigProvider;

@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.stork.api.LoadBalancer;
@@ -59,7 +58,7 @@ public final class Stork implements StorkServiceRegistry {
      */
     public static final String STORK_REGISTRAR = "stork-registrar";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Stork.class);
+    private static final Logger LOGGER = Logger.getLogger(Stork.class);
 
     private final Map<String, Service> services = new ConcurrentHashMap<>();
     private final Map<String, ServiceRegistrar> serviceRegistrars = new ConcurrentHashMap<>();
@@ -218,7 +217,7 @@ public final class Stork implements StorkServiceRegistry {
             String loadBalancerType;
             if (loadBalancerConfig == null) {
                 // no load balancer, use round-robin
-                LOGGER.debug("No load balancer configured for type {}, using {}", serviceDiscoveryConfig.type(),
+                LOGGER.debugf("No load balancer configured for type %s, using %s", serviceDiscoveryConfig.type(),
                         RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE);
                 loadBalancerType = RoundRobinLoadBalancerProvider.ROUND_ROBIN_TYPE;
                 loadBalancer = new RoundRobinLoadBalancer();
@@ -243,7 +242,7 @@ public final class Stork implements StorkServiceRegistry {
         final var serviceRegistrarConfig = serviceConfig.serviceRegistrar();
         final ServiceRegistrar<?> serviceRegistrar;
         if (serviceRegistrarConfig == null) {
-            LOGGER.debug("No service registrar configured for service {}", serviceConfig.serviceName());
+            LOGGER.debugf("No service registrar configured for service %s", serviceConfig.serviceName());
         } else {
             boolean enabled = Boolean
                     .parseBoolean(serviceRegistrarConfig.parameters().getOrDefault("enabled", "true"));

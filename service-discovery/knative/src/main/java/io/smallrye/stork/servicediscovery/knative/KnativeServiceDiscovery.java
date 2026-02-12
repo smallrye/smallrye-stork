@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.fabric8.knative.client.DefaultKnativeClient;
 import io.fabric8.knative.client.KnativeClient;
@@ -40,7 +39,7 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
     private final boolean secure;
     private final Vertx vertx;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KnativeServiceDiscovery.class);
+    private static final Logger LOGGER = Logger.getLogger(KnativeServiceDiscovery.class);
 
     private final AtomicBoolean invalidated = new AtomicBoolean();
 
@@ -74,19 +73,19 @@ public class KnativeServiceDiscovery extends CachingServiceDiscovery {
         kn.services().inform(new ResourceEventHandler<>() {
             @Override
             public void onAdd(Service obj) {
-                LOGGER.info("Service added: {}", obj.getMetadata().getName());
+                LOGGER.infof("Service added: %s", obj.getMetadata().getName());
                 invalidate();
             }
 
             @Override
             public void onUpdate(Service oldObj, Service newObj) {
-                LOGGER.info("Service updated : {}", newObj.getMetadata().getName());
+                LOGGER.infof("Service updated : %s", newObj.getMetadata().getName());
                 invalidate();
             }
 
             @Override
             public void onDelete(Service obj, boolean deletedFinalStateUnknown) {
-                LOGGER.info("Service deleted: {}", obj.getMetadata().getName());
+                LOGGER.infof("Service deleted: %s", obj.getMetadata().getName());
                 invalidate();
             }
 
