@@ -14,8 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointPort;
@@ -67,7 +66,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     private final Vertx vertx;
     private final boolean useEndpointSlices;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
+    private static final Logger LOGGER = Logger.getLogger(KubernetesServiceDiscovery.class);
 
     private final AtomicBoolean invalidated = new AtomicBoolean();
 
@@ -181,19 +180,19 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         op.inform(new ResourceEventHandler<T>() {
             @Override
             public void onAdd(T obj) {
-                LOGGER.info("{} added: {}", type.getSimpleName(), getName(obj));
+                LOGGER.infof("%s added: %s", type.getSimpleName(), getName(obj));
                 invalidate();
             }
 
             @Override
             public void onUpdate(T oldObj, T newObj) {
-                LOGGER.info("{} updated: {}", type.getSimpleName(), getName(newObj));
+                LOGGER.infof("%s updated: %s", type.getSimpleName(), getName(newObj));
                 invalidate();
             }
 
             @Override
             public void onDelete(T obj, boolean deletedFinalStateUnknown) {
-                LOGGER.info("{} deleted: {}", type.getSimpleName(), getName(obj));
+                LOGGER.infof("%s deleted: %s", type.getSimpleName(), getName(obj));
                 invalidate();
             }
         });
@@ -252,7 +251,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                             Map<Endpoints, List<Pod>> endpoints = result.result();
                             emitter.complete(endpoints);
                         } else {
-                            LOGGER.error("Unable to retrieve the endpoint from the {} service", application,
+                            LOGGER.errorf("Unable to retrieve the endpoint from the %s service", application,
                                     result.cause());
                             emitter.fail(result.cause());
                         }
@@ -286,7 +285,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                             List<EndpointSlice> endpointSlices = result.result();
                             emitter.complete(endpointSlices);
                         } else {
-                            LOGGER.error("Unable to retrieve the endpoint from the {} service", application,
+                            LOGGER.errorf("Unable to retrieve the endpoint from the %s service", application,
                                     result.cause());
                             emitter.fail(result.cause());
                         }

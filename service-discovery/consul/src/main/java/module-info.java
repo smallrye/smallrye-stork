@@ -17,7 +17,7 @@ module io.smallrye.stork.servicediscovery.consul {
     requires jakarta.interceptor;
     requires jakarta.inject;
     requires org.jctools.core;
-    requires org.slf4j;
+    requires org.jboss.logging;
     requires io.vertx.web.client;
     requires io.vertx.uritemplate;
     requires io.vertx.web.common;

@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 
 import jakarta.inject.Inject;
 
+import org.jboss.logging.Logger;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
@@ -24,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
@@ -37,7 +36,7 @@ import io.smallrye.stork.test.TestConfigProviderBean;
 
 @ExtendWith(WeldJunit5Extension.class)
 public class PowerOfTwoChoicesLoadBalancerCDITest {
-    private static final Logger log = LoggerFactory.getLogger(PowerOfTwoChoicesLoadBalancerCDITest.class);
+    private static final Logger log = Logger.getLogger(PowerOfTwoChoicesLoadBalancerCDITest.class);
 
     public static final String FST_SRVC_1 = "localhost:8080";
     public static final String FST_SRVC_2 = "localhost:8081";
@@ -115,7 +114,7 @@ public class PowerOfTwoChoicesLoadBalancerCDITest {
 
         CompletableFuture<Throwable> result = new CompletableFuture<>();
 
-        service.selectInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
+        service.selectInstance().subscribe().with(v -> log.errorf("Unexpected successful result: %s", v),
                 result::complete);
 
         await().atMost(Duration.ofSeconds(10)).until(result::isDone);

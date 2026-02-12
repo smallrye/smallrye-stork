@@ -17,7 +17,7 @@ module io.smallrye.stork.core {
     requires jakarta.interceptor;
     requires jakarta.inject;
     requires org.jctools.core;
-    requires org.slf4j;
+    requires org.jboss.logging;
 
     exports io.smallrye.stork;
     exports io.smallrye.stork.impl;

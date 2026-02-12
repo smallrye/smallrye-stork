@@ -11,12 +11,11 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
@@ -26,7 +25,7 @@ import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
 
 public class RandomLoadBalancerTest {
-    private static final Logger log = LoggerFactory.getLogger(RandomLoadBalancerTest.class);
+    private static final Logger log = Logger.getLogger(RandomLoadBalancerTest.class);
 
     public static final String FST_SRVC_1 = "localhost:8080";
     public static final String FST_SRVC_2 = "localhost:8081";
@@ -81,7 +80,7 @@ public class RandomLoadBalancerTest {
 
         CompletableFuture<Throwable> result = new CompletableFuture<>();
 
-        service.selectInstance().subscribe().with(v -> log.error("Unexpected successful result: {}", v),
+        service.selectInstance().subscribe().with(v -> log.errorf("Unexpected successful result: %s", v),
                 result::complete);
 
         await().atMost(Duration.ofSeconds(10)).until(result::isDone);

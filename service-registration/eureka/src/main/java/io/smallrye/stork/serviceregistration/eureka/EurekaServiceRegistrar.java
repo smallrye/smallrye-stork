@@ -2,8 +2,7 @@ package io.smallrye.stork.serviceregistration.eureka;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.Metadata;
@@ -16,7 +15,7 @@ import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
 
 public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKey> {
-    private static final Logger log = LoggerFactory.getLogger(EurekaServiceRegistrar.class);
+    private static final Logger log = Logger.getLogger(EurekaServiceRegistrar.class);
     private final EurekaRegistrarConfiguration config;
     private final WebClient client;
     private final String path;
@@ -69,7 +68,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
     public Uni<Void> deregisterServiceInstance(String serviceName) {
         return client.get("/eureka/apps/" + serviceName)
                 .putHeader("Accept", "application/json;charset=UTF-8")
-                .send().invoke(() -> log.info("Instance found for '{}'", serviceName))
+                .send().invoke(() -> log.infof("Instance found for '%s'", serviceName))
                 .flatMap(item -> {
                     JsonObject body = item.bodyAsJsonObject();
                     JsonObject application = body.getJsonObject("application");
@@ -84,7 +83,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
                 .putHeader("Accept", "application/xml")
                 .send()
                 .onFailure()
-                .invoke(err -> log.error("Unable to deregister '{}' of '{}'. Error: {}", instanceId, applicationId,
+                .invoke(err -> log.errorf("Unable to deregister '%s' of '%s'. Error: %s", instanceId, applicationId,
                         err.getMessage()))
                 .onItem().invoke(resp -> log.info("'" + instanceId + "'" + " successfully deregistered")).replaceWithVoid();
 
@@ -133,7 +132,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
                 .putHeader("content-type", "application/json")
                 .putHeader("accept", "application/json")
                 .sendJson(instance)
-                .invoke(() -> log.info("Instance registered for service {}: {}", applicationId, registration))
+                .invoke(() -> log.infof("Instance registered for service %s: %s", applicationId, registration))
                 .replaceWithVoid();
 
         return response;
