@@ -285,7 +285,7 @@ public class DnsServiceDiscoveryTestUtils {
         for (String id : registeredConsulServices) {
 
             log.info("unregistering service {}", id);
-            client.deregisterService(id, res -> {
+            client.deregisterService(id).onComplete(res -> {
                 if (res.succeeded()) {
                     log.info("unregistered service {}", id);
                     latch.countDown();
