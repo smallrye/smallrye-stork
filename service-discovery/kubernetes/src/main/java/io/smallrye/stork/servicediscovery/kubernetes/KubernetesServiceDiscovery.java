@@ -14,8 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointPort;
@@ -32,6 +31,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.dsl.AnyNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Gettable;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.smallrye.mutiny.Uni;
@@ -47,7 +47,7 @@ import io.vertx.core.Vertx;
  * An implementation of service discovery for Kubernetes.
  * This implementation locates a Kubernetes service and retrieves the <em>endpoints</em> (the address of the pods
  * backing the service).
- *
+ * <p>
  * Experimental feature: EndpointSlice-based service discovery.
  * Behavior and configuration may change in future versions.
  *
@@ -64,13 +64,11 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     private final String namespace;
     private final boolean secure;
     private final Vertx vertx;
-    private final int requestRetryBackoffLimit;
-    private final int requestRetryBackoffInterval;
     private final boolean useEndpointSlices;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
+    private static final Logger LOGGER = Logger.getLogger(KubernetesServiceDiscovery.class);
 
-    private AtomicBoolean invalidated = new AtomicBoolean();
+    private final AtomicBoolean invalidated = new AtomicBoolean();
 
     /**
      * Creates a new KubernetesServiceDiscovery.
@@ -86,9 +84,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         this.application = config.getApplication() == null ? serviceName : config.getApplication();
         this.namespace = config.getK8sNamespace() == null ? base.getNamespace() : config.getK8sNamespace();
         this.portName = config.getPortName();
-        this.requestRetryBackoffInterval = config.getRequestRetryBackoffInterval() == null ? 0
+        int requestRetryBackoffInterval = config.getRequestRetryBackoffInterval() == null ? 0
                 : Integer.parseInt(config.getRequestRetryBackoffInterval());
-        this.requestRetryBackoffLimit = config.getRequestRetryBackoffLimit() == null ? 0
+        int requestRetryBackoffLimit = config.getRequestRetryBackoffLimit() == null ? 0
                 : Integer.parseInt(config.getRequestRetryBackoffLimit());
 
         allNamespaces = namespace != null && namespace.equalsIgnoreCase("all");
@@ -182,25 +180,24 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         op.inform(new ResourceEventHandler<T>() {
             @Override
             public void onAdd(T obj) {
-                LOGGER.info("{} added: {}", type.getSimpleName(), getName(obj));
+                LOGGER.infof("%s added: %s", type.getSimpleName(), getName(obj));
                 invalidate();
             }
 
             @Override
             public void onUpdate(T oldObj, T newObj) {
-                LOGGER.info("{} updated: {}", type.getSimpleName(), getName(newObj));
+                LOGGER.infof("%s updated: %s", type.getSimpleName(), getName(newObj));
                 invalidate();
             }
 
             @Override
             public void onDelete(T obj, boolean deletedFinalStateUnknown) {
-                LOGGER.info("{} deleted: {}", type.getSimpleName(), getName(obj));
+                LOGGER.infof("%s deleted: %s", type.getSimpleName(), getName(obj));
                 invalidate();
             }
         });
     }
 
-    @SuppressWarnings("unchecked")
     private <T> String getName(T obj) {
         return ((HasMetadata) obj).getMetadata().getName();
     }
@@ -231,9 +228,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     }
 
     private Uni<Map<Endpoints, List<Pod>>> fetchServiceEnpoints() {
-        Uni<Map<Endpoints, List<Pod>>> endpointsUni = Uni.createFrom().emitter(
+        return Uni.createFrom().emitter(
                 emitter -> {
-                    vertx.executeBlocking(future -> {
+                    vertx.executeBlocking(() -> {
                         final Map<Endpoints, List<Pod>> items;
 
                         if (allNamespaces) {
@@ -248,26 +245,24 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                                     .getItems();
                             items = gatherBackendPodsInNamespace(endpointsList);
                         }
-                        future.complete(items);
-                    }, result -> {
+                        return items;
+                    }).onComplete(result -> {
                         if (result.succeeded()) {
-                            @SuppressWarnings("unchecked")
-                            Map<Endpoints, List<Pod>> endpoints = (Map<Endpoints, List<Pod>>) result.result();
+                            Map<Endpoints, List<Pod>> endpoints = result.result();
                             emitter.complete(endpoints);
                         } else {
-                            LOGGER.error("Unable to retrieve the endpoint from the {} service", application,
+                            LOGGER.errorf("Unable to retrieve the endpoint from the %s service", application,
                                     result.cause());
                             emitter.fail(result.cause());
                         }
                     });
                 });
-        return endpointsUni;
     }
 
     private Uni<List<EndpointSlice>> fetchServiceEndpointSlice() {
-        Uni<List<EndpointSlice>> slicesUni = Uni.createFrom().emitter(
+        return Uni.createFrom().emitter(
                 emitter -> {
-                    vertx.executeBlocking(future -> {
+                    vertx.executeBlocking(() -> {
                         List<EndpointSlice> items = new ArrayList<>();
 
                         if (allNamespaces) {
@@ -284,20 +279,18 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                                     .getItems();
                             items.addAll(endpointSlices);
                         }
-                        future.complete(items);
-                    }, result -> {
+                        return items;
+                    }).onComplete(result -> {
                         if (result.succeeded()) {
-                            @SuppressWarnings("unchecked")
-                            List<EndpointSlice> endpointSlices = (List<EndpointSlice>) result.result();
+                            List<EndpointSlice> endpointSlices = result.result();
                             emitter.complete(endpointSlices);
                         } else {
-                            LOGGER.error("Unable to retrieve the endpoint from the {} service", application,
+                            LOGGER.errorf("Unable to retrieve the endpoint from the %s service", application,
                                     result.cause());
                             emitter.fail(result.cause());
                         }
                     });
                 });
-        return slicesUni;
     }
 
     private List<ServiceInstance> fromSlicesToStorkServiceInstances(List<EndpointSlice> endpointSlices,
@@ -341,13 +334,12 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     private Map<Endpoints, List<Pod>> gatherBackendPodsInNamespace(List<Endpoints> endpointsList) {
         Map<Endpoints, List<Pod>> items = new HashMap<>();
         for (Endpoints endpoint : endpointsList) {
-            List<Pod> backendPods = new ArrayList<>();
             List<String> podNames = endpoint.getSubsets().stream()
                     .flatMap(endpointSubset -> endpointSubset.getAddresses().stream())
-                    .map(address -> address.getTargetRef().getName()).collect(Collectors.toList());
-            backendPods.addAll(podNames.stream()
+                    .map(address -> address.getTargetRef().getName()).toList();
+            List<Pod> backendPods = podNames.stream()
                     .map(name -> client.pods().inNamespace(namespace).withName(name))
-                    .map(podPodResource -> podPodResource.get()).collect(Collectors.toList()));
+                    .map(Gettable::get).collect(Collectors.toList());
             items.put(endpoint, backendPods);
         }
         return items;
@@ -359,7 +351,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             List<Pod> backendPods = new ArrayList<>();
             List<String> podNames = endpoint.getSubsets().stream()
                     .flatMap(endpointSubset -> endpointSubset.getAddresses().stream())
-                    .map(address -> address.getTargetRef().getName()).collect(Collectors.toList());
+                    .map(address -> address.getTargetRef().getName()).toList();
             podNames.forEach(podName -> backendPods
                     .addAll(client.pods().inAnyNamespace().withField(METADATA_NAME, podName).list()
                             .getItems()));

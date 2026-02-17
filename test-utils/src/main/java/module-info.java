@@ -19,8 +19,7 @@ module io.smallrye.stork.test {
     requires jakarta.interceptor;
     requires jakarta.inject;
     requires org.jctools.core;
-    requires org.slf4j;
-    requires org.slf4j.simple;
+    requires org.jboss.logging;
     requires org.assertj.core;
     requires net.bytebuddy;
 

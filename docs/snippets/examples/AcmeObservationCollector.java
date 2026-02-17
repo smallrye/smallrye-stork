@@ -4,12 +4,11 @@ import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.observability.ObservationCollector;
 import io.smallrye.stork.api.observability.StorkEventHandler;
 import io.smallrye.stork.api.observability.StorkObservation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 public class AcmeObservationCollector implements ObservationCollector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AcmeObservationCollector.class);
+    private static final Logger LOGGER = Logger.getLogger(AcmeObservationCollector.class);
 
     private static final StorkEventHandler ACME_HANDLER = event -> {
         //This is the terminal event. Put here your custom logic to extend the metrics collection.

@@ -8,8 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.stork.api.LoadBalancer;
 import io.smallrye.stork.api.NoServiceInstanceFoundException;
@@ -24,7 +23,7 @@ import io.smallrye.stork.utils.DurationUtils;
  */
 public class LeastResponseTimeLoadBalancer implements LoadBalancer {
 
-    private static final Logger log = LoggerFactory.getLogger(LeastResponseTimeLoadBalancer.class);
+    private static final Logger log = Logger.getLogger(LeastResponseTimeLoadBalancer.class);
 
     // TODO sampling instead of collecting everything
     private final CallStatistics callStatistics;
@@ -57,7 +56,8 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
         for (ServiceInstance instance : serviceInstances) {
             CallStatistics.CallsData callsData = callStatistics.statsForInstance(instance.getId());
             if (callsData == null || callsData.lastRecorded == CallStatistics.NO_CALL_STARTED) {
-                log.debug("Selected: {} callsDataNull: {} lastRecorded: {}", instance.getId(), callsData == null,
+                log.debugf("Selected: %s callsDataNull: %s lastRecorded: %s", (Object) instance.getId(),
+                        (Object) (callsData == null),
                         callsData == null ? null : callsData.lastRecorded);
                 callStatistics.init(instance.getId()); // to mark that it was used
                 best = instance;
@@ -69,7 +69,7 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
                 if (score < bestScore) {
                     best = instance;
                     bestScore = score;
-                    log.debug("Current best: {}", instance.getId());
+                    log.debugf("Current best: %s", instance.getId());
                 }
             }
         }
@@ -80,7 +80,7 @@ public class LeastResponseTimeLoadBalancer implements LoadBalancer {
                     ? ((List<ServiceInstance>) serviceInstances).get(selectedIdx)
                     : new ArrayList<>(serviceInstances).get(selectedIdx);
         }
-        log.debug("Chosen service instance: {}", best.getId());
+        log.debugf("Chosen service instance: %s", best.getId());
         return new ServiceInstanceWithStatGathering(best, callStatistics);
     }
 

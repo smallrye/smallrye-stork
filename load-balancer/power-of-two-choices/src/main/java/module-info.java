@@ -18,7 +18,7 @@ module io.smallrye.stork.loadbalancer.poweroftwochoices {
     requires jakarta.interceptor;
     requires jakarta.inject;
     requires org.jctools.core;
-    requires org.slf4j;
+    requires org.jboss.logging;
 
     exports io.smallrye.stork.loadbalancer.poweroftwochoices;
 

@@ -1,7 +1,6 @@
 package io.smallrye.stork.serviceregistration.staticlist;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 
 import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.ServiceRegistrar;
@@ -18,7 +17,7 @@ import io.smallrye.stork.utils.StorkAddressUtils;
 public class StaticListServiceRegistrarProvider
         implements ServiceRegistrarProvider<StaticRegistrarConfiguration, Metadata.DefaultMetadataKey> {
 
-    private static final Logger log = LoggerFactory.getLogger(StaticListServiceRegistrarProvider.class);
+    private static final Logger log = Logger.getLogger(StaticListServiceRegistrarProvider.class);
 
     @Override
     public ServiceRegistrar<Metadata.DefaultMetadataKey> createServiceRegistrar(StaticRegistrarConfiguration config,

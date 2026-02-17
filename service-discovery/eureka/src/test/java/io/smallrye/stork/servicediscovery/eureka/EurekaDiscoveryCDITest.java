@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jboss.logging.Logger;
 import org.jboss.weld.junit5.ExplicitParamInjection;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
@@ -23,8 +24,6 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -46,7 +45,7 @@ import io.vertx.mutiny.ext.web.client.WebClient;
 @ExplicitParamInjection
 public class EurekaDiscoveryCDITest {
 
-    private static final Logger log = LoggerFactory.getLogger(EurekaDiscoveryCDITest.class);
+    private static final Logger log = Logger.getLogger(EurekaDiscoveryCDITest.class);
     @WeldSetup
     public WeldInitiator weld = WeldInitiator.of(TestConfigProviderBean.class,
             EurekaServiceDiscoveryProviderLoader.class);

@@ -13,7 +13,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
+import org.jboss.logging.Logger;
 import org.testcontainers.containers.GenericContainer;
 
 import io.smallrye.stork.Stork;
@@ -284,10 +284,10 @@ public class DnsServiceDiscoveryTestUtils {
         CountDownLatch latch = new CountDownLatch(registeredConsulServices.size());
         for (String id : registeredConsulServices) {
 
-            log.info("unregistering service {}", id);
-            client.deregisterService(id, res -> {
+            log.infof("unregistering service %s", id);
+            client.deregisterService(id).onComplete(res -> {
                 if (res.succeeded()) {
-                    log.info("unregistered service {}", id);
+                    log.infof("unregistered service %s", id);
                     latch.countDown();
                 } else {
                     fail("Failed to deregister service in consul", res.cause());
