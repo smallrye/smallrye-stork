@@ -41,7 +41,7 @@
 
 
         <version.vertx-mutiny-bindings>3.21.5</version.vertx-mutiny-bindings>
-        <vertx.version>4.5.25</vertx.version>
+        <vertx.version>5.0.8</vertx.version>
 
         <!-- override the testcontainers version with the newest one -->
         <version.testcontainers>1.21.4</version.testcontainers>
