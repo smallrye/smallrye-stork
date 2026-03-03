@@ -2,9 +2,10 @@ name: SmallRye Build
 
 on:
   push:
-    branches: 
+    branches:
       - main
       - '1.x'
+      - '3.x'
     paths-ignore:
       - '.gitignore'
       - 'CODEOWNERS'
@@ -15,6 +16,7 @@ on:
     branches:
       - main
       - '1.x'
+      - '3.x'
     paths-ignore:
       - '.gitignore'
       - 'CODEOWNERS'
