@@ -3,6 +3,7 @@ package io.smallrye.stork.servicediscovery.consul;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -28,6 +29,7 @@ public class ConsulServiceDiscoveryTest {
 
     Stork stork;
     int consulPort;
+    @AutoClose
     ConsulClient client;
 
     @BeforeEach

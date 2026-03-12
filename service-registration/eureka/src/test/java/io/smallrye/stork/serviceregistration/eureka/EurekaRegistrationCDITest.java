@@ -15,6 +15,7 @@ import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -61,6 +62,7 @@ public class EurekaRegistrationCDITest {
     TestConfigProviderBean config;
 
     private static Vertx vertx = Vertx.vertx();;
+    @AutoClose
     private WebClient client;
 
     public int port;
@@ -77,7 +79,6 @@ public class EurekaRegistrationCDITest {
 
     @AfterEach
     public void cleanup() {
-        client.close();
         config.clear();
     }
 

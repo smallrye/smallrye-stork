@@ -20,6 +20,8 @@ import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,34 +73,10 @@ public class PowerOfTwoChoicesLoadBalancerProgrammaticApiCDITest {
                         new PowerOfTwoChoicesConfiguration()));
     }
 
-    @Test
-    public void shouldSelectLessLoadedAmongTwoWhenAllLoaded() {
-        Service service = stork.getService("first-service");
-
-        List<ServiceInstance> instances = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            instances.add(selectInstanceAndStart(service));
-        }
-
-        Random random = new Random();
-        // Start reporting
-        for (ServiceInstance instance : instances) {
-            if (random.nextInt(10) > 7) {
-                // Simulate failures
-                mockRecordingTime(instance, 1000);
-                instance.recordEnd(new Exception("boom"));
-            } else {
-                mockRecordingTime(instance, 1000);
-            }
-
-            ServiceInstance selected = selectInstance(service);
-            assertThat(selected).isNotNull();
-        }
-    }
-
-    @Test
-    public void testWithSecureRandom() {
-        Service service = stork.getService("first-service-secure-random");
+    @ParameterizedTest
+    @ValueSource(strings = { "first-service", "first-service-secure-random" })
+    public void shouldSelectLessLoadedAmongTwoWhenAllLoaded(String serviceName) {
+        Service service = stork.getService(serviceName);
 
         List<ServiceInstance> instances = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {

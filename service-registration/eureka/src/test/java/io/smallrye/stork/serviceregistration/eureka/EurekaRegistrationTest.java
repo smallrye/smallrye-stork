@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -46,6 +47,7 @@ public class EurekaRegistrationTest {
             .withExposedPorts(EUREKA_PORT);
 
     private static Vertx vertx = Vertx.vertx();
+    @AutoClose
     private WebClient client;
 
     public static final int EUREKA_PORT = 8761;
@@ -65,8 +67,6 @@ public class EurekaRegistrationTest {
     @AfterEach
     public void cleanup() {
         TestConfigProvider.clear();
-        client.close();
-
     }
 
     @Test

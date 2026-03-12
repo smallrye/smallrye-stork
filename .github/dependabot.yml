@@ -1,12 +1,24 @@
 version: 2
 updates:
-  #  Main branch
-  - package-ecosystem: maven
+  # Configuration for main branch - keep Vert.x on 4.x
+  - package-ecosystem: "maven"
     directory: "/"
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-  - package-ecosystem: "github-actions"
-    directory: "/"
+    target-branch: "main"
     schedule:
       interval: "weekly"
+    ignore:
+      # Ignore Vert.x 5.x and above updates on main branch
+      - dependency-name: "io.vertx:*"
+        update-types: ["version-update:semver-major"]
+        versions: [">=5.0.0"]
+
+  # Configuration for 3.x branch - keep Vert.x on 5.x
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: "3.x"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Ignore Vert.x 4.x and below updates on 3.x branch
+      - dependency-name: "io.vertx:*"
+        versions: ["<5.0.0"]

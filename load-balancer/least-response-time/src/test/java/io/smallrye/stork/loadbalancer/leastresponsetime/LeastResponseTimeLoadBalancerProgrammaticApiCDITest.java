@@ -25,6 +25,8 @@ import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,23 +75,13 @@ public class LeastResponseTimeLoadBalancerProgrammaticApiCDITest {
                         new LeastResponseTimeConfiguration()));
     }
 
-    @Test
-    void shouldSelectNotSelectedFirst() {
-        Service service = stork.getService("first-service");
+    @ParameterizedTest
+    @ValueSource(strings = { "first-service", "first-service-secure-random" })
+    void shouldSelectNotSelectedFirst(String serviceName) {
+        Service service = stork.getService(serviceName);
 
         ServiceInstance serviceInstance = selectInstance(service);
         assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_1);
-        serviceInstance = selectInstance(service);
-        assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_2);
-    }
-
-    @Test
-    void testWithSecureRandom() {
-        Service service = stork.getService("first-service-secure-random");
-
-        ServiceInstance serviceInstance = selectInstance(service);
-        assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_1);
-        serviceInstance.recordStart(true);
         serviceInstance = selectInstance(service);
         assertThat(asString(serviceInstance)).isEqualTo(FST_SRVC_2);
     }

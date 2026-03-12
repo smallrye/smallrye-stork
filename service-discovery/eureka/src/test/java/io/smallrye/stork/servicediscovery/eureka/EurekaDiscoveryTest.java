@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -47,6 +48,7 @@ public class EurekaDiscoveryTest {
             .withExposedPorts(EUREKA_PORT);
 
     private static Vertx vertx = Vertx.vertx();
+    @AutoClose
     private WebClient client;
 
     public static final int EUREKA_PORT = 8761;
@@ -67,9 +69,7 @@ public class EurekaDiscoveryTest {
     public void cleanup() {
         unregisterAll(client);
         TestConfigProvider.clear();
-        client.close();
         eureka.stop();
-
     }
 
     @Test
