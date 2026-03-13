@@ -49,7 +49,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
         return registerApplicationInstance(client, serviceName,
                 eurekaId, ipAddress, null,
-                defaultPort, null, -1, "UP", "", null);
+                defaultPort, null, -1, "UP", null);
 
     }
 
@@ -60,13 +60,13 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
         return registerApplicationInstance(client, options.serviceName(),
                 options.serviceName(), options.ipAddress(), null,
-                options.defaultPort(), null, -1, "UP", "", options.metadata());
+                options.defaultPort(), null, -1, "UP", options.metadata());
 
     }
 
     @Override
     public Uni<Void> deregisterServiceInstance(String serviceName) {
-        return client.get("/eureka/apps/" + serviceName)
+        return client.get(path + serviceName)
                 .putHeader("Accept", "application/json;charset=UTF-8")
                 .send().invoke(() -> log.infof("Instance found for '%s'", serviceName))
                 .flatMap(item -> {
@@ -79,7 +79,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
     }
 
     private Uni<Void> deregisterApplicationInstance(String applicationId, String instanceId) {
-        return client.delete("/eureka/apps/" + applicationId + "/" + instanceId)
+        return client.delete(path + applicationId + "/" + instanceId)
                 .putHeader("Accept", "application/xml")
                 .send()
                 .onFailure()
@@ -91,7 +91,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
     private Uni<Void> registerApplicationInstance(WebClient client, String applicationId, String instanceId,
             String ipAddress, String virtualAddress, int port,
-            String secureVirtualAddress, int securePort, String state, String path, Map<String, String> metadata) {
+            String secureVirtualAddress, int securePort, String state, Map<String, String> metadata) {
         JsonObject instance = new JsonObject();
         JsonObject registration = new JsonObject();
         instance.put("instance", registration);
@@ -128,7 +128,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
                         .put("name", "MyOwn"))
                 .put("leaseInfo", new JsonObject().put("renewalIntervalInSecs", 10000).put("durationInSecs", 10000));
 
-        Uni<Void> response = client.post(path + "/eureka/apps/" + applicationId)
+        Uni<Void> response = client.post(path + applicationId)
                 .putHeader("content-type", "application/json")
                 .putHeader("accept", "application/json")
                 .sendJson(instance)
