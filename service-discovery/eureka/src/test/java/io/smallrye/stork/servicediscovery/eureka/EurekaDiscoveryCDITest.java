@@ -154,7 +154,7 @@ public class EurekaDiscoveryCDITest {
         List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(2)
                 .anySatisfy(instance -> {
-                    assertThat(instance.getHost()).isEqualTo("secure.acme.com");
+                    assertThat(instance.getHost()).isEqualTo("acme.com");
                     assertThat(instance.getPort()).isEqualTo(433);
                     assertThat(instance.isSecure()).isTrue();
                 })
@@ -287,7 +287,7 @@ public class EurekaDiscoveryCDITest {
         List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
-                    assertThat(instance.getHost()).isEqualTo("ssl.acme.com");
+                    assertThat(instance.getHost()).isEqualTo("acme2.com");
                     assertThat(instance.getPort()).isEqualTo(433);
                 });
     }
