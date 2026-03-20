@@ -144,7 +144,7 @@ public class EurekaDiscoveryTest {
         List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(2)
                 .anySatisfy(instance -> {
-                    assertThat(instance.getHost()).isEqualTo("secure.acme.com");
+                    assertThat(instance.getHost()).isEqualTo("acme.com");
                     assertThat(instance.getPort()).isEqualTo(433);
                     assertThat(instance.isSecure()).isTrue();
                 })
@@ -277,7 +277,7 @@ public class EurekaDiscoveryTest {
         List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
-                    assertThat(instance.getHost()).isEqualTo("ssl.acme.com");
+                    assertThat(instance.getHost()).isEqualTo("acme2.com");
                     assertThat(instance.getPort()).isEqualTo(433);
                 });
     }
@@ -383,11 +383,11 @@ public class EurekaDiscoveryTest {
         JsonObject registration = new JsonObject();
         instance.put("instance", registration);
         registration
-                .put("hostName", "localhost")
+                .put("hostName", virtualAddress)
                 .put("instanceId", instanceId)
                 .put("app", applicationId)
                 .put("ipAddr", "1.1.1." + port)
-                .put("vipAddress", virtualAddress)
+                .put("vipAddress", applicationId)
                 .put("port", new JsonObject().put("$", port).put("@enabled", "true"));
 
         if (secureVirtualAddress != null) {

@@ -92,15 +92,16 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
     private Uni<Void> registerApplicationInstance(WebClient client, String applicationId, String instanceId,
             String ipAddress, String virtualAddress, int port,
             String secureVirtualAddress, int securePort, String state, Map<String, String> metadata) {
+        String hostName = config.getHostName() != null && !config.getHostName().isBlank() ? config.getHostName() : ipAddress;
         JsonObject instance = new JsonObject();
         JsonObject registration = new JsonObject();
         instance.put("instance", registration);
         registration
-                .put("hostName", "localhost")
+                .put("hostName", hostName)
                 .put("instanceId", instanceId)
                 .put("app", applicationId)
                 .put("ipAddr", ipAddress)
-                .put("vipAddress", virtualAddress)
+                .put("vipAddress", virtualAddress != null ? virtualAddress : applicationId)
                 .put("port", new JsonObject().put("$", port).put("@enabled", "true"));
 
         if (secureVirtualAddress != null) {

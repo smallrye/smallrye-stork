@@ -100,22 +100,15 @@ public class EurekaServiceDiscovery extends CachingServiceDiscovery {
             List<ServiceInstance> previousInstances) {
         return instances
                 .map(instance -> {
-                    String virtualAddress;
-                    int port;
-
-                    if (secure && instance.securePort.enabled) {
-                        virtualAddress = instance.secureVipAddress;
-                        if (virtualAddress == null) {
-                            virtualAddress = instance.vipAddress;
-                        }
-                        port = instance.securePort.port;
-                    } else {
-                        virtualAddress = instance.vipAddress;
-                        port = instance.port.port;
-                    }
-                    ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, virtualAddress, port);
+                    String host = instance.hostName != null && !instance.hostName.isBlank()
+                            ? instance.hostName
+                            : instance.ipAddr;
+                    int port = secure && instance.securePort.enabled
+                            ? instance.securePort.port
+                            : instance.port.port;
+                    ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, host, port);
                     return matching == null
-                            ? new DefaultServiceInstance(ServiceInstanceIds.next(), virtualAddress, port, secure)
+                            ? new DefaultServiceInstance(ServiceInstanceIds.next(), host, port, secure)
                             : matching;
                 })
                 .collect(Collectors.toList());
