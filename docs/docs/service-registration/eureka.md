@@ -38,6 +38,9 @@ Eureka service registrar is configured with the following parameters:
 
 --8<-- "target/attributes/META-INF/stork-docs/eureka-sr-attributes.txt"
 
+The `ipAddress` passed to `registerServiceInstance()` is used as both the IP address (`ipAddr`) and the hostname (`hostName`) registered in Eureka.
+If the instance has a distinct DNS hostname, set `host-name` explicitly to override this default.
+
 ## Service deregistration configuration
 
 There is no specific configuration required to enable deregistration; however, you must ensure that a consul service registrar is configured for the service:

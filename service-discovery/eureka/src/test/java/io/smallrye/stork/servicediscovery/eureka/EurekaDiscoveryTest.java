@@ -9,8 +9,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AutoClose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -148,7 +148,7 @@ public class EurekaDiscoveryTest {
         List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(2)
                 .anySatisfy(instance -> {
-                    assertThat(instance.getHost()).isEqualTo("secure.acme.com");
+                    assertThat(instance.getHost()).isEqualTo("acme.com");
                     assertThat(instance.getPort()).isEqualTo(433);
                     assertThat(instance.isSecure()).isTrue();
                 })
@@ -281,7 +281,7 @@ public class EurekaDiscoveryTest {
         List<ServiceInstance> instances = service.getInstances().await().atMost(Duration.ofSeconds(5));
         assertThat(instances).hasSize(1)
                 .anySatisfy(instance -> {
-                    assertThat(instance.getHost()).isEqualTo("ssl.acme.com");
+                    assertThat(instance.getHost()).isEqualTo("acme2.com");
                     assertThat(instance.getPort()).isEqualTo(433);
                 });
     }
@@ -387,11 +387,11 @@ public class EurekaDiscoveryTest {
         JsonObject registration = new JsonObject();
         instance.put("instance", registration);
         registration
-                .put("hostName", "localhost")
+                .put("hostName", virtualAddress)
                 .put("instanceId", instanceId)
                 .put("app", applicationId)
                 .put("ipAddr", "1.1.1." + port)
-                .put("vipAddress", virtualAddress)
+                .put("vipAddress", applicationId)
                 .put("port", new JsonObject().put("$", port).put("@enabled", "true"));
 
         if (secureVirtualAddress != null) {

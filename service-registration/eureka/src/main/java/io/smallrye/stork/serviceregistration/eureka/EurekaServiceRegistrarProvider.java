@@ -16,6 +16,7 @@ import io.smallrye.stork.spi.StorkInfrastructure;
 @ServiceRegistrarAttribute(name = "eureka-trust-all", description = "Enable/Disable the TLS certificate verification", defaultValue = "false")
 @ServiceRegistrarAttribute(name = "eureka-tls", description = "Use TLS to connect to the Eureka server", defaultValue = "false")
 @ServiceRegistrarAttribute(name = "health-check-url", description = "The liveness http address.", defaultValue = "")
+@ServiceRegistrarAttribute(name = "host-name", description = "The host name to register in Eureka. If not set, the ipAddress is used.", defaultValue = "")
 @ApplicationScoped
 public class EurekaServiceRegistrarProvider
         implements ServiceRegistrarProvider<EurekaRegistrarConfiguration, EurekaMetadataKey> {

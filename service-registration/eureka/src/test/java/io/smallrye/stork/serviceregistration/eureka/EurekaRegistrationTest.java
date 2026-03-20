@@ -83,7 +83,7 @@ public class EurekaRegistrationTest {
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
         eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)
-                .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), "localhost", 8406).subscribe()
+                .with(EurekaMetadataKey.META_EUREKA_SERVICE_ID, serviceName), "myServiceAddress", 8406).subscribe()
                 .with(success -> registrationLatch.countDown(), failure -> fail(""));
 
         await().atMost(Duration.ofSeconds(10))
@@ -104,7 +104,9 @@ public class EurekaRegistrationTest {
         JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
 
         assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
-        assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
+        assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("myServiceAddress");
+        assertThat(jsonServiceInstance.getString("hostName")).isEqualTo("myServiceAddress");
+        assertThat(jsonServiceInstance.getString("vipAddress")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
         assertThat(jsonServiceInstance.getString("healthCheckUrl")).isEqualTo("/q/health/live");
 
@@ -148,6 +150,7 @@ public class EurekaRegistrationTest {
 
         assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
+        assertThat(jsonServiceInstance.getString("vipAddress")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
         assertThat(jsonServiceInstance.getString("healthCheckUrl")).isEqualTo("/q/health/live");
         assertThat(jsonServiceInstance.getJsonObject("metadata").getString("protocol")).isEqualTo("https");
@@ -190,6 +193,7 @@ public class EurekaRegistrationTest {
 
         assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
+        assertThat(jsonServiceInstance.getString("vipAddress")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
 
     }
@@ -250,6 +254,7 @@ public class EurekaRegistrationTest {
 
         assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
+        assertThat(jsonServiceInstance.getString("vipAddress")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
         CountDownLatch deregistrationLatch = new CountDownLatch(1);
         eurekaServiceRegistrar.deregisterServiceInstance(serviceName)

@@ -47,6 +47,7 @@ It uses the Stork service name (`my-service` in the previous configuration) if n
 The `instance` attribute allows selecting a specific instance.
 Using this attribute prevents load-balancing as you will always select a single instance.
 
-The `secure` attribute indicates if you want the _secure virtual address_ of the application instance.
-If set to `true`, unsecured instances are filtered out from the available instances.
+The `secure` attribute indicates whether to connect to instances over TLS.
+If set to `true`, instances without a secure port enabled are filtered out.
+The connection host is always resolved from the `hostName` field of the Eureka instance (falling back to `ipAddr`), regardless of this setting.
 
