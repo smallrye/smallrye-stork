@@ -5,17 +5,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 
+import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
 import io.smallrye.stork.spi.config.SimpleServiceConfig;
 import io.smallrye.stork.utils.StorkConfigUtils;
 
 public class SpringBootConfigProvider implements ConfigProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(SpringBootConfigProvider.class);
 
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
 
@@ -26,10 +31,14 @@ public class SpringBootConfigProvider implements ConfigProvider {
         Map<String, Map<String, String>> propertiesByServiceName = new HashMap<>();
 
         for (String propertyName : getPropertyNames(environment)) {
-
-            StorkConfigUtils.computeServiceProperty(propertiesByServiceName, propertyName,
-                    environment.getProperty(propertyName));
-
+            if (propertyName.startsWith(Stork.STORK + ".")) {
+                String value = environment.getProperty(propertyName);
+                if (value != null && !value.trim().isEmpty()) {
+                    StorkConfigUtils.computeServiceProperty(propertiesByServiceName, propertyName, value.trim());
+                } else {
+                    log.debug("Ignoring empty stork config property: {}", propertyName);
+                }
+            }
         }
 
         for (Map.Entry<String, Map<String, String>> serviceEntry : propertiesByServiceName.entrySet()) {
