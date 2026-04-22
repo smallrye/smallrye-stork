@@ -24,6 +24,7 @@ import io.vertx.core.Vertx;
 @ServiceDiscoveryAttribute(name = "request-retry-backoff-limit", description = "Maximum number of retry attempts allowed after a request failure.")
 @ServiceDiscoveryAttribute(name = "request-retry-backoff-interval", description = "Amount of time to wait between retry attempts after a request fails.")
 @ServiceDiscoveryAttribute(name = "use-endpoint-slices", description = "Use the EndpointSlice API instead", defaultValue = "false")
+@ServiceDiscoveryAttribute(name = "use-cluster-ip", description = "Use the Kubernetes Service ClusterIP instead of pod IPs. Stork returns a single instance with the ClusterIP and resolved port.", defaultValue = "false")
 @ApplicationScoped
 public class KubernetesServiceDiscoveryProvider
         implements ServiceDiscoveryProvider<KubernetesConfiguration> {

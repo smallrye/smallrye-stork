@@ -51,7 +51,7 @@ metadata:
   namespace: <namespace>
 rules:
   - apiGroups: [""] # "" indicates the core API group
-    resources: ["endpoints", "pods"] # stork queries service endpoints and pods
+    resources: ["endpoints", "pods", "services"] # stork queries service endpoints, pods and services
     verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -162,6 +162,85 @@ If different port combinations exist, Kubernetes exposes them as separate Endpoi
 This guarantees that all `(address, port)` combinations returned by Stork are valid.
 
 
+## ClusterIP mode
+
+By default, Stork resolves individual **pod IPs** from Kubernetes Endpoints (or EndpointSlices).
+In ClusterIP mode, Stork resolves to the **ClusterIP and port** of the Kubernetes Service instead, without inspecting the backing pods.
+
+The `use-cluster-ip` attribute enables this mode.
+
+### When to use ClusterIP mode
+
+ClusterIP mode is useful when:
+
+* You have a **multi-port Service** and want Stork to resolve the port by name, without needing to know actual port numbers.
+* You don't need client-side load balancing — for example, because `kube-proxy`, a service mesh, or another network-level mechanism already handles traffic distribution.
+* You want to **control the resolution strategy through configuration**, without changing application code.
+
+### Configuration
+
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=kubernetes
+    stork.my-service.service-discovery.k8s-namespace=my-namespace
+    stork.my-service.service-discovery.use-cluster-ip=true
+    stork.my-service.service-discovery.port-name=http
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=kubernetes
+    quarkus.stork.my-service.service-discovery.k8s-namespace=my-namespace
+    quarkus.stork.my-service.service-discovery.use-cluster-ip=true
+    quarkus.stork.my-service.service-discovery.port-name=http
+    ```
+
+In this mode, Stork queries the Kubernetes `Service` resource directly and returns a single `ServiceInstance` with:
+
+* **Host** — the Service's ClusterIP (e.g., `10.96.0.15`)
+* **Port** — resolved from the Service spec, matching `port-name` when multiple ports are defined
+
+Since only one instance is returned, any configured Stork load balancer becomes a passthrough.
+
+!!! note
+    ClusterIP mode does not support headless Services (`clusterIP: None`). 
+If the target Service is headless, Stork will fail with an error and fall back to the last known instances (or an empty list on first call).
+
+### Multi-port Services
+
+ClusterIP mode works well with multi-port Services.
+Use the `port-name` attribute to select the desired port:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  ports:
+    - name: http
+      port: 8080
+    - name: grpc
+      port: 50051
+```
+
+=== "stork standalone"
+    ```properties
+    stork.my-service.service-discovery.type=kubernetes
+    stork.my-service.service-discovery.use-cluster-ip=true
+    stork.my-service.service-discovery.port-name=grpc
+    ```
+
+=== "stork in quarkus"
+    ```properties
+    quarkus.stork.my-service.service-discovery.type=kubernetes
+    quarkus.stork.my-service.service-discovery.use-cluster-ip=true
+    quarkus.stork.my-service.service-discovery.port-name=grpc
+    ```
+
+This resolves to `10.96.x.x:50051` — the ClusterIP with the `grpc` port without the application needing to know the actual port number.
+If `port-name` is not set, Stork uses the first port defined in the Service spec.
+
 Supported attributes are the following:
 
 --8<-- "target/attributes/META-INF/stork-docs/kubernetes-sd-attributes.txt"
@@ -183,4 +262,8 @@ By default, retries are disabled to prevent the system from entering an infinite
 
 When EndpointSlice are selected, Stork creates informers on the `EndpointSlice` resources instead of classic `Endpoints`. 
 The caching behavior remains unchanged.
+
+In ClusterIP mode, Stork creates an Informer on the Kubernetes `Service` resource (instead of Endpoints or EndpointSlices).
+The cache is invalidated when the Service is added, updated, or deleted.
+The same caching behavior described above applies.
 
