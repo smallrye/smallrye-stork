@@ -8,6 +8,7 @@ import java.util.Map;
 import org.eclipse.microprofile.config.Config;
 import org.jboss.logging.Logger;
 
+import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.config.ServiceConfig;
 import io.smallrye.stork.spi.config.ConfigProvider;
 import io.smallrye.stork.spi.config.SimpleServiceConfig;
@@ -31,8 +32,15 @@ public class MicroProfileConfigProvider implements ConfigProvider {
         Map<String, Map<String, String>> propertiesByServiceName = new HashMap<>();
 
         for (String propertyName : config.getPropertyNames()) {
-            StorkConfigUtils.computeServiceProperty(propertiesByServiceName, propertyName,
-                    config.getValue(propertyName, String.class));
+            if (propertyName.startsWith(Stork.STORK + ".")) {
+                config.getOptionalValue(propertyName, String.class)
+                        .map(String::trim)
+                        .filter(value -> !value.isEmpty())
+                        .ifPresentOrElse(
+                                value -> StorkConfigUtils.computeServiceProperty(propertiesByServiceName,
+                                        propertyName, value),
+                                () -> log.debug("Ignoring empty stork config property: {}", propertyName));
+            }
         }
 
         for (Map.Entry<String, Map<String, String>> serviceEntry : propertiesByServiceName.entrySet()) {
