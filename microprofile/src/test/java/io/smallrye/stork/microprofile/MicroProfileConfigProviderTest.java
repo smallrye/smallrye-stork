@@ -233,6 +233,28 @@ public class MicroProfileConfigProviderTest {
         assertThat(lb.getType()).isEqualTo("test-lb-2");
     }
 
+    @Test
+    void shouldFilterNonStorkPropertiesAndIgnoreEmptyValues() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("stork." + FIRST_SERVICE + ".service-discovery", "test-sd-1");
+        properties.put("stork." + FIRST_SERVICE + ".service-discovery.one", "http://localhost:8080");
+        properties.put("stork." + FIRST_SERVICE + ".service-discovery.two", "");
+        properties.put("stork." + FIRST_SERVICE + ".service-discovery.three", "   ");
+        properties.put("user.script", "");
+        properties.put("some.other.property", "");
+        properties.put("non.stork.property", "some-value");
+
+        Stork stork = storkForConfig(properties);
+
+        ServiceDiscovery serviceDiscovery = stork.getService(FIRST_SERVICE).getServiceDiscovery();
+        assertThat(serviceDiscovery).isNotNull().isInstanceOf(TestServiceDiscovery.class);
+
+        TestServiceDiscovery sd = (TestServiceDiscovery) serviceDiscovery;
+        assertThat(sd.getType()).isEqualTo("test-sd-1");
+        assertThat(sd.getConfig().getOne()).isEqualTo("http://localhost:8080");
+        assertThat(sd.getConfig().getTwo()).isNull();
+    }
+
     private Stork storkForConfig(Map<String, String> properties) {
         Map<String, ConfigValue> backend = new HashMap<>();
         for (Map.Entry<String, String> entry : properties.entrySet()) {
