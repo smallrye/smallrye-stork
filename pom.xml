@@ -470,10 +470,15 @@
         <module>service-registration/eureka</module>
         <module>test-utils</module>
         <module>docs</module>
-        <module>samples/vertx-endpoint-resolver-example</module>
     </modules>
 
     <profiles>
+        <profile>
+            <id>samples</id>
+            <modules>
+                <module>samples/vertx-endpoint-resolver-example</module>
+            </modules>
+        </profile>
         <profile>
             <id>coverage</id>
             <properties>
