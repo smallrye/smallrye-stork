@@ -1,0 +1,24 @@
+@startuml
+
+!include diagrams/includes/themes/light.puml
+
+skinparam sequenceMessageAlign center
+autonumber "<b>(0)"
+
+
+participant Application
+participant ObservableStorkInfrastructure
+participant ObservationCollector
+participant Stork
+participant Service
+
+Application -> ObservableStorkInfrastructure : instantiates
+ObservableStorkInfrastructure -> ObservationCollector : instantiates
+ObservationCollector -> ObservableStorkInfrastructure: ObservationCollector
+ObservableStorkInfrastructure -> Application: ObservableStorkInfrastructure
+
+... ...
+
+Application -> Stork : initialize(observableInfrastructure)
+Stork -> Service : instantiates (..., ObservationCollector, ...)
+@enduml
