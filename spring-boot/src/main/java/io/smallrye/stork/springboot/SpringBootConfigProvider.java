@@ -5,8 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.logging.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
@@ -20,7 +19,7 @@ import io.smallrye.stork.utils.StorkConfigUtils;
 
 public class SpringBootConfigProvider implements ConfigProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(SpringBootConfigProvider.class);
+    private static final Logger log = Logger.getLogger(SpringBootConfigProvider.class);
 
     private final List<ServiceConfig> serviceConfigs = new ArrayList<>();
 
@@ -36,7 +35,7 @@ public class SpringBootConfigProvider implements ConfigProvider {
                 if (value != null && !value.trim().isEmpty()) {
                     StorkConfigUtils.computeServiceProperty(propertiesByServiceName, propertyName, value.trim());
                 } else {
-                    log.debug("Ignoring empty stork config property: {}", propertyName);
+                    log.debugf("Ignoring empty stork config property: %s", propertyName);
                 }
             }
         }

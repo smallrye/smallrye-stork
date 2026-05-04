@@ -39,7 +39,7 @@ public class MicroProfileConfigProvider implements ConfigProvider {
                         .ifPresentOrElse(
                                 value -> StorkConfigUtils.computeServiceProperty(propertiesByServiceName,
                                         propertyName, value),
-                                () -> log.debug("Ignoring empty stork config property: {}", propertyName));
+                                () -> log.debugf("Ignoring empty stork config property: %s", propertyName));
             }
         }
 
