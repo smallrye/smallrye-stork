@@ -78,6 +78,9 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                         "use-endpoint-slices", "true"),
                 null);
 
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+        whenGetSlicesApiAvailableThenReturnTrue();
+
         String serviceName = "svc";
         String[] ips = { "10.96.96.231" };
         EndpointPort[] ports = { new EndpointPort("http", 8080) };
@@ -126,6 +129,9 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                         "k8s-namespace", "test",
                         "use-endpoint-slices", "true"),
                 null);
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+        whenGetSlicesApiAvailableThenReturnTrue();
 
         String serviceName = "svc";
         String[] ips1 = { "10.96.96.231" };
@@ -180,6 +186,9 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                         "use-endpoint-slices", "true"),
                 null);
 
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+        whenGetSlicesApiAvailableThenReturnTrue();
+
         String serviceName = "svc";
         String[] ips1 = { "10.96.96.231", "10.96.96.232" };
         EndpointPort[] ports1 = { new EndpointPort("http", 8080) };
@@ -228,6 +237,10 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                         "k8s-namespace", "test",
                         "use-endpoint-slices", "true"),
                 null);
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        whenGetSlicesApiAvailableThenReturnTrue();
 
         String serviceName = "svc";
         String[] ips1 = { "10.96.96.231", "10.96.96.232" };
@@ -288,11 +301,18 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
 
         whenGetSlicesApiAvailableThenReturnTrue();
 
+        String serviceNameSlice = "svc";
         String[] ipsSlice = { "10.0.0.99" }; // <- this ip should be ignored, because the user disabled EndpointSlices
-        EndpointPort[] portsSlice = { new EndpointPort("http", 9090) };
-        registerKubernetesEndpointSlice("svc", "test", ipsSlice, portsSlice);
+        int[] portsClice = { 8080 };
+        registerKubernetesEndpointSlice(serviceNameSlice, "test", ipsSlice, portsClice);
 
-        utils.registerKubernetesLegacyEndpointsResources("svc", defaultNamespace, "10.0.0.2");
+        String serviceName = "svc";
+        String[] endpointIps = { "10.0.0.2" };
+        String[] sliceIps = { "10.0.0.99" };
+        int[] slicePorts = { 9090 };
+
+        utils.registerKubernetesResources(serviceName, defaultNamespace, endpointIps);
+        registerKubernetesEndpointSlice(serviceName, defaultNamespace, sliceIps, slicePorts);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
