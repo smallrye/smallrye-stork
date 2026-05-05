@@ -66,7 +66,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     private final Vertx vertx;
     private final int requestRetryBackoffLimit;
     private final int requestRetryBackoffInterval;
-    private final boolean useEndpointSlices;
+    private final Boolean useEndpointSlices;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
@@ -106,7 +106,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         this.client = new KubernetesClientBuilder().withConfig(k8sConfig).build();
         this.vertx = vertx;
         this.secure = isSecure(config);
-        this.useEndpointSlices = config.getUseEndpointSlices() == null ? Boolean.FALSE
+        this.useEndpointSlices = config.getUseEndpointSlices() == null ? null
                 : Boolean.valueOf(config.getUseEndpointSlices());
         if (shouldUseEndpointSlices()) {
             configureSlicesInformer();
@@ -131,23 +131,24 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
      */
 
     private boolean shouldUseEndpointSlices() {
-        boolean shouldUseEndpointSlices = false;
-        if (useEndpointSlices) {
-            shouldUseEndpointSlices = true;
+        // if disabled explicitly, do not use autodetection
+        if (Boolean.FALSE.equals(useEndpointSlices)) {
+            return false; // old cluster - endpoints
         }
-        //cluster autodetection: EndpointSlices live in `discovery.k8s.io/v1`
+        // cluster autodetection: EndpointSlices live in `discovery.k8s.io/v1`
+        // use autodetection even if explicitly set to true, to avoid misconfiguration on clusters that do not support EndpointSlices
         boolean apiAvailable = client.getApiGroups().getGroups().stream()
                 .anyMatch(g -> DISCOVERY_K8S_API.equals(g.getName()));
 
         if (!apiAvailable) {
-            shouldUseEndpointSlices = false; // old cluster - endpoints
+            return false; // old cluster - endpoints
         }
 
         EndpointSliceList slices = client.discovery().v1().endpointSlices()
                 .inNamespace(namespace)
                 .withLabel(SERVICE_SELECTOR, application)
                 .list();
-        shouldUseEndpointSlices = slices != null && !slices.getItems().isEmpty();
+        boolean shouldUseEndpointSlices = slices != null && !slices.getItems().isEmpty();
         if (shouldUseEndpointSlices) {
             LOGGER.info("EndpointSlice discovery is enabled (experimental)");
         }
