@@ -29,7 +29,6 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.discovery.v1.Endpoint;
 import io.fabric8.kubernetes.api.model.discovery.v1.EndpointSlice;
-import io.fabric8.kubernetes.api.model.discovery.v1.EndpointSliceList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -70,6 +69,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     private final int requestRetryBackoffLimit;
     private final int requestRetryBackoffInterval;
     private final Boolean useEndpointSlices;
+    private final boolean useEndpointSlicesEnabled;
     private final boolean useClusterIp;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
@@ -112,6 +112,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         this.secure = isSecure(config);
         this.useEndpointSlices = config.getUseEndpointSlices() == null ? null
                 : Boolean.valueOf(config.getUseEndpointSlices());
+        this.useEndpointSlicesEnabled = shouldUseEndpointSlices();
         this.useClusterIp = config.getUseClusterIp() != null && Boolean.parseBoolean(config.getUseClusterIp());
         if (useClusterIp && Boolean.TRUE.equals(useEndpointSlices)) {
             LOGGER.warn("Both 'use-cluster-ip' and 'use-endpoint-slices' are enabled for service '{}'. "
@@ -119,7 +120,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         }
         if (useClusterIp) {
             configureServicesInformer();
-        } else if (shouldUseEndpointSlices()) {
+        } else if (useEndpointSlicesEnabled) {
             configureSlicesInformer();
         } else {
             configureEndpointsInformer();
@@ -155,15 +156,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             return false; // old cluster - endpoints
         }
 
-        EndpointSliceList slices = client.discovery().v1().endpointSlices()
-                .inNamespace(namespace)
-                .withLabel(SERVICE_SELECTOR, application)
-                .list();
-        boolean shouldUseEndpointSlices = slices != null && !slices.getItems().isEmpty();
-        if (shouldUseEndpointSlices) {
-            LOGGER.info("EndpointSlice discovery is enabled (experimental)");
-        }
-        return shouldUseEndpointSlices;
+        LOGGER.info("EndpointSlice discovery is enabled (experimental)");
+        return apiAvailable;
     }
 
     private void configureEndpointsInformer() {
@@ -251,7 +245,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         if (useClusterIp) {
             result = fetchServiceClusterIp().onItem()
                     .transform(clusterIps -> fromClusterIpServicesToStorkServiceInstances(clusterIps, previousInstances));
-        } else if (shouldUseEndpointSlices()) {
+        } else if (useEndpointSlicesEnabled) {
             result = fetchServiceEndpointSlice().onItem()
                     .transform(slices -> fromSlicesToStorkServiceInstances(slices, previousInstances));
         } else {
