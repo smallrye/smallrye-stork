@@ -115,12 +115,11 @@ When available, EndpointSlices are the recommended source for service discovery.
 
 ## Configuration
 
-By default, Stork uses **classic Endpoints** for compatibility.
-EndpointSlices can be enabled explicitly or selected automatically.
+EndpointSlices can be enabled or disabled explicitly. By default, Stork uses automatic detection.
 
 ### Explicit configuration
 
-You can force the use of EndpointSlices per service:
+You can force the use of EndpointSlices per service (note that it will still fallback to Endpoints if EndpointSlices are not available for the service):
 
 ```properties
 quarkus.stork.my-service.service-discovery.use-endpoint-slices=true
