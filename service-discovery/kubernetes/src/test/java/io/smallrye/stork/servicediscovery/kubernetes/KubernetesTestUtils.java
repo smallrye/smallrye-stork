@@ -29,7 +29,7 @@ public class KubernetesTestUtils {
         this.client = client;
     }
 
-    public Endpoints registerKubernetesResources(String serviceName, String namespace, String... ips) {
+    public Endpoints registerKubernetesLegacyEndpointsResources(String serviceName, String namespace, String... ips) {
         Assert.checkNotNullParam("ips", ips);
         Endpoints endpoints = buildAndRegisterKubernetesService(serviceName, namespace, true, ips);
         Arrays.stream(ips).forEach(ip -> buildAndRegisterBackendPod(serviceName, namespace, true, ip));
