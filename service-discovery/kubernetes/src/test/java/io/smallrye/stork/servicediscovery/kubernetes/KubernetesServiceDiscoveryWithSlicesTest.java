@@ -80,7 +80,7 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
 
         String serviceName = "svc";
         String[] ips = { "10.96.96.231" };
-        int[] ports = { 8080 };
+        EndpointPort[] ports = { new EndpointPort("http", 8080) };
 
         registerKubernetesEndpointSlice(serviceName, "test", ips, ports);
 
@@ -129,10 +129,10 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
 
         String serviceName = "svc";
         String[] ips1 = { "10.96.96.231" };
-        int[] ports1 = { 8080 };
+        EndpointPort[] ports1 = { new EndpointPort("http", 8080) };
 
         String[] ips2 = { "10.96.96.232" };
-        int[] ports2 = { 9090 };
+        EndpointPort[] ports2 = { new EndpointPort("metrics", 9090) };
 
         registerKubernetesEndpointSlice(serviceName, "test", ips1, ports1);
         registerKubernetesEndpointSlice(serviceName, "test", ips2, ports2);
@@ -182,7 +182,7 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
 
         String serviceName = "svc";
         String[] ips1 = { "10.96.96.231", "10.96.96.232" };
-        int[] ports1 = { 8080 };
+        EndpointPort[] ports1 = { new EndpointPort("http", 8080) };
 
         registerKubernetesEndpointSlice(serviceName, "test", ips1, ports1);
 
@@ -231,10 +231,10 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
 
         String serviceName = "svc";
         String[] ips1 = { "10.96.96.231", "10.96.96.232" };
-        int[] ports1 = { 8080, 8081 };
+        EndpointPort[] ports1 = { new EndpointPort("http", 8080), new EndpointPort("management", 8081) };
 
         String[] ips2 = { "10.96.96.232" };
-        int[] ports2 = { 9090 };
+        EndpointPort[] ports2 = { new EndpointPort("metrics", 9090) };
 
         registerKubernetesEndpointSlice(serviceName, "test", ips1, ports1);
         registerKubernetesEndpointSlice(serviceName, "test", ips2, ports2);
@@ -284,10 +284,20 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        String serviceName = "svc";
-        String[] ips = { "10.0.0.2" };
+        whenGetSlicesApiAvailableThenReturnTrue();
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, ips); // <-- classic Endpoints
+        String serviceNameSlice = "svc";
+        String[] ipsSlice = { "10.0.0.99" }; // <- this ip should be ignored, because the user disabled EndpointSlices
+        EndpointPort[] portsSlice = { new EndpointPort("http", 8080) };
+        registerKubernetesEndpointSlice(serviceNameSlice, "test", ipsSlice, portsSlice);
+
+        String serviceName = "svc";
+        String[] endpointIps = { "10.0.0.2" };
+        String[] sliceIps = { "10.0.0.99" };
+        EndpointPort[] slicePorts = { new EndpointPort("http", 9090) };
+
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, endpointIps);
+        registerKubernetesEndpointSlice(serviceName, defaultNamespace, sliceIps, slicePorts);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -317,7 +327,7 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
 
         String serviceName = "svc";
         String[] ips = { "10.0.0.3" };
-        int[] ports = { 8080 };
+        EndpointPort[] ports = { new EndpointPort("http", 8080) };
 
         whenGetSlicesApiAvailableThenReturnTrue();
 
@@ -336,6 +346,83 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
         assertThat(instances.get()).hasSize(1);
         assertThat(instances.get().get(0).getHost()).isEqualTo("10.0.0.3");
         assertThat(instances.get().get(0).getPort()).isEqualTo(8080);
+    }
+
+    @Test
+    void shouldGetServiceUsingSelectedPortNameWhenMultiplePortsFromSpecificNamespace() {
+        String serviceName = "svc";
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl,
+                        "k8s-namespace", "ns1",
+                        "port-name", "http",
+                        "use-endpoint-slices", "true"),
+                null);
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        whenGetSlicesApiAvailableThenReturnTrue();
+
+        String[] ips1 = { "10.96.96.231", "10.96.96.232" };
+        EndpointPort[] ports1 = { new EndpointPort("http", 8080), new EndpointPort("management", 8081) };
+
+        registerKubernetesEndpointSlice(serviceName, "ns1", ips1, ports1);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(2);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder("10.96.96.231",
+                "10.96.96.232");
+        for (ServiceInstance serviceInstance : instances.get()) {
+            Map<String, String> labels = serviceInstance.getLabels();
+            assertThat(labels).contains(
+                    entry("kubernetes.io/service-name", "svc"),
+                    entry("kubernetes.io/version", "1.0"));
+        }
+        instances.get().stream().map(ServiceInstance::getMetadata).forEach(metadata -> {
+            Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+            assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+        });
+    }
+
+    @Test
+    void shouldReturnNoInstancesWhenPortNameMatchesNothing() {
+        String serviceName = "svc";
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl,
+                        "k8s-namespace", "ns1",
+                        "port-name", "metrics",
+                        "use-endpoint-slices", "true"),
+                null);
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        whenGetSlicesApiAvailableThenReturnTrue();
+
+        String[] ips = { "10.96.96.231", "10.96.96.232" };
+        EndpointPort[] ports = { new EndpointPort("http", 8080) };
+
+        registerKubernetesEndpointSlice(serviceName, "ns1", ips, ports);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(0);
     }
 
     private void whenGetSlicesApiAvailableThenReturnTrue() {
@@ -374,7 +461,7 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
         String serviceName = "svc";
         String[] ips = { "10.0.0.4" };
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, ips); // <-- Endpoints
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, ips); // <-- Endpoints
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -404,10 +491,11 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
      * @param ips the IP addresses exposed by the service
      * @param ports the ports exposed by those IPs
      */
-    private void registerKubernetesEndpointSlice(String serviceName, String namespace, String[] ips, int[] ports) {
+    private void registerKubernetesEndpointSlice(String serviceName, String namespace, String[] ips, EndpointPort[] ports) {
         List<io.fabric8.kubernetes.api.model.discovery.v1.EndpointPort> portList = new ArrayList<>();
-        for (Integer port : ports) {
-            portList.add(new io.fabric8.kubernetes.api.model.discovery.v1.EndpointPortBuilder().withPort(port).build());
+        for (EndpointPort port : ports) {
+            portList.add(new io.fabric8.kubernetes.api.model.discovery.v1.EndpointPortBuilder().withPort(port.portNumber())
+                    .withName(port.name()).build());
         }
         String randomSuffix = UUID.randomUUID().toString().substring(0, 4);
         EndpointSlice slice = new EndpointSliceBuilder()
@@ -431,6 +519,9 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                 .resource(slice)
                 .create();
 
+    }
+
+    record EndpointPort(String name, int portNumber) {
     }
 
 }

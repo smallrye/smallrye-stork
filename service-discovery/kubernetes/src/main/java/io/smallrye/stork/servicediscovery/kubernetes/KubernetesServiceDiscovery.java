@@ -311,6 +311,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
                 for (String address : endpoint.getAddresses()) {
                     for (io.fabric8.kubernetes.api.model.discovery.v1.EndpointPort port : ports) {
+                        if (portName != null && !portName.equals(port.getName())) {
+                            continue;
+                        }
 
                         ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, address,
                                 port.getPort());
