@@ -398,6 +398,38 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
         });
     }
 
+    @Test
+    void shouldReturnNoInstancesWhenPortNameMatchesNothing() {
+        String serviceName = "svc";
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl,
+                        "k8s-namespace", "ns1",
+                        "port-name", "metrics",
+                        "use-endpoint-slices", "true"),
+                null);
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        whenGetSlicesApiAvailableThenReturnTrue();
+
+        String[] ips = { "10.96.96.231", "10.96.96.232" };
+        EndpointPort[] ports = { new EndpointPort("http", 8080) };
+
+        registerKubernetesEndpointSlice(serviceName, "ns1", ips, ports);
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(0);
+    }
+
     private void whenGetSlicesApiAvailableThenReturnTrue() {
         server.expect()
                 .get()
@@ -495,6 +527,6 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
     }
 
     record EndpointPort(String name, int portNumber) {
-    };
+    }
 
 }
