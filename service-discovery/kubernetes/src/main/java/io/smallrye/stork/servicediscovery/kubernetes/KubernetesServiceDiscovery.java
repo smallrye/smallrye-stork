@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
@@ -23,6 +24,8 @@ import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.discovery.v1.Endpoint;
 import io.fabric8.kubernetes.api.model.discovery.v1.EndpointSlice;
 import io.fabric8.kubernetes.client.Config;
@@ -170,11 +173,29 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                 EndpointSlice.class);
     }
 
+    private void configureServicesInformer() {
+        configureInformer(
+                ignore -> client.services().inAnyNamespace(),
+                ns -> client.services().inNamespace(ns),
+                Service.class);
+    }
+
+    /**
+     * Sets up a Kubernetes informer that invalidates the cache on resource changes.
+     * Used for {@link Endpoints}, {@link EndpointSlice}, and {@link Service} resources.
+     * The {@code ? extends Resource<T>} bounds are needed because fabric8 resource operations
+     * use different {@link Resource} subtypes (e.g. {@code ServiceResource<Service>}).
+     *
+     * @param <T> the Kubernetes resource type
+     * @param opAllNamespaces supplier for the all-namespaces operation
+     * @param opNamespace supplier for a single-namespace operation
+     * @param type the resource class, used for log messages
+     */
     private <T> void configureInformer(
-            Function<Boolean, AnyNamespaceOperation<T, ?, Resource<T>>> opAllNamespaces,
-            Function<String, AnyNamespaceOperation<T, ?, Resource<T>>> opNamespace,
+            Function<Boolean, ? extends AnyNamespaceOperation<T, ?, ? extends Resource<T>>> opAllNamespaces,
+            Function<String, ? extends AnyNamespaceOperation<T, ?, ? extends Resource<T>>> opNamespace,
             Class<T> type) {
-        AnyNamespaceOperation<T, ?, Resource<T>> op;
+        AnyNamespaceOperation<T, ?, ? extends Resource<T>> op;
         if (allNamespaces) {
             op = opAllNamespaces.apply(true);
         } else {
@@ -226,17 +247,23 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             result = fetchServiceEndpointSlice().onItem()
                     .transform(slices -> fromSlicesToStorkServiceInstances(slices, previousInstances));
         } else {
-            Uni<Map<Endpoints, List<Pod>>> endpointsUni = fetchServiceEnpoints();
-            return endpointsUni.onItem()
-                    .transform(endpoints -> fromEndpointsToStorkServiceInstances(endpoints, previousInstances))
-                    .invoke(() -> invalidated.set(false));
+            result = fetchServiceEndpoints().onItem()
+                    .transform(endpoints -> fromEndpointsToStorkServiceInstances(endpoints, previousInstances));
         }
+        return result
+                .invoke(() -> invalidated.set(false));
+    }
 
     }
 
     private Uni<Map<Endpoints, List<Pod>>> fetchServiceEnpoints() {
         return Uni.createFrom().emitter(
+    private <T> Uni<T> executeOnWorkerThread(Supplier<T> supplier) {
+        return Uni.createFrom().emitter(
                 emitter -> {
+                    vertx.executeBlocking(future -> {
+                        future.complete(supplier.get());
+                    }, result -> {
                     vertx.executeBlocking(() -> {
                         final Map<Endpoints, List<Pod>> items;
 
@@ -255,9 +282,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         return items;
                     }).onComplete(result -> {
                         if (result.succeeded()) {
+                            @SuppressWarnings("unchecked")
+                            T value = (T) result.result();
+                            emitter.complete(value);
                             Map<Endpoints, List<Pod>> endpoints = result.result();
                             emitter.complete(endpoints);
                         } else {
+                            LOGGER.error("Unable to retrieve resources from the {} service", application,
                             LOGGER.errorf("Unable to retrieve the endpoint from the %s service", application,
                                     result.cause());
                             emitter.fail(result.cause());
@@ -266,38 +297,80 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                 });
     }
 
+    private Uni<Map<Endpoints, List<Pod>>> fetchServiceEndpoints() {
+        return executeOnWorkerThread(() -> {
+            if (allNamespaces) {
+                List<Endpoints> endpointsList = client.endpoints().inAnyNamespace()
+                        .withField(METADATA_NAME, application).list().getItems();
+                return gatherBackendPodsInAnyNamespace(endpointsList);
+            } else {
+                List<Endpoints> endpointsList = client.endpoints().inNamespace(namespace)
+                        .withField(METADATA_NAME, application).list().getItems();
+                return gatherBackendPodsInNamespace(endpointsList);
+            }
+        });
+    }
+
     private Uni<List<EndpointSlice>> fetchServiceEndpointSlice() {
-        return Uni.createFrom().emitter(
-                emitter -> {
-                    vertx.executeBlocking(() -> {
-                        List<EndpointSlice> items = new ArrayList<>();
+        return executeOnWorkerThread(() -> {
+            if (allNamespaces) {
+                return client.discovery().v1().endpointSlices()
+                        .inNamespace(namespace)
+                        .withLabel(SERVICE_SELECTOR, application)
+                        .list().getItems();
+            } else {
+                return client.discovery().v1().endpointSlices().inNamespace(namespace)
+                        .withLabel(SERVICE_SELECTOR, application)
+                        .list().getItems();
+            }
+        });
+    }
 
-                        if (allNamespaces) {
-                            List<EndpointSlice> endpointSlices = client.discovery().v1().endpointSlices()
-                                    .inNamespace(namespace)
-                                    .withLabel(SERVICE_SELECTOR, application)
-                                    .list().getItems();
-                            items.addAll(endpointSlices);
+    private Uni<List<Service>> fetchServiceClusterIp() {
+        return executeOnWorkerThread(() -> {
+            if (allNamespaces) {
+                return client.services().inAnyNamespace()
+                        .withField(METADATA_NAME, application).list().getItems();
+            } else {
+                Service svc = client.services()
+                        .inNamespace(namespace).withName(application).get();
+                return svc != null ? List.of(svc) : Collections.emptyList();
+            }
+        });
+    }
 
-                        } else {
-                            List<EndpointSlice> endpointSlices = client.discovery().v1().endpointSlices().inNamespace(namespace)
-                                    .withLabel(SERVICE_SELECTOR, application)
-                                    .list()
-                                    .getItems();
-                            items.addAll(endpointSlices);
-                        }
-                        return items;
-                    }).onComplete(result -> {
-                        if (result.succeeded()) {
-                            List<EndpointSlice> endpointSlices = result.result();
-                            emitter.complete(endpointSlices);
-                        } else {
-                            LOGGER.errorf("Unable to retrieve the endpoint from the %s service", application,
-                                    result.cause());
-                            emitter.fail(result.cause());
-                        }
-                    });
-                });
+    private List<ServiceInstance> fromClusterIpServicesToStorkServiceInstances(List<Service> clusterIpServices,
+            List<ServiceInstance> previousInstances) {
+        List<ServiceInstance> serviceInstances = new ArrayList<>();
+        for (Service instance : clusterIpServices) {
+            List<ServicePort> servicePorts = instance.getSpec().getPorts();
+            if (servicePorts == null || servicePorts.isEmpty()) {
+                LOGGER.warn("Skipping service '{}' in namespace '{}': no ports defined",
+                        application, instance.getMetadata().getNamespace());
+                continue;
+            }
+            ResolvedPort resolved = resolvePort(servicePorts,
+                    ServicePort::getName, ServicePort::getPort, ServicePort::getProtocol);
+            if (resolved == null) {
+                LOGGER.warn("Skipping service '{}' in namespace '{}': no matching port found for port-name '{}'",
+                        application, instance.getMetadata().getNamespace(), portName);
+                continue;
+            }
+
+            String clusterIp = instance.getSpec().getClusterIP();
+            if (clusterIp == null || "None".equals(clusterIp)) {
+                LOGGER.warn("Skipping headless service '{}' in namespace '{}'",
+                        application, instance.getMetadata().getNamespace());
+                continue;
+            }
+            Map<String, String> labels = instance.getMetadata().getLabels() != null
+                    ? new HashMap<>(instance.getMetadata().getLabels())
+                    : new HashMap<>();
+            serviceInstances.add(findOrCreateServiceInstance(previousInstances,
+                    clusterIp, resolved.port(), labels, instance.getMetadata().getNamespace(), resolved.protocol()));
+
+        }
+        return serviceInstances;
     }
 
     private List<ServiceInstance> fromSlicesToStorkServiceInstances(List<EndpointSlice> endpointSlices,
@@ -309,6 +382,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     ? slice.getMetadata().getLabels()
                     : Collections.emptyMap());
             List<io.fabric8.kubernetes.api.model.discovery.v1.EndpointPort> ports = slice.getPorts();
+            if (ports == null || ports.isEmpty()) {
+                continue;
+            }
             for (Endpoint endpoint : slice.getEndpoints()) {
 
                 if (endpoint.getConditions() != null
@@ -322,18 +398,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                             continue;
                         }
 
-                        ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, address,
-                                port.getPort());
-                        if (matching != null) {
-                            serviceInstances.add(matching);
-                        } else {
-                            Metadata<KubernetesMetadataKey> k8sMetadata = Metadata.of(KubernetesMetadataKey.class);
-                            DefaultServiceInstance serviceInstance = new DefaultServiceInstance(ServiceInstanceIds.next(),
-                                    address, port.getPort(), Optional.empty(), secure,
-                                    labels,
-                                    k8sMetadata.with(META_K8S_SERVICE_ID, address).with(META_K8S_NAMESPACE, namespace));
-                            serviceInstances.add(serviceInstance);
-                        }
+                        serviceInstances.add(findOrCreateServiceInstance(previousInstances,
+                                address, port.getPort(), labels, namespace, null));
                     }
                 }
             }
@@ -384,53 +450,71 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         hostname = endpointAddress.getHostname();
                     }
                     List<EndpointPort> endpointPorts = subset.getPorts();
-                    Integer port = 0;
-                    String protocol = "";
-                    if (endpointPorts.size() == 1) {
-                        port = endpointPorts.get(0).getPort();
-                        protocol = endpointPorts.get(0).getProtocol();
-                    } else {
-                        for (EndpointPort endpointPort : endpointPorts) {
-                            // return first endpoint port or the matching one with the provided port name.
-                            if (portName == null || portName.equals(endpointPort.getName())) {
-                                port = endpointPort.getPort();
-                                protocol = endpointPort.getProtocol();
-                                break;
-                            }
-                        }
+                    if (endpointPorts == null || endpointPorts.isEmpty()) {
+                        continue;
+                    }
+                    ResolvedPort resolved = resolvePort(endpointPorts,
+                            EndpointPort::getName, EndpointPort::getPort, EndpointPort::getProtocol);
+                    if (resolved == null) {
+                        LOGGER.warn("Skipping endpoint for service '{}': no matching port found for port-name '{}'",
+                                application, portName);
+                        continue;
                     }
 
-                    ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, hostname, port);
-                    if (matching != null) {
-                        serviceInstances.add(matching);
-                    } else {
-                        Map<String, String> labels = new HashMap<>(endPoints.getMetadata().getLabels() != null
-                                ? endPoints.getMetadata().getLabels()
-                                : Collections.emptyMap());
-                        Optional<Pod> maybePod = pods.stream().filter(pod -> pod.getMetadata().getName().equals(podName))
-                                .findFirst();
-                        String podNamespace = namespace;
-                        if (maybePod.isPresent()) {
-                            Pod pod = maybePod.get();
-                            ObjectMeta metadata = pod.getMetadata();
-                            podNamespace = metadata.getNamespace();
-                            Map<String, String> podLabels = metadata.getLabels();
-                            for (Map.Entry<String, String> label : podLabels.entrySet()) {
-                                labels.putIfAbsent(label.getKey(), label.getValue());
-                            }
+                    Map<String, String> labels = new HashMap<>(endPoints.getMetadata().getLabels() != null
+                            ? endPoints.getMetadata().getLabels()
+                            : Collections.emptyMap());
+                    Optional<Pod> maybePod = pods.stream().filter(pod -> pod.getMetadata().getName().equals(podName))
+                            .findFirst();
+                    String podNamespace = namespace;
+                    if (maybePod.isPresent()) {
+                        Pod pod = maybePod.get();
+                        ObjectMeta metadata = pod.getMetadata();
+                        podNamespace = metadata.getNamespace();
+                        Map<String, String> podLabels = metadata.getLabels();
+                        for (Map.Entry<String, String> label : podLabels.entrySet()) {
+                            labels.putIfAbsent(label.getKey(), label.getValue());
                         }
-                        Metadata<KubernetesMetadataKey> k8sMetadata = Metadata.of(KubernetesMetadataKey.class);
-                        serviceInstances.add(
-                                new DefaultServiceInstance(ServiceInstanceIds.next(), hostname, port, Optional.empty(), secure,
-                                        labels,
-                                        k8sMetadata.with(META_K8S_SERVICE_ID, hostname).with(META_K8S_NAMESPACE, podNamespace)
-                                                .with(META_K8S_PORT_PROTOCOL, protocol)));
                     }
+                    serviceInstances.add(findOrCreateServiceInstance(previousInstances,
+                            hostname, resolved.port(), labels, podNamespace, resolved.protocol()));
                 }
             }
 
         }
         return serviceInstances;
+    }
+
+    private record ResolvedPort(int port, String protocol) {
+    }
+
+    private <P> ResolvedPort resolvePort(List<P> ports,
+            Function<P, String> getName, Function<P, Integer> getPort, Function<P, String> getProtocol) {
+        if (ports.size() == 1) {
+            return new ResolvedPort(getPort.apply(ports.get(0)), getProtocol.apply(ports.get(0)));
+        }
+        for (P p : ports) {
+            if (portName == null || portName.equals(getName.apply(p))) {
+                return new ResolvedPort(getPort.apply(p), getProtocol.apply(p));
+            }
+        }
+        return null;
+    }
+
+    private ServiceInstance findOrCreateServiceInstance(List<ServiceInstance> previousInstances,
+            String host, int port, Map<String, String> labels, String instanceNamespace, String protocol) {
+        ServiceInstance matching = ServiceInstanceUtils.findMatching(previousInstances, host, port);
+        if (matching != null) {
+            return matching;
+        }
+        Metadata<KubernetesMetadataKey> k8sMetadata = Metadata.of(KubernetesMetadataKey.class)
+                .with(META_K8S_SERVICE_ID, host)
+                .with(META_K8S_NAMESPACE, instanceNamespace);
+        if (protocol != null && !protocol.isEmpty()) {
+            k8sMetadata = k8sMetadata.with(META_K8S_PORT_PROTOCOL, protocol);
+        }
+        return new DefaultServiceInstance(ServiceInstanceIds.next(),
+                host, port, Optional.empty(), secure, labels, k8sMetadata);
     }
 
     private static boolean isSecure(KubernetesConfiguration config) {

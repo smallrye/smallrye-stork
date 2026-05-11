@@ -807,14 +807,14 @@ public class KubernetesServiceDiscoveryTest {
 
         client.endpoints().inNamespace(defaultNamespace).withName(serviceName).withTimeout(100, TimeUnit.MILLISECONDS).delete();
 
+        instances.set(null);
         service.getServiceDiscovery().getServiceInstances()
-                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
                 .subscribe().with(instances::set);
 
         await().atMost(Duration.ofSeconds(5))
-                .until(() -> instances.get().isEmpty());
+                .until(() -> instances.get() != null);
 
-        assertThat(instances.get()).hasSize(0);
+        assertThat(instances.get()).isEmpty();
     }
 
     @Test
@@ -856,17 +856,15 @@ public class KubernetesServiceDiscoveryTest {
                 .withTimeout(100, TimeUnit.MILLISECONDS)
                 .delete();
 
+        instances.clear();
+        AtomicReference<List<ServiceInstance>> refreshed = new AtomicReference<>();
         service.getServiceDiscovery().getServiceInstances()
-                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
-                .subscribe().with(received -> {
-                    instances.clear();
-                    instances.addAll(received);
-                });
+                .subscribe().with(refreshed::set);
 
         await().atMost(Duration.ofSeconds(5))
-                .until(instances::isEmpty);
+                .until(() -> refreshed.get() != null);
 
-        assertThat(instances).isEmpty();
+        assertThat(refreshed.get()).isEmpty();
     }
 
 }

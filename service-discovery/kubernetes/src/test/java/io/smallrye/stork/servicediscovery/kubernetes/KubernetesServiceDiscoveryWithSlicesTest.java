@@ -498,6 +498,31 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
     }
 
     @Test
+    void shouldReturnEmptyListWhenNoEndpointSlicesExist() {
+        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
+                null,
+                Map.of(
+                        "k8s-host", k8sMasterUrl,
+                        "k8s-namespace", defaultNamespace,
+                        "use-endpoint-slices", "true"),
+                null);
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        stork.getService("svc")
+                .getServiceDiscovery()
+                .getServiceInstances()
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).isEmpty();
+    }
+
+    @Test
     void shouldNotCallClusterForAutodetectionOnCacheRefresh() {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231" };
