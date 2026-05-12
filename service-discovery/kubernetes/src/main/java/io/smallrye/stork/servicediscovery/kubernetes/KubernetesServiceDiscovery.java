@@ -135,7 +135,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
      * </p>
      * <ol>
      * <li>User config: if {@code use-endpoint-slices} is explicitly set, that value is used.</li>
-     * <li>If not set, use EndpointSlices only when the API is available and the service has slices.</li>
+     * <li>If not set, use EndpointSlices only when the API is available.</li>
      * <li>Otherwise fall back to classic Endpoints.</li>
      * </ol>
      *
@@ -157,7 +157,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         }
 
         LOGGER.info("EndpointSlice discovery is enabled (experimental)");
-        return apiAvailable;
+        return true;
     }
 
     private void configureEndpointsInformer() {
