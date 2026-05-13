@@ -21,6 +21,12 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
     }
 
     @Override
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName,
+            Metadata<Metadata.DefaultMetadataKey> metadata, String ipAddress, int defaultPort) {
+        return registerServiceInstance(serviceName, metadata, ipAddress, defaultPort);
+    }
+
+    @Override
     public Uni<Void> registerServiceInstance(String serviceName, Metadata<Metadata.DefaultMetadataKey> metadata,
             String ipAddress,
             int defaultPort) {
@@ -36,6 +42,16 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
     @Override
     public Uni<Void> deregisterServiceInstance(String serviceName) {
         InMemoryAddressesBackend.clear(serviceName);
+        return Uni.createFrom().voidItem();
+    }
+
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName, String ipAddress, int port) {
+        HostAndPort hostAndPort = StorkAddressUtils.parseToHostAndPort(ipAddress, port,
+                "service '" + serviceName + "'");
+        String address = StorkAddressUtils.parseToString(hostAndPort);
+        InMemoryAddressesBackend.remove(serviceName, address);
+        log.info("Address {} has been deregistered for service {}", address, serviceName);
         return Uni.createFrom().voidItem();
     }
 
