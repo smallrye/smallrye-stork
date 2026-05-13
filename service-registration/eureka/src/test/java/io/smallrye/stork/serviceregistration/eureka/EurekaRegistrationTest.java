@@ -148,7 +148,7 @@ public class EurekaRegistrationTest {
         JsonObject application = jsonResponse.getJsonObject("application");
         JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
 
-        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service::localhost::8406");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
         assertThat(jsonServiceInstance.getString("vipAddress")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
@@ -191,7 +191,7 @@ public class EurekaRegistrationTest {
         JsonObject application = jsonResponse.getJsonObject("application");
         JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
 
-        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service::localhost::8406");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
         assertThat(jsonServiceInstance.getString("vipAddress")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
@@ -252,12 +252,12 @@ public class EurekaRegistrationTest {
         JsonObject application = jsonResponse.getJsonObject("application");
         JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
 
-        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service::localhost::8406");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
         assertThat(jsonServiceInstance.getString("vipAddress")).isEqualTo("my-service");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
         CountDownLatch deregistrationLatch = new CountDownLatch(1);
-        eurekaServiceRegistrar.deregisterServiceInstance(serviceName)
+        eurekaServiceRegistrar.deregisterServiceInstance(serviceName, "localhost", 8406)
                 .subscribe()
                 .with(success -> deregistrationLatch.countDown(), failure -> fail("Failure: " + failure.getMessage()));
 
@@ -274,6 +274,192 @@ public class EurekaRegistrationTest {
         assertThat(httpResponse2).isNotNull();
         assertThat(httpResponse2.statusCode()).isEqualTo(404);
 
+    }
+
+    @Test
+    public void shouldRegisterMultipleInstancesWithUniqueEurekaIds(TestInfo info) {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(2);
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register first instance"));
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "10.96.96.232", 8407).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register second instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<HttpResponse<Buffer>> response = client.get("/eureka/apps/my-service")
+                .putHeader("Accept", "application/json;charset=UTF-8").send();
+
+        UniAssertSubscriber<HttpResponse<Buffer>> subscriber = response
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
+        assertThat(httpResponse).isNotNull();
+        assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        assertThat(application.getJsonArray("instance")).hasSize(2);
+    }
+
+    @Test
+    public void shouldDeregisterSpecificInstanceWhileKeepingOthers(TestInfo info) {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(2);
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register first instance"));
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "10.96.96.232", 8407).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register second instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        CountDownLatch deregistrationLatch = new CountDownLatch(1);
+        eurekaServiceRegistrar.deregisterServiceInstance(serviceName, "10.96.96.231", 8406)
+                .subscribe()
+                .with(success -> deregistrationLatch.countDown(), failure -> fail("Failure: " + failure.getMessage()));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> deregistrationLatch.getCount() == 0L);
+
+        Uni<HttpResponse<Buffer>> response = client.get("/eureka/apps/my-service")
+                .putHeader("Accept", "application/json;charset=UTF-8").send();
+
+        UniAssertSubscriber<HttpResponse<Buffer>> subscriber = response
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
+        assertThat(httpResponse).isNotNull();
+        assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        assertThat(application.getJsonArray("instance")).hasSize(1);
+
+        JsonObject remainingInstance = application.getJsonArray("instance").getJsonObject(0);
+        assertThat(remainingInstance.getString("instanceId")).isEqualTo("my-service::10.96.96.232::8407");
+    }
+
+    @Test
+    public void shouldRegisterWithCustomInstanceName(TestInfo info) {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "my-custom-id", Metadata.of(EurekaMetadataKey.class),
+                "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<HttpResponse<Buffer>> response = client.get("/eureka/apps/my-service")
+                .putHeader("Accept", "application/json;charset=UTF-8").send();
+
+        UniAssertSubscriber<HttpResponse<Buffer>> subscriber = response
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
+        assertThat(httpResponse).isNotNull();
+        assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        JsonObject instance = application.getJsonArray("instance").getJsonObject(0);
+        assertThat(instance.getString("instanceId")).isEqualTo("my-custom-id");
+        assertThat(instance.getString("ipAddr")).isEqualTo("10.96.96.231");
+    }
+
+    @Test
+    public void shouldDeregisterByInstanceName(TestInfo info) {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(2);
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "instance-one", Metadata.of(EurekaMetadataKey.class),
+                "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register first instance"));
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "instance-two", Metadata.of(EurekaMetadataKey.class),
+                "10.96.96.232", 8407).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register second instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        CountDownLatch deregistrationLatch = new CountDownLatch(1);
+        eurekaServiceRegistrar.deregisterServiceInstance(serviceName, "instance-one")
+                .subscribe()
+                .with(success -> deregistrationLatch.countDown(), failure -> fail("Failure: " + failure.getMessage()));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> deregistrationLatch.getCount() == 0L);
+
+        Uni<HttpResponse<Buffer>> response = client.get("/eureka/apps/my-service")
+                .putHeader("Accept", "application/json;charset=UTF-8").send();
+
+        UniAssertSubscriber<HttpResponse<Buffer>> subscriber = response
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
+        assertThat(httpResponse).isNotNull();
+        assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        assertThat(application.getJsonArray("instance")).hasSize(1);
+
+        JsonObject remainingInstance = application.getJsonArray("instance").getJsonObject(0);
+        assertThat(remainingInstance.getString("instanceId")).isEqualTo("instance-two");
+    }
+
+    @Test
+    public void shouldCompleteSuccessfullyWhenDeregisteringNonExistentService(TestInfo info) {
+        String serviceName = "non-existent-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        // Deregistering a service that was never registered should complete without error,
+        // not throw a NullPointerException when parsing the 404 response body.
+        UniAssertSubscriber<Void> subscriber = eurekaServiceRegistrar.deregisterServiceInstance(serviceName)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.awaitItem().assertCompleted();
     }
 
 }

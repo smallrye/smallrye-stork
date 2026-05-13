@@ -18,13 +18,13 @@ public class TestServiceRegistrar implements ServiceRegistrar<TestMetadataKey> {
     }
 
     @Override
-    public Uni<Void> registerServiceInstance(String serviceName, Metadata<TestMetadataKey> metadata, String ipAddress,
-            int defaultPort) {
-        return null;
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata<TestMetadataKey> metadata,
+            String ipAddress, int defaultPort) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Uni<Void> deregisterServiceInstance(String serviceName) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }

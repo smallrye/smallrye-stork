@@ -72,7 +72,21 @@ As you can see, the `AcmeConfiguration` class gives access to the configuration 
 
 #### Implement your own service deregistration mechanism
 
+The `registerServiceInstance` method receives an optional `instanceName` parameter that acts as an explicit identifier for the registered instance.
+When provided, it should be used as the registration ID so that the same instance can be precisely targeted during deregistration.
+If `instanceName` is `null` or empty, implementations should fall back to a deterministic ID derived from the service name, IP address, and port.
+
 Finally, you can implement your own service deregistration mechanism in `deregisterServiceInstance` method.
+
+!!! warning "Override the specific-instance deregistration methods"
+    The `ServiceRegistrar` interface provides several deregistration methods:
+
+    - `deregisterServiceInstance(String serviceName)` — deregisters **all** instances of a service.
+    - `deregisterServiceInstance(String serviceName, String instanceName)` — deregisters the instance registered under the given name.
+    - `deregisterServiceInstance(String serviceName, String ipAddress, int port)` — deregisters the instance identified by IP and port.
+
+    The default implementations of the second and third methods fall back to the first, which may deregister **all** instances.
+    **Custom registrar implementations should override at least one of the specific-instance methods** to provide precise, instance-level deregistration and avoid unintended side effects.
 
 
 ## Using your service registrar using the programmatic API

@@ -107,7 +107,7 @@ public class EurekaRegistrationContextPathTest {
         JsonObject application = jsonResponse.getJsonObject("application");
         JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
 
-        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service::localhost::8406");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
         assertThat(jsonServiceInstance.getJsonObject("metadata").getString("protocol")).isEqualTo("https");
@@ -151,7 +151,7 @@ public class EurekaRegistrationContextPathTest {
         JsonObject application = jsonResponse.getJsonObject("application");
         JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
 
-        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service");
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-service::localhost::8406");
         assertThat(jsonServiceInstance.getString("ipAddr")).isEqualTo("localhost");
         assertThat(jsonServiceInstance.getJsonObject("port").getInteger("$")).isEqualTo(8406);
         CountDownLatch deregistrationLatch = new CountDownLatch(1);
