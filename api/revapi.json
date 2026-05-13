@@ -32,7 +32,13 @@
         "ignore": true,
         "code": "java.method.addedToInterface",
         "new": "method io.smallrye.mutiny.Uni<java.lang.Void> io.smallrye.stork.api.ServiceRegistrar<MetadataKeyType extends java.lang.Enum<MetadataKeyType> & io.smallrye.stork.api.MetadataKey>::deregisterServiceInstance(java.lang.String)",
-        "justification": "The method has bee added to extend the capabilities of the ServiceRegistrar interface by providing support for service deregistration. It is a backward-compatible change, as it adds a default method to the interface and does not break existing implementations."
+        "justification": "The method has been added to extend the capabilities of the ServiceRegistrar interface by providing support for service deregistration. It is a backward-compatible change, as it adds a default method to the interface and does not break existing implementations."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.Uni<java.lang.Void> io.smallrye.stork.api.ServiceRegistrar<MetadataKeyType extends java.lang.Enum<MetadataKeyType> & io.smallrye.stork.api.MetadataKey>::registerServiceInstance(java.lang.String, java.lang.String, io.smallrye.stork.api.Metadata<MetadataKeyType>, java.lang.String, int)",
+        "justification": "Added instanceName parameter to allow deterministic instance ID generation, required to fix deregistration bugs in backends like Consul."
       }
     ]
   }

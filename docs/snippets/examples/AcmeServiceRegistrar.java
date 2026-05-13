@@ -16,7 +16,8 @@ public class AcmeServiceRegistrar implements ServiceRegistrar {
 
 
     @Override
-    public Uni<Void> registerServiceInstance(String serviceName, Metadata metadata, String ipAddress, int defaultPort) {
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata metadata, String ipAddress, int defaultPort) {
+        //instanceName is an optional identifier for this specific instance; use it as the registration ID when provided
         //do whatever is needed for registering service instance
         return Uni.createFrom().voidItem();
     }

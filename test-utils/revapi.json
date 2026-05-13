@@ -41,6 +41,20 @@
         "new": "class io.smallrye.stork.test.TestServiceRegistrarProvider",
         "annotation": "@io.smallrye.stork.api.config.ServiceRegistrarAttributes({@io.smallrye.stork.api.config.ServiceRegistrarAttribute(name = \"one\", description = \"no description\"), @io.smallrye.stork.api.config.ServiceRegistrarAttribute(name = \"two\", description = \"no description\")})",
         "justification": "New registrar API"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.stork.test.TestServiceRegistrarProvider.Registration::<init>(java.lang.String, io.smallrye.stork.test.TestSrRegistrarConfiguration, io.smallrye.stork.api.Metadata<io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata>, java.lang.String, java.lang.String, int)",
+        "new": "method void io.smallrye.stork.test.TestServiceRegistrarProvider.Registration::<init>(java.lang.String, io.smallrye.stork.test.TestSrRegistrarConfiguration, io.smallrye.stork.api.Metadata<io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata>, java.lang.String, java.lang.String, java.lang.String, int)",
+        "justification": "Added instanceName parameter to Registration constructor and TestServiceRegistrar to support the new abstract method in ServiceRegistrar. Test-only class; no production callers affected."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method io.smallrye.mutiny.Uni<java.lang.Void> io.smallrye.stork.test.TestServiceRegistrarProvider.TestServiceRegistrar::registerServiceInstance(java.lang.String, io.smallrye.stork.api.Metadata<io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata>, java.lang.String, int)",
+        "new": "method io.smallrye.mutiny.Uni<java.lang.Void> io.smallrye.stork.test.TestServiceRegistrarProvider.TestServiceRegistrar::registerServiceInstance(java.lang.String, java.lang.String, io.smallrye.stork.api.Metadata<io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata>, java.lang.String, int)",
+        "justification": "Added instanceName parameter to Registration constructor and TestServiceRegistrar to support the new abstract method in ServiceRegistrar. Test-only class; no production callers affected."
       }
     ]
   }
