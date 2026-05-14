@@ -601,7 +601,7 @@ public class KubernetesServiceDiscoveryTest {
         KubernetesServiceDiscovery kubernetesDiscovery = (KubernetesServiceDiscovery) service.getServiceDiscovery();
         kubernetesDiscovery.invalidate();
 
-        //second try to get instances, instances should be fetched from cache, cluster calls should be still 1
+        //second try to get instances, instances should be fetched from cluster, calls should be 2
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
                 .subscribe().with(instances::set);

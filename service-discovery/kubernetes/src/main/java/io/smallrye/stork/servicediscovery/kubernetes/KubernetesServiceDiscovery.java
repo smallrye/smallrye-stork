@@ -25,7 +25,6 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.discovery.v1.Endpoint;
 import io.fabric8.kubernetes.api.model.discovery.v1.EndpointSlice;
-import io.fabric8.kubernetes.api.model.discovery.v1.EndpointSliceList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -64,7 +63,11 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     private final String namespace;
     private final boolean secure;
     private final Vertx vertx;
-    private final boolean useEndpointSlices;
+    private final int requestRetryBackoffLimit;
+    private final int requestRetryBackoffInterval;
+    private final Boolean useEndpointSlices;
+    private final boolean useEndpointSlicesEnabled;
+    private final boolean useClusterIp;
 
     private static final Logger LOGGER = Logger.getLogger(KubernetesServiceDiscovery.class);
 
@@ -106,7 +109,15 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         this.secure = isSecure(config);
         this.useEndpointSlices = config.getUseEndpointSlices() == null ? Boolean.FALSE
                 : Boolean.valueOf(config.getUseEndpointSlices());
-        if (shouldUseEndpointSlices()) {
+        this.useEndpointSlicesEnabled = shouldUseEndpointSlices();
+        this.useClusterIp = config.getUseClusterIp() != null && Boolean.parseBoolean(config.getUseClusterIp());
+        if (useClusterIp && Boolean.TRUE.equals(useEndpointSlices)) {
+            LOGGER.warn("Both 'use-cluster-ip' and 'use-endpoint-slices' are enabled for service '{}'. "
+                    + "'use-cluster-ip' takes precedence; 'use-endpoint-slices' will be ignored.", serviceName);
+        }
+        if (useClusterIp) {
+            configureServicesInformer();
+        } else if (useEndpointSlicesEnabled) {
             configureSlicesInformer();
         } else {
             configureEndpointsInformer();
@@ -121,7 +132,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
      * </p>
      * <ol>
      * <li>User config: if {@code use-endpoint-slices} is explicitly set, that value is used.</li>
-     * <li>If not set, use EndpointSlices only when the API is available and the service has slices.</li>
+     * <li>If not set, use EndpointSlices only when the API is available.</li>
      * <li>Otherwise fall back to classic Endpoints.</li>
      * </ol>
      *
@@ -141,15 +152,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             shouldUseEndpointSlices = false; // old cluster - endpoints
         }
 
-        EndpointSliceList slices = client.discovery().v1().endpointSlices()
-                .inNamespace(namespace)
-                .withLabel(SERVICE_SELECTOR, application)
-                .list();
-        shouldUseEndpointSlices = slices != null && !slices.getItems().isEmpty();
-        if (shouldUseEndpointSlices) {
-            LOGGER.info("EndpointSlice discovery is enabled (experimental)");
-        }
-        return shouldUseEndpointSlices;
+        LOGGER.info("EndpointSlice discovery is enabled (experimental)");
+        return true;
     }
 
     private void configureEndpointsInformer() {
@@ -214,10 +218,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     @Override
     public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
-        if (shouldUseEndpointSlices()) {
-            Uni<List<EndpointSlice>> endpointSlices = fetchServiceEndpointSlice();
-            return endpointSlices.onItem().transform(slices -> fromSlicesToStorkServiceInstances(slices, previousInstances))
-                    .invoke(() -> invalidated.set(false));
+        Uni<List<ServiceInstance>> result;
+        if (useClusterIp) {
+            result = fetchServiceClusterIp().onItem()
+                    .transform(clusterIps -> fromClusterIpServicesToStorkServiceInstances(clusterIps, previousInstances));
+        } else if (useEndpointSlicesEnabled) {
+            result = fetchServiceEndpointSlice().onItem()
+                    .transform(slices -> fromSlicesToStorkServiceInstances(slices, previousInstances));
         } else {
             Uni<Map<Endpoints, List<Pod>>> endpointsUni = fetchServiceEnpoints();
             return endpointsUni.onItem()
