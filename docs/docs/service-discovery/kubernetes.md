@@ -144,6 +144,12 @@ Otherwise, it falls back to classic Endpoints.
 
 This ensures backward compatibility with older clusters and services while automatically benefiting from EndpointSlices when available.
 
+The detection is performed **asynchronously** (off the event loop) and its result is cached for the lifetime of the service discovery instance.
+If the cluster API is temporarily unreachable during detection, Stork retries a few times before falling back to classic Endpoints.
+This means a transient connectivity issue at startup does not permanently disable EndpointSlice discovery, but it may cause Stork to fall back to Endpoints for the lifetime of that instance.
+
+Falling back to classic Endpoints is safe even on modern clusters: Kubernetes maintains `Endpoints` objects alongside `EndpointSlices` for backward compatibility, so both APIs reflect the same service instances.
+
 ## Service instance resolution with EndpointSlices
 
 When using EndpointSlices, Stork does **not** resolve Pods.

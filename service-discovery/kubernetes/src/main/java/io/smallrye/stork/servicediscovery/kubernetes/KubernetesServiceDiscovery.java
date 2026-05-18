@@ -4,6 +4,7 @@ import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKe
 import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_PORT_PROTOCOL;
 import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,12 +71,13 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     private final int requestRetryBackoffLimit;
     private final int requestRetryBackoffInterval;
     private final Boolean useEndpointSlices;
-    private final boolean useEndpointSlicesEnabled;
+    private final Uni<Boolean> useEndpointSlicesEnabledUni;
     private final boolean useClusterIp;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscovery.class);
 
-    private AtomicBoolean invalidated = new AtomicBoolean();
+    private final AtomicBoolean invalidated = new AtomicBoolean();
+    private final AtomicBoolean informerConfigured = new AtomicBoolean(false);
 
     /**
      * Creates a new KubernetesServiceDiscovery.
@@ -112,7 +115,12 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         this.secure = isSecure(config);
         this.useEndpointSlices = config.getUseEndpointSlices() == null ? null
                 : Boolean.valueOf(config.getUseEndpointSlices());
-        this.useEndpointSlicesEnabled = shouldUseEndpointSlices();
+        this.useEndpointSlicesEnabledUni = shouldUseEndpointSlices()
+                .onFailure().retry().withBackOff(Duration.ofMillis(500)).atMost(3)
+                .onFailure()
+                .invoke(th -> LOGGER.warn("Failed to detect EndpointSlice API support, falling back to Endpoints", th))
+                .onFailure().recoverWithItem(false)
+                .memoize().indefinitely();
         this.useClusterIp = config.getUseClusterIp() != null && Boolean.parseBoolean(config.getUseClusterIp());
         if (useClusterIp && Boolean.TRUE.equals(useEndpointSlices)) {
             LOGGER.warn("Both 'use-cluster-ip' and 'use-endpoint-slices' are enabled for service '{}'. "
@@ -120,63 +128,60 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         }
         if (useClusterIp) {
             configureServicesInformer();
-        } else if (useEndpointSlicesEnabled) {
-            configureSlicesInformer();
-        } else {
-            configureEndpointsInformer();
         }
+        // the endpoints/slices informer is configured lazily on the first fetchNewServiceInstances call,
+        // once the Uni resolves which API the cluster supports
     }
 
     /**
-     * Returns whether service discovery should use EndpointSlices instead of classic Endpoints.
+     * Asynchronously determines whether service discovery should use EndpointSlices instead of classic Endpoints.
+     * The cluster API groups check runs on a Vert.x worker thread to avoid blocking the event loop.
+     * If {@code use-endpoint-slices=false}, returns {@code false} immediately.
+     * Otherwise, queries the cluster for {@code discovery.k8s.io} support, even when explicitly set to {@code true},
+     * to guard against misconfiguration on clusters that do not expose EndpointSlices.
+     * Retries and fallback on failure are handled by the caller.
      *
-     * <p>
-     * Order of precedence:
-     * </p>
-     * <ol>
-     * <li>User config: if {@code use-endpoint-slices} is explicitly set, that value is used.</li>
-     * <li>If not set, use EndpointSlices only when the API is available.</li>
-     * <li>Otherwise fall back to classic Endpoints.</li>
-     * </ol>
-     *
-     * @return true if EndpointSlices should be used, false otherwise.
+     * @return a {@link Uni} emitting {@code true} if EndpointSlices should be used, {@code false} otherwise.
      */
 
-    private boolean shouldUseEndpointSlices() {
-        // if disabled explicitly, do not use autodetection
+    private Uni<Boolean> shouldUseEndpointSlices() {
         if (Boolean.FALSE.equals(useEndpointSlices)) {
-            return false; // old cluster - endpoints
+            return Uni.createFrom().item(false);
         }
         // cluster autodetection: EndpointSlices live in `discovery.k8s.io/v1`
         // use autodetection even if explicitly set to true, to avoid misconfiguration on clusters that do not support EndpointSlices
-        boolean apiAvailable = client.getApiGroups().getGroups().stream()
-                .anyMatch(g -> DISCOVERY_K8S_API.equals(g.getName()));
-
-        if (!apiAvailable) {
-            return false; // old cluster - endpoints
-        }
-
-        LOGGER.info("EndpointSlice discovery is enabled (experimental)");
-        return true;
+        return Uni.createFrom().completionStage(
+                vertx.<Boolean> executeBlocking(
+                        () -> client.getApiGroups().getGroups().stream()
+                                .anyMatch(g -> DISCOVERY_K8S_API.equals(g.getName())),
+                        false)
+                        .toCompletionStage())
+                .map(apiAvailable -> {
+                    if (!apiAvailable) {
+                        return false;
+                    }
+                    LOGGER.info("EndpointSlice discovery is enabled (experimental)");
+                    return true;
+                });
     }
 
     private void configureEndpointsInformer() {
         configureInformer(
-                ignore -> client.endpoints().inAnyNamespace(),
+                () -> client.endpoints().inAnyNamespace(),
                 ns -> client.endpoints().inNamespace(ns),
                 Endpoints.class);
     }
 
     private void configureSlicesInformer() {
         configureInformer(
-                ignore -> client.discovery().v1().endpointSlices().inAnyNamespace(),
+                () -> client.discovery().v1().endpointSlices().inAnyNamespace(),
                 ns -> client.discovery().v1().endpointSlices().inNamespace(ns),
                 EndpointSlice.class);
     }
 
     private void configureServicesInformer() {
         configureInformer(
-                ignore -> client.services().inAnyNamespace(),
+                () -> client.services().inAnyNamespace(),
                 ns -> client.services().inNamespace(ns),
                 Service.class);
     }
@@ -193,12 +198,12 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
      * @param type the resource class, used for log messages
      */
     private <T> void configureInformer(
-            Function<Boolean, ? extends AnyNamespaceOperation<T, ?, ? extends Resource<T>>> opAllNamespaces,
+            Supplier<? extends AnyNamespaceOperation<T, ?, ? extends Resource<T>>> opAllNamespaces,
             Function<String, ? extends AnyNamespaceOperation<T, ?, ? extends Resource<T>>> opNamespace,
             Class<T> type) {
         AnyNamespaceOperation<T, ?, ? extends Resource<T>> op;
         if (allNamespaces) {
-            op = opAllNamespaces.apply(true);
+            op = opAllNamespaces.get();
         } else {
             op = opNamespace.apply(namespace);
         }
@@ -241,51 +246,48 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
 
     @Override
     public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
-        Uni<List<ServiceInstance>> result;
         if (useClusterIp) {
-            result = fetchServiceClusterIp().onItem()
-                    .transform(clusterIps -> fromClusterIpServicesToStorkServiceInstances(clusterIps, previousInstances));
-        } else if (useEndpointSlicesEnabled) {
-            result = fetchServiceEndpointSlice().onItem()
-                    .transform(slices -> fromSlicesToStorkServiceInstances(slices, previousInstances));
-        } else {
-            result = fetchServiceEndpoints().onItem()
-                    .transform(endpoints -> fromEndpointsToStorkServiceInstances(endpoints, previousInstances));
+            return fetchServiceClusterIp().onItem()
+                    .transform(clusterIps -> fromClusterIpServicesToStorkServiceInstances(clusterIps, previousInstances))
+                    .invoke(() -> invalidated.set(false));
         }
-        return result
-                .invoke(() -> invalidated.set(false));
+        return useEndpointSlicesEnabledUni.flatMap(useSlices -> {
+            configureInformerOnce(useSlices);
+            Uni<List<ServiceInstance>> result;
+            if (useSlices) {
+                result = fetchServiceEndpointSlice().onItem()
+                        .transform(slices -> fromSlicesToStorkServiceInstances(slices, previousInstances));
+            } else {
+                result = fetchServiceEndpoints().onItem()
+                        .transform(endpoints -> fromEndpointsToStorkServiceInstances(endpoints, previousInstances));
+            }
+            return result.invoke(() -> invalidated.set(false));
+        });
+    }
+
+    private void configureInformerOnce(boolean useSlices) {
+        if (informerConfigured.compareAndSet(false, true)) {
+            if (useSlices) {
+                configureSlicesInformer();
+            } else {
+                configureEndpointsInformer();
+            }
+        }
     }
 
     private <T> Uni<T> executeOnWorkerThread(Supplier<T> supplier) {
-        return Uni.createFrom().emitter(
-                emitter -> {
-                    vertx.executeBlocking(future -> {
-                        future.complete(supplier.get());
-                    }, result -> {
-                        if (result.succeeded()) {
-                            @SuppressWarnings("unchecked")
-                            T value = (T) result.result();
-                            emitter.complete(value);
-                        } else {
-                            LOGGER.error("Unable to retrieve resources from the {} service", application,
-                                    result.cause());
-                            emitter.fail(result.cause());
-                        }
-                    });
-                });
+        return Uni.createFrom().completionStage(
+                vertx.<T> executeBlocking(supplier::get, false).toCompletionStage())
+                .onFailure().invoke(th -> LOGGER.error("Unable to retrieve resources from the {} service",
+                        application, th));
     }
 
     private Uni<Map<Endpoints, List<Pod>>> fetchServiceEndpoints() {
         return executeOnWorkerThread(() -> {
-            if (allNamespaces) {
-                List<Endpoints> endpointsList = client.endpoints().inAnyNamespace()
-                        .withField(METADATA_NAME, application).list().getItems();
-                return gatherBackendPodsInAnyNamespace(endpointsList);
-            } else {
-                List<Endpoints> endpointsList = client.endpoints().inNamespace(namespace)
-                        .withField(METADATA_NAME, application).list().getItems();
-                return gatherBackendPodsInNamespace(endpointsList);
-            }
+            List<Endpoints> endpointsList = allNamespaces
+                    ? client.endpoints().inAnyNamespace().withField(METADATA_NAME, application).list().getItems()
+                    : client.endpoints().inNamespace(namespace).withField(METADATA_NAME, application).list().getItems();
+            return gatherBackendPods(endpointsList);
         });
     }
 
@@ -385,31 +387,18 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         return serviceInstances;
     }
 
-    private Map<Endpoints, List<Pod>> gatherBackendPodsInNamespace(List<Endpoints> endpointsList) {
+    private Map<Endpoints, List<Pod>> gatherBackendPods(List<Endpoints> endpointsList) {
         Map<Endpoints, List<Pod>> items = new HashMap<>();
         for (Endpoints endpoint : endpointsList) {
-            List<Pod> backendPods = new ArrayList<>();
             List<String> podNames = endpoint.getSubsets().stream()
                     .flatMap(endpointSubset -> endpointSubset.getAddresses().stream())
                     .map(address -> address.getTargetRef().getName()).collect(Collectors.toList());
-            backendPods.addAll(podNames.stream()
-                    .map(name -> client.pods().inNamespace(namespace).withName(name))
-                    .map(podPodResource -> podPodResource.get()).collect(Collectors.toList()));
-            items.put(endpoint, backendPods);
-        }
-        return items;
-    }
-
-    private Map<Endpoints, List<Pod>> gatherBackendPodsInAnyNamespace(List<Endpoints> endpointsList) {
-        Map<Endpoints, List<Pod>> items = new HashMap<>();
-        for (Endpoints endpoint : endpointsList) {
-            List<Pod> backendPods = new ArrayList<>();
-            List<String> podNames = endpoint.getSubsets().stream()
-                    .flatMap(endpointSubset -> endpointSubset.getAddresses().stream())
-                    .map(address -> address.getTargetRef().getName()).collect(Collectors.toList());
-            podNames.forEach(podName -> backendPods
-                    .addAll(client.pods().inAnyNamespace().withField(METADATA_NAME, podName).list()
-                            .getItems()));
+            List<Pod> backendPods = podNames.stream()
+                    .flatMap(name -> allNamespaces
+                            ? client.pods().inAnyNamespace().withField(METADATA_NAME, name).list().getItems().stream()
+                            : Stream.of(client.pods().inNamespace(namespace).withName(name).get()))
+                    .filter(pod -> pod != null)
+                    .collect(Collectors.toList());
             items.put(endpoint, backendPods);
         }
         return items;

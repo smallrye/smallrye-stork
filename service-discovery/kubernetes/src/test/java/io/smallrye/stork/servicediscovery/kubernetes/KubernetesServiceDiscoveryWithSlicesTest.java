@@ -498,6 +498,34 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
     }
 
     @Test
+    void shouldFallbackToEndpointsWhenApiGroupsAlwaysFails() {
+        String serviceName = "svc";
+        String[] ips = { "10.96.96.231" };
+
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, ips);
+
+        // /apis always fails — exhausts retries, recoverWithItem(false) kicks in
+        server.expect().get().withPath("/apis").andReturn(500, "").always();
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                null,
+                Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace),
+                null);
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+        stork.getService(serviceName).getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances", th))
+                .subscribe().with(instances::set);
+
+        // timeout is generous to account for retry backoff
+        await().atMost(Duration.ofSeconds(15)).until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(1);
+        assertThat(instances.get().get(0).getHost()).isEqualTo(ips[0]);
+    }
+
+    @Test
     void shouldNotCallClusterForAutodetectionOnCacheRefresh() {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231" };
