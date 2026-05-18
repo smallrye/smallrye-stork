@@ -38,8 +38,6 @@ module io.smallrye.stork.serviceregistration.eureka {
     requires com.fasterxml.jackson.core;
     requires io.smallrye.mutiny.vertx.core;
     requires io.smallrye.mutiny.vertx.runtime;
-    requires io.smallrye.mutiny.vertx.codegen.generatorv4;
-    requires io.vertx.codegen;
     requires io.smallrye.mutiny.vertx.auth.common;
     requires io.smallrye.mutiny.vertx.web.common;
     requires io.smallrye.mutiny.vertx.uri.template;
