@@ -167,6 +167,21 @@ public class StaticServiceRegistrationTest {
     }
 
     @Test
+    void shouldRegisterInstanceWithTagsViaService() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService("first-service");
+        service.registerInstance("my-instance", List.of("v1.0", "canary"), "localhost", 8080);
+
+        List<String> addresses = InMemoryAddressesBackend.getAddresses("first-service");
+        assertThat(addresses).hasSize(1);
+        assertThat(addresses).contains("localhost:8080");
+    }
+
+    @Test
     void shouldDeregisterInstanceViaService() {
         TestConfigProvider.addServiceConfig("first-service", null, null, "static",
                 null, null, null);

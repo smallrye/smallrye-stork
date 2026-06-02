@@ -254,6 +254,10 @@ public class Service {
         return serviceRegistrar.registerServiceInstance(serviceName, instanceName, Metadata.empty(), ipAddress, port);
     }
 
+    public Uni<Void> registerInstance(String instanceName, List<String> tags, String ipAddress, int port) {
+        return serviceRegistrar.registerServiceInstance(serviceName, instanceName, tags, Metadata.empty(), ipAddress, port);
+    }
+
     /**
      * Registers a service instance using the provided options (tags, metadata, etc.).
      *
