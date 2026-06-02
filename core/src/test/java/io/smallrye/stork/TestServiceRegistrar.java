@@ -1,5 +1,7 @@
 package io.smallrye.stork;
 
+import java.util.List;
+
 import org.jboss.logging.Logger;
 
 import io.smallrye.mutiny.Uni;
@@ -20,6 +22,14 @@ public class TestServiceRegistrar implements ServiceRegistrar<TestMetadataKey> {
     @Override
     public Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata<TestMetadataKey> metadata,
             String ipAddress, int defaultPort) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName, List<String> tags,
+            Metadata<TestMetadataKey> metadata,
+            String ipAddress,
+            int defaultPort) {
         throw new UnsupportedOperationException();
     }
 
