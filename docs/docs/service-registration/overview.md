@@ -39,13 +39,13 @@ SmallRye Stork now supports deregistration of service instances from a central r
 This feature complements the registration mechanism.
 
 This operation is typically should be triggered when a service instance is shut down or no longer available, helping maintain a consistent and accurate service registry.
-To enable service deregistration, you can invoke the `deregisterServiceInstance` method on the `ServiceRegistrar` implementation programmatically.
-To target a specific instance, prefer one of these overloads:
+To enable service deregistration, you can invoke the deregistration methods on the `Service` instance programmatically.
+To target a specific instance, prefer one of these methods:
 
-- `deregisterServiceInstance(serviceName, instanceName)` — deregisters the instance registered under the given name.
-- `deregisterServiceInstance(serviceName, ipAddress, port)` — deregisters the instance identified by IP and port.
+- `deregisterNamedInstance(instanceName)` — deregisters the instance registered under the given name.
+- `deregisterServiceInstance(ipAddress, port)` — deregisters the instance identified by IP and port.
 
-The single-argument overload `deregisterServiceInstance(serviceName)` deregisters **all** instances of the service.
+The no-argument overload `deregisterServiceInstance()` deregisters **all** instances of the service and is deprecated, prefer one of the specific methods above.
 
 **Note**: When used in standalone mode, Stork does **not** automatically handle service instance registration or deregistration. 
 However, when using the quarkus-stork-registration extension within a Quarkus application, 

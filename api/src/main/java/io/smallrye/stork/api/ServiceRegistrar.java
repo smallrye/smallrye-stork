@@ -32,17 +32,29 @@ public interface ServiceRegistrar<MetadataKeyType extends Enum<MetadataKeyType> 
 
     default Uni<Void> registerServiceInstance(String serviceName, Metadata<MetadataKeyType> metadata, String ipAddress,
             int defaultPort) {
-        return registerServiceInstance(serviceName, null, metadata, ipAddress, defaultPort);
+        return registerServiceInstance(serviceName, (String) null, metadata, ipAddress, defaultPort);
+    }
+
+    default Uni<Void> registerServiceInstance(String serviceName, List<String> tags,
+            Metadata<MetadataKeyType> metadata, String ipAddress, int defaultPort) {
+        return registerServiceInstance(serviceName, null, tags, metadata, ipAddress, defaultPort);
     }
 
     Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata<MetadataKeyType> metadata,
             String ipAddress, int defaultPort);
 
+    default Uni<Void> registerServiceInstance(String serviceName, String instanceName, List<String> tags,
+            Metadata<MetadataKeyType> metadata, String ipAddress, int defaultPort) {
+        return registerServiceInstance(serviceName, instanceName, metadata, ipAddress, defaultPort);
+    }
+
     default Uni<Void> registerServiceInstance(RegistrarOptions options) {
         checkRegistrarOptionsNotNull(options);
         checkAddressNotNull(options.ipAddress());
 
-        return registerServiceInstance(options.serviceName(), options.ipAddress(), options.defaultPort());
+        return registerServiceInstance(options.serviceName(), null, options.tags() != null ? options.tags() : List.of(),
+                Metadata.empty(), options.ipAddress(),
+                options.defaultPort());
     }
 
     @Deprecated
