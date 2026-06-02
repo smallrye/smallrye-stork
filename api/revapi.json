@@ -39,6 +39,12 @@
         "code": "java.method.addedToInterface",
         "new": "method io.smallrye.mutiny.Uni<java.lang.Void> io.smallrye.stork.api.ServiceRegistrar<MetadataKeyType extends java.lang.Enum<MetadataKeyType> & io.smallrye.stork.api.MetadataKey>::registerServiceInstance(java.lang.String, java.lang.String, io.smallrye.stork.api.Metadata<MetadataKeyType>, java.lang.String, int)",
         "justification": "Added instanceName parameter to allow deterministic instance ID generation, required to fix deregistration bugs in backends like Consul."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.Uni<java.lang.Void> io.smallrye.stork.api.ServiceRegistrar<MetadataKeyType extends java.lang.Enum<MetadataKeyType> & io.smallrye.stork.api.MetadataKey>::registerServiceInstance(java.lang.String, java.lang.String, java.util.List<java.lang.String>, io.smallrye.stork.api.Metadata<MetadataKeyType>, java.lang.String, int)",
+        "justification": "Added tags parameter to support tagging service instances at registration time."
       }
     ]
   }

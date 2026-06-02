@@ -38,6 +38,9 @@ public interface ServiceRegistrar<MetadataKeyType extends Enum<MetadataKeyType> 
     Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata<MetadataKeyType> metadata,
             String ipAddress, int defaultPort);
 
+    Uni<Void> registerServiceInstance(String serviceName, String instanceName, List<String> tags,
+            Metadata<MetadataKeyType> metadata, String ipAddress, int defaultPort);
+
     default Uni<Void> registerServiceInstance(RegistrarOptions options) {
         checkRegistrarOptionsNotNull(options);
         checkAddressNotNull(options.ipAddress());
