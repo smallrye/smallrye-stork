@@ -34,6 +34,13 @@ public class InMemoryAddressesBackend {
         }
     }
 
+    public static void remove(String serviceName, String address) {
+        List<String> addresses = backend.get(serviceName);
+        if (addresses != null) {
+            addresses.remove(address);
+        }
+    }
+
     public static void clearAll() {
         backend.clear();
     }

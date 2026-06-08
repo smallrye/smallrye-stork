@@ -1,5 +1,7 @@
 package io.smallrye.stork.serviceregistration.eureka;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.impl.EurekaMetadataKey;
 import io.smallrye.stork.spi.StorkInfrastructure;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
@@ -45,7 +48,8 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
         checkAddressNotNull(ipAddress);
 
-        String eurekaId = metadata.getMetadata().isEmpty() ? serviceName
+        String eurekaId = metadata.getMetadata().isEmpty()
+                ? buildEurekaId(serviceName, ipAddress, defaultPort)
                 : metadata.getMetadata().get(EurekaMetadataKey.META_EUREKA_SERVICE_ID).toString();
 
         return registerApplicationInstance(client, serviceName,
@@ -59,24 +63,66 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
         checkRegistrarOptionsNotNull(options);
         checkAddressNotNull(options.ipAddress());
 
+        String eurekaId = buildEurekaId(options.serviceName(), options.ipAddress(), options.defaultPort());
         return registerApplicationInstance(client, options.serviceName(),
-                options.serviceName(), options.ipAddress(), null,
+                eurekaId, options.ipAddress(), null,
                 options.defaultPort(), null, -1, "UP", options.metadata());
 
     }
 
+    /**
+     * Deregisters all instances of the given service from Eureka by querying the application endpoint for their IDs
+     * and deregistering them in parallel. This avoids silent failures that would occur if the service ID
+     * were assumed to match the service name.
+     */
     @Override
     public Uni<Void> deregisterServiceInstance(String serviceName) {
         return client.get(path + serviceName)
                 .putHeader("Accept", "application/json;charset=UTF-8")
-                .send().invoke(() -> log.info("Instance found for '{}'", serviceName))
+                .send()
                 .flatMap(item -> {
-                    JsonObject body = item.bodyAsJsonObject();
-                    JsonObject application = body.getJsonObject("application");
-                    JsonObject instance = application.getJsonArray("instance").getJsonObject(0);
-                    return deregisterApplicationInstance(application.getString("name"), instance.getString("instanceId"));
+                    if (item.statusCode() == 404) {
+                        log.info("No application found for '{}'", serviceName);
+                        return Uni.createFrom().voidItem();
+                    }
+                    if (item.statusCode() >= 400) {
+                        log.error("Eureka returned {} when querying instances for '{}'", item.statusCode(), serviceName);
+                        return Uni.createFrom().failure(new RuntimeException(
+                                "Eureka returned " + item.statusCode() + " when querying instances for '" + serviceName + "'"));
+                    }
+                    JsonObject application = item.bodyAsJsonObject().getJsonObject("application");
+                    String appName = application.getString("name");
+                    JsonArray instances = application.getJsonArray("instance");
+                    List<Uni<Void>> deregistrations = new ArrayList<>();
+                    for (int i = 0; i < instances.size(); i++) {
+                        String instanceId = instances.getJsonObject(i).getString("instanceId");
+                        deregistrations.add(deregisterApplicationInstance(appName, instanceId));
+                    }
+                    return Uni.combine().all().unis(deregistrations).discardItems();
                 });
+    }
 
+    @Override
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata<EurekaMetadataKey> metadata,
+            String ipAddress, int defaultPort) {
+        checkAddressNotNull(ipAddress);
+        String eurekaId = instanceName != null && !instanceName.isEmpty()
+                ? instanceName
+                : buildEurekaId(serviceName, ipAddress, defaultPort);
+        return registerApplicationInstance(client, serviceName, eurekaId, ipAddress, null, defaultPort, null, -1, "UP",
+                metadata == null ? Metadata.empty().asMap() : metadata.asMap());
+    }
+
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName, String instanceName) {
+        checkInstanceNameNotNull(instanceName);
+        return deregisterApplicationInstance(serviceName, instanceName);
+    }
+
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName, String ipAddress, int port) {
+        String eurekaId = buildEurekaId(serviceName, ipAddress, port);
+        return deregisterApplicationInstance(serviceName, eurekaId);
     }
 
     private Uni<Void> deregisterApplicationInstance(String applicationId, String instanceId) {
@@ -86,8 +132,17 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
                 .onFailure()
                 .invoke(err -> log.error("Unable to deregister '{}' of '{}'. Error: {}", instanceId, applicationId,
                         err.getMessage()))
-                .onItem().invoke(resp -> log.info("'" + instanceId + "'" + " successfully deregistered")).replaceWithVoid();
-
+                .flatMap(resp -> {
+                    if (resp.statusCode() >= 400) {
+                        log.error("Eureka returned {} when deregistering '{}' of '{}'", resp.statusCode(), instanceId,
+                                applicationId);
+                        return Uni.createFrom().failure(new RuntimeException(
+                                "Eureka returned " + resp.statusCode() + " when deregistering '" + instanceId + "' of '"
+                                        + applicationId + "'"));
+                    }
+                    log.info("'{}' successfully deregistered", instanceId);
+                    return Uni.createFrom().voidItem();
+                });
     }
 
     private Uni<Void> registerApplicationInstance(WebClient client, String applicationId, String instanceId,
@@ -139,6 +194,11 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
         return response;
 
+    }
+
+    // '::' is used as separator; it does not appear in well-formed DNS service names, IP addresses, or port numbers.
+    private static String buildEurekaId(String serviceName, String ipAddress, int port) {
+        return serviceName + "::" + ipAddress + "::" + port;
     }
 
 }
