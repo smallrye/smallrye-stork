@@ -234,26 +234,28 @@ public class Service {
     /**
      * Registers a service instance identified by its IP address and port.
      *
-     * @param serviceName the name of the service
      * @param ipAddress the IP address of the instance
      * @param port the port of the instance
      * @return a {@link Uni} completing when the registration is done
      */
-    public Uni<Void> registerInstance(String serviceName, String ipAddress, int port) {
+    public Uni<Void> registerInstance(String ipAddress, int port) {
         return serviceRegistrar.registerServiceInstance(serviceName, ipAddress, port);
     }
 
     /**
      * Registers a service instance with an explicit instance name used as the registration ID.
      *
-     * @param serviceName the name of the service
      * @param instanceName the unique identifier for this instance in the registry
      * @param ipAddress the IP address of the instance
      * @param port the port of the instance
      * @return a {@link Uni} completing when the registration is done
      */
-    public Uni<Void> registerInstance(String serviceName, String instanceName, String ipAddress, int port) {
+    public Uni<Void> registerInstance(String instanceName, String ipAddress, int port) {
         return serviceRegistrar.registerServiceInstance(serviceName, instanceName, Metadata.empty(), ipAddress, port);
+    }
+
+    public Uni<Void> registerInstance(String instanceName, List<String> tags, String ipAddress, int port) {
+        return serviceRegistrar.registerServiceInstance(serviceName, instanceName, tags, Metadata.empty(), ipAddress, port);
     }
 
     /**
@@ -267,39 +269,36 @@ public class Service {
     }
 
     /**
-     * Deregisters all instances of the given service.
+     * Deregisters all instances of this service.
      *
-     * @param serviceName the name of the service
      * @return a {@link Uni} completing when the deregistration is done
-     * @deprecated Prefer {@link #deregisterServiceInstance(String, String)} or
-     *             {@link #deregisterServiceInstance(String, String, int)} to target a specific instance.
+     * @deprecated Prefer {@link #deregisterServiceInstance(String, int)} or
+     *             {@link #deregisterServiceInstance(String)} to target a specific instance.
      */
-    @Deprecated
-    public Uni<Void> deregisterServiceInstance(String serviceName) {
+    @Deprecated(forRemoval = true)
+    public Uni<Void> deregisterServiceInstance() {
         return serviceRegistrar.deregisterServiceInstance(serviceName);
-    }
-
-    /**
-     * Deregisters the service instance identified by the given IP address and port.
-     *
-     * @param serviceName the name of the service
-     * @param ipAddress the IP address of the instance to deregister
-     * @param port the port of the instance to deregister
-     * @return a {@link Uni} completing when the deregistration is done
-     */
-    public Uni<Void> deregisterServiceInstance(String serviceName, String ipAddress, int port) {
-        return serviceRegistrar.deregisterServiceInstance(serviceName, ipAddress, port);
     }
 
     /**
      * Deregisters the service instance identified by the given instance name.
      *
-     * @param serviceName the name of the service
      * @param instanceName the registration ID of the instance to deregister
      * @return a {@link Uni} completing when the deregistration is done
      */
-    public Uni<Void> deregisterServiceInstance(String serviceName, String instanceName) {
+    public Uni<Void> deregisterServiceInstance(String instanceName) {
         return serviceRegistrar.deregisterServiceInstance(serviceName, instanceName);
+    }
+
+    /**
+     * Deregisters the service instance identified by the given IP address and port.
+     *
+     * @param ipAddress the IP address of the instance to deregister
+     * @param port the port of the instance to deregister
+     * @return a {@link Uni} completing when the deregistration is done
+     */
+    public Uni<Void> deregisterServiceInstance(String ipAddress, int port) {
+        return serviceRegistrar.deregisterServiceInstance(serviceName, ipAddress, port);
     }
 
     public ObservationCollector getObservations() {

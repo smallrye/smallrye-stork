@@ -105,12 +105,20 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
     @Override
     public Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata<EurekaMetadataKey> metadata,
             String ipAddress, int defaultPort) {
+        return registerServiceInstance(serviceName, instanceName, List.of(), metadata, ipAddress, defaultPort);
+    }
+
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName, List<String> tags,
+            Metadata<EurekaMetadataKey> metadata,
+            String ipAddress,
+            int defaultPort) {
         checkAddressNotNull(ipAddress);
         String eurekaId = instanceName != null && !instanceName.isEmpty()
                 ? instanceName
                 : buildEurekaId(serviceName, ipAddress, defaultPort);
         return registerApplicationInstance(client, serviceName, eurekaId, ipAddress, null, defaultPort, null, -1, "UP",
                 metadata == null ? Metadata.empty().asMap() : metadata.asMap());
+
     }
 
     @Override

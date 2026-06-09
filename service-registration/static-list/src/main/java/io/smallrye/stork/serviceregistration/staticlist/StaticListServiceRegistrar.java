@@ -1,5 +1,7 @@
 package io.smallrye.stork.serviceregistration.staticlist;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +25,16 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
     @Override
     public Uni<Void> registerServiceInstance(String serviceName, String instanceName,
             Metadata<Metadata.DefaultMetadataKey> metadata, String ipAddress, int defaultPort) {
+        return registerServiceInstance(serviceName, instanceName, List.of(), metadata, ipAddress, defaultPort);
+    }
+
+    @Override
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName, List<String> tags,
+            Metadata<Metadata.DefaultMetadataKey> metadata,
+            String ipAddress,
+            int defaultPort) {
         return registerServiceInstance(serviceName, metadata, ipAddress, defaultPort);
+
     }
 
     @Override
