@@ -43,15 +43,17 @@ public class TestServiceRegistrarProvider
         public final int port;
         public final String serviceName;
         public final String instanceName;
+        public final List<String> tags;
 
         public Registration(String serviceRegistrarName, TestSrRegistrarConfiguration config, Metadata<TestMetadata> metadata,
-                String serviceName, String instanceName, String ipAddress, int port) {
+                String serviceName, String instanceName, List<String> tags, String ipAddress, int port) {
             this.serviceRegistrarName = serviceRegistrarName;
             this.config = config;
             this.metadata = metadata;
             this.ipAddress = ipAddress;
             this.serviceName = serviceName;
             this.instanceName = instanceName;
+            this.tags = tags;
             this.port = port;
         }
     }
@@ -77,10 +79,10 @@ public class TestServiceRegistrarProvider
                 Metadata<TestMetadata> metadata,
                 String ipAddress,
                 int defaultPort) {
-            registrations.add(new Registration(serviceRegistrarName, config, metadata, serviceName, instanceName, ipAddress,
-                    defaultPort));
+            registrations
+                    .add(new Registration(serviceRegistrarName, config, metadata, serviceName, instanceName, tags, ipAddress,
+                            defaultPort));
             return Uni.createFrom().voidItem();
-
         }
 
         @Override

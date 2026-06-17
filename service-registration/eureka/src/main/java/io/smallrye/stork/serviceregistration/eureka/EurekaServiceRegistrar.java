@@ -1,6 +1,7 @@
 package io.smallrye.stork.serviceregistration.eureka;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -108,6 +109,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
         return registerServiceInstance(serviceName, instanceName, List.of(), metadata, ipAddress, defaultPort);
     }
 
+    @Override
     public Uni<Void> registerServiceInstance(String serviceName, String instanceName, List<String> tags,
             Metadata<EurekaMetadataKey> metadata,
             String ipAddress,
@@ -116,8 +118,12 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
         String eurekaId = instanceName != null && !instanceName.isEmpty()
                 ? instanceName
                 : buildEurekaId(serviceName, ipAddress, defaultPort);
+        Map<String, String> metaMap = new HashMap<>(metadata != null ? metadata.asMap() : Map.of());
+        if (tags != null && !tags.isEmpty()) {
+            metaMap.put("tags", String.join(",", tags));
+        }
         return registerApplicationInstance(client, serviceName, eurekaId, ipAddress, null, defaultPort, null, -1, "UP",
-                metadata == null ? Metadata.empty().asMap() : metadata.asMap());
+                metaMap);
 
     }
 
