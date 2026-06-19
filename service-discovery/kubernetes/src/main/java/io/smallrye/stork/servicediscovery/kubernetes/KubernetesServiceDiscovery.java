@@ -295,7 +295,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         return executeOnWorkerThread(() -> {
             if (allNamespaces) {
                 return client.discovery().v1().endpointSlices()
-                        .inNamespace(namespace)
+                        .inAnyNamespace()
                         .withLabel(SERVICE_SELECTOR, application)
                         .list().getItems();
             } else {
