@@ -379,7 +379,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         }
 
                         serviceInstances.add(findOrCreateServiceInstance(previousInstances,
-                                address, port.getPort(), labels, namespace, null));
+                                address, port.getPort(), labels, slice.getMetadata().getNamespace(), port.getProtocol()));
                     }
                 }
             }
