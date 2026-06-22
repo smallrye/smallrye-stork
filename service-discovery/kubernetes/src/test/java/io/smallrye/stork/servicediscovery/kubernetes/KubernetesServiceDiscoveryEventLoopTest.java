@@ -3,6 +3,7 @@ package io.smallrye.stork.servicediscovery.kubernetes;
 import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesTestUtils.servicePort;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -30,7 +31,7 @@ import io.vertx.core.Vertx;
  * Verifies that the Kubernetes service discovery informer setup does not block
  * the Vert.x event loop.
  *
- * @see <a href="https://github.com/smallrye/smallrye-stork/issues/1231">smallrye-stork#1231</a>
+ * @see <a href="https://github.com/smallrye/smallrye-stork/issues/1274">smallrye-stork#1274</a>
  */
 @DisabledOnOs(OS.WINDOWS)
 @EnableKubernetesMockClient(crud = true)
@@ -158,8 +159,8 @@ class KubernetesServiceDiscoveryEventLoopTest {
         try {
             KubernetesServiceDiscovery discovery = new KubernetesServiceDiscovery("svc", config, vertx);
 
-            List<ServiceInstance> first = discovery.getServiceInstances().await().indefinitely();
-            List<ServiceInstance> second = discovery.getServiceInstances().await().indefinitely();
+            List<ServiceInstance> first = discovery.getServiceInstances().await().atMost(Duration.ofSeconds(5));
+            List<ServiceInstance> second = discovery.getServiceInstances().await().atMost(Duration.ofSeconds(5));
 
             assertThat(first).hasSize(1);
             assertThat(second).hasSize(1);
