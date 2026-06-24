@@ -1,5 +1,6 @@
 package io.smallrye.stork.servicediscovery.kubernetes;
 
+import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_NAMESPACE;
 import static io.smallrye.stork.servicediscovery.kubernetes.KubernetesMetadataKey.META_K8S_SERVICE_ID;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,6 +113,7 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                 .forEach(metadata -> {
                     Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
                     assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+                    assertThat(k8sMetadata.getMetadata().get(META_K8S_NAMESPACE)).isEqualTo("test");
                 });
 
         assertThat(instances.get()).allSatisfy(si -> assertThat(si.isSecure()).isFalse());
@@ -417,6 +419,59 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                 .until(() -> instances.get() != null);
 
         assertThat(instances.get()).hasSize(0);
+    }
+
+    @Test
+    void shouldGetEndpointSlicesFromAllNamespaces() {
+        String serviceName = "svc";
+
+        TestConfigProvider.addServiceConfig(serviceName, null, "kubernetes", null,
+                null, Map.of("k8s-host", k8sMasterUrl,
+                        "k8s-namespace", "all",
+                        "use-endpoint-slices", "true"),
+                null);
+        whenGetSlicesApiAvailableThenReturnTrue();
+
+        String[] ips1 = { "10.96.96.231", "10.96.96.232" };
+        String[] ips2 = { "10.99.99.241", "10.99.99.242" };
+        EndpointPort[] ports = { new EndpointPort("http", 8080) };
+
+        registerKubernetesEndpointSlice(serviceName, "ns1", ips1, ports);
+        registerKubernetesEndpointSlice(serviceName, "ns2", ips2, ports);
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
+
+        Service service = stork.getService(serviceName);
+        service.getServiceDiscovery().getServiceInstances()
+                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes (EndpointSlices)", th))
+                .subscribe().with(instances::set);
+
+        await().atMost(Duration.ofSeconds(5))
+                .until(() -> instances.get() != null);
+
+        assertThat(instances.get()).hasSize(4);
+        assertThat(instances.get().stream().map(ServiceInstance::getPort)).allMatch(p -> p == 8080);
+        assertThat(instances.get().stream().map(ServiceInstance::getHost)).containsExactlyInAnyOrder(
+                "10.96.96.231", "10.96.96.232", "10.99.99.241", "10.99.99.242");
+
+        instances.get().stream()
+                .map(ServiceInstance::getMetadata)
+                .forEach(metadata -> {
+                    Metadata<KubernetesMetadataKey> k8sMetadata = (Metadata<KubernetesMetadataKey>) metadata;
+                    assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_SERVICE_ID);
+                    assertThat(k8sMetadata.getMetadata()).containsKey(META_K8S_NAMESPACE);
+                });
+
+        List<String> namespaces = instances.get().stream()
+                .map(si -> {
+                    @SuppressWarnings("unchecked")
+                    Metadata<KubernetesMetadataKey> m = (Metadata<KubernetesMetadataKey>) si.getMetadata();
+                    return (String) m.getMetadata().get(META_K8S_NAMESPACE);
+                })
+                .toList();
+        assertThat(namespaces).containsExactlyInAnyOrder("ns1", "ns1", "ns2", "ns2");
     }
 
     @Test
