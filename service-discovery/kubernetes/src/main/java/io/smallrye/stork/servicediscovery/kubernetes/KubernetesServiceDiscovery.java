@@ -295,7 +295,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         return executeOnWorkerThread(() -> {
             if (allNamespaces) {
                 return client.discovery().v1().endpointSlices()
-                        .inNamespace(namespace)
+                        .inAnyNamespace()
                         .withLabel(SERVICE_SELECTOR, application)
                         .list().getItems();
             } else {
@@ -379,7 +379,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                         }
 
                         serviceInstances.add(findOrCreateServiceInstance(previousInstances,
-                                address, port.getPort(), labels, namespace, null));
+                                address, port.getPort(), labels, slice.getMetadata().getNamespace(), port.getProtocol()));
                     }
                 }
             }
