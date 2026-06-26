@@ -69,12 +69,20 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
     public Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata<ConsulMetadataKey> metadata,
             String ipAddress,
             int defaultPort) {
+        return registerServiceInstance(serviceName, instanceName, List.of(), metadata, ipAddress, defaultPort);
+    }
+
+    @Override
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName, List<String> tags,
+            Metadata<ConsulMetadataKey> metadata,
+            String ipAddress,
+            int defaultPort) {
         checkAddressNotNull(ipAddress);
 
         // Use the explicit ID when provided; otherwise generate a unique one.
         String consulId = instanceName != null && !instanceName.isEmpty() ? instanceName
                 : buildConsulId(serviceName, ipAddress, defaultPort);
-        return registerInstance(serviceName, ipAddress, defaultPort, consulId, List.of(), Collections.emptyMap());
+        return registerInstance(serviceName, ipAddress, defaultPort, consulId, tags, Collections.emptyMap());
     }
 
     private Uni<Void> registerInstance(String serviceName, String ipAddress, int defaultPort, String consulId,

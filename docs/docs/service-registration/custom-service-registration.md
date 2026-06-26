@@ -88,6 +88,9 @@ Finally, you can implement your own service deregistration mechanism in `deregis
     The default implementations of the second and third methods fall back to the first, which may deregister **all** instances.
     **Custom registrar implementations should override at least one of the specific-instance methods** to provide precise, instance-level deregistration and avoid unintended side effects.
 
+    Note that the `Service` class wraps these with simpler methods that do not require passing the service name:
+    `deregisterNamedInstance(instanceName)`, `deregisterServiceInstance(ipAddress, port)`, and the deprecated no-arg `deregisterServiceInstance()`.
+
 
 ## Using your service registrar using the programmatic API
 
