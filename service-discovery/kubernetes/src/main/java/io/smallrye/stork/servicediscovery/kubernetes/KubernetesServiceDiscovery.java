@@ -126,11 +126,8 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
             LOGGER.warnf("Both 'use-cluster-ip' and 'use-endpoint-slices' are enabled for service '%s'. "
                     + "'use-cluster-ip' takes precedence; 'use-endpoint-slices' will be ignored.", serviceName);
         }
-        if (useClusterIp) {
-            configureServicesInformer();
-        }
-        // the endpoints/slices informer is configured lazily on the first fetchNewServiceInstances call,
-        // once the Uni resolves which API the cluster supports
+        // all informers are configured lazily on the first fetchNewServiceInstances call,
+        // to avoid blocking I/O during construction
     }
 
     /**
@@ -246,32 +243,49 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
     @Override
     public Uni<List<ServiceInstance>> fetchNewServiceInstances(List<ServiceInstance> previousInstances) {
         if (useClusterIp) {
-            return fetchServiceClusterIp().onItem()
-                    .transform(clusterIps -> fromClusterIpServicesToStorkServiceInstances(clusterIps, previousInstances))
-                    .invoke(() -> invalidated.set(false));
+            return configureInformerOnce(this::configureServicesInformer)
+                    .chain(configured -> fetchServiceClusterIp().onItem()
+                            .transform(clusterIps -> fromClusterIpServicesToStorkServiceInstances(clusterIps,
+                                    previousInstances))
+                            .invoke(() -> invalidated.set(!configured)));
         }
         return useEndpointSlicesEnabledUni.flatMap(useSlices -> {
-            configureInformerOnce(useSlices);
-            Uni<List<ServiceInstance>> result;
-            if (useSlices) {
-                result = fetchServiceEndpointSlice().onItem()
-                        .transform(slices -> fromSlicesToStorkServiceInstances(slices, previousInstances));
-            } else {
-                result = fetchServiceEndpoints().onItem()
-                        .transform(endpoints -> fromEndpointsToStorkServiceInstances(endpoints, previousInstances));
-            }
-            return result.invoke(() -> invalidated.set(false));
+            Runnable configurator = useSlices ? this::configureSlicesInformer : this::configureEndpointsInformer;
+            return configureInformerOnce(configurator)
+                    .chain(configured -> {
+                        Uni<List<ServiceInstance>> fetch;
+                        if (useSlices) {
+                            fetch = fetchServiceEndpointSlice().onItem()
+                                    .transform(slices -> fromSlicesToStorkServiceInstances(slices, previousInstances));
+                        } else {
+                            fetch = fetchServiceEndpoints().onItem()
+                                    .transform(endpoints -> fromEndpointsToStorkServiceInstances(endpoints,
+                                            previousInstances));
+                        }
+                        return fetch.invoke(() -> invalidated.set(!configured));
+                    });
         });
     }
 
-    private void configureInformerOnce(boolean useSlices) {
+    private Uni<Boolean> configureInformerOnce(Runnable configurator) {
         if (informerConfigured.compareAndSet(false, true)) {
-            if (useSlices) {
-                configureSlicesInformer();
-            } else {
-                configureEndpointsInformer();
-            }
+            return executeOnWorkerThread(configurator)
+                    .replaceWith(true)
+                    .onFailure().invoke(th -> {
+                        LOGGER.warn("Failed to configure informer", th);
+                        informerConfigured.set(false);
+                        invalidated.set(true);
+                    })
+                    .onFailure().recoverWithItem(false);
         }
+        return Uni.createFrom().item(true);
+    }
+
+    private Uni<Void> executeOnWorkerThread(Runnable runnable) {
+        return executeOnWorkerThread(() -> {
+            runnable.run();
+            return null;
+        }).replaceWithVoid();
     }
 
     private <T> Uni<T> executeOnWorkerThread(Supplier<T> supplier) {
