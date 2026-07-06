@@ -115,7 +115,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         this.useEndpointSlicesEnabled = shouldUseEndpointSlices();
         this.useClusterIp = config.getUseClusterIp() != null && Boolean.parseBoolean(config.getUseClusterIp());
         if (useClusterIp && Boolean.TRUE.equals(useEndpointSlices)) {
-            LOGGER.warn("Both 'use-cluster-ip' and 'use-endpoint-slices' are enabled for service '{}'. "
+            LOGGER.warnf("Both 'use-cluster-ip' and 'use-endpoint-slices' are enabled for service '%s'. "
                     + "'use-cluster-ip' takes precedence; 'use-endpoint-slices' will be ignored.", serviceName);
         }
         if (useClusterIp) {
@@ -254,42 +254,14 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                 .invoke(() -> invalidated.set(false));
     }
 
-    }
-
-    private Uni<Map<Endpoints, List<Pod>>> fetchServiceEnpoints() {
-        return Uni.createFrom().emitter(
     private <T> Uni<T> executeOnWorkerThread(Supplier<T> supplier) {
         return Uni.createFrom().emitter(
                 emitter -> {
-                    vertx.executeBlocking(future -> {
-                        future.complete(supplier.get());
-                    }, result -> {
-                    vertx.executeBlocking(() -> {
-                        final Map<Endpoints, List<Pod>> items;
-
-                        if (allNamespaces) {
-                            List<Endpoints> endpointsList = client.endpoints().inAnyNamespace()
-                                    .withField(METADATA_NAME, application).list()
-                                    .getItems();
-                            items = gatherBackendPodsInAnyNamespace(endpointsList);
-                        } else {
-                            List<Endpoints> endpointsList = client.endpoints().inNamespace(namespace)
-                                    .withField(METADATA_NAME, application)
-                                    .list()
-                                    .getItems();
-                            items = gatherBackendPodsInNamespace(endpointsList);
-                        }
-                        return items;
-                    }).onComplete(result -> {
+                    vertx.executeBlocking(supplier::get).onComplete(result -> {
                         if (result.succeeded()) {
-                            @SuppressWarnings("unchecked")
-                            T value = (T) result.result();
-                            emitter.complete(value);
-                            Map<Endpoints, List<Pod>> endpoints = result.result();
-                            emitter.complete(endpoints);
+                            emitter.complete(result.result());
                         } else {
-                            LOGGER.error("Unable to retrieve resources from the {} service", application,
-                            LOGGER.errorf("Unable to retrieve the endpoint from the %s service", application,
+                            LOGGER.errorf("Unable to retrieve resources from the %s service", application,
                                     result.cause());
                             emitter.fail(result.cause());
                         }
@@ -345,21 +317,21 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         for (Service instance : clusterIpServices) {
             List<ServicePort> servicePorts = instance.getSpec().getPorts();
             if (servicePorts == null || servicePorts.isEmpty()) {
-                LOGGER.warn("Skipping service '{}' in namespace '{}': no ports defined",
+                LOGGER.warnf("Skipping service '%s' in namespace '%s': no ports defined",
                         application, instance.getMetadata().getNamespace());
                 continue;
             }
             ResolvedPort resolved = resolvePort(servicePorts,
                     ServicePort::getName, ServicePort::getPort, ServicePort::getProtocol);
             if (resolved == null) {
-                LOGGER.warn("Skipping service '{}' in namespace '{}': no matching port found for port-name '{}'",
+                LOGGER.warnf("Skipping service '%s' in namespace '%s': no matching port found for port-name '%s'",
                         application, instance.getMetadata().getNamespace(), portName);
                 continue;
             }
 
             String clusterIp = instance.getSpec().getClusterIP();
             if (clusterIp == null || "None".equals(clusterIp)) {
-                LOGGER.warn("Skipping headless service '{}' in namespace '{}'",
+                LOGGER.warnf("Skipping headless service '%s' in namespace '%s'",
                         application, instance.getMetadata().getNamespace());
                 continue;
             }
@@ -456,7 +428,7 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
                     ResolvedPort resolved = resolvePort(endpointPorts,
                             EndpointPort::getName, EndpointPort::getPort, EndpointPort::getProtocol);
                     if (resolved == null) {
-                        LOGGER.warn("Skipping endpoint for service '{}': no matching port found for port-name '{}'",
+                        LOGGER.warnf("Skipping endpoint for service '%s': no matching port found for port-name '%s'",
                                 application, portName);
                         continue;
                     }
