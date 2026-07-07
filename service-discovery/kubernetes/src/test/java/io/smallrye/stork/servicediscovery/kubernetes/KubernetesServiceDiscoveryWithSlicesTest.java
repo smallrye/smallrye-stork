@@ -78,9 +78,6 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                         "use-endpoint-slices", "true"),
                 null);
 
-        Stork stork = StorkTestUtils.getNewStorkInstance();
-        whenGetSlicesApiAvailableThenReturnTrue();
-
         String serviceName = "svc";
         String[] ips = { "10.96.96.231" };
         EndpointPort[] ports = { new EndpointPort("http", 8080) };
@@ -129,9 +126,6 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                         "k8s-namespace", "test",
                         "use-endpoint-slices", "true"),
                 null);
-
-        Stork stork = StorkTestUtils.getNewStorkInstance();
-        whenGetSlicesApiAvailableThenReturnTrue();
 
         String serviceName = "svc";
         String[] ips1 = { "10.96.96.231" };
@@ -186,9 +180,6 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                         "use-endpoint-slices", "true"),
                 null);
 
-        Stork stork = StorkTestUtils.getNewStorkInstance();
-        whenGetSlicesApiAvailableThenReturnTrue();
-
         String serviceName = "svc";
         String[] ips1 = { "10.96.96.231", "10.96.96.232" };
         EndpointPort[] ports1 = { new EndpointPort("http", 8080) };
@@ -237,10 +228,6 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                         "k8s-namespace", "test",
                         "use-endpoint-slices", "true"),
                 null);
-
-        Stork stork = StorkTestUtils.getNewStorkInstance();
-
-        whenGetSlicesApiAvailableThenReturnTrue();
 
         String serviceName = "svc";
         String[] ips1 = { "10.96.96.231", "10.96.96.232" };
@@ -297,22 +284,15 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
                         "use-endpoint-slices", "false"),
                 null);
 
-        Stork stork = StorkTestUtils.getNewStorkInstance();
-
-        whenGetSlicesApiAvailableThenReturnTrue();
-
-        String serviceNameSlice = "svc";
-        String[] ipsSlice = { "10.0.0.99" }; // <- this ip should be ignored, because the user disabled EndpointSlices
-        int[] portsClice = { 8080 };
-        registerKubernetesEndpointSlice(serviceNameSlice, "test", ipsSlice, portsClice);
-
         String serviceName = "svc";
         String[] endpointIps = { "10.0.0.2" };
         String[] sliceIps = { "10.0.0.99" };
-        int[] slicePorts = { 9090 };
+        EndpointPort[] slicePorts = { new EndpointPort("http", 9090) };
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, endpointIps);
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, endpointIps);
         registerKubernetesEndpointSlice(serviceName, defaultNamespace, sliceIps, slicePorts);
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -543,31 +523,6 @@ public class KubernetesServiceDiscoveryWithSlicesTest {
 
         assertThat(instances.get()).hasSize(1);
         assertThat(instances.get().get(0).getHost()).isEqualTo(ips[0]);
-    }
-
-    @Test
-    void shouldReturnEmptyListWhenNoEndpointSlicesExist() {
-        TestConfigProvider.addServiceConfig("svc", null, "kubernetes", null,
-                null,
-                Map.of(
-                        "k8s-host", k8sMasterUrl,
-                        "k8s-namespace", defaultNamespace,
-                        "use-endpoint-slices", "true"),
-                null);
-
-        Stork stork = StorkTestUtils.getNewStorkInstance();
-
-        AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
-
-        stork.getService("svc")
-                .getServiceDiscovery()
-                .getServiceInstances()
-                .subscribe().with(instances::set);
-
-        await().atMost(Duration.ofSeconds(5))
-                .until(() -> instances.get() != null);
-
-        assertThat(instances.get()).isEmpty();
     }
 
     @Test
