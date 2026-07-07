@@ -81,11 +81,11 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
                 .send()
                 .flatMap(item -> {
                     if (item.statusCode() == 404) {
-                        log.info("No application found for '{}'", serviceName);
+                        log.infof("No application found for '%s'", serviceName);
                         return Uni.createFrom().voidItem();
                     }
                     if (item.statusCode() >= 400) {
-                        log.error("Eureka returned {} when querying instances for '{}'", item.statusCode(), serviceName);
+                        log.errorf("Eureka returned %d when querying instances for '%s'", item.statusCode(), serviceName);
                         return Uni.createFrom().failure(new RuntimeException(
                                 "Eureka returned " + item.statusCode() + " when querying instances for '" + serviceName + "'"));
                     }
@@ -133,13 +133,13 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
                         err.getMessage()))
                 .flatMap(resp -> {
                     if (resp.statusCode() >= 400) {
-                        log.error("Eureka returned {} when deregistering '{}' of '{}'", resp.statusCode(), instanceId,
+                        log.errorf("Eureka returned %d when deregistering '%s' of '%s'", resp.statusCode(), instanceId,
                                 applicationId);
                         return Uni.createFrom().failure(new RuntimeException(
                                 "Eureka returned " + resp.statusCode() + " when deregistering '" + instanceId + "' of '"
                                         + applicationId + "'"));
                     }
-                    log.info("'{}' successfully deregistered", instanceId);
+                    log.infof("'%s' successfully deregistered", instanceId);
                     return Uni.createFrom().voidItem();
                 });
     }
