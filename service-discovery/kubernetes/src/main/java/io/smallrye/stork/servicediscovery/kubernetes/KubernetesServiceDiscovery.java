@@ -35,7 +35,6 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.dsl.AnyNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.Gettable;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.smallrye.mutiny.Uni;
@@ -93,9 +92,9 @@ public class KubernetesServiceDiscovery extends CachingServiceDiscovery {
         this.application = config.getApplication() == null ? serviceName : config.getApplication();
         this.namespace = config.getK8sNamespace() == null ? base.getNamespace() : config.getK8sNamespace();
         this.portName = config.getPortName();
-        int requestRetryBackoffInterval = config.getRequestRetryBackoffInterval() == null ? 0
+        this.requestRetryBackoffInterval = config.getRequestRetryBackoffInterval() == null ? 0
                 : Integer.parseInt(config.getRequestRetryBackoffInterval());
-        int requestRetryBackoffLimit = config.getRequestRetryBackoffLimit() == null ? 0
+        this.requestRetryBackoffLimit = config.getRequestRetryBackoffLimit() == null ? 0
                 : Integer.parseInt(config.getRequestRetryBackoffLimit());
 
         allNamespaces = namespace != null && namespace.equalsIgnoreCase("all");

@@ -50,7 +50,7 @@ public class StaticListServiceRegistrar implements ServiceRegistrar<Metadata.Def
                 "service '" + serviceName + "'");
         String address = StorkAddressUtils.parseToString(hostAndPort);
         InMemoryAddressesBackend.remove(serviceName, address);
-        log.info("Address {} has been deregistered for service {}", address, serviceName);
+        log.infof("Address %s has been deregistered for service %s", address, serviceName);
         return Uni.createFrom().voidItem();
     }
 

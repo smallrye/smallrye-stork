@@ -98,11 +98,11 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
                 serviceOptions)
                 .onComplete(result -> {
                     if (result.failed()) {
-                        log.error("Unable to register instance {} of service {}", consulId, serviceName,
+                        log.errorf("Unable to register instance %s of service %s", consulId, serviceName,
                                 result.cause());
                         em.fail(result.cause());
                     } else {
-                        log.info("Instance {} of service {} has been registered ", consulId, serviceName);
+                        log.infof("Instance %s of service %s has been registered", consulId, serviceName);
                         em.complete(result.result());
                     }
                 }));
@@ -114,11 +114,11 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
         return Uni.createFrom().emitter(em -> client.deregisterService(instanceName)
                 .onComplete(result -> {
                     if (result.failed()) {
-                        log.error("Unable to deregister instance {} of service {}", instanceName, serviceName,
+                        log.errorf("Unable to deregister instance %s of service %s", instanceName, serviceName,
                                 result.cause());
                         em.fail(result.cause());
                     } else {
-                        log.info("Instance {} of service {} has been deregistered", instanceName, serviceName);
+                        log.infof("Instance %s of service %s has been deregistered", instanceName, serviceName);
                         em.complete(result.result());
                     }
                 }));
@@ -133,7 +133,7 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
     public Uni<Void> deregisterServiceInstance(String serviceName) {
         return Uni.createFrom().<ServiceList> emitter(em -> client.catalogServiceNodes(serviceName).onComplete(result -> {
             if (result.failed()) {
-                log.error("Unable to retrieve instances of service {} from Consul catalog", serviceName,
+                log.errorf("Unable to retrieve instances of service %s from Consul catalog", serviceName,
                         result.cause());
                 em.fail(result.cause());
             } else {
@@ -143,18 +143,18 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
                 .flatMap(serviceList -> {
                     List<Service> services = serviceList.getList();
                     if (services == null || services.isEmpty()) {
-                        log.info("No registered instances found for service {}", serviceName);
+                        log.infof("No registered instances found for service %s", serviceName);
                         return Uni.createFrom().voidItem();
                     }
                     List<Uni<Void>> deregistrations = services.stream()
                             .map(service -> Uni.createFrom()
                                     .<Void> emitter(em -> client.deregisterService(service.getId()).onComplete(result -> {
                                         if (result.failed()) {
-                                            log.error("Unable to deregister instance {} of service {}",
+                                            log.errorf("Unable to deregister instance %s of service %s",
                                                     service.getId(), serviceName, result.cause());
                                             em.fail(result.cause());
                                         } else {
-                                            log.info("Instance {} of service {} has been deregistered",
+                                            log.infof("Instance %s of service %s has been deregistered",
                                                     service.getId(), serviceName);
                                             em.complete(null);
                                         }
