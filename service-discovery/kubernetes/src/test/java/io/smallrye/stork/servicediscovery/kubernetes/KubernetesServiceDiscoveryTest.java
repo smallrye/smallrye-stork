@@ -72,7 +72,7 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, ips);
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, ips);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -110,7 +110,7 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
 
-        utils.registerKubernetesResources("greetingApp", defaultNamespace, ips);
+        utils.registerKubernetesLegacyEndpointsResources("greetingApp", defaultNamespace, ips);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -148,7 +148,7 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, ips);
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, ips);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -187,7 +187,7 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String[] ips = { "10.96.96.231", "10.96.96.232", "10.96.96.233" };
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, ips);
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, ips);
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -225,9 +225,9 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        utils.registerKubernetesResources("rest-service", defaultNamespace, "10.96.96.231", "10.96.96.232",
+        utils.registerKubernetesLegacyEndpointsResources("rest-service", defaultNamespace, "10.96.96.231", "10.96.96.232",
                 "10.96.96.233");
-        utils.registerKubernetesResources("svc", defaultNamespace, "10.95.95.125");
+        utils.registerKubernetesLegacyEndpointsResources("svc", defaultNamespace, "10.95.95.125");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -261,7 +261,8 @@ public class KubernetesServiceDiscoveryTest {
         String serviceName = "svc";
         String specificNs = "ns1";
 
-        utils.registerKubernetesResources(serviceName, specificNs, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, specificNs, "10.96.96.231", "10.96.96.232",
+                "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -390,8 +391,8 @@ public class KubernetesServiceDiscoveryTest {
         Stork stork = StorkTestUtils.getNewStorkInstance();
         String serviceName = "svc";
 
-        utils.registerKubernetesResources(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
-        utils.registerKubernetesResources(serviceName, "ns2", "10.99.99.241", "10.99.99.242", "10.99.99.243");
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, "ns1", "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, "ns2", "10.99.99.241", "10.99.99.242", "10.99.99.243");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -431,7 +432,8 @@ public class KubernetesServiceDiscoveryTest {
 
         String serviceName = "svc";
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -455,7 +457,7 @@ public class KubernetesServiceDiscoveryTest {
         client.pods().withName("svc-109696232").delete();
         client.pods().withName("svc-109696233").delete();
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232");
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232");
 
         Thread.sleep(5000);
 
@@ -474,7 +476,8 @@ public class KubernetesServiceDiscoveryTest {
         client.pods().withName("svc-109696231").delete();
         client.pods().withName("svc-109696232").delete();
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.234");
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                "10.96.96.234");
 
         Thread.sleep(5000);
 
@@ -500,7 +503,8 @@ public class KubernetesServiceDiscoveryTest {
 
         //Given a few instances for a svc service
         List<Endpoints> endpointsList = List
-                .of(utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                .of(utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, "10.96.96.231",
+                        "10.96.96.232",
                         "10.96.96.233"));
 
         //Recording k8s cluster calls and and build the response with the (previous registered) endpoints
@@ -553,7 +557,8 @@ public class KubernetesServiceDiscoveryTest {
 
         //Given a few instances for a svc service
         List<Endpoints> endpointsList = List
-                .of(utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                .of(utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, "10.96.96.231",
+                        "10.96.96.232",
                         "10.96.96.233"));
 
         //Recording k8s cluster calls and and build the response with the (previous registered) endpoints
@@ -596,7 +601,7 @@ public class KubernetesServiceDiscoveryTest {
         KubernetesServiceDiscovery kubernetesDiscovery = (KubernetesServiceDiscovery) service.getServiceDiscovery();
         kubernetesDiscovery.invalidate();
 
-        //second try to get instances, instances should be fetched from cache, cluster calls should be still 1
+        //second try to get instances, instances should be fetched from cluster, calls should be 2
         service.getServiceDiscovery().getServiceInstances()
                 .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
                 .subscribe().with(instances::set);
@@ -652,7 +657,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(serverHit.get()).isEqualTo(1);
 
         //We trigger an event in the cluster just to invalidate cache
-        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
                 "10.96.96.233");
 
         serviceDiscovery.getServiceInstances()
@@ -675,7 +680,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(serverHit.get()).isEqualTo(3);
 
         //We trigger an event in the cluster just to invalidate cache
-        utils.registerKubernetesResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
+        utils.registerKubernetesLegacyEndpointsResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
                 "10.96.96.236");
 
         serviceDiscovery.getServiceInstances()
@@ -731,7 +736,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(serverHit.get()).isEqualTo(1);
 
         //We trigger an event in the cluster just to invalidate cache
-        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
                 "10.96.96.233");
 
         serviceDiscovery.getServiceInstances()
@@ -754,7 +759,7 @@ public class KubernetesServiceDiscoveryTest {
         assertThat(serverHit.get()).isEqualTo(3);
 
         //We trigger an event in the cluster just to invalidate cache
-        utils.registerKubernetesResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
+        utils.registerKubernetesLegacyEndpointsResources("svc2", defaultNamespace, "10.96.96.234", "10.96.96.235",
                 "10.96.96.236");
 
         serviceDiscovery.getServiceInstances()
@@ -782,7 +787,8 @@ public class KubernetesServiceDiscoveryTest {
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", defaultNamespace, "refresh-period", "3"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                "10.96.96.233");
 
         AtomicReference<List<ServiceInstance>> instances = new AtomicReference<>();
 
@@ -801,14 +807,14 @@ public class KubernetesServiceDiscoveryTest {
 
         client.endpoints().inNamespace(defaultNamespace).withName(serviceName).withTimeout(100, TimeUnit.MILLISECONDS).delete();
 
+        instances.set(null);
         service.getServiceDiscovery().getServiceInstances()
-                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
                 .subscribe().with(instances::set);
 
         await().atMost(Duration.ofSeconds(5))
-                .until(() -> instances.get().isEmpty());
+                .until(() -> instances.get() != null);
 
-        assertThat(instances.get()).hasSize(0);
+        assertThat(instances.get()).isEmpty();
     }
 
     @Test
@@ -825,7 +831,8 @@ public class KubernetesServiceDiscoveryTest {
                 null, Map.of("k8s-host", k8sMasterUrl, "k8s-namespace", "all", "refresh-period", "3"), null);
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        utils.registerKubernetesResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232", "10.96.96.233");
+        utils.registerKubernetesLegacyEndpointsResources(serviceName, defaultNamespace, "10.96.96.231", "10.96.96.232",
+                "10.96.96.233");
 
         Set<ServiceInstance> instances = new CopyOnWriteArraySet<>();
 
@@ -849,17 +856,15 @@ public class KubernetesServiceDiscoveryTest {
                 .withTimeout(100, TimeUnit.MILLISECONDS)
                 .delete();
 
+        instances.clear();
+        AtomicReference<List<ServiceInstance>> refreshed = new AtomicReference<>();
         service.getServiceDiscovery().getServiceInstances()
-                .onFailure().invoke(th -> fail("Failed to get service instances from Kubernetes", th))
-                .subscribe().with(received -> {
-                    instances.clear();
-                    instances.addAll(received);
-                });
+                .subscribe().with(refreshed::set);
 
         await().atMost(Duration.ofSeconds(5))
-                .until(instances::isEmpty);
+                .until(() -> refreshed.get() != null);
 
-        assertThat(instances).isEmpty();
+        assertThat(refreshed.get()).isEmpty();
     }
 
 }
