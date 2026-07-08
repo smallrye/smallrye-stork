@@ -1,9 +1,9 @@
 package io.smallrye.stork.serviceregistration.consul;
 
-import static io.smallrye.stork.impl.ConsulMetadataKey.META_CONSUL_SERVICE_ID;
-
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 
@@ -17,6 +17,8 @@ import io.vertx.core.net.JksOptions;
 import io.vertx.ext.consul.CheckOptions;
 import io.vertx.ext.consul.ConsulClient;
 import io.vertx.ext.consul.ConsulClientOptions;
+import io.vertx.ext.consul.Service;
+import io.vertx.ext.consul.ServiceList;
 import io.vertx.ext.consul.ServiceOptions;
 
 public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKey> {
@@ -56,20 +58,22 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
         checkRegistrarOptionsNotNull(options);
         checkAddressNotNull(options.ipAddress());
 
-        return registerInstance(options.serviceName(), options.ipAddress(), options.defaultPort(), options.serviceName(),
+        String consulId = buildConsulId(options.serviceName(), options.ipAddress(), options.defaultPort());
+        return registerInstance(options.serviceName(), options.ipAddress(), options.defaultPort(), consulId,
                 options.tags(), options.metadata());
 
     }
 
     @Override
-    public Uni<Void> registerServiceInstance(String serviceName, Metadata<ConsulMetadataKey> metadata, String ipAddress,
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata<ConsulMetadataKey> metadata,
+            String ipAddress,
             int defaultPort) {
         checkAddressNotNull(ipAddress);
 
-        String consulId = metadata.getMetadata().isEmpty() ? serviceName
-                : metadata.getMetadata().get(ConsulMetadataKey.META_CONSUL_SERVICE_ID).toString();
-
-        return registerInstance(serviceName, ipAddress, defaultPort, consulId, List.of(), Map.of());
+        // Use the explicit ID when provided; otherwise generate a unique one.
+        String consulId = instanceName != null && !instanceName.isEmpty() ? instanceName
+                : buildConsulId(serviceName, ipAddress, defaultPort);
+        return registerInstance(serviceName, ipAddress, defaultPort, consulId, List.of(), Collections.emptyMap());
     }
 
     private Uni<Void> registerInstance(String serviceName, String ipAddress, int defaultPort, String consulId,
@@ -94,29 +98,81 @@ public class ConsulServiceRegistrar implements ServiceRegistrar<ConsulMetadataKe
                 serviceOptions)
                 .onComplete(result -> {
                     if (result.failed()) {
-                        log.errorf("Unable to register instances of service %s", serviceName,
+                        log.errorf("Unable to register instance %s of service %s", consulId, serviceName,
                                 result.cause());
                         em.fail(result.cause());
                     } else {
-                        log.infof("Instances of service %s has been registered ", serviceName);
+                        log.infof("Instance %s of service %s has been registered", consulId, serviceName);
                         em.complete(result.result());
                     }
                 }));
     }
 
     @Override
-    public Uni<Void> deregisterServiceInstance(String serviceName) {
-        return Uni.createFrom().emitter(em -> client.deregisterService(serviceName)
+    public Uni<Void> deregisterServiceInstance(String serviceName, String instanceName) {
+        checkInstanceNameNotNull(instanceName);
+        return Uni.createFrom().emitter(em -> client.deregisterService(instanceName)
                 .onComplete(result -> {
                     if (result.failed()) {
-                        log.errorf("Unable to deregister instances of service %s", serviceName,
+                        log.errorf("Unable to deregister instance %s of service %s", instanceName, serviceName,
                                 result.cause());
                         em.fail(result.cause());
                     } else {
-                        log.infof("Instances of service %s has been deregistered ", serviceName);
+                        log.infof("Instance %s of service %s has been deregistered", instanceName, serviceName);
                         em.complete(result.result());
                     }
                 }));
+    }
+
+    /**
+     * Deregisters all instances of the given service from Consul by querying the catalog for their IDs
+     * and deregistering them in parallel. This avoids silent failures that would occur if the service ID
+     * were assumed to match the service name.
+     */
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName) {
+        return Uni.createFrom().<ServiceList> emitter(em -> client.catalogServiceNodes(serviceName).onComplete(result -> {
+            if (result.failed()) {
+                log.errorf("Unable to retrieve instances of service %s from Consul catalog", serviceName,
+                        result.cause());
+                em.fail(result.cause());
+            } else {
+                em.complete(result.result());
+            }
+        }))
+                .flatMap(serviceList -> {
+                    List<Service> services = serviceList.getList();
+                    if (services == null || services.isEmpty()) {
+                        log.infof("No registered instances found for service %s", serviceName);
+                        return Uni.createFrom().voidItem();
+                    }
+                    List<Uni<Void>> deregistrations = services.stream()
+                            .map(service -> Uni.createFrom()
+                                    .<Void> emitter(em -> client.deregisterService(service.getId()).onComplete(result -> {
+                                        if (result.failed()) {
+                                            log.errorf("Unable to deregister instance %s of service %s",
+                                                    service.getId(), serviceName, result.cause());
+                                            em.fail(result.cause());
+                                        } else {
+                                            log.infof("Instance %s of service %s has been deregistered",
+                                                    service.getId(), serviceName);
+                                            em.complete(null);
+                                        }
+                                    })))
+                            .collect(Collectors.toList());
+                    return Uni.combine().all().unis(deregistrations).discardItems();
+                });
+    }
+
+    @Override
+    public Uni<Void> deregisterServiceInstance(String serviceName, String ipAddress, int port) {
+        String consulId = buildConsulId(serviceName, ipAddress, port);
+        return deregisterServiceInstance(serviceName, consulId);
+    }
+
+    // '::' is used as separator; it does not appear in well-formed DNS service names, IP addresses, or port numbers.
+    private static String buildConsulId(String serviceName, String ipAddress, int port) {
+        return serviceName + "::" + ipAddress + "::" + port;
     }
 
     protected static Integer getPort(String name, String value) {

@@ -2,6 +2,7 @@ package io.smallrye.stork.api;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -95,6 +96,18 @@ public class Metadata<T extends Enum<T> & MetadataKey> {
      */
     public EnumMap<T, Object> getMetadata() {
         return metadata;
+    }
+
+    /**
+     * @return the metadata as a {@code Map<String, String>}, using each key's name and converting values via
+     *         {@code toString()}
+     */
+    public Map<String, String> asMap() {
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<T, Object> entry : metadata.entrySet()) {
+            result.put(entry.getKey().getName(), entry.getValue() != null ? entry.getValue().toString() : null);
+        }
+        return result;
     }
 
     /**
