@@ -17,6 +17,10 @@ import io.fabric8.kubernetes.api.model.EndpointsBuilder;
 import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.smallrye.common.constraint.Assert;
 import io.smallrye.stork.api.ServiceInstance;
@@ -29,7 +33,7 @@ public class KubernetesTestUtils {
         this.client = client;
     }
 
-    public Endpoints registerKubernetesResources(String serviceName, String namespace, String... ips) {
+    public Endpoints registerKubernetesLegacyEndpointsResources(String serviceName, String namespace, String... ips) {
         Assert.checkNotNullParam("ips", ips);
         Endpoints endpoints = buildAndRegisterKubernetesService(serviceName, namespace, true, ips);
         Arrays.stream(ips).forEach(ip -> buildAndRegisterBackendPod(serviceName, namespace, true, ip));
@@ -103,5 +107,39 @@ public class KubernetesTestUtils {
 
     public static String ipAsSuffix(String ipAddress) {
         return ipAddress.replace(".", "");
+    }
+
+    public Service registerKubernetesServiceResource(String serviceName, String namespace,
+            String clusterIp, ServicePort... ports) {
+        Map<String, String> labels = new HashMap<>();
+        labels.put("app.kubernetes.io/name", serviceName);
+        labels.put("app.kubernetes.io/version", "1.0");
+
+        Service service = new ServiceBuilder()
+                .withNewMetadata()
+                .withName(serviceName)
+                .withNamespace(namespace)
+                .withLabels(labels)
+                .endMetadata()
+                .withNewSpec()
+                .withClusterIP(clusterIp)
+                .withPorts(Arrays.asList(ports))
+                .endSpec()
+                .build();
+
+        if (namespace != null) {
+            client.services().inNamespace(namespace).resource(service).create();
+        } else {
+            client.services().resource(service).create();
+        }
+        return service;
+    }
+
+    public static ServicePort servicePort(String name, int port, String protocol) {
+        return new ServicePortBuilder()
+                .withName(name)
+                .withPort(port)
+                .withProtocol(protocol)
+                .build();
     }
 }

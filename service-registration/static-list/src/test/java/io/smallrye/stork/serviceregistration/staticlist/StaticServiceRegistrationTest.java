@@ -93,6 +93,49 @@ public class StaticServiceRegistrationTest {
     }
 
     @Test
+    void shouldDeregisterSingleInstanceWithoutAffectingOthers() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "first-service";
+
+        ServiceRegistrar<Metadata.DefaultMetadataKey> staticRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        staticRegistrar.registerServiceInstance(serviceName, "localhost", 8080);
+        staticRegistrar.registerServiceInstance(serviceName, "localhost", 8081);
+        staticRegistrar.registerServiceInstance(serviceName, "remotehost", 9090);
+
+        assertThat(InMemoryAddressesBackend.getAddresses(serviceName)).hasSize(3);
+
+        staticRegistrar.deregisterServiceInstance(serviceName, "localhost", 8081);
+
+        List<String> addresses = InMemoryAddressesBackend.getAddresses(serviceName);
+        assertThat(addresses).hasSize(2);
+        assertThat(addresses).containsExactlyInAnyOrder("localhost:8080", "remotehost:9090");
+    }
+
+    @Test
+    void shouldRegisterWithCustomInstanceNameIgnoringName() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        String serviceName = "first-service";
+
+        ServiceRegistrar<Metadata.DefaultMetadataKey> staticRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        staticRegistrar.registerServiceInstance(serviceName, "my-custom-id", Metadata.of(Metadata.DefaultMetadataKey.class),
+                "localhost", 8080);
+
+        List<String> addresses = InMemoryAddressesBackend.getAddresses(serviceName);
+        assertThat(addresses).hasSize(1);
+        assertThat(addresses).contains("localhost:8080");
+    }
+
+    @Test
     void shouldFailIfAddresseNull() {
         TestConfigProvider.addServiceConfig("first-service", null, null, "static",
                 null, null, null);

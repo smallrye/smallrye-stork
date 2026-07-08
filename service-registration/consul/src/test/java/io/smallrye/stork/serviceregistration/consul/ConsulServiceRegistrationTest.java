@@ -57,39 +57,6 @@ public class ConsulServiceRegistrationTest {
     }
 
     @Test
-    void shouldRegisterConsulIdDefaultingToServiceName() {
-        String serviceName = "my-service";
-        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
-                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
-                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
-        Stork stork = StorkTestUtils.getNewStorkInstance();
-
-        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
-
-        CountDownLatch registrationLatch = new CountDownLatch(1);
-        consulRegistrar.registerServiceInstance(serviceName, "10.96.96.231", 8406).subscribe()
-                .with(success -> registrationLatch.countDown(), failure -> fail(""));
-
-        await().atMost(Duration.ofSeconds(10))
-                .until(() -> registrationLatch.getCount() == 0L);
-
-        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
-                emitter -> client.healthServiceNodes(serviceName, true)
-                        .onComplete(result -> {
-                            if (result.failed()) {
-                                emitter.fail(result.cause());
-                            } else {
-                                emitter.complete(result.result());
-                            }
-                        }));
-
-        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
-                .subscribe().withSubscriber(UniAssertSubscriber.create());
-
-        assertThat(subscriber.awaitItem().getItem()).isNotNull();
-    }
-
-    @Test
     void shouldRegisterServiceInstancesInConsul() throws InterruptedException {
         String serviceName = "my-service";
         TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
@@ -205,8 +172,143 @@ public class ConsulServiceRegistrationTest {
         item.getList().stream().findFirst().ifPresent(service -> {
             assertThat(service.getChecks()).isNotEmpty();
             assertThat(service.getChecks().size()).isEqualTo(2);
-            assertThat(service.getChecks().stream().map(Check::getServiceId)).containsAnyOf("my-service");
+            assertThat(service.getChecks().stream().map(Check::getServiceId)).containsAnyOf("my-service::10.96.96.231::8406");
         });
+    }
+
+    @Test
+    void shouldRegisterMultipleInstancesWithUniqueDefaultConsulIds() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(2);
+        consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register first instance"));
+
+        consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.232", 8407).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register second instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        ServiceEntryList item = subscriber.awaitItem().getItem();
+        assertThat(item).isNotNull();
+        assertThat(item.getList()).hasSize(2);
+        assertThat(item.getList()).extracting(e -> e.getService().getId())
+                .containsExactlyInAnyOrder("my-service::10.96.96.231::8406", "my-service::10.96.96.232::8407");
+        assertThat(item.getList()).extracting(e -> e.getService().getAddress())
+                .containsExactlyInAnyOrder("10.96.96.231", "10.96.96.232");
+    }
+
+    @Test
+    void shouldRegisterMultipleInstancesWithUniqueCustomConsulIds() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(2);
+        consulRegistrar.registerServiceInstance(serviceName, "instance-one", Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register first instance"));
+
+        consulRegistrar.registerServiceInstance(serviceName, "instance-two", Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.232", 8407).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register second instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        ServiceEntryList item = subscriber.awaitItem().getItem();
+        assertThat(item).isNotNull();
+        assertThat(item.getList()).hasSize(2);
+        assertThat(item.getList()).extracting(e -> e.getService().getId())
+                .containsExactlyInAnyOrder("instance-one", "instance-two");
+        assertThat(item.getList()).extracting(e -> e.getService().getAddress())
+                .containsExactlyInAnyOrder("10.96.96.231", "10.96.96.232");
+    }
+
+    @Test
+    void shouldRegisterMultipleInstancesUsingOptionsWithUniqueConsulIds() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(2);
+        ServiceRegistrar.RegistrarOptions options1 = new ServiceRegistrar.RegistrarOptions(serviceName, "10.96.96.231",
+                8406, List.of(), Map.of());
+        ServiceRegistrar.RegistrarOptions options2 = new ServiceRegistrar.RegistrarOptions(serviceName, "10.96.96.232",
+                8407, List.of(), Map.of());
+
+        consulRegistrar.registerServiceInstance(options1).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register first instance"));
+
+        consulRegistrar.registerServiceInstance(options2).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register second instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        ServiceEntryList item = subscriber.awaitItem().getItem();
+        assertThat(item).isNotNull();
+        assertThat(item.getList()).hasSize(2);
+        assertThat(item.getList()).extracting(e -> e.getService().getId())
+                .containsExactlyInAnyOrder("my-service::10.96.96.231::8406", "my-service::10.96.96.232::8407");
+        assertThat(item.getList()).extracting(e -> e.getService().getAddress())
+                .containsExactlyInAnyOrder("10.96.96.231", "10.96.96.232");
     }
 
     @Test
@@ -254,23 +356,30 @@ public class ConsulServiceRegistrationTest {
 
     @Test
     void shouldDeregisterServiceInstancesInConsul() throws InterruptedException {
-        //Given a service `my-service` registered in consul
         String serviceName = "my-service";
+        String ipAddress = "10.96.96.231";
+        int port = 8406;
         TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
                 null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
                 Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
         stork = StorkTestUtils.getNewStorkInstance();
-        List<String> tags = List.of("primary");
-        registerService(new ConsulServiceOptions(serviceName, 8406, tags, List.of("example.com")));
 
         ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
-        consulRegistrar.deregisterServiceInstance(serviceName).subscribe()
-                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+        consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class),
+                ipAddress, port).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register instance"));
 
         await().atMost(Duration.ofSeconds(10))
                 .until(() -> registrationLatch.getCount() == 0L);
+
+        CountDownLatch deregistrationLatch = new CountDownLatch(1);
+        consulRegistrar.deregisterServiceInstance(serviceName, ipAddress, port).subscribe()
+                .with(success -> deregistrationLatch.countDown(), failure -> fail("Failed to deregister instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> deregistrationLatch.getCount() == 0L);
 
         Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
                 emitter -> client.healthServiceNodes(serviceName, true)
@@ -287,7 +396,199 @@ public class ConsulServiceRegistrationTest {
 
         ServiceEntryList item = subscriber.awaitItem().getItem();
         assertThat(item.getList()).isEmpty();
+    }
 
+    @Test
+    void shouldDeregisterServiceInstancesByNameInConsul() throws InterruptedException {
+        String serviceName = "my-service";
+        String ipAddress = "10.96.96.231";
+        int port = 8406;
+        String instanceName = "my-service-instance";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+        consulRegistrar.registerServiceInstance(serviceName, instanceName, Metadata.of(ConsulMetadataKey.class),
+                ipAddress, port).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        CountDownLatch deregistrationLatch = new CountDownLatch(1);
+        consulRegistrar.deregisterServiceInstance(serviceName, instanceName).subscribe()
+                .with(success -> deregistrationLatch.countDown(), failure -> fail("Failed to deregister instance"));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> deregistrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        ServiceEntryList item = subscriber.awaitItem().getItem();
+        assertThat(item.getList()).isEmpty();
+    }
+
+    @Test
+    void shouldDeregisterSpecificInstanceByAddressAndPort() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(2);
+        consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register first instance"));
+        consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.232", 8407).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register second instance"));
+
+        await().atMost(Duration.ofSeconds(10)).until(() -> registrationLatch.getCount() == 0L);
+
+        CountDownLatch deregistrationLatch = new CountDownLatch(1);
+        consulRegistrar.deregisterServiceInstance(serviceName, "10.96.96.231", 8406).subscribe()
+                .with(success -> deregistrationLatch.countDown(), failure -> fail("Failed to deregister instance"));
+
+        await().atMost(Duration.ofSeconds(10)).until(() -> deregistrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        ServiceEntryList item = subscriber.awaitItem().getItem();
+        assertThat(item.getList()).hasSize(1);
+        assertThat(item.getList().get(0).getService().getId()).isEqualTo("my-service::10.96.96.232::8407");
+        assertThat(item.getList().get(0).getService().getAddress()).isEqualTo("10.96.96.232");
+    }
+
+    @Test
+    void shouldDeregisterAllInstancesByServiceName() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(2);
+        consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register first instance"));
+        consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.232", 8407).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register second instance"));
+
+        await().atMost(Duration.ofSeconds(10)).until(() -> registrationLatch.getCount() == 0L);
+
+        CountDownLatch deregistrationLatch = new CountDownLatch(1);
+        consulRegistrar.deregisterServiceInstance(serviceName).subscribe()
+                .with(success -> deregistrationLatch.countDown(), failure -> fail("Failed to deregister all instances"));
+
+        await().atMost(Duration.ofSeconds(10)).until(() -> deregistrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        assertThat(subscriber.awaitItem().getItem().getList()).isEmpty();
+    }
+
+    @Test
+    void shouldDeregisterAllInstancesByInstanceName() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(2);
+        consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register first instance"));
+        consulRegistrar.registerServiceInstance(serviceName, Metadata.of(ConsulMetadataKey.class),
+                "10.96.96.232", 8407).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail("Failed to register second instance"));
+
+        await().atMost(Duration.ofSeconds(10)).until(() -> registrationLatch.getCount() == 0L);
+
+        CountDownLatch deregistrationLatch = new CountDownLatch(1);
+        consulRegistrar.deregisterServiceInstance(serviceName, "my-service::10.96.96.231::8406").subscribe()
+                .with(success -> deregistrationLatch.countDown(), failure -> fail("Failed to deregister all instances"));
+
+        await().atMost(Duration.ofSeconds(10)).until(() -> deregistrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        ServiceEntryList item = subscriber.awaitItem().getItem();
+        assertThat(item.getList()).hasSize(1);
+        assertThat(item.getList().get(0).getService().getId()).isEqualTo("my-service::10.96.96.232::8407");
+        assertThat(item.getList().get(0).getService().getAddress()).isEqualTo("10.96.96.232");
+    }
+
+    @Test
+    void shouldCompleteSuccessfullyWhenDeregisteringNonExistentService() {
+        String serviceName = "non-existent-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, null,
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        UniAssertSubscriber<Void> subscriber = consulRegistrar.deregisterServiceInstance(serviceName)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.awaitItem().assertCompleted();
     }
 
     public record ConsulServiceOptions(String serviceName, int port, List<String> tags, List<String> addresses) {
