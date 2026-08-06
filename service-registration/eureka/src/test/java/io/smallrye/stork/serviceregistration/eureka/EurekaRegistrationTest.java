@@ -445,6 +445,79 @@ public class EurekaRegistrationTest {
     }
 
     @Test
+    public void shouldRegisterWithTagsInMetadata(TestInfo info) {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, null, List.of("v2.0", "production"),
+                Metadata.of(EurekaMetadataKey.class), "localhost", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<HttpResponse<Buffer>> response = client.get("/eureka/apps/my-service")
+                .putHeader("Accept", "application/json;charset=UTF-8").send();
+
+        UniAssertSubscriber<HttpResponse<Buffer>> subscriber = response
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
+        assertThat(httpResponse).isNotNull();
+        assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
+
+        assertThat(jsonServiceInstance.getJsonObject("metadata").getString("tags")).isEqualTo("v2.0,production");
+    }
+
+    @Test
+    public void shouldRegisterNamedInstanceWithTagsInMetadata(TestInfo info) {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
+                Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
+
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "my-named-instance", List.of("v2.0", "staging"),
+                Metadata.of(EurekaMetadataKey.class), "localhost", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<HttpResponse<Buffer>> response = client.get("/eureka/apps/my-service")
+                .putHeader("Accept", "application/json;charset=UTF-8").send();
+
+        UniAssertSubscriber<HttpResponse<Buffer>> subscriber = response
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        HttpResponse<Buffer> httpResponse = subscriber.awaitItem().getItem();
+        assertThat(httpResponse).isNotNull();
+        assertThat(httpResponse.statusCode()).isEqualTo(200);
+
+        JsonObject jsonResponse = httpResponse.bodyAsJsonObject();
+        JsonObject application = jsonResponse.getJsonObject("application");
+        JsonObject jsonServiceInstance = application.getJsonArray("instance").getJsonObject(0);
+
+        assertThat(jsonServiceInstance.getString("instanceId")).isEqualTo("my-named-instance");
+        assertThat(jsonServiceInstance.getJsonObject("metadata").getString("tags")).isEqualTo("v2.0,staging");
+    }
+
+    @Test
     public void shouldCompleteSuccessfullyWhenDeregisteringNonExistentService(TestInfo info) {
         String serviceName = "non-existent-service";
         TestConfigProvider.addServiceConfig(serviceName, null, null, "eureka", null, null,
