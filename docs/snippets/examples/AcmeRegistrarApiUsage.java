@@ -14,7 +14,7 @@ public class AcmeRegistrarApiUsage {
                 new AcmeLoadBalancerConfiguration().withMyAttribute("my-value"),new AcmeRegistrarConfiguration())
         );
 
-        stork.getService("my-service").registerInstance("my-service", "localhost",
+        stork.getService("my-service").registerNamedInstance("my-instance", "localhost",
                 9000);
     }
 

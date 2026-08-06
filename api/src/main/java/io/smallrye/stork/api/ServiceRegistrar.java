@@ -1,5 +1,6 @@
 package io.smallrye.stork.api;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -32,17 +33,31 @@ public interface ServiceRegistrar<MetadataKeyType extends Enum<MetadataKeyType> 
 
     default Uni<Void> registerServiceInstance(String serviceName, Metadata<MetadataKeyType> metadata, String ipAddress,
             int defaultPort) {
-        return registerServiceInstance(serviceName, null, metadata, ipAddress, defaultPort);
+        return registerServiceInstance(serviceName, (String) null, metadata, ipAddress, defaultPort);
+    }
+
+    default Uni<Void> registerServiceInstance(String serviceName, List<String> tags,
+            Metadata<MetadataKeyType> metadata, String ipAddress, int defaultPort) {
+        List<String> tagsList = tags == null ? Collections.emptyList() : List.copyOf(tags);
+        return registerServiceInstance(serviceName, null, tagsList, metadata, ipAddress, defaultPort);
     }
 
     Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata<MetadataKeyType> metadata,
             String ipAddress, int defaultPort);
 
+    default Uni<Void> registerServiceInstance(String serviceName, String instanceName, List<String> tags,
+            Metadata<MetadataKeyType> metadata, String ipAddress, int defaultPort) {
+        return registerServiceInstance(serviceName, instanceName, metadata, ipAddress, defaultPort);
+    }
+
     default Uni<Void> registerServiceInstance(RegistrarOptions options) {
         checkRegistrarOptionsNotNull(options);
         checkAddressNotNull(options.ipAddress());
 
-        return registerServiceInstance(options.serviceName(), options.ipAddress(), options.defaultPort());
+        List<String> tags = options.tags() != null ? List.copyOf(options.tags()) : Collections.emptyList();
+        return registerServiceInstance(options.serviceName(), null, tags,
+                Metadata.empty(), options.ipAddress(),
+                options.defaultPort());
     }
 
     @Deprecated
