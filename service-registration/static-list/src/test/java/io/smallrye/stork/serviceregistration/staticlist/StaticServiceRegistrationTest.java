@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.Metadata;
+import io.smallrye.stork.api.Service;
 import io.smallrye.stork.api.ServiceRegistrar;
 import io.smallrye.stork.test.StorkTestUtils;
 import io.smallrye.stork.test.TestConfigProvider;
@@ -131,6 +132,123 @@ public class StaticServiceRegistrationTest {
                 "localhost", 8080);
 
         List<String> addresses = InMemoryAddressesBackend.getAddresses(serviceName);
+        assertThat(addresses).hasSize(1);
+        assertThat(addresses).contains("localhost:8080");
+    }
+
+    @Test
+    void shouldRegisterNamedInstanceViaService() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService("first-service");
+        service.registerInstance("localhost", 8080);
+
+        List<String> addresses = InMemoryAddressesBackend.getAddresses("first-service");
+        assertThat(addresses).hasSize(1);
+        assertThat(addresses).contains("localhost:8080");
+    }
+
+    @Test
+    void shouldRegisterNamedInstanceWithNameViaService() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService("first-service");
+        service.registerNamedInstance("my-instance", "remotehost", 9090);
+
+        List<String> addresses = InMemoryAddressesBackend.getAddresses("first-service");
+        assertThat(addresses).hasSize(1);
+        assertThat(addresses).contains("remotehost:9090");
+    }
+
+    @Test
+    void shouldRegisterNamedInstanceWithTagsViaService() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService("first-service");
+        service.registerInstance(List.of("v1.0", "canary"), "localhost", 8080);
+
+        List<String> addresses = InMemoryAddressesBackend.getAddresses("first-service");
+        assertThat(addresses).hasSize(1);
+        assertThat(addresses).contains("localhost:8080");
+    }
+
+    @Test
+    void shouldRegisterNamedInstanceWithNameAndTagsViaService() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService("first-service");
+        service.registerNamedInstance("my-instance", List.of("v1.0", "canary"), "localhost", 8080);
+
+        List<String> addresses = InMemoryAddressesBackend.getAddresses("first-service");
+        assertThat(addresses).hasSize(1);
+        assertThat(addresses).contains("localhost:8080");
+    }
+
+    @Test
+    void shouldDeregisterByIpAndPortViaService() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService("first-service");
+        service.registerInstance("localhost", 8080);
+        service.registerInstance("remotehost", 9090);
+
+        assertThat(InMemoryAddressesBackend.getAddresses("first-service")).hasSize(2);
+
+        service.deregisterServiceInstance("localhost", 8080);
+
+        List<String> addresses = InMemoryAddressesBackend.getAddresses("first-service");
+        assertThat(addresses).hasSize(1);
+        assertThat(addresses).contains("remotehost:9090");
+    }
+
+    @Test
+    void shouldDeregisterNamedInstanceViaService() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService("first-service");
+        service.registerInstance("localhost", 8080);
+        service.registerInstance("remotehost", 9090);
+
+        assertThat(InMemoryAddressesBackend.getAddresses("first-service")).hasSize(2);
+
+        // static-list does not support instance-name deregistration;
+        // the default fallback deregisters all instances
+        service.deregisterNamedInstance("any-instance-name");
+
+        assertThat(InMemoryAddressesBackend.getAddresses("first-service")).isNullOrEmpty();
+    }
+
+    @Test
+    void shouldRegisterViaRegistrarOptionsViaService() {
+        TestConfigProvider.addServiceConfig("first-service", null, null, "static",
+                null, null, null);
+
+        stork = StorkTestUtils.getNewStorkInstance();
+
+        Service service = stork.getService("first-service");
+        ServiceRegistrar.RegistrarOptions options = new ServiceRegistrar.RegistrarOptions(
+                "first-service", "localhost", 8080, List.of("v1.0"), Map.of());
+        service.registerInstance(options);
+
+        List<String> addresses = InMemoryAddressesBackend.getAddresses("first-service");
         assertThat(addresses).hasSize(1);
         assertThat(addresses).contains("localhost:8080");
     }

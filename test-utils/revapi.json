@@ -46,8 +46,8 @@
         "ignore": true,
         "code": "java.method.numberOfParametersChanged",
         "old": "method void io.smallrye.stork.test.TestServiceRegistrarProvider.Registration::<init>(java.lang.String, io.smallrye.stork.test.TestSrRegistrarConfiguration, io.smallrye.stork.api.Metadata<io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata>, java.lang.String, java.lang.String, int)",
-        "new": "method void io.smallrye.stork.test.TestServiceRegistrarProvider.Registration::<init>(java.lang.String, io.smallrye.stork.test.TestSrRegistrarConfiguration, io.smallrye.stork.api.Metadata<io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata>, java.lang.String, java.lang.String, java.lang.String, int)",
-        "justification": "Added instanceName parameter to Registration constructor and TestServiceRegistrar to support the new abstract method in ServiceRegistrar. Test-only class; no production callers affected."
+        "new": "method void io.smallrye.stork.test.TestServiceRegistrarProvider.Registration::<init>(java.lang.String, io.smallrye.stork.test.TestSrRegistrarConfiguration, io.smallrye.stork.api.Metadata<io.smallrye.stork.test.TestServiceRegistrarProvider.TestMetadata>, java.lang.String, java.lang.String, java.util.List<java.lang.String>, java.lang.String, int)",
+        "justification": "Added instanceName and tags parameters to Registration constructor. Test-only class; no production callers affected."
       },
       {
         "ignore": true,
