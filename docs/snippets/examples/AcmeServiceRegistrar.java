@@ -4,7 +4,9 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.stork.api.Metadata;
 import io.smallrye.stork.api.ServiceRegistrar;
 
-public class AcmeServiceRegistrar implements ServiceRegistrar {
+import java.util.List;
+
+public class AcmeServiceRegistrar implements ServiceRegistrar<Metadata.DefaultMetadataKey> {
 
     private final String backendHost;
     private final int backendPort;
@@ -19,6 +21,12 @@ public class AcmeServiceRegistrar implements ServiceRegistrar {
     public Uni<Void> registerServiceInstance(String serviceName, String instanceName, Metadata metadata, String ipAddress, int defaultPort) {
         //instanceName is an optional identifier for this specific instance; use it as the registration ID when provided
         //do whatever is needed for registering service instance
+        return Uni.createFrom().voidItem();
+    }
+
+    @Override
+    public Uni<Void> registerServiceInstance(String serviceName, String instanceName, List<String> tags,
+            Metadata<Metadata.DefaultMetadataKey> metadata, String ipAddress, int defaultPort) {
         return Uni.createFrom().voidItem();
     }
 
