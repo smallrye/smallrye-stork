@@ -126,11 +126,11 @@ public class ConsulServiceRegistrationTest {
 
         ServiceEntryList item = subscriber.awaitItem().getItem();
         assertThat(item).isNotNull();
-        item.getList().stream().findFirst().ifPresent(service -> {
-            assertThat(service.getService().getTags()).containsExactlyInAnyOrder("v1.2.3", "canary");
-            assertThat(service.getService().getMeta()).containsAllEntriesOf(Map.of("protocol", "https",
-                    "max_connections", "100", "team", "platform"));
-        });
+        assertThat(item.getList()).isNotEmpty();
+        var service = item.getList().get(0);
+        assertThat(service.getService().getTags()).containsExactlyInAnyOrder("v1.2.3", "canary");
+        assertThat(service.getService().getMeta()).containsAllEntriesOf(Map.of("protocol", "https",
+                "max_connections", "100", "team", "platform"));
 
     }
 
@@ -169,11 +169,11 @@ public class ConsulServiceRegistrationTest {
 
         ServiceEntryList item = subscriber.awaitItem().getItem();
         assertThat(item).isNotNull();
-        item.getList().stream().findFirst().ifPresent(service -> {
-            assertThat(service.getChecks()).isNotEmpty();
-            assertThat(service.getChecks().size()).isEqualTo(2);
-            assertThat(service.getChecks().stream().map(Check::getServiceId)).containsAnyOf("my-service::10.96.96.231::8406");
-        });
+        assertThat(item.getList()).isNotEmpty();
+        var service = item.getList().get(0);
+        assertThat(service.getChecks()).isNotEmpty();
+        assertThat(service.getChecks().size()).isEqualTo(2);
+        assertThat(service.getChecks().stream().map(Check::getServiceId)).containsAnyOf("my-service::10.96.96.231::8406");
     }
 
     @Test
@@ -589,6 +589,83 @@ public class ConsulServiceRegistrationTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.awaitItem().assertCompleted();
+    }
+
+    @Test
+    void shouldRegisterServiceInstanceWithTagsInConsul() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+        consulRegistrar.registerServiceInstance(serviceName, List.of("v2.0", "production"),
+                Metadata.of(ConsulMetadataKey.class), "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        ServiceEntryList item = subscriber.awaitItem().getItem();
+        assertThat(item).isNotNull();
+        assertThat(item.getList()).isNotEmpty();
+        var service = item.getList().get(0);
+        assertThat(service.getService().getTags()).containsExactlyInAnyOrder("v2.0", "production");
+    }
+
+    @Test
+    void shouldRegisterNamedInstanceWithTagsInConsul() throws InterruptedException {
+        String serviceName = "my-service";
+        TestConfigProvider.addServiceConfig(serviceName, null, null, "consul",
+                null, Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort), "refresh-period", "5"),
+                Map.of("consul-host", "localhost", "consul-port", String.valueOf(consulPort)));
+        Stork stork = StorkTestUtils.getNewStorkInstance();
+
+        ServiceRegistrar<ConsulMetadataKey> consulRegistrar = stork.getService(serviceName).getServiceRegistrar();
+
+        CountDownLatch registrationLatch = new CountDownLatch(1);
+        consulRegistrar.registerServiceInstance(serviceName, "my-named-instance", List.of("v2.0", "staging"),
+                Metadata.of(ConsulMetadataKey.class), "10.96.96.231", 8406).subscribe()
+                .with(success -> registrationLatch.countDown(), failure -> fail(""));
+
+        await().atMost(Duration.ofSeconds(10))
+                .until(() -> registrationLatch.getCount() == 0L);
+
+        Uni<ServiceEntryList> serviceEntryList = Uni.createFrom().emitter(
+                emitter -> client.healthServiceNodes(serviceName, true)
+                        .onComplete(result -> {
+                            if (result.failed()) {
+                                emitter.fail(result.cause());
+                            } else {
+                                emitter.complete(result.result());
+                            }
+                        }));
+
+        UniAssertSubscriber<ServiceEntryList> subscriber = serviceEntryList
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        ServiceEntryList item = subscriber.awaitItem().getItem();
+        assertThat(item).isNotNull();
+        assertThat(item.getList()).isNotEmpty();
+        var service = item.getList().get(0);
+        assertThat(service.getService().getId()).isEqualTo("my-named-instance");
+        assertThat(service.getService().getTags()).containsExactlyInAnyOrder("v2.0", "staging");
     }
 
     public record ConsulServiceOptions(String serviceName, int port, List<String> tags, List<String> addresses) {
