@@ -1,0 +1,37 @@
+@startuml
+
+!include diagrams/includes/themes/light.puml
+
+skinparam sequenceMessageAlign center
+autonumber "<b>(0)"
+
+
+participant Service
+participant ObservationCollector
+participant StorkObservation
+participant StorkEventHandler
+
+Service -> ObservationCollector : create("serviceName", sd type, ss type)
+ObservationCollector -> StorkObservation : instantiates
+StorkObservation -> StorkObservation: Registers start time
+ObservationCollector -> Service : StorkObservation
+
+... ...
+
+Service -> StorkObservation : onServiceDiscoverySuccess(List<ServiceInstance>)
+StorkObservation -> StorkObservation : Registers end service\ndiscovery time.\nRegisters instances count\n
+... ...
+
+Service -> StorkObservation : onServiceDiscoveryFailure(Throwable)
+StorkObservation -> StorkObservation : Registers end service\ndiscovery time.\nRegisters failure cause\n
+... ...
+
+Service -> StorkObservation : onServiceSelectionSuccess(instanceId)
+StorkObservation -> StorkObservation : Registers end service\nselection time.\nRegisters instance id\nRegisters overall duration\n
+StorkObservation -> StorkEventHandler: complete(this)
+... ...
+
+Service -> StorkObservation : onServiceSelectionFailure(Throwable))
+StorkObservation -> StorkObservation : Registers overall duration.\nRegisters failure cause\n
+StorkObservation -> StorkEventHandler: complete(this)
+@enduml
