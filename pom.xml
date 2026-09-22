@@ -38,9 +38,9 @@
         <version.microprofile-config-api>3.1.1</version.microprofile-config-api>
         <version.mutiny>3.3.0</version.mutiny>
         <version.smallrye-config>4.0.0</version.smallrye-config>
-
+      
         <version.vertx-mutiny-bindings>4.0.2</version.vertx-mutiny-bindings>
-        <vertx.version>5.1.8</vertx.version>
+        <vertx.version>5.2.0</vertx.version>
 
         <!-- override the testcontainers version with the newest one -->
         <version.testcontainers>1.21.4</version.testcontainers>
