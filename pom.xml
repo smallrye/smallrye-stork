@@ -40,7 +40,7 @@
         <version.smallrye-config>4.0.0</version.smallrye-config>
 
         <vertx.version>5.2.0</vertx.version>
-        <version.vertx-mutiny-bindings>4.0.1</version.vertx-mutiny-bindings>
+        <version.vertx-mutiny-bindings>4.0.2</version.vertx-mutiny-bindings>
 
         <!-- override the testcontainers version with the newest one -->
         <version.testcontainers>1.21.4</version.testcontainers>
