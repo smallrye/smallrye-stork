@@ -1,0 +1,24 @@
+@startuml
+!include diagrams/includes/themes/light.puml
+hide members
+class Stork <<entry-point>>
+interface ServiceDiscovery
+interface ServiceInstance
+interface LoadBalancer
+class Service <<named>>
+
+Stork -- "*" Service
+Service -- ServiceDiscovery
+Service -- LoadBalancer
+
+Service --[dotted] ServiceInstance: selectServiceInstance
+
+class Kubernetes implements ServiceDiscovery
+class Consul implements ServiceDiscovery
+class "Custom Service Discovery" implements ServiceDiscovery
+
+class RoundRobin<<default>> implements LoadBalancer
+class LeastResponseTime implements LoadBalancer
+class "Custom Load Balancer" implements LoadBalancer
+
+@enduml

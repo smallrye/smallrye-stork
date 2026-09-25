@@ -1,0 +1,10 @@
+!define BG_MAIN_COLOR      #1A618C
+!define BG_SECONDARY_COLOR #616768
+!define BG_PACKAGE_COLOR   #7a209f
+!define BORDER_COLOR       #EEEEEE
+!define FONT_COLOR         #EEEEEE
+!define ARROW_COLOR        #EEEEEE
+
+' include the general skinparams for both, light and dark
+' to overwrite with the given settings
+!include general.puml
