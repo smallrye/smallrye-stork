@@ -14,7 +14,6 @@ module io.smallrye.stork.loadbalancer.poweroftwochoices {
     requires jakarta.cdi;
     requires jakarta.cdi.lang.model;
     requires jakarta.annotation;
-    requires jakarta.el;
     requires jakarta.interceptor;
     requires jakarta.inject;
     requires org.jctools.core;
