@@ -56,48 +56,9 @@ Wait for a bit, and you're done.
 
 ## Building the documentation
 
-The documentation is built using [MKDoc](https://www.mkdocs.org/) and it stored in the `docs` directory
-
-### Prerequisites
-
-You need Python 3 installed on your machine, as well as _pipenv_:
-
-```shell
-# From the `docs` directory
-pip3 install pipenv # if you don't have it yet
-pipenv install
-```
-
-### Structure
-
-The website configuration is in the `docs/mkdocs.yml` file. 
-The content is in the `docs` module.
-
-### Build
-
-You can build the web site using, from the `docs` module:
-
-```shell
-pipenv run mkdocs build
-```
-
-The website is generated in the `site` directory.
-You can also enable the _serve_ mode, which update the website while you update it:
-
-```shell
-pipenv run mkdocs serve
-```
-
-### Upgrade the dependencies
-
-```shell
-pipenv update
-```
-
-### Deployment
-
-The website is automatically deployed when a new tag is created in the repository.
-The documentation is automatically versioned. 
+The documentation is AsciiDoc, in `docs/src/main/asciidoc`, and is published on
+[smallrye.io](https://smallrye.io/docs/smallrye-stork/latest/): the `main` branch every night, and each
+release once it is tagged. See [`docs/README.adoc`](docs/README.adoc) for how to write and preview pages.
 
 ## Before you contribute
 

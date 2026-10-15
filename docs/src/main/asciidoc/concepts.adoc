@@ -1,0 +1,383 @@
+= Concepts
+include::_attributes.adoc[]
+
+This page presents the concepts used in Stork.
+When using Stork in a _managed_ environment, such as Quarkus, all these concepts are hidden, as you only configure the lookup and selection.
+However, when using the programmatic API, you will use these concepts directly.
+
+[plantuml,stork,svg]
+----
+@startuml
+!define BG_MAIN_COLOR      AliceBlue
+!define BG_SECONDARY_COLOR #B4BCBE
+!define BG_PACKAGE_COLOR   #eeb291
+!define BORDER_COLOR       #444444
+!define FONT_COLOR         #444444
+!define ARROW_COLOR        DarkGrey
+
+
+' include the general skinparams for both, light and dark
+' to overwrite with the given settings
+!define BORDER_THICKNESS 3
+skinparam backgroundColor transparent
+
+skinparam classFontSize 30
+
+skinparam RoundCorner 4
+skinparam Shadowing false
+
+skinparam Default {
+  FontColor FONT_COLOR
+  FontSize 30
+}
+
+skinparam class {
+    BackgroundColor BG_MAIN_COLOR
+    ArrowColor FONT_COLOR
+    BorderColor FONT_COLOR
+    FontSize 30
+}
+
+skinparam Arrow {
+  Color FONT_COLOR
+  FontColor FONT_COLOR
+  FontStyle Bold
+  FontSize 30
+}
+
+skinparam package {
+  FontColor FONT_COLOR
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam node {
+  FontColor FONT_COLOR
+  BackgroundColor BG_PACKAGE_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam component {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+  Style uml2
+}
+
+skinparam database {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam cloud {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam collections {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Control {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Boundary {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Entity {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam interface {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam SequenceParticipantBorderThickness 3
+skinparam sequence {
+  ParticipantBackgroundColor BG_MAIN_COLOR
+  ParticipantBorderColor BORDER_COLOR
+  ParticipantFontStyle normal
+  ParticipantFontColor FONT_COLOR
+  LifeLineBorderColor BORDER_COLOR
+  LifeLineBackgroundColor BG_MAIN_COLOR
+  ArrowColor FONT_COLOR
+  ArrowBorderColor BORDER_COLOR
+  ArrowFontColor FONT_COLOR
+  ArrowThickness 3
+  ActorBackgroundColor BG_MAIN_COLOR
+  ActorBorderColor BORDER_COLOR
+  ActorFontColor FONT_COLOR
+}
+hide members
+class Stork <<entry-point>>
+interface ServiceDiscovery
+interface ServiceInstance
+interface LoadBalancer
+class Service <<named>>
+
+Stork -- "*" Service
+Service -- ServiceDiscovery
+Service -- LoadBalancer
+
+Service --[dotted] ServiceInstance: selectServiceInstance
+
+class Kubernetes implements ServiceDiscovery
+class Consul implements ServiceDiscovery
+class "Custom Service Discovery" implements ServiceDiscovery
+
+class RoundRobin<<default>> implements LoadBalancer
+class LeastResponseTime implements LoadBalancer
+class "Custom Load Balancer" implements LoadBalancer
+
+@enduml
+----
+
+== Process overview
+
+When using the programmatic API of Stork, you can:
+
+[arabic]
+. Retrieve the _singleton_ `Stork` instance. This instance is configured with the set of `Service` it manages.
+. Retrieve the `Service` you want to use. Each `Service` is associated with a name.
+. Retrieve the `ServiceInstance` which will provide the metadata to access the actual service.
+
+[plantuml,sequence,svg]
+----
+@startuml
+
+!define BG_MAIN_COLOR      AliceBlue
+!define BG_SECONDARY_COLOR #B4BCBE
+!define BG_PACKAGE_COLOR   #eeb291
+!define BORDER_COLOR       #444444
+!define FONT_COLOR         #444444
+!define ARROW_COLOR        DarkGrey
+
+
+' include the general skinparams for both, light and dark
+' to overwrite with the given settings
+!define BORDER_THICKNESS 3
+skinparam backgroundColor transparent
+
+skinparam classFontSize 30
+
+skinparam RoundCorner 4
+skinparam Shadowing false
+
+skinparam Default {
+  FontColor FONT_COLOR
+  FontSize 30
+}
+
+skinparam class {
+    BackgroundColor BG_MAIN_COLOR
+    ArrowColor FONT_COLOR
+    BorderColor FONT_COLOR
+    FontSize 30
+}
+
+skinparam Arrow {
+  Color FONT_COLOR
+  FontColor FONT_COLOR
+  FontStyle Bold
+  FontSize 30
+}
+
+skinparam package {
+  FontColor FONT_COLOR
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam node {
+  FontColor FONT_COLOR
+  BackgroundColor BG_PACKAGE_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam component {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+  Style uml2
+}
+
+skinparam database {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam cloud {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam collections {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Control {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Boundary {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Entity {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam interface {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam SequenceParticipantBorderThickness 3
+skinparam sequence {
+  ParticipantBackgroundColor BG_MAIN_COLOR
+  ParticipantBorderColor BORDER_COLOR
+  ParticipantFontStyle normal
+  ParticipantFontColor FONT_COLOR
+  LifeLineBorderColor BORDER_COLOR
+  LifeLineBackgroundColor BG_MAIN_COLOR
+  ArrowColor FONT_COLOR
+  ArrowBorderColor BORDER_COLOR
+  ArrowFontColor FONT_COLOR
+  ArrowThickness 3
+  ActorBackgroundColor BG_MAIN_COLOR
+  ActorBorderColor BORDER_COLOR
+  ActorFontColor FONT_COLOR
+}
+
+skinparam sequenceMessageAlign center
+autonumber "<b>(0)"
+
+
+participant Application
+participant Stork
+participant ConfigProvider
+participant Service
+participant "Service Discovery"
+participant "Load Balancer"
+
+Application -> Stork : initialize()
+Stork -> ConfigProvider : getConfig()
+ConfigProvider -> Stork : : List<ServiceConfig>
+
+... ...
+
+Application -> Stork : getService("name")
+Stork -> Application: Service
+
+...  ...
+
+
+Application -> Service : selectServiceInstance()
+Service -> "Service Discovery" : getServiceInstances()
+"Service Discovery" ---> Service : Uni<List<ServiceInstance>>
+Service -> "Load Balancer" : selectServiceInstance()
+"Load Balancer" ---> Service : Uni<ServiceInstance>
+Service ---> Application : Uni<ServiceInstance>
+
+@enduml
+----
+
+Behind the scenes, Stork will handle the service lookup and selection.
+
+[NOTE]
+====
+
+The service lookup and selection are asynchronous operations.
+Thus, the API returns instances of `Uni`.
+
+====
+
+== Stork
+
+`io.smallrye.stork.Stork` is the entry-point of the API.
+The `Stork` instance is a _singleton_.
+It needs to be initialized once (when the application starts) and shutdown when the application stops:
+
+[source,java]
+----
+include::{examples-dir}/examples/StorkEntryPointExample.java[indent=0]
+----
+
+During the initialization, Stork looks for `io.smallrye.stork.config.ConfigProvider` SPI provider and CDI beans (from 2.x version) and retrieves the list of managed services:
+
+* A service is identified by a *name*.
+* A service has a service discovery configuration indicating how Stork will look for service instances
+* A service can have a load-balancer configuration indicating how Stork can select the most appropriate instance.
+
+== Service
+
+A `io.smallrye.stork.Service` is the structure representing a _service_ used by the application.
+Services are pre-configured with their name, service discovery, and optionally, their load-balancer.
+You retrieve a `Service` using the `Stork#getService(String name)` method.
+
+[source,java]
+----
+include::{examples-dir}/examples/StorkServiceExample.java[indent=0]
+----
+
+The `Service` lets you retrieve the list of `ServiceInstance`, or select a single one, when a load-balancer is configured.
+
+== Service Instance
+
+The `io.smallrye.stork.api.ServiceInstance` represents an actual instance of the service.
+It provides the metadata to configure a _client_ to interact with that specific instance of service.
+
+[source,java]
+----
+include::{examples-dir}/examples/StorkServiceLookupExample.java[indent=0]
+----
+
+The service selection is a two-steps process:
+
+[arabic]
+. Service lookup - using the service discovery
+. Service selection - using the load balancer
+
+[source,java]
+----
+include::{examples-dir}/examples/StorkServiceSelectionExample.java[indent=0]
+----
+
+== Service Discovery
+
+The `io.smallrye.stork.api.ServiceDiscovery` represents a service discovery mechanism, such as DNS, Consul, or Eureka.
+
+You can implement a custom service discovery for Stork by implementing the `ServiceDiscoveryProvider` interface.
+The corresponding `ServiceRegistrarProviderLoader` and `RegistrarConfiguration` classes will be automatically generated during compilation time.
+
+Please note that the `ServiceDiscovery` implementation must be non-blocking.
+
+== Load Balancer
+
+The `io.smallrye.stork.api.LoadBalancer` represents a load-balancer strategy, such as round-robin.
+
+To implement a custom load balancer for Stork, implement the `LoadBalancerProvider` interface.
+The corresponding `LoadBalancerProviderLoader` and `Configuration` classes will be automatically generated during compilation time.
+
+Please note that the `LoadBalancer` implementation, similarly to `ServiceDiscovery`
+must be non-blocking.
+
+== Service registration
+
+The `io.smallrye.stork.api.ServiceRegistrar` represents a service registration mechanism for Consul and Eureka.
+
+You can implement a custom service registrar for Stork by implementing the `ServiceRegistrarProvider` interface.
+The corresponding `ServiceRegistrarProviderLoader` and `RegistrarConfiguration` classes will be automatically generated during compilation time.
+
+Please note that the `ServiceRegistrar` implementation must be non-blocking.
