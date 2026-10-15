@@ -1,0 +1,71 @@
+= Eureka Service Discovery
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+
+https://github.com/Netflix/eureka[Eureka] is a RESTful service that is primarily used in the AWS cloud for the purpose of discovery, load balancing, and failover of middle-tier servers.
+
+This page explains how Stork can use Eureka to handle the service discovery and service registration.
+
+== Dependency
+
+First, you need to add the Stork Eureka Service Discovery provider:
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+    <groupId>io.smallrye.stork</groupId>
+    <artifactId>stork-service-discovery-eureka</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+=== Service discovery configuration
+
+For each application instance expected to be registered in Eureka, configure the lookup:
+
+[.tabs]
+====
+
+stork standalone::
++
+--
+
+[source,properties]
+----
+stork.my-service.service-discovery.type=eureka
+stork.my-service.service-discovery.eureka-host=localhost
+stork.my-service.service-discovery.eureka-port=8761
+----
+
+--
+
+stork in quarkus::
++
+--
+
+[source,properties]
+----
+quarkus.stork.my-service.service-discovery.type=eureka
+quarkus.stork.my-service.service-discovery.eureka-host=localhost
+quarkus.stork.my-service.service-discovery.eureka-port=8761
+----
+
+--
+
+====
+
+Stork looks for the service with the given name (`my-service` in the previous example).
+
+Supported attributes are the following:
+
+include::{generated-dir}/eureka-sd-attributes.adoc[]
+
+The `application` attribute is optional.
+It uses the Stork service name (`my-service` in the previous configuration) if not set.
+
+The `instance` attribute allows selecting a specific instance.
+Using this attribute prevents load-balancing as you will always select a single instance.
+
+The `secure` attribute indicates whether to connect to instances over TLS.
+If set to `true`, instances without a secure port enabled are filtered out.
+The connection host is always resolved from the `hostName` field of the Eureka instance (falling back to `ipAddr`), regardless of this setting.

@@ -1,0 +1,63 @@
+= Power Of Two Choices Load Balancing
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+
+The `power-of-two-choices` load balancing selects two random service instances and then chooses the one with the least inflight requests.
+It avoids the overhead of `least-requests` and the worst case for `random` where it selects a busy destination.
+
+This strategy acts as follows:
+
+[arabic]
+. when the selection happens, it picks two random instances from the list,
+. it returns the least loaded instance (based on the number of inflight requests),
+. when the operation completes, successfully or not, the number of inflight requests for the instance is decremented.
+
+Check http://www.eecs.harvard.edu/~michaelm/NEWWORK/postscripts/twosurvey.pdf[The Power of Two Random Choices] paper to learn more about this pattern and the benefits.
+
+== Dependency
+
+First, you need to add the random load-balancer to your project:
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+    <groupId>io.smallrye.stork</groupId>
+    <artifactId>stork-load-balancer-power-of-two-choices</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+== Configuration
+
+For each service expected to use a random service selection, configure the `load-balancer` to be `power-of-two-choices`:
+
+[.tabs]
+====
+
+stork standalone::
++
+--
+
+[source,properties]
+----
+stork.my-service.load-balancer.type=power-of-two-choices
+----
+
+--
+
+stork in quarkus::
++
+--
+
+[source,properties]
+----
+quarkus.stork.my-service.load-balancer.type=power-of-two-choices
+----
+
+--
+
+====
+
+Supported configuration properties are the following:
+
+include::{generated-dir}/power-of-two-choices-lb-attributes.adoc[]
