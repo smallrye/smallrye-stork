@@ -1,0 +1,59 @@
+= Least Requests Load Balancing
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+
+The `least-requests` load balancing strategy monitors the number of inflight calls and selects the less-used instance.
+
+This strategy keeps track of the inflight calls made by the application and picks the service instance with the smallest number of inflight requests:
+
+[arabic]
+. when the selection happens, the service instance with the smallest number of inflight requests is selected, and this number is incremented
+. when the operation completes, successfully or not, the number of inflight requests is decremented
+
+== Dependency
+
+First, you need to add the `least-requests` load-balancer to your project:
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+    <groupId>io.smallrye.stork</groupId>
+    <artifactId>stork-load-balancer-least-requests</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+== Configuration
+
+For each service expected to use a least-response-time selection, configure the `load-balancer` to be `least-requests`:
+
+[.tabs]
+====
+
+stork standalone::
++
+--
+
+[source,properties]
+----
+stork.my-service.load-balancer.type=least-requests
+----
+
+--
+
+stork in quarkus::
++
+--
+
+[source,properties]
+----
+quarkus.stork.my-service.load-balancer.type=least-requests
+----
+
+--
+
+====
+
+Supported configuration properties are the following:
+
+include::{generated-dir}/least-requests-lb-attributes.adoc[]

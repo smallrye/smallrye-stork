@@ -1,0 +1,389 @@
+= Stork Observability API
+include::_attributes.adoc[]
+
+Stork proposes an observability API that automatically observes some parameters to show how the Stork service discovery and selection are behaving.
+
+For any _observation_ to happen, you need to provide your own implementation of an `ObservationCollector.` By default, Stork provides a no-op implementation.
+
+The `ObservationCollector` is responsible for instantiating the `StorkObservation`.
+
+The `StorkObservation` reacts to Stork events thanks to a `StorkEventHandler`.
+
+You can extend the metrics collection by extending the `StorkEventHandler` interface.
+
+The following sequence diagram shows how the observability is initialized :
+
+[plantuml,observability_sequence,svg]
+----
+@startuml
+
+!define BG_MAIN_COLOR      AliceBlue
+!define BG_SECONDARY_COLOR #B4BCBE
+!define BG_PACKAGE_COLOR   #eeb291
+!define BORDER_COLOR       #444444
+!define FONT_COLOR         #444444
+!define ARROW_COLOR        DarkGrey
+
+
+' include the general skinparams for both, light and dark
+' to overwrite with the given settings
+!define BORDER_THICKNESS 3
+skinparam backgroundColor transparent
+
+skinparam classFontSize 30
+
+skinparam RoundCorner 4
+skinparam Shadowing false
+
+skinparam Default {
+  FontColor FONT_COLOR
+  FontSize 30
+}
+
+skinparam class {
+    BackgroundColor BG_MAIN_COLOR
+    ArrowColor FONT_COLOR
+    BorderColor FONT_COLOR
+    FontSize 30
+}
+
+skinparam Arrow {
+  Color FONT_COLOR
+  FontColor FONT_COLOR
+  FontStyle Bold
+  FontSize 30
+}
+
+skinparam package {
+  FontColor FONT_COLOR
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam node {
+  FontColor FONT_COLOR
+  BackgroundColor BG_PACKAGE_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam component {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+  Style uml2
+}
+
+skinparam database {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam cloud {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam collections {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Control {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Boundary {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Entity {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam interface {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam SequenceParticipantBorderThickness 3
+skinparam sequence {
+  ParticipantBackgroundColor BG_MAIN_COLOR
+  ParticipantBorderColor BORDER_COLOR
+  ParticipantFontStyle normal
+  ParticipantFontColor FONT_COLOR
+  LifeLineBorderColor BORDER_COLOR
+  LifeLineBackgroundColor BG_MAIN_COLOR
+  ArrowColor FONT_COLOR
+  ArrowBorderColor BORDER_COLOR
+  ArrowFontColor FONT_COLOR
+  ArrowThickness 3
+  ActorBackgroundColor BG_MAIN_COLOR
+  ActorBorderColor BORDER_COLOR
+  ActorFontColor FONT_COLOR
+}
+
+skinparam sequenceMessageAlign center
+autonumber "<b>(0)"
+
+
+participant Application
+participant ObservableStorkInfrastructure
+participant ObservationCollector
+participant Stork
+participant Service
+
+Application -> ObservableStorkInfrastructure : instantiates
+ObservableStorkInfrastructure -> ObservationCollector : instantiates
+ObservationCollector -> ObservableStorkInfrastructure: ObservationCollector
+ObservableStorkInfrastructure -> Application: ObservableStorkInfrastructure
+
+... ...
+
+Application -> Stork : initialize(observableInfrastructure)
+Stork -> Service : instantiates (..., ObservationCollector, ...)
+@enduml
+----
+
+The `StorkObservation` registers times, number of discovered instances, the selected instance and failures by reacting to the lifecycle of a Stork event such as:
+
+* start : Observation has been started.
+The beginning time is registered.
+It happens when the `ObservationCollector#create()` method gets called.
+* service discovery success: a collection of instances has been successfully discovered for a service.
+The end discovery time and number of instances are recorded.
+It happens when the `StorkObservation#onServiceDiscoverySuccess` gets called.
+* service discovery error: an error occurs when discovering a service.
+The end discovery time and failure cause are captured.
+It happens when the `StorkObservation#onServiceDiscoveryFailure` gets called.
+* service selection success: an instance has been successfully selected from the collection.
+The end selection time and selected instance ID are registered.
+It happens when the `StorkObservation#onServiceSelectionSuccess` gets called.
+* service selection error: an error occurred during selecting the instance.
+End selection time and failure cause are registered.
+It happens when the `StorkObservation#onServiceSelectionFailure` gets called.
+* end: Observation has finished. Overall duration is registered.
+It happens when the `StorkObservation#onServiceSelectionSuccess` gets called.
+
+The following sequence diagram represents the described observation process above:
+
+[plantuml,observation_sequence,svg]
+----
+@startuml
+
+!define BG_MAIN_COLOR      AliceBlue
+!define BG_SECONDARY_COLOR #B4BCBE
+!define BG_PACKAGE_COLOR   #eeb291
+!define BORDER_COLOR       #444444
+!define FONT_COLOR         #444444
+!define ARROW_COLOR        DarkGrey
+
+
+' include the general skinparams for both, light and dark
+' to overwrite with the given settings
+!define BORDER_THICKNESS 3
+skinparam backgroundColor transparent
+
+skinparam classFontSize 30
+
+skinparam RoundCorner 4
+skinparam Shadowing false
+
+skinparam Default {
+  FontColor FONT_COLOR
+  FontSize 30
+}
+
+skinparam class {
+    BackgroundColor BG_MAIN_COLOR
+    ArrowColor FONT_COLOR
+    BorderColor FONT_COLOR
+    FontSize 30
+}
+
+skinparam Arrow {
+  Color FONT_COLOR
+  FontColor FONT_COLOR
+  FontStyle Bold
+  FontSize 30
+}
+
+skinparam package {
+  FontColor FONT_COLOR
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam node {
+  FontColor FONT_COLOR
+  BackgroundColor BG_PACKAGE_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam component {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+  Style uml2
+}
+
+skinparam database {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam cloud {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam collections {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Control {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Boundary {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Entity {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam interface {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam SequenceParticipantBorderThickness 3
+skinparam sequence {
+  ParticipantBackgroundColor BG_MAIN_COLOR
+  ParticipantBorderColor BORDER_COLOR
+  ParticipantFontStyle normal
+  ParticipantFontColor FONT_COLOR
+  LifeLineBorderColor BORDER_COLOR
+  LifeLineBackgroundColor BG_MAIN_COLOR
+  ArrowColor FONT_COLOR
+  ArrowBorderColor BORDER_COLOR
+  ArrowFontColor FONT_COLOR
+  ArrowThickness 3
+  ActorBackgroundColor BG_MAIN_COLOR
+  ActorBorderColor BORDER_COLOR
+  ActorFontColor FONT_COLOR
+}
+
+skinparam sequenceMessageAlign center
+autonumber "<b>(0)"
+
+
+participant Service
+participant ObservationCollector
+participant StorkObservation
+participant StorkEventHandler
+
+Service -> ObservationCollector : create("serviceName", sd type, ss type)
+ObservationCollector -> StorkObservation : instantiates
+StorkObservation -> StorkObservation: Registers start time
+ObservationCollector -> Service : StorkObservation
+
+... ...
+
+Service -> StorkObservation : onServiceDiscoverySuccess(List<ServiceInstance>)
+StorkObservation -> StorkObservation : Registers end service\ndiscovery time.\nRegisters instances count\n
+... ...
+
+Service -> StorkObservation : onServiceDiscoveryFailure(Throwable)
+StorkObservation -> StorkObservation : Registers end service\ndiscovery time.\nRegisters failure cause\n
+... ...
+
+Service -> StorkObservation : onServiceSelectionSuccess(instanceId)
+StorkObservation -> StorkObservation : Registers end service\nselection time.\nRegisters instance id\nRegisters overall duration\n
+StorkObservation -> StorkEventHandler: complete(this)
+... ...
+
+Service -> StorkObservation : onServiceSelectionFailure(Throwable))
+StorkObservation -> StorkObservation : Registers overall duration.\nRegisters failure cause\n
+StorkObservation -> StorkEventHandler: complete(this)
+@enduml
+----
+
+== Implementing an observation collector
+
+An `ObservationCollector` implementation must override the `create` method to provide an instance of StorkObservation.
+In addition, the user can access and enrich the observation data through the `StorkEventHandler`.
+
+A custom observation collector class should look as follows:
+
+[source,java]
+----
+include::{examples-dir}/examples/AcmeObservationCollector.java[indent=0]
+----
+
+The next step is to initialize Stork with an `ObservableStorkInfrastructure`, taking an instance of your `ObservationCollector` as parameter.
+
+[source,java]
+----
+include::{examples-dir}/examples/ObservableInitializationExample.java[indent=0]
+----
+
+Then, Stork uses your implementation to register metrics.
+
+== Observing service discovery and selection behaviours
+
+To access metrics registered by `StorkObservation`, use the following code:
+
+[source,java]
+----
+include::{examples-dir}/examples/ObservationExample.java[indent=0]
+----
+
+Stork Observability with Quarkus
+
+Stork metrics are automatically enabled when using Stork together with the Micrometer extension in a Quarkus application.
+
+Micrometer collects the metrics of the rest and grpc client using Stork, as well as when using the Stork API.
+
+As an example, if you export the metrics to Prometheus, you will get:
+
+[source,text]
+----
+# HELP stork_load_balancer_failures_total The number of failures during service selection.
+# TYPE stork_load_balancer_failures_total counter
+stork_load_balancer_failures_total{service_name="hello-service",} 0.0
+# HELP stork_service_selection_duration_seconds The duration of the selection operation 
+# TYPE stork_service_selection_duration_seconds summary
+stork_service_selection_duration_seconds_count{service_name="hello-service",} 13.0
+stork_service_selection_duration_seconds_sum{service_name="hello-service",} 0.001049291
+# HELP stork_service_selection_duration_seconds_max The duration of the selection operation 
+# TYPE stork_service_selection_duration_seconds_max gauge
+stork_service_selection_duration_seconds_max{service_name="hello-service",} 0.0
+# HELP stork_overall_duration_seconds_max The total duration of the Stork service discovery and selection operations
+# TYPE stork_overall_duration_seconds_max gauge
+stork_overall_duration_seconds_max{service_name="hello-service",} 0.0
+# HELP stork_overall_duration_seconds The total duration of the Stork service discovery and selection operations
+# TYPE stork_overall_duration_seconds summary
+stork_overall_duration_seconds_count{service_name="hello-service",} 13.0
+stork_overall_duration_seconds_sum{service_name="hello-service",} 0.001049291
+# HELP stork_service_discovery_failures_total The number of failures during service discovery
+# TYPE stork_service_discovery_failures_total counter
+stork_service_discovery_failures_total{service_name="hello-service",} 0.0
+# HELP stork_service_discovery_duration_seconds_max The duration of the discovery operation
+# TYPE stork_service_discovery_duration_seconds_max gauge
+stork_service_discovery_duration_seconds_max{service_name="hello-service",} 0.0
+# HELP stork_service_discovery_duration_seconds The duration of the discovery operation
+# TYPE stork_service_discovery_duration_seconds summary
+stork_service_discovery_duration_seconds_count{service_name="hello-service",} 13.0
+stork_service_discovery_duration_seconds_sum{service_name="hello-service",} 6.585046209
+# HELP stork_instances_count_total The number of service instances discovered
+# TYPE stork_instances_count_total counter
+stork_instances_count_total{service_name="hello-service",} 26.0
+----

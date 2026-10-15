@@ -1,0 +1,70 @@
+title: SmallRye Stork
+nav:
+- title: Overview
+  page: index
+- title: Concepts
+  page: concepts
+- title: Programmatic API
+  page: programmatic-api
+- title: Microprofile Configuration
+  page: microprofile-config
+- title: Spring Boot Configuration
+  page: springboot-config
+- title: Observability
+  page: observability
+- title: Logging
+  page: logging
+- title: Javadoc
+  url: https://javadoc.io/doc/io.smallrye.stork/smallrye-stork-api/latest/index.html
+- title: Using Stork with Quarkus
+  page: quarkus
+- title: Service Discovery
+  items:
+  - title: Overview
+    page: service-discovery/overview
+  - title: Consul
+    page: service-discovery/consul
+  - title: DNS
+    page: service-discovery/dns
+  - title: Kubernetes
+    page: service-discovery/kubernetes
+  - title: KNative
+    page: service-discovery/knative
+  - title: Eureka
+    page: service-discovery/eureka
+  - title: Composite
+    page: service-discovery/composite
+  - title: Static List
+    page: service-discovery/static-list
+  - title: Custom Service Discovery
+    page: service-discovery/custom-service-discovery
+- title: Load-Balancing
+  items:
+  - title: Overview
+    page: load-balancer/overview
+  - title: Round Robin
+    page: load-balancer/round-robin
+  - title: Random
+    page: load-balancer/random
+  - title: Least Requests
+    page: load-balancer/least-requests
+  - title: Least Response Time
+    page: load-balancer/least-response-time
+  - title: Power Of Two Choices
+    page: load-balancer/power-of-two-choices
+  - title: Sticky
+    page: load-balancer/sticky
+  - title: Custom Load Balancer
+    page: load-balancer/custom-load-balancer
+- title: Service Registration
+  items:
+  - title: Overview
+    page: service-registration/overview
+  - title: Consul
+    page: service-registration/consul
+  - title: Eureka
+    page: service-registration/eureka
+  - title: Static List
+    page: service-registration/static-list
+  - title: Custom Service Registration
+    page: service-registration/custom-service-registration
