@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v7
         name: Checkout code
         with:
-          fetch-depth: 0 # fetch all commits and branches for mike to work properly
+          fetch-depth: 0 # fetch all commits and tags, to compare with the previous release
       - uses: actions/setup-java@v6
         name: Set up Java 21
         with:

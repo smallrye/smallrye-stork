@@ -1,0 +1,96 @@
+= Static List Service Registration
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+
+Stork provides the ability to register services using Static list as backend.
+
+== Dependency
+
+To use the `static` service registrar, first add the appropriate Service Registration provider dependency to your project:
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+    <groupId>io.smallrye.stork</groupId>
+    <artifactId>stork-service-registration-static-list</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+== Service registration configuration
+
+For each service that should register the service instances in a static list, configure the service registrar `type`:
+
+[.tabs]
+====
+
+stork standalone::
++
+--
+
+--
+
+====
+
+[source,properties]
+----
+stork.my-service.service-registrar.type=static
+----
+
+[.tabs]
+====
+
+stork in quarkus::
++
+--
+
+--
+
+====
+
+[source,properties]
+----
+quarkus.stork.my-service.service-registrar.type=static
+----
+
+Static service registrar is configured with the following parameters:
+
+include::{generated-dir}/static-sr-attributes.adoc[]
+
+== Service deregistration configuration
+
+There is no specific configuration required to enable deregistration; however, you must ensure that a consul service registrar is configured for the service:
+
+[.tabs]
+====
+
+stork standalone::
++
+--
+
+--
+
+====
+
+[source,properties]
+----
+stork.my-service.service-registrar.type=static
+----
+
+[.tabs]
+====
+
+stork in quarkus::
++
+--
+
+--
+
+====
+
+[source,properties]
+----
+quarkus.stork.my-service.service-registrar.type=static
+----
+
+As with registration, deregistration relies on the service name.

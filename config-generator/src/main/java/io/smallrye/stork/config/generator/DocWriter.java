@@ -22,52 +22,66 @@ public class DocWriter {
     }
 
     public void createAttributeTable(String serviceRegistrarType, ServiceRegistrarAttribute[] attributes) throws IOException {
-        String attributeTableFile = serviceRegistrarType + "-sr-attributes.txt";
-        FileObject loaderFile = createResourceFile(attributeTableFile);
-        try (PrintWriter out = new PrintWriter(loaderFile.openWriter())) {
-            out.println(" | Attribute            | Mandatory  | Default Value      | Description  |");
-            out.println(" |----------------------|------------|--------------------|--------------|");
-            for (ServiceRegistrarAttribute attribute : attributes) {
-                out.println(String.format("| `%s` | %s | %s | %s |",
-                        attribute.name(),
-                        attribute.required() ? "Yes" : "No",
-                        Constants.DEFAULT_VALUE.equals(attribute.defaultValue()) ? "" : '`' + attribute.defaultValue() + '`',
-                        attribute.description()));
-            }
+        String[][] rows = new String[attributes.length][];
+        for (int i = 0; i < attributes.length; i++) {
+            ServiceRegistrarAttribute attribute = attributes[i];
+            rows[i] = new String[] { attribute.name(), attribute.required() ? "Yes" : "No", attribute.defaultValue(),
+                    attribute.description() };
         }
+        writeTables(serviceRegistrarType + "-sr-attributes", rows);
     }
 
     public void createAttributeTable(String serviceDiscoveryType, ServiceDiscoveryAttribute[] attributes) throws IOException {
-        String attributeTableFile = serviceDiscoveryType + "-sd-attributes.txt";
-        FileObject loaderFile = createResourceFile(attributeTableFile);
-        try (PrintWriter out = new PrintWriter(loaderFile.openWriter())) {
-            out.println(" | Attribute            | Mandatory  | Default Value      | Description  |");
-            out.println(" |----------------------|------------|--------------------|--------------|");
-            for (ServiceDiscoveryAttribute attribute : attributes) {
-                out.println(String.format("| `%s` | %s | %s | %s |",
-                        attribute.name(),
-                        attribute.required() ? "Yes" : "No",
-                        Constants.DEFAULT_VALUE.equals(attribute.defaultValue()) ? "" : '`' + attribute.defaultValue() + '`',
-                        attribute.description()));
-            }
+        String[][] rows = new String[attributes.length][];
+        for (int i = 0; i < attributes.length; i++) {
+            ServiceDiscoveryAttribute attribute = attributes[i];
+            rows[i] = new String[] { attribute.name(), attribute.required() ? "Yes" : "No", attribute.defaultValue(),
+                    attribute.description() };
         }
+        writeTables(serviceDiscoveryType + "-sd-attributes", rows);
     }
 
     public void createAttributeTable(String loadBalancerType, LoadBalancerAttribute[] attributes) throws IOException {
-        String attributeTableFile = loadBalancerType + "-lb-attributes.txt";
-        FileObject loaderFile = createResourceFile(attributeTableFile);
+        String[][] rows = new String[attributes.length][];
+        for (int i = 0; i < attributes.length; i++) {
+            LoadBalancerAttribute attribute = attributes[i];
+            rows[i] = new String[] { attribute.name(), attribute.required() ? "Yes" : "No", attribute.defaultValue(),
+                    attribute.description() };
+        }
+        writeTables(loadBalancerType + "-lb-attributes", rows);
+    }
 
-        try (PrintWriter out = new PrintWriter(loaderFile.openWriter())) {
+    /**
+     * Writes the attribute table twice: as Markdown ({@code .txt}) and as AsciiDoc ({@code .adoc}), which the
+     * documentation published on smallrye.io includes.
+     */
+    private void writeTables(String baseName, String[][] rows) throws IOException {
+        try (PrintWriter out = new PrintWriter(createResourceFile(baseName + ".txt").openWriter())) {
             out.println(" | Attribute            | Mandatory  | Default Value      | Description  |");
             out.println(" |----------------------|------------|--------------------|--------------|");
-            for (LoadBalancerAttribute attribute : attributes) {
-                out.println(String.format("| `%s` | %s | %s | %s |",
-                        attribute.name(),
-                        attribute.required() ? "Yes" : "No",
-                        Constants.DEFAULT_VALUE.equals(attribute.defaultValue()) ? "" : '`' + attribute.defaultValue() + '`',
-                        attribute.description()));
+            for (String[] row : rows) {
+                out.println(String.format("| `%s` | %s | %s | %s |", row[0], row[1], markdownDefault(row[2]), row[3]));
             }
         }
+        try (PrintWriter out = new PrintWriter(createResourceFile(baseName + ".adoc").openWriter())) {
+            out.println("[cols=\"2,1,2,5\",options=\"header\"]");
+            out.println("|===");
+            out.println("|Attribute |Mandatory |Default Value |Description");
+            for (String[] row : rows) {
+                out.println(String.format("|`%s` |%s |%s |%s", row[0], row[1], asciidocDefault(row[2]),
+                        row[3] == null ? "" : row[3].replace("|", "\\|")));
+            }
+            out.println("|===");
+        }
+    }
+
+    private static String markdownDefault(String value) {
+        return Constants.DEFAULT_VALUE.equals(value) ? "" : '`' + value + '`';
+    }
+
+    private static String asciidocDefault(String value) {
+        // a passthrough keeps characters such as * or { in default values literal
+        return Constants.DEFAULT_VALUE.equals(value) ? "" : "`+" + value + "+`";
     }
 
     private FileObject createResourceFile(String fileName) throws IOException {
