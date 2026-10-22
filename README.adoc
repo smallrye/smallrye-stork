@@ -52,6 +52,10 @@ hello/mp-rest/url=stork://my-service/hello           # <3>
 2. Configures the load balancer for `my-service`
 3. Uses the `stork` scheme and indicates which service is targeted. When accessed, it will select the service instance using Stork.
 
+=== Documentation
+
+The documentation is on https://smallrye.io/docs/smallrye-stork/latest/[smallrye.io].
+
 === Contributing
 
 Check the link:CONTRIBUTING.md[contribution guide] to get build and contribution instructions.
