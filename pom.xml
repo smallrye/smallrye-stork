@@ -35,6 +35,7 @@
         <maven.compiler.release>17</maven.compiler.release>
 
         <version.assertj>3.27.7</version.assertj>
+        <version.mutiny>3.3.1</version.mutiny>
         <version.microprofile-config-api>3.1.3</version.microprofile-config-api>
         <version.mutiny>3.3.0</version.mutiny>
         <version.smallrye-config>4.2.0</version.smallrye-config>
