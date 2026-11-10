@@ -1,0 +1,203 @@
+= DNS Service Discovery
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+
+DNS is a name resolution protocol used to determine IP addresses for hostnames.
+That makes it a natural fit for service discovery.
+Consul and AWS Cloud Map provide DNS resolutions for service discovery.
+
+This page explains how Stork can use DNS to handle the service discovery.
+
+== DNS records
+
+DNS supports a https://en.wikipedia.org/wiki/List_of_DNS_record_types[variety of record types]. Stork can resolve hostnames to addresses based on https://en.wikipedia.org/wiki/SRV_record[_SRV_], A and AAAA records. All these types of records may return multiple addresses for a single hostname. You may choose to not resolve target hostnames.
+
+While _A_ and _AAAA_ records are quite similar, they just carry an IP (_v4_ for _A_ and _v6_ for _AAAA_), the _SRV_ records are different.
+They contain a _weight_, a _target_ and a _port_ for a service instance.
+The _target_ returned in an _SRV_ record needs to be resolved further by an _A_ or an _AAAA_ record.
+
+In short, it works as follows:
+
+[plantuml,srv_sequence,svg]
+----
+@startuml
+!define BG_MAIN_COLOR      AliceBlue
+!define BG_SECONDARY_COLOR #B4BCBE
+!define BG_PACKAGE_COLOR   #eeb291
+!define BORDER_COLOR       #444444
+!define FONT_COLOR         #444444
+!define ARROW_COLOR        DarkGrey
+
+
+' include the general skinparams for both, light and dark
+' to overwrite with the given settings
+!define BORDER_THICKNESS 3
+skinparam backgroundColor transparent
+
+skinparam classFontSize 30
+
+skinparam RoundCorner 4
+skinparam Shadowing false
+
+skinparam Default {
+  FontColor FONT_COLOR
+  FontSize 30
+}
+
+skinparam class {
+    BackgroundColor BG_MAIN_COLOR
+    ArrowColor FONT_COLOR
+    BorderColor FONT_COLOR
+    FontSize 30
+}
+
+skinparam Arrow {
+  Color FONT_COLOR
+  FontColor FONT_COLOR
+  FontStyle Bold
+  FontSize 30
+}
+
+skinparam package {
+  FontColor FONT_COLOR
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam node {
+  FontColor FONT_COLOR
+  BackgroundColor BG_PACKAGE_COLOR
+  BorderColor BORDER_COLOR
+}
+skinparam component {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+  Style uml2
+}
+
+skinparam database {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam cloud {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+
+skinparam collections {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Control {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Boundary {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam Entity {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam interface {
+  BackgroundColor BG_MAIN_COLOR
+  BorderColor BORDER_COLOR
+  FontColor FONT_COLOR
+}
+skinparam SequenceParticipantBorderThickness 3
+skinparam sequence {
+  ParticipantBackgroundColor BG_MAIN_COLOR
+  ParticipantBorderColor BORDER_COLOR
+  ParticipantFontStyle normal
+  ParticipantFontColor FONT_COLOR
+  LifeLineBorderColor BORDER_COLOR
+  LifeLineBackgroundColor BG_MAIN_COLOR
+  ArrowColor FONT_COLOR
+  ArrowBorderColor BORDER_COLOR
+  ArrowFontColor FONT_COLOR
+  ArrowThickness 3
+  ActorBackgroundColor BG_MAIN_COLOR
+  ActorBorderColor BORDER_COLOR
+  ActorFontColor FONT_COLOR
+}
+
+skinparam sequenceMessageAlign center
+
+
+participant Application
+participant Stork
+participant "DNS Server"
+
+Application -> Stork : get service instances
+Stork -> "DNS Server" : get SRV records for hostname
+"DNS Server" -> Stork : list of SRV records
+Stork -> Application : list of SRV record targets if no resolution desired
+Stork -> "DNS Server" : get A/AAAA records for each SRV record target
+"DNS Server" -> Stork : list of A/AAAA
+Stork -> Application : list of ServiceInstances
+
+@enduml
+----
+
+== Dependency
+
+To use the DNS service discovery, you need to add the Stork DNS Service Discovery provider dependency to your project:
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+    <groupId>io.smallrye.stork</groupId>
+    <artifactId>stork-service-discovery-dns</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+== Configuration
+
+Next, set the service discovery `type` to `dns`.
+Additionally, you would usually specify the DNS server, or servers, to use for the discovery.
+All in all, your configuration could look as follows:
+
+[.tabs]
+====
+
+stork standalone::
++
+--
+
+[source,properties]
+----
+stork.my-service.service-discovery.type=dns
+# optional dns servers:
+stork.my-service.service-discovery.dns-servers=my-dns-server:8221,my-dns-server2
+----
+
+--
+
+stork in quarkus::
++
+--
+
+[source,properties]
+----
+quarkus.stork.my-service.service-discovery.type=dns
+
+# optional dns servers:
+quarkus.stork.my-service.service-discovery.dns-servers=my-dns-server:8221,my-dns-server2
+----
+
+--
+
+====
+
+All the available parameters are as follows:
+
+include::{generated-dir}/dns-sd-attributes.adoc[]
