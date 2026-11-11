@@ -38,7 +38,7 @@
         <version.mutiny>3.3.1</version.mutiny>
         <version.microprofile-config-api>3.1.3</version.microprofile-config-api>
         <version.mutiny>3.3.1</version.mutiny>
-        <version.smallrye-config>4.2.0</version.smallrye-config>
+        <version.smallrye-config>4.2.2</version.smallrye-config>
 
         <vertx.version>5.2.3</vertx.version>
         <version.vertx-mutiny-bindings>4.1.0</version.vertx-mutiny-bindings>
@@ -409,7 +409,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <!-- Mostly for IDE to add the generated-sources to the classpath -->
-                <version>3.6.2</version>
+                <version>3.7.0</version>
                 <executions>
                     <execution>
                         <id>add-generated-sources</id>
