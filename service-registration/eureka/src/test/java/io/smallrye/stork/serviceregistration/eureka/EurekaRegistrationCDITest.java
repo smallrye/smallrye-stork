@@ -64,6 +64,7 @@ public class EurekaRegistrationCDITest {
     private static Vertx vertx = Vertx.vertx();;
     @AutoClose
     private WebClient client;
+    private ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar;
 
     public int port;
     public String host;
@@ -79,6 +80,10 @@ public class EurekaRegistrationCDITest {
 
     @AfterEach
     public void cleanup() {
+        // Stops the lease renewals of the registered instances
+        if (eurekaServiceRegistrar != null) {
+            eurekaServiceRegistrar.deregisterServiceInstance("my-service").await().atMost(Duration.ofSeconds(10));
+        }
         config.clear();
     }
 
@@ -91,7 +96,7 @@ public class EurekaRegistrationCDITest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
         eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)

@@ -72,6 +72,26 @@ The secure virtual IP address defaults to the virtual IP address (the service na
 For services only reachable over HTTPS, set `non-secure-port-enabled=false` to register the non-secure port as disabled; this requires `secure-port` to be set.
 Secure clients connect to the registered host name, so set `host-name` to the name the TLS certificate is issued for.
 
+## Lease renewal
+
+Eureka evicts an instance whose lease is not renewed within the lease duration.
+Stork renews the lease of each registered instance every `lease-renewal-interval` (default: 30 seconds) and registers the instance again if Eureka does not know it, e.g. after a restart of the Eureka server or if the initial registration failed.
+Renewals stop when the instance is deregistered.
+The registrar sends `lease-renewal-interval` and `lease-duration` (default: 90 seconds) to Eureka as lease information.
+
+`lease-renewal-interval` must be greater than 0 and lower than `lease-duration`.
+Keep it well below `lease-duration`, so that several renewals fit into one lease duration and a single failed renewal does not get the instance evicted.
+Eureka's default ratio of 1:3 (30 and 90 seconds) is a good reference.
+
+If you set `lease-renewal-enabled=false`, Eureka evicts the instance once `lease-duration` has expired.
+
+!!! note
+    Previous versions did not renew the lease and sent a fixed lease duration of 10000 seconds to Eureka instead.
+    If you set `lease-renewal-enabled=false` or renew the lease with your own heartbeat, set a `lease-duration` that is long enough for your use case; otherwise, Eureka evicts the instance after 90 seconds.
+
+With Stork standalone, deregister the instances before calling `Stork.shutdown()`; otherwise, their leases keep being renewed.
+When Quarkus registers the instances, it deregisters them on shutdown.
+
 ## Service deregistration configuration
 
 There is no specific configuration required to enable deregistration; however, you must ensure that a consul service registrar is configured for the service:
