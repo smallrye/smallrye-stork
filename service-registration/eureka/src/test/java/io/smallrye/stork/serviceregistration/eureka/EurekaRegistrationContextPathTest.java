@@ -47,6 +47,7 @@ public class EurekaRegistrationContextPathTest {
 
     private static Vertx vertx = Vertx.vertx();
     private WebClient client;
+    private ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar;
 
     public static final int EUREKA_PORT = 8761;
 
@@ -64,6 +65,10 @@ public class EurekaRegistrationContextPathTest {
 
     @AfterEach
     public void cleanup() {
+        // Stops the lease renewals of the registered instances
+        if (eurekaServiceRegistrar != null) {
+            eurekaServiceRegistrar.deregisterServiceInstance("my-service").await().atMost(Duration.ofSeconds(10));
+        }
         TestConfigProvider.clear();
         client.close();
 
@@ -80,7 +85,7 @@ public class EurekaRegistrationContextPathTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
@@ -127,7 +132,7 @@ public class EurekaRegistrationContextPathTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
 

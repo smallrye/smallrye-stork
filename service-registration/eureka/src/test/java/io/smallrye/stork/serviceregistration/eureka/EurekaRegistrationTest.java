@@ -50,6 +50,7 @@ public class EurekaRegistrationTest {
     private static Vertx vertx = Vertx.vertx();
     @AutoClose
     private WebClient client;
+    private ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar;
 
     public static final int EUREKA_PORT = 8761;
 
@@ -67,6 +68,10 @@ public class EurekaRegistrationTest {
 
     @AfterEach
     public void cleanup() {
+        // Stops the lease renewals of the registered instances
+        if (eurekaServiceRegistrar != null) {
+            eurekaServiceRegistrar.deregisterServiceInstance("my-service").await().atMost(Duration.ofSeconds(10));
+        }
         TestConfigProvider.clear();
     }
 
@@ -79,7 +84,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
@@ -122,7 +127,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
@@ -168,7 +173,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
@@ -207,7 +212,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             eurekaServiceRegistrar.registerServiceInstance(serviceName, Metadata.of(EurekaMetadataKey.class)
@@ -229,7 +234,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
@@ -285,7 +290,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(2);
 
@@ -321,7 +326,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(2);
 
@@ -368,7 +373,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
@@ -404,7 +409,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(2);
 
@@ -453,7 +458,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
@@ -489,7 +494,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         CountDownLatch registrationLatch = new CountDownLatch(1);
 
@@ -526,7 +531,7 @@ public class EurekaRegistrationTest {
 
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        ServiceRegistrar<EurekaMetadataKey> eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
 
         // Deregistering a service that was never registered should complete without error,
         // not throw a NullPointerException when parsing the 404 response body.
@@ -543,8 +548,8 @@ public class EurekaRegistrationTest {
                 Map.of("eureka-host", eureka.getHost(), "eureka-port", String.valueOf(port)));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        stork.getService(serviceName).getServiceRegistrar()
-                .registerServiceInstance(serviceName, "10.96.96.231", 8406)
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "10.96.96.231", 8406)
                 .await().atMost(Duration.ofSeconds(10));
 
         JsonObject instance = getFirstInstance(serviceName);
@@ -560,8 +565,8 @@ public class EurekaRegistrationTest {
                         "secure-port", "443"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        stork.getService(serviceName).getServiceRegistrar()
-                .registerServiceInstance(serviceName, "10.96.96.231", 8406)
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "10.96.96.231", 8406)
                 .await().atMost(Duration.ofSeconds(10));
 
         JsonObject instance = getFirstInstance(serviceName);
@@ -581,8 +586,8 @@ public class EurekaRegistrationTest {
                         "non-secure-port-enabled", "false"));
         Stork stork = StorkTestUtils.getNewStorkInstance();
 
-        stork.getService(serviceName).getServiceRegistrar()
-                .registerServiceInstance(serviceName, "10.96.96.231", 8406)
+        eurekaServiceRegistrar = stork.getService(serviceName).getServiceRegistrar();
+        eurekaServiceRegistrar.registerServiceInstance(serviceName, "10.96.96.231", 8406)
                 .await().atMost(Duration.ofSeconds(10));
 
         JsonObject instance = getFirstInstance(serviceName);
