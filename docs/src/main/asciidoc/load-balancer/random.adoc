@@ -1,0 +1,53 @@
+= Random Load Balancing
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+
+The `random` load balancing is a straightforward service instance selection solution that picks a random instance every time.
+
+== Dependency
+
+First, you need to add the random load-balancer to your project:
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+    <groupId>io.smallrye.stork</groupId>
+    <artifactId>stork-load-balancer-random</artifactId>
+    <version>{project-version}</version>
+</dependency>
+----
+
+== Configuration
+
+For each service expected to use a random service selection, configure the `load-balancer` to be `random`:
+
+[.tabs]
+====
+
+stork standalone::
++
+--
+
+[source,properties]
+----
+stork.my-service.load-balancer.type=random
+----
+
+--
+
+stork in quarkus::
++
+--
+
+[source,properties]
+----
+quarkus.stork.my-service.load-balancer.type=random
+----
+
+--
+
+====
+
+Supported attributes are the following:
+
+include::{generated-dir}/random-lb-attributes.adoc[]
