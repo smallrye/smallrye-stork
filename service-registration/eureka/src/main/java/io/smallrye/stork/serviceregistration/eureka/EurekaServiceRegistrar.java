@@ -23,6 +23,9 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
     private final EurekaRegistrarConfiguration config;
     private final WebClient client;
     private final String path;
+    private final int securePort;
+    private final String secureVipAddress;
+    private final boolean nonSecurePortEnabled;
 
     public EurekaServiceRegistrar(EurekaRegistrarConfiguration config, String serviceName,
             StorkInfrastructure infrastructure) {
@@ -40,6 +43,12 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
             contextPath += "/";
         }
         path = contextPath + "eureka/apps/";
+        securePort = config.getSecurePort().isBlank() ? -1 : Integer.parseInt(config.getSecurePort());
+        secureVipAddress = config.getSecureVipAddress().isBlank() ? null : config.getSecureVipAddress();
+        nonSecurePortEnabled = Boolean.parseBoolean(config.getNonSecurePortEnabled());
+        if (!nonSecurePortEnabled && securePort == -1) {
+            throw new IllegalArgumentException("'non-secure-port-enabled' is set to false but no 'secure-port' is configured");
+        }
     }
 
     @Override
@@ -54,7 +63,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
 
         return registerApplicationInstance(client, serviceName,
                 eurekaId, ipAddress, null,
-                defaultPort, null, -1, "UP", null);
+                defaultPort, secureVipAddress, securePort, "UP", null);
 
     }
 
@@ -66,7 +75,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
         String eurekaId = buildEurekaId(options.serviceName(), options.ipAddress(), options.defaultPort());
         return registerApplicationInstance(client, options.serviceName(),
                 eurekaId, options.ipAddress(), null,
-                options.defaultPort(), null, -1, "UP", options.metadata());
+                options.defaultPort(), secureVipAddress, securePort, "UP", options.metadata());
 
     }
 
@@ -121,8 +130,8 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
         if (tags != null && !tags.isEmpty()) {
             metaMap.put("tags", String.join(",", tags));
         }
-        return registerApplicationInstance(client, serviceName, eurekaId, ipAddress, null, defaultPort, null, -1, "UP",
-                metaMap);
+        return registerApplicationInstance(client, serviceName, eurekaId, ipAddress, null, defaultPort, secureVipAddress,
+                securePort, "UP", metaMap);
 
     }
 
@@ -162,6 +171,7 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
             String ipAddress, String virtualAddress, int port,
             String secureVirtualAddress, int securePort, String state, Map<String, String> metadata) {
         String hostName = config.getHostName() != null && !config.getHostName().isBlank() ? config.getHostName() : ipAddress;
+        String vipAddress = virtualAddress != null ? virtualAddress : applicationId;
         JsonObject instance = new JsonObject();
         JsonObject registration = new JsonObject();
         instance.put("instance", registration);
@@ -170,18 +180,16 @@ public class EurekaServiceRegistrar implements ServiceRegistrar<EurekaMetadataKe
                 .put("instanceId", instanceId)
                 .put("app", applicationId)
                 .put("ipAddr", ipAddress)
-                .put("vipAddress", virtualAddress != null ? virtualAddress : applicationId)
-                .put("port", new JsonObject().put("$", port).put("@enabled", "true"));
+                .put("vipAddress", vipAddress)
+                .put("port", new JsonObject().put("$", port).put("@enabled", String.valueOf(nonSecurePortEnabled)));
 
-        if (secureVirtualAddress != null) {
-            registration
-                    .put("secureVipAddress", secureVirtualAddress);
-        }
         if (config.getHealthCheckUrl() != null && !config.getHealthCheckUrl().isBlank()) {
             registration.put("healthCheckUrl", config.getHealthCheckUrl());
         }
         if (securePort != -1) {
-            registration.put("securePort", new JsonObject().put("$", securePort).put("@enabled", "true"));
+            registration
+                    .put("securePort", new JsonObject().put("$", securePort).put("@enabled", "true"))
+                    .put("secureVipAddress", secureVirtualAddress != null ? secureVirtualAddress : vipAddress);
         }
 
         if (metadata != null && !metadata.isEmpty()) {
