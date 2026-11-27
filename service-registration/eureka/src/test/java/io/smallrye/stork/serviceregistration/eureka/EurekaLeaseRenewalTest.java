@@ -89,6 +89,8 @@ public class EurekaLeaseRenewalTest {
         registerInstance();
 
         registrar.deregisterServiceInstance(SERVICE_NAME).await().atMost(TIMEOUT);
+        // Already deregistered: skip cleanup, which would read Eureka's cached app list and get a 404 on DELETE.
+        registrar = null;
 
         await().during(Duration.ofSeconds(3)).atMost(TIMEOUT).until(() -> getInstance().statusCode() == 404);
     }
