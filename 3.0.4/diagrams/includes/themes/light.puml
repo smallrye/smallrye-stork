@@ -1,0 +1,11 @@
+!define BG_MAIN_COLOR      AliceBlue
+!define BG_SECONDARY_COLOR #B4BCBE
+!define BG_PACKAGE_COLOR   #eeb291
+!define BORDER_COLOR       #444444
+!define FONT_COLOR         #444444
+!define ARROW_COLOR        DarkGrey
+
+
+' include the general skinparams for both, light and dark
+' to overwrite with the given settings
+!include general.puml
